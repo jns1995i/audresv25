@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="/images/logo.png">
+    <title><%= title ? `${title}` : 'AUDRES25' %></title>
+    <style>
+      @media (max-width: 1024px) {
+        body {
+            display: block;
+            overflow-y: auto;
+        }
+        .mainF {
+            flex-direction: column;
+            height: auto;
+        }
+        .leftF {
+            height: 200px !important;
+            width: 100%;
+        }
+        .gemF {
+            height: 100px !important;
+            margin-top: 0 !important;
+            img {
+                height: 70px;
+            }
+        }
+        .logoF {
+            height: 30px;
+            width: 30px;
+            position: absolute;
+            top: 35% !important;
+            left: 53% !important;
+        }
+        img.logo {
+            height: 70%;
+        }
+        .rem48 {
+            font-size: 3rem;
+        }
+        .rem48.p2 {
+            margin-top: -2rem !important;
+        }
+        .rem48.p1 {
+            margin-top: -1.6rem !important;
+        }
+        .rightF {
+            height: fit-content;
+            width: 100%;
+        }
+        #headF {
+            flex-direction: column-reverse !important;
+        }
+      }
+    </style>
+</head>
+<body class="abstractBG">
+
+    <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+
+    <div class="mainF" style="z-index: 500 !important;">
+        <div class="h700 padding20 col justifyStart relative leftF width55">
+            <div class="height0 col absolute translateCenter" id="headF">
+                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
+                <div class="h400 padding10 gemF relative" style="margin-top: -3rem;">
+                    <img src="/images/gold.png" alt="" class="height100 glowImg" style="transform: rotate(-10deg);">
+                    
+                    <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
+                        <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="padding20 rightF width45 col height0 relative" style="z-index: 500 !important;">
+            <%- body %>
+        </div>
+    </div>
+
+        <script>
+        document.querySelectorAll('.showPass').forEach(button => {
+            button.addEventListener('click', function() {
+                const passwordInput = button.previousElementSibling;
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    button.textContent = 'hide';
+                } else {
+                    passwordInput.type = 'password';
+                    button.textContent = 'show';
+                }
+            });
+        });
+    </script>
+
+    
+</body>
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="/images/logo.png">
+    <title><%= title ? `${title}` : 'AUDRES25' %></title>
+    <style>
+  body {
+    overflow-y: auto !important;
+    display: block !important;
+    padding: 5px;
+  }
+  .mainF {
+    height: auto !important;
+  }
+  .leftF {
+    align-self: start !important;
+    justify-content: start !important;
+  }
+  #headF {
+    align-items: start;
+    position: initial !important;
+    top: initial !important;
+    left: initial !important;
+    transform: none !important;
+  }
+  .gemF {
+      height: 200px !important;
+      img {
+          height: 150px;
+      }
+  }
+  .rem48 {
+      font-size: 3rem;
+  }
+  .rem48.p2 {
+      margin-top: -2rem !important;
+      font-size: 3rem;
+  }
+  .rem48.p1 {
+      font-size: 3rem;
+  }
+  .logoF {
+      height: 60px;
+      width: 60px;
+      position: absolute;
+      top: 30% !important;
+      left: 53% !important;
+  }
+  img.logo {
+      height: 70%;
+  }
+      @media (max-width: 1024px) {
+        body {
+            display: block;
+            overflow-y: auto;
+        }
+        .mainF {
+            flex-direction: column;
+            height: auto;
+        }
+        .leftF {
+          height: auto !important;
+            width: 100%;
+        }
+        .gemF {
+          height: auto !important;
+            margin-top: 0 !important;
+            img {
+                height: 70px;
+            }
+        }
+        .logoF {
+            height: 30px;
+            width: 30px;
+            position: absolute;
+            top: 35% !important;
+            left: 53% !important;
+        }
+        img.logo {
+            height: 70%;
+        }
+        .rem48 {
+            font-size: 3rem;
+        }
+        .rem48.p2 {
+            margin-top: -2rem !important;
+        }
+        .rem48.p1 {
+            margin-top: -1.6rem !important;
+        }
+        .rightF {
+            height: fit-content;
+            width: 100%;
+            padding-block: 0 !important;
+        }
+        #headF {
+            flex-direction: column-reverse !important;
+        }
+        .crd {
+          display: none !important;
+        }
+         .colF1 {
+          flex-direction: column !important;
+          .field {
+            width: 100%;
+          }
+         }
+      }
+    </style>
+</head>
+<body class="abstractBG">
+  
+
+    <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+
+    <div class="mainF" style="z-index: 500 !important;">
+        <div class="height0 padding20 col justifyStart relative leftF width55">
+            <div class="height0 col" id="headF">
+                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
+                <div class="h400 padding10 gemF relative" style="margin-top: -3rem;">
+                    <img src="/images/gold.png" alt="" class="height100 glowImg" style="transform: rotate(-10deg);">
+                    
+                    <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
+                        <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+                    </div>
+                </div>
+            </div>
+
+            <div class="liquid index50 col justifyStart height0 colorPrimary cornerRem1" id="">
+                <div class="height0 col justifyCenter alignStart padding20 relative">
+                    <p class="rem2 str400 marginBottom10">Data Privacy Notice</p>
+                    <p class="rem11 str400 textJustify">
+                        By submitting this form, you agree to provide your personal details and valid ID for identity verification purposes only. All information collected will be treated as confidential and will be used solely for processing your document request. In compliance with the Data Privacy Act of 2012, your data will be securely stored and accessed only by authorized personnel from the Registrar’s Office. Your information will not be shared with third parties and will be retained only as necessary.
+                    </p>
+                </div>
+            </div>
+                            
+            <div id="" class="crd height0 index50 height0 colorPrimary alignEnd relative cornerRem1 padding20 marginTop20 liquid">
+                    <div class="height0 col alignStart str400 gap5">
+                      <p class="rem2 str400">LIST OF ID</p>
+                      <hr class="width90">
+                      <p class="rem13">Phinma Alumni ID</p>
+                      <p class="rem13">School ID</p>
+                      <p class="rem13">Philippine Passport</p>
+                      <p class="rem13">Driver’s License</p>
+                      <p class="rem13">Unified Multi-Purpose ID (UMID) / SSS ID</p>
+                      <p class="rem13">PhilSys National ID</p>
+                    </div>
+                    <div class="height0 col alignStart str400 gap5">
+                      <p class="rem13">GSIS e-Card</p>
+                      <p class="rem13">PRC ID</p>
+                      <p class="rem13">Postal ID</p>
+                      <p class="rem13">Voter’s ID / Voter’s Certification</p>
+                      <p class="rem13">Barangay ID (with photo and signature)</p>
+                      <p class="rem13">Alien Certificate of Registration (ACR)</p>
+                      <p class="rem13">Firearms License (PNP-issued)</p>
+                    </div>
+            </div>
+        </div>
+        <div class="padding20 rightF width45 col height0 relative" style="z-index: 100 !important;">
+            
+            <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
+
+            <form action="/reqDirect" method="POST" enctype="multipart/form-data" class="padding30 card alignCenter relative colorPrimary" style="z-index: 100;">
+                    <div class="col justifyStart alignStart gap10 relative">
+                        <p class="size28 str500 colorPrimary">REQUEST FORM</p>
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field gap5 width30">
+                                <label for="">First Name*</label>
+                                <input type="text" name="firstName" required>
+                            </div>
+                            <div class="field gap5 width30">
+                                <label for="">Middle Name</label>
+                                <input type="text" name="middleName">
+                            </div>
+                            <div class="field gap5 width30">
+                                <label for="">Last Name*</label>
+                                <input type="text" name="lastName" required>
+                            </div>
+                            <div class="field gap5 width10">
+                                <label for="">Ext</label>
+                                <input type="text" name="extName">
+                            </div>
+                        </div>
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field width60 gap5">
+                                <label for="">Address*</label>
+                                <input type="text" name="address" required>
+                            </div>
+                            <div class="field width40 gap5">
+                                <label for="">Phone Number*</label>
+                                <input type="text" id="number" name="number" inputmode="numeric" required class="number">
+                            </div>
+                        </div>
+                        <div class="height0 width100 gap10 alignEnd colF1">
+                            <div class="field gap5">
+                                <label for="">Active PHINMA AU or Personal Email*</label>
+                                <label class="red str500 marginLeft5 hidden bgPink paddingInline5 corner5" id="error">Already Email Exist!</label>
+                                <input type="email" name="email" id="em" required>
+                            </div>
+                            <script>
+                                document.getElementById('em').addEventListener('input', function () {
+                                    const email = this.value;
+                                
+                                    fetch(`/check-email?email=${encodeURIComponent(email)}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const errorMsg = document.getElementById('error');
+                                            if (data.exists) {
+                                                errorMsg.classList.remove('hidden');
+                                            } else {
+                                                errorMsg.classList.add('hidden');
+                                            }
+                                        });
+                                });
+                                </script>
+                            <div class="field col alignStart gap5">
+                                <label for="birthday">Birthday*</label>
+                                <div class="height0 gap5">
+                                    <div class="selectBar">
+                                        <select id="bMonth" name="bMonth" required>
+                                            <option value="">Month</option>
+                                        </select>
+                                    </div>
+                                    <div class="selectBar">
+                                        <select id="bDay" name="bDay" required>
+                                            <option value="">Day</option>
+                                        </select>
+                                    </div>
+                                    <div class="selectBar">
+                                        <select id="bYear" name="bYear" required>
+                                            <option value="">Year</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row height0 gap10 colF1">
+                            <div class="field gap5 height0">
+                                <label for="">Type of Student*</label>
+                                <div class="selectBar">
+                                    <select name="role" id="role" required>
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="Student">Current Student</option>
+                                        <option value="Alumni">Alumni</option>
+                                        <option value="Former">Former Students or Transferred to other School</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="field gap5">
+                                <label for="">Campus*</label>
+                                <div class="selectBar">
+                                    <select name="campus" id="campus" required>
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="Main">Main</option>
+                                        <option value="South">South</option>
+                                        <option value="San Jose">San Jose</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="height0 gap10 colF1">
+                            <div class="field gap5">
+                                <div class="height0 justifyBetween">
+                                    <label for="">Student Number (Optional)</label>
+                                    <label class="red marginLeft5 hidden bgPink paddingInline5 corner5" id="error2">Student Number Already Exist!</label>
+                                </div>
+                                <input type="text" id="sn" name="studentNo" placeholder="e.g. 01-1920-032235">
+                            </div>
+                            <script>
+                                document.getElementById('sn').addEventListener('input', function () {
+                                    const studentNo = this.value;
+                                
+                                    fetch(`/check-studentNo?studentNo=${encodeURIComponent(studentNo)}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const errorMsg = document.getElementById('error2');
+                                            if (data.exists) {
+                                                errorMsg.classList.remove('hidden');
+                                            } else {
+                                                errorMsg.classList.add('hidden');
+                                            }
+                                        });
+                                });
+                            </script>
+                            <div class="field height0 col alignStart gap5 hidden" id="yearGraduateContainer">
+                                <label for="yearGraduate">Year Graduated</label>
+                                <input type="text" id="yearGraduate" name="yearGraduate">
+                            </div>
+                            <div class="field height0 col alignStart gap5 hidden" id="yearAttendedContainer">
+                                <label for="yearAttended">Year Last Attended</label>
+                                <input type="text" id="yearAttended" name="yearAttended">
+                            </div>
+                        </div>
+                        <div class="row height0 gap10 colF1">
+                            <div class="field height0 col alignStart gap5 hidden" id="">
+                                <label for="yearLevel">Year Level</label>
+                                <div class="selectBar">
+                                    <select name="yearLevel" id="yearLevel">
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="First Year">First Year</option>
+                                        <option value="Second Year">Second Year</option>
+                                        <option value="Third Year">Third Year</option>
+                                        <option value="Fourth Year">Fourth Year</option>
+                                        <option value="Grade 11">Grade 11</option>
+                                        <option value="Grade 12">Grade 12</option>
+                                        <option value="Year 1"> Year 1</option>
+                                        <option value="Year 2"> Year 2</option>
+                                        <option value="Year 3"> Year 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field gap5">
+                                <label for="">Course or Strand*</label>
+                                <div class="selectBar">
+                                    <select name="course" required>
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="Bachelor of Arts in Political Science">Bachelor of Arts in Political Science</option>
+                                        <option value="Bachelor of Early Childhood Education">Bachelor of Early Childhood Education</option>
+                                        <option value="Bachelor of Elementary Education">Bachelor of Elementary Education</option>
+                                        <option value="Bachelor of Science in Accountancy">Bachelor of Science in Accountancy</option>
+                                        <option value="Bachelor of Science in Accounting Information System">Bachelor of Science in Accounting Information System</option>
+                                        <option value="Bachelor of Science in Business Administration - Banking and Microfinance">Bachelor of Science in Business Administration - Banking and Microfinance</option>
+                                        <option value="Bachelor of Science in Business Administration - Financial Management">Bachelor of Science in Business Administration - Financial Management</option>
+                                        <option value="Bachelor of Science in Business Administration - Human Resource Management">Bachelor of Science in Business Administration - Human Resource Management</option>
+                                        <option value="Bachelor of Science in Business Administration - Marketing Management">Bachelor of Science in Business Administration - Marketing Management</option>
+                                        <option value="Bachelor of Science in Civil Engineering">Bachelor of Science in Civil Engineering</option>
+                                        <option value="Bachelor of Science in Criminology">Bachelor of Science in Criminology</option>
+                                        <option value="Bachelor of Science in Electrical Engineering">Bachelor of Science in Electrical Engineering</option>
+                                        <option value="Bachelor of Science in Entrepreneurship">Bachelor of Science in Entrepreneurship</option>
+                                        <option value="Bachelor of Science in Hospitality Management">Bachelor of Science in Hospitality Management</option>
+                                        <option value="Bachelor of Science in Information Technology">Bachelor of Science in Information Technology</option>
+                                        <option value="Bachelor of Science in Management Accounting">Bachelor of Science in Management Accounting</option>
+                                        <option value="Bachelor of Science in Medical Laboratory Science">Bachelor of Science in Medical Laboratory Science</option>
+                                        <option value="Bachelor of Science in Nursing">Bachelor of Science in Nursing</option>
+                                        <option value="Bachelor of Science in Pharmacy">Bachelor of Science in Pharmacy</option>
+                                        <option value="Bachelor of Science in Psychology">Bachelor of Science in Psychology</option>
+                                        <option value="Bachelor of Secondary Education - English">Bachelor of Secondary Education - English</option>
+                                        <option value="Bachelor of Secondary Education - Filipino">Bachelor of Secondary Education - Filipino</option>
+                                        <option value="Bachelor of Secondary Education - Mathematics">Bachelor of Secondary Education - Mathematics</option>
+                                        <option value="Bachelor of Secondary Education - Science">Bachelor of Secondary Education - Science</option>
+                                        <option value="Doctor of Philosophy major in Educational Management">Doctor of Philosophy major in Educational Management</option>
+                                        <option value="Doctor of Philosophy major in Filipino">Doctor of Philosophy major in Filipino</option>
+                                        <option value="Doctor of Philosophy major in Psychology and Guidance">Doctor of Philosophy major in Psychology and Guidance</option>
+                                        <option value="Doctor of Philosophy major in Science Education">Doctor of Philosophy major in Science Education</option>
+                                        <option value="Master of Arts Major in Educational Management (Thesis & Non-Thesis)">Master of Arts Major in Educational Management (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in English (Thesis & Non-Thesis)">Master of Arts Major in English (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Guidance and Counseling (Thesis & Non-Thesis)">Master of Arts Major in Guidance and Counseling (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Mathematics (Thesis & Non-Thesis)">Master of Arts Major in Mathematics (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Physical Education (Thesis & Non-Thesis)">Master of Arts Major in Physical Education (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Psychology (Thesis & Non-Thesis)">Master of Arts Major in Psychology (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Public Management">Master of Arts Major in Public Management</option>
+                                        <option value="Master of Arts Major in Science Education">Master of Arts Major in Science Education</option>
+                                        <option value="Master of Science in Business Administration major in Management">Master of Science in Business Administration major in Management</option>
+                                        <option value="ABM Specializes in Hospitality and Tourism">ABM Specializes in Hospitality and Tourism</option>
+                                        <option value="GAS - Criminology">GAS - Criminology</option>
+                                        <option value="GAS - Education">GAS - Education</option>
+                                        <option value="GAS - Information Technology">GAS - Information Technology</option>
+                                        <option value="HUMSS">HUMSS</option>
+                                        <option value="STEM">STEM</option>
+                                        <option value="STEM Health (Nursing, Pharmacy, Medical Laboratory Science, Psychology)">STEM Health (Nursing, Pharmacy, Medical Laboratory Science, Psychology)</option>
+                                    </select>                        
+                                </div>
+                            </div>
+                            <div class="field gap5">
+                                <label for="" class="relative width100">Upload Valid ID </label>
+                                <input type="file" name="vId" required>
+                            </div>
+                        </div>
+                        <br>
+                            <div id="idList" class="heigth100 bgWhite index100 height0 colorPrimary alignEnd relative cornerRem1 padding20 borderPrimary" style="z-index: 200 !important;">
+                                <a href="javascript:void(0)" class="nav cnav absolute right10 top10" id="xBtn"><i class="fas fa-times"></i></a>
+                                <div class="height0 col alignStart gap5">
+                                  <p class="size20 str500">LIST OF ID</p>
+                                  <hr class="width90">
+                                  <p class="size12 str500">Phinma Alumni ID</p>
+                                  <p class="size12 str500">School ID</p>
+                                  <p class="size12 str500">Philippine Passport</p>
+                                  <p class="size12 str500">Driver’s License</p>
+                                  <p class="size12 str500">Unified Multi-Purpose ID (UMID) / SSS ID</p>
+                                  <p class="size12 str500">PhilSys National ID</p>
+                                  <p class="size12 str500">GSIS e-Card</p>
+                                  <p class="size12 str500">PRC ID</p>
+                                  <p class="size12 str500">Postal ID</p>
+                                  <p class="size12 str500">Voter’s ID / Voter’s Certification</p>
+                                  <p class="size12 str500">Barangay ID (with photo and signature)</p>
+                                  <p class="size12 str500">Alien Certificate of Registration (ACR)</p>
+                                  <p class="size12 str500">Firearms License (PNP-issued)</p>
+                                </div>
+                            </div>
+                    </div>
+                    <br>
+                    <div class="col height0 alignStart gap5" id="editCard">
+                            <div class="fieldsetsContainer col height0 padding0 width100" id="fieldsetsContainer">
+                                <fieldset>
+                                    <div class="row gap10  colF1">
+                                        <div class="field">
+                                            <Label>Document Type</Label>
+                                            <div class="selectBar">
+                                                <select class="document-type" name="type" onchange="handleDocumentTypeChange(this)" required>
+                                                    <option value="">Select</option>
+                                                    <option value="Certificate of Enrollment">Certificate of Enrollment</option>
+                                                    <option value="Certificate of Grades">Certificate of Grades</option>
+                                                    <option value="Certificate of Graduation">Certificate of Graduation</option>
+                                                    <option value="Diploma">Diploma</option>
+                                                    <option value="Form 137">Form 137</option>
+                                                    <option value="GWA">GWA</option>
+                                                    <option value="MA Curriculum">MA Curriculum</option>
+                                                    <option value="Medium of Instruction">Medium of Instruction</option>
+                                                    <option value="Subject Description">Subject Description</option>
+                                                    <option value="Transcript of Record">Transcript of Record</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <label>No. Copies</label>
+                                            <input name="qty" type="number" required>
+                                        </div>
+                                    </div>
+                                    <div class="row gap10">
+                                        <div class="field additional-options">
+                                            <label>Purpose</label>
+                                            <div class="selectBar">
+                                                <select class="document-options" name="purpose" onchange="handleOptionChange(this)" required>
+                                                    <option value="">Select</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="field upload hidden">
+                                        <label class="str500">Please upload photo of School Request</label>
+                                        <input type="file" name="reqPhoto" class="bgYellow">
+                                    </div>
+                                    <br>
+                                    <p class="size14 marginBottom5">If applicable:</p>
+                                    <div class="row gap10  colF1">
+                                        <div class="field">
+                                            <label for="">School Year</label>
+                                            <div class="selectBar">
+                                                <select name="schoolYear" id="schoolYear">
+                                                    <option value="" selected disabled>Select</option>
+                                                    <% for (let year = 2025; year >= 1990; year--) { %>
+                                                        <option value="<%= year %>-<%= year + 1 %>">
+                                                            <%= year %>-<%= year + 1 %>
+                                                        </option>
+                                                    <% } %>
+                                                </select>                                
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <label for="">Semester</label>
+                                            <div class="selectBar">
+                                                <select name="semester" id="">
+                                                    <option value="First">First</option>
+                                                    <option value="Second">Second</option>
+                                                    <option value="Summer">Summer</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                      <span class="totalAmount marginTop10"></span>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="height0 row marginBlock5">
+                                <input type="checkbox" class="width0 marginRight10" required>
+                                <p class="size12 inline">I have read and understood the <a href="" class="inline blue str600" id="dpn">DATA PRIVACY NOTICE</a></p>
+                            </div>
+                            <div class="bgYellow cornerRem1 padding20">
+                                TAKE NOTE: Please review all the details carefully before submitting your request. Ensure that all selections and information are correct, as changes may not be allowed after submission.
+                            </div>
+                            <div class="field height0 marginTop15 width100 alignEnd">
+                                <button type="submit" class="nav tnav pnav"><i class="fas fa-check-circle"></i>Submit</button>
+                            </div>
+                    </div>
+                </form>
+        </div>
+    </div>
+
+    <script>
+    document.querySelectorAll('.showPass').forEach(button => {
+        button.addEventListener('click', function() {
+            const passwordInput = button.previousElementSibling;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                button.textContent = 'hide';
+            } else {
+                passwordInput.type = 'password';
+                button.textContent = 'show';
+            }
+        });
+    });
+</script>
+
+
+<script>
+    document.querySelectorAll('.showPass').forEach(button => {
+        button.addEventListener('click', function() {
+            const passwordInput = button.previousElementSibling;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                button.textContent = 'hide';
+            } else {
+                passwordInput.type = 'password';
+                button.textContent = 'show';
+            }
+        });
+    });
+</script>
+ <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    const idBtn = document.getElementById("idBtn");
+    const xBtn = document.getElementById("xBtn");
+    const idList = document.getElementById("idList");
+
+    idBtn.addEventListener("click", () => {
+        idList.classList.remove("hidden");
+    });
+
+    xBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        idList.classList.add("hidden");
+    });
+    });
+</script>
+<script>
+    // Wait for the DOM to fully load
+    document.addEventListener("DOMContentLoaded", function () {
+        const dpn = document.getElementById('dpn');
+        const dpnCard = document.getElementById('dpnCard');
+        const dpnClose = document.getElementById('dpnClose');
+
+        // Show the div when <a> is clicked
+        dpn.addEventListener('click', function (e) {
+            e.preventDefault(); // prevent page jump
+            dpnCard.classList.remove('hidden');
+        });
+
+        // Hide the div when Close button is clicked
+        dpnClose.addEventListener('click', function () {
+            dpnCard.classList.add('hidden');
+        });
+    });
+</script>
+<script>
+    document.getElementById("role").addEventListener("change", function() {
+    var role = this.value;
+    
+    // Hide both fields initially
+    document.getElementById("yearGraduateContainer").classList.add("hidden");
+    document.getElementById("yearAttendedContainer").classList.add("hidden");
+
+    // Show the correct field based on role selection
+    if (role === "Alumni") {
+        document.getElementById("yearGraduateContainer").classList.remove("hidden");
+    } else if (role === "Former") {
+        document.getElementById("yearAttendedContainer").classList.remove("hidden");
+    }
+});
+
+</script>
+
+<script>
+    function enforceNumericInput(event) {
+        event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const phoneInputs = document.querySelectorAll('.number');
+        phoneInputs.forEach(input => {
+            input.addEventListener('input', enforceNumericInput);
+        });
+    });
+</script>
+<script>
+    // Price mapping for document types
+    const documentPrices = {
+        "Certificate of Enrollment": 150,
+        "Certificate of Grades": 150,
+        "Certificate of Graduation": 150,
+        "Diploma": 800,
+        "Form 137": 200,
+        "GWA": 150,
+        "MA Curriculum": 150,
+        "Medium of Instruction": 150,
+        "Subject Description": 150,
+        "Transcript of Record": 350
+    };
+
+    function handleDocumentTypeChange(select) {
+        const fieldset = select.closest("fieldset");
+        const optionsSelect = fieldset.querySelector(".document-options");
+        const uploadDiv = fieldset.querySelector(".upload");
+        const fileInput = uploadDiv.querySelector("input[type='file']");
+
+        // Always show the purpose dropdown and reset options
+        optionsSelect.innerHTML = "";  // Clear existing options
+        uploadDiv.classList.add("hidden");
+        fileInput.removeAttribute("required");  // Reset required attribute for file upload
+
+        // Populate purpose options based on document type
+        if (select.value === "Transcript of Record") {
+            optionsSelect.innerHTML += `<option value="Board Exam">For Board Exam</option>`;
+            optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
+            optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
+        } else if (select.value === "Form 137") {
+            optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
+            optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
+        } else {
+            optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
+        }
+
+        // Enable file upload and set as required for "School Copy"
+        if (select.value === "Transcript of Record" || select.value === "Form 137") {
+            // Do not show upload by default, only for specific purposes
+            optionsSelect.addEventListener('change', function () {
+                if (optionsSelect.value === "School Copy") {
+                    uploadDiv.classList.remove("hidden");
+                    fileInput.setAttribute("required", true);
+                } else {
+                    uploadDiv.classList.add("hidden");
+                    fileInput.removeAttribute("required");
+                }
+            });
+        }
+
+        // Update total amount whenever the document type changes
+        updateTotalAmount();
+    }
+
+    function updateTotalAmount() {
+        const qty = document.querySelector("input[name='qty']").value;
+        const documentType = document.querySelector("select[name='type']").value;
+
+        // Default to 1 if quantity is not a valid number
+        const quantity = isNaN(qty) || qty <= 0 ? 1 : parseInt(qty);
+
+        // Get the price based on the selected document type
+        const price = documentPrices[documentType] || 0;  // Default price is 0 if no document type selected
+
+        // Calculate the total
+        const totalAmount = price * quantity;
+
+        // Update the total amount span
+        document.querySelector(".totalAmount").innerHTML = `Total Amount: ₱${totalAmount.toFixed(2)}`;
+    }
+
+    // Handle changes to the document type and quantity
+    document.addEventListener("DOMContentLoaded", function () {
+        // Listen for changes on the document type select
+        const documentTypeSelect = document.querySelector("select[name='type']");
+        documentTypeSelect.addEventListener("change", function () {
+            handleDocumentTypeChange(documentTypeSelect);  // Update options and file upload when document type changes
+            updateTotalAmount();  // Update the total amount after changing the document type
+        });
+
+        // Listen for changes on the quantity input
+        const qtyInput = document.querySelector("input[name='qty']");
+        qtyInput.addEventListener("input", updateTotalAmount);  // Recalculate total amount whenever quantity changes
+
+        // Initial update when page loads
+        handleDocumentTypeChange(documentTypeSelect);  // Ensure the options are correctly populated
+        updateTotalAmount();  // Initial calculation of the total amount
+    });
+</script>
+<script>
+    // Populate Day Dropdown (1-31)
+    const daySelect = document.getElementById("bDay");
+    for (let i = 1; i <= 31; i++) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        daySelect.appendChild(option);
+    }
+
+    // Populate Month Dropdown (January-December) with values as words
+const monthSelect = document.getElementById("bMonth");
+const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+];
+
+months.forEach(month => {
+    let option = document.createElement("option");
+    option.value = month; // Store month name as value
+    option.textContent = month;
+    monthSelect.appendChild(option);
+});
+
+
+    // Populate Year Dropdown (Current Year to 1980)
+    const yearSelect = document.getElementById("bYear");
+    const currentYear = new Date().getFullYear();
+
+    for (let i = currentYear; i >= 1980; i--) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        yearSelect.appendChild(option);
+    }
+</script>
+
+</body>
+</html>

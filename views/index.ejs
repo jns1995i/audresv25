@@ -1,0 +1,84 @@
+<% layout('design') %>
+<style>
+  @media (max-width: 900px) {
+    .wcT {
+      display: none;
+    }
+    .login {
+      flex-direction: column;
+      div {
+        padding-bottom: 0;
+        width: 100%;
+        img {
+          width: 10%;
+        }
+      }
+      form {
+        width: 100%;
+        padding-top: 0;
+      }
+    }
+    #getStat {
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+      p {
+        text-align: center;
+        width: 60%;
+      }
+      a {
+        width: 150px;
+      }
+    }
+  }
+</style>
+
+<div class="height0 gap5 bgWhite cornerRem12 login colorPrimary width90 padding20">
+  <div class="height0 col width40">
+    <img src="/images/logo3.png" alt="" class="width80">
+    <p class="textCenter textWrap rem2 str500">AU REGISTRAR</p>
+    <p class="textCenter textWrap rem1 str500 marginBottom10">PHINMA Araullo University</p>
+  </div>
+  <form action="" class="colorPrimary gap5 width60">
+    <div class="height0 col">
+        <% if (error) { %>
+            <p class="rem2 str500 wcT textCenter textWrap">Welcome Users</p>
+            <span style="color: red;" class="bgRed100"><%= error %></span>
+        <% } else { %>
+            <p class="rem24 str500 wcT textCenter textWrap">Welcome Users</p>
+        <% } %>
+    </div>
+    <div class="field">
+      <label for="">Username</label>
+      <input type="text">
+    </div>
+    <div class="field password width100">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+        <span class="showPass" id="showPass">show</span>
+    </div>
+    <div class="field padding5">
+      <button type="submit" class="nav pnav width100">Log In</button>
+    </div>
+    <a href="/fg">Forgot Password</a>
+  </form>
+</div>
+
+<br>
+
+<div class="height0 liquid padding10 justifyBetween width90" id="getStat">
+  <p class="rem13">No Account Yet? Make Your First Request Here</p>
+  <a href="/rg" class="nav liquid">Get Started Here</a>
+</div>
+
+<br>
+
+<div class="height0 padding15 gap10 width90 justifyStart liquid">
+    <div class="height0 padding10 border0 borderRadius10 alignStart width50 col gap10 relative">
+        <p class="rem18 gap10 alignCenter">Need Help?</p>
+        <p class="rem11 gap10 alignCenter">Fullscreen the video or click below to access the Tutorial Section</p>
+        <a href="/ins" class="nav liquid">Learn More <i class="fas fa-chevron-right"></i></a>
+        <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
+    </div>
+    <video autoplay muted loop playsinline controls class="width50 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
+</div>

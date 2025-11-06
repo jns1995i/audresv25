@@ -1,0 +1,43 @@
+const mongoose = require('mongoose');
+
+const requestSchema = new mongoose.Schema({
+  requestBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true
+  },
+  processBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user'
+  },
+
+  type: { type: String, required: true, trim: true },
+  purpose: { type: String, trim: true },
+  qty: { type: Number, default: 1 },
+
+  schoolYear: { type: String, trim: true },
+  semester: { type: String, trim: true },
+
+  proof: { type: String, trim: true },  // path or filename of proof
+  tr: { type: String, trim: true },     // transaction reference or tracking
+
+  reviewAt: { type: Date },
+  approveAt: { type: Date },
+  assessAt: { type: Date },
+  payAt: { type: Date },
+  verifyAt: { type: Date },
+  turnAt: { type: Date },
+  claimedAt: { type: Date },
+
+  claimedBy: { type: String, trim: true }, // name of claimant
+  releaseBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+
+  remarks: { type: String, trim: true },
+  notes: { type: String, trim: true },
+
+  archive: { type: Boolean, default: false }
+}, {
+  timestamps: true // adds createdAt & updatedAt automatically
+});
+
+module.exports = mongoose.model('request', requestSchema);

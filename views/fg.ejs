@@ -1,0 +1,62 @@
+<% layout('design') %>
+
+<style>
+  @media (max-width: 900px) {
+    .wcT {
+      display: none;
+    }
+    .login {
+      flex-direction: column;
+      div {
+        padding-bottom: 0;
+        width: 100%;
+        img {
+          width: 10%;
+        }
+      }
+      form {
+        width: 100%;
+        padding-top: 0;
+      }
+    }
+    .fa-key {
+        font-size: 2rem !important;
+        height: 40px;
+        width: 40px;
+    }
+  }
+</style>
+
+<div class="height0 padding20 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
+
+<div class="height0 bgWhite cornerRem1 login colorPrimary width90">
+  <div class="height0 col padding20 width45">
+    <img src="/images/logo3.png" alt="" class="width70 wcT">
+    <p class="textCenter textWrap rem2 str500 wcT">AU REGISTRAR</p>
+    <p class="textCenter textWrap rem1 str500 wcT">PHINMA Araullo University</p>
+  </div>
+  <form action="" class="colorPrimary gap10 width55">
+    <i class="fas fa-key bgBlue100 corner500 rem3 h70 w70"></i>
+    
+    <div class="height0 col">
+        <% if (error) { %>
+            <p class="rem2 str500 textCenter textWrap">Forgot Password</p>
+            <p style="color: red;" class="bgRed100 marginTop5"><%= error %></p>
+        <% } else { %>
+            <p class="rem2 str500 textCenter textWrap">Forgot Password</p>
+        <% } %>
+    </div>
+    <div class="field">
+      <label for="">Email</label>
+      <input type="text">
+    </div>
+    <div class="height0 bgBlue100 textCenter">
+        This can't be undone! You temporary password will be sent to your School Email
+    </div>
+    <div class="field padding5">
+      <button type="submit" class="nav pnav width100">Submit</button>
+    </div>
+  </form>
+</div>
+
+<br><br><br>

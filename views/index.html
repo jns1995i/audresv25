@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" href="../public/style.css">
+    <link rel="icon" href="../public/images/logo.png">
+    <title>Document</title>
+    <style>
+        /*
+        div {
+            border: 1px solid white;
+        }
+        */
+
+        @media (max-width: 426px) {
+            #card1 form, #card1 div, #card1 video {
+                width: 90% !important;
+            }
+        }
+
+        @media (max-width: 769px) {
+            #card1 {
+                position: initial !important;
+                transform: initial;
+                width: 100% !important;
+                align-items: center;
+                margin-bottom: 50px;
+            }
+            #card1 form, #card1 div, #card1 video {
+                width: 70%;
+            }
+            #p1 {
+                height: 180px !important;
+                width: 100% !important;
+                margin-top: 50px;
+            }
+            #p2 {
+                font-size: 3rem !important;
+                bottom: 4rem !important;
+                top: initial !important;
+            }
+            #p3 {
+                font-size: 3rem !important;
+                bottom: 1rem !important;
+                top: initial !important;
+            }
+            #p4 {
+                top: 1.2rem !important;
+                height: 100px !important;
+            }
+            #p5 {
+                height: 30px !important;
+                width: 30px !important;
+                top: 30% !important;
+            }
+            #watermark {
+                transform: scale(1.4);
+                top: -50px;
+                right: -50px;
+            }
+        }
+        @media (max-width: 920px) {
+            
+            #p2 {
+                font-size: 5rem;
+            }
+            #p3 {
+                font-size: 5rem;
+            }
+        }
+    </style>
+    
+</head>
+<body class="abstractBG block overflow-y1">
+
+    <img src="../public/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite borderRadius500" style="opacity: 0.05; filter: grayscale(0.9)" id="watermark">
+
+    
+    <div class="height85 relative width75" id="p1">
+        <p class="white absolute top0 index0 textCenter str400 gradientText textWrap" style="font-size: 6.5rem;" id="p2">AU Registrar Document</p>
+        <p class="white absolute index0 textCenter str400 gradientText textWrap" style="font-size: 6.5rem; top: 6rem;" id="p3">Request System</p>
+        <img src="../public/images/gold.png" alt="" class="absolute h400 glowImg" style="transform: rotate(-10deg); top: 155px;" id="p4">
+        <div class="h120 w120 glass glowImg absolute borderRadius20" style="left: 55%; top: 46%; transform: rotate(15deg);" id="p5">
+            <img src="../public/images/au.png" alt="" class="borderRadius500 height80" style="opacity: 0.5;">
+        </div>
+    </div>
+
+    <div class="height0 absolute translateY right25 borderRadius10 w500 col white justifyStart gap10" style="z-index: 10;" id="card1">
+        <form action="" class="width65 bRadius1 colorPrimary gap5">
+            
+            <div class="height0 width0 padding5 bgWhite bRadius05 unresponsive col"><img src="../public/images/logo1.jpg" alt="" class="width36"></div>
+
+            <div class="height0 padding6 bgYellow width0 bRadius06 rem08 str400 red">
+                Incorrect Username or Password!
+            </div>
+
+            <div class="field">
+                <label for="">Username</label>
+                <input type="text">
+            </div>
+            <div class="field">
+                <label for="">Password</label>
+                <input type="text">
+            </div>
+            <div class="field">
+                <a href="" class="nav pnav width100">Log In</a>
+            </div>
+            <div class="height0">
+                <a href="">Forgot Password</a>
+            </div>
+        </form>
+        <div class="height0 width65 glass padding10 border0 borderRadius10 justifyBetween">
+            <p class="rem14 flex justifyCenter gap10 alignCenter padding10">No account yet?</p> <a href="ins.php" class="nav transparent border0 white liquid width0">Direct Request</a>
+        </div>
+        <hr class="width65">
+        <video autoplay muted loop playsinline controls class="width65 borderRadius10 glowImg2" style="opacity: 1;"><source src="../public/images/video.mp4" type="video/mp4"></video>
+        <div class="height0 width65 glass padding10 border0 borderRadius10 justifyBetween">
+            <p class="rem14 flex justifyCenter gap10 alignCenter padding10">Need Help?</p> <a href="ins.php" class="nav transparent border0 white liquid width0">Proceed Here</a>
+        </div>
+    </div>
+    
+</body>
+</html>
