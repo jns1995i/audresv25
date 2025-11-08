@@ -6,6 +6,9 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const engine = require('ejs-mate');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
 
 const isLogin = require('./middleware/isLogin');
 const isRequest = require('./middleware/isRequest');
@@ -97,6 +100,54 @@ app.use((req, res, next) => {
   console.log(`🌀 Global variables ready Supreme Ferry`);
   next();
 });
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: 'audres25', // your folder in Cloudinary
+    resource_type: 'auto',
+    public_id: `${Date.now()}-${file.originalname}`
+  })
+});
+
+// Create multer middleware
+const upload = multer({ storage });
+
+const cpUpload = upload.any();
+
+function generatePassword() {
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_+-=[]{}";
+
+  // Ensure at least one of each
+  const pick = (str) => str[Math.floor(Math.random() * str.length)];
+
+  let password = [
+    pick(upper),
+    pick(lower),
+    pick(numbers),
+    pick(symbols)
+  ];
+
+  // Fill remaining length to reach 8 chars
+  const all = upper + lower + numbers + symbols;
+  while (password.length < 8) {
+    password.push(pick(all));
+  }
+
+  // Shuffle for randomness
+  return password.sort(() => Math.random() - 0.5).join("");
+}
 
 // ================== ROUTES ==================
 
@@ -211,12 +262,157 @@ app.get('/logout', (req, res) => {
   });
 });
 
+app.post('/reqDirect', cpUpload, async (req, res) => {
+  try {
+    const {
+      firstName, middleName, lastName, extName,
+      address, number, email, bDay, bMonth, bYear,
+      role, campus, studentNo, yearLevel, course,
+      schoolYear, semester, type, purpose, qty,
+      yearGraduate, yearAttended
+    } = req.body;
+
+        // 1️⃣ Check for existing email
+    const existingEmail = await users.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" });
+    }
+
+    // 2️⃣ Check for existing student number (only if role is Student)
+    if (role === 'Student' && studentNo) {
+      const existingStudent = await users.findOne({ schoolId: studentNo });
+      if (existingStudent) {
+        return res.render('index', { error: 'Student Number is already registered!', title: "AUDRESv25" });
+      }
+    }
+
+    // Find vId file from req.files
+    const vIdFile = req.files.find(f => f.fieldname === 'vId');
+    let vIdUrl = null;
+    if (vIdFile) {
+      const result = await cloudinary.uploader.upload(vIdFile.path, { folder: 'user_vIds' });
+      vIdUrl = result.secure_url;
+    }
+
+    // Convert month to number
+    const monthMap = {
+      January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+      July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
+    };
+    const bMonthNum = monthMap[bMonth] || null;
+
+    // Create new user
+    const newUser = new users({
+      fName: firstName,
+      mName: middleName,
+      lName: lastName,
+      xName: extName,
+      address,
+      phone: number,
+      email,
+      bDay: Number(bDay),
+      bMonth: bMonthNum,
+      bYear: Number(bYear),
+      role,
+      campus,
+      schoolId: studentNo || undefined,
+      yearLevel,
+      course,
+      yearGraduate: yearGraduate || '',
+      yearAttended: yearAttended || '',
+      vId: vIdUrl,
+      username: email,
+      password: generatePassword(),
+      archive: true,
+      verify: true
+    });
+
+    const savedUser = await newUser.save();
+
+    // Filter request photos
+    const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
+    const reqPhotoUrlsMap = await Promise.all(
+      reqPhotos.map(async file => {
+        if (!file.path) return null;
+        const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
+        return result.secure_url;
+      })
+    );
+
+    // Normalize fields into arrays
+    const typesArr = Array.isArray(type) ? type : [type];
+    const purposesArr = Array.isArray(purpose) ? purpose : [purpose];
+    const qtyArr = Array.isArray(qty) ? qty : [qty];
+    const schoolYearsArr = Array.isArray(schoolYear) ? schoolYear : [schoolYear];
+    const semestersArr = Array.isArray(semester) ? semester : [semester];
+
+    // Build request documents
+    const requestDocs = typesArr.map((t, i) => ({
+      requestBy: savedUser._id,
+      type: t,
+      purpose: purposesArr[i],
+      qty: qtyArr[i],
+      schoolYear: schoolYearsArr[i] || '',
+      semester: semestersArr[i] || '',
+      proof: reqPhotoUrlsMap[i] || null,
+      archive: true,
+      verify: true
+    }));
+
+    await requests.insertMany(requestDocs);
+
+    res.redirect('/regSuccess');
+  } catch (err) {
+    console.error(err);
+    res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
+  }
+});
+
+app.get('/regSuccess', (req, res) => {
+  res.render('regSuccess', { title: 'Success' });
+});
+
+app.get('/check-studentNo', async (req, res) => {
+  try {
+    const studentNo = req.query.studentNo;
+    if (!studentNo) return res.json({ exists: false });
+
+    // Check if a user with this student number exists
+    const userExists = await users.findOne({ schoolId: studentNo });
+    
+    return res.json({ exists: !!userExists });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ exists: false, error: 'Server error' });
+  }
+});
+
+app.get('/check-email', async (req, res) => {
+  try {
+    const email = req.query.email;
+    if (!email) return res.json({ exists: false });
+
+    // Check if a user with this email exists
+    const userExists = await users.findOne({ email: email.toLowerCase() });
+    
+    return res.json({ exists: !!userExists });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ exists: false, error: 'Server error' });
+  }
+});
+
+
 app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard' });
 });
 
 app.get('/hom', isLogin, (req, res) => {
   res.render('hom', { title: 'Home' });
+});
+
+app.get('/prf', isLogin, (req, res) => {
+  res.render('prf', { title: 'Profile' });
 });
 
 app.use((req, res) => {

@@ -35,7 +35,8 @@ const requestSchema = new mongoose.Schema({
   remarks: { type: String, trim: true },
   notes: { type: String, trim: true },
 
-  archive: { type: Boolean, default: false }
+  archive: { type: Boolean, default: false },
+  verify: { type: Boolean, default: true }
 }, {
   timestamps: true // adds createdAt & updatedAt automatically
 });

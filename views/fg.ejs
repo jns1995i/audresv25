@@ -24,19 +24,23 @@
         height: 40px;
         width: 40px;
     }
+    #melt {
+      width: 100% !important;
+    }
   }
+  
 </style>
 
 <div class="height0 padding20 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
 
-<div class="height0 bgWhite cornerRem1 login colorPrimary width90">
+<div class="height0 bgWhite cornerRem2 login colorPrimary width90" id="melt">
   <div class="height0 col padding20 width45">
     <img src="/images/logo3.png" alt="" class="width70 wcT">
     <p class="textCenter textWrap rem2 str500 wcT">AU REGISTRAR</p>
     <p class="textCenter textWrap rem1 str500 wcT">PHINMA Araullo University</p>
   </div>
   <form action="" class="colorPrimary gap10 width55">
-    <i class="fas fa-key bgBlue100 corner500 rem3 h70 w70"></i>
+    <%- include('icons/password') %>
     
     <div class="height0 col">
         <% if (error) { %>
@@ -50,6 +54,20 @@
       <label for="">Email</label>
       <input type="text">
     </div>
+
+    <div class="justifyBetween">
+      <input type="text" id="num1" class="width20 textCenter" readonly>
+      <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-plus"></i></div>
+      <input type="text" id="num2" class="width20 textCenter" readonly>
+      <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-equals"></i></div>
+      <input type="text" id="answer" class="width20 textCenter str500" required>
+      <div class="height0 width20 gap5 justifyEnd" style="width: 20%;">
+        <a href="#" class="nav cnav" id="reset"><i class="fas fa-rotate"></i></a>
+      </div>
+    </div>
+
+    <div class="bgRed100 hidden" id="warning20">Please fill the correct value!</div>
+
     <div class="height0 bgBlue100 textCenter">
         This can't be undone! You temporary password will be sent to your School Email
     </div>
@@ -59,4 +77,49 @@
   </form>
 </div>
 
-<br><br><br>
+<br><br><br>  <script>
+  function generateRandomNumbers() {
+    const num1 = Math.floor(Math.random() * 10) + 1; // 1-10
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    document.getElementById('num1').value = num1;
+    document.getElementById('num2').value = num2;
+    const answerInput = document.getElementById('answer');
+    answerInput.value = '';
+    answerInput.style.color = 'black';
+    answerInput.style.fontWeight = 'bold';
+    answerInput.dataset.correct = num1 + num2;
+
+    // Hide warning on reset
+    document.getElementById('warning20').classList.add('hidden');
+  }
+
+  // Check answer on input
+  document.getElementById('answer').addEventListener('input', function() {
+    // Only allow numbers
+    this.value = this.value.replace(/[^0-9]/g, '');
+    
+    const correct = Number(this.dataset.correct);
+    const user = Number(this.value);
+    const warning = document.getElementById('warning20');
+    
+    if (this.value === '') {
+      this.style.color = 'black';
+      warning.classList.add('hidden');
+    } else if (user === correct) {
+      this.style.color = 'blue';
+      warning.classList.add('hidden');
+    } else {
+      this.style.color = 'red';
+      warning.classList.remove('hidden');
+    }
+  });
+
+  // Reset numbers
+  document.getElementById('reset').addEventListener('click', function(e) {
+    e.preventDefault();
+    generateRandomNumbers();
+  });
+
+  // Initialize
+  generateRandomNumbers();
+  </script>

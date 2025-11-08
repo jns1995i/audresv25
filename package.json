@@ -11,6 +11,7 @@
     "dev": "nodemon app.js"
   },
   "dependencies": {
+    "cloudinary": "^1.41.3",
     "connect-mongodb-session": "^5.0.0",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
@@ -19,6 +20,7 @@
     "express-session": "^1.18.2",
     "mongoose": "^8.19.2",
     "morgan": "^1.10.1",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0"
   }
 }

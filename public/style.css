@@ -146,6 +146,7 @@ html {
     font-family: 'poppins', arial;
     background-color: transparent;
     font-weight: 400;
+    color-scheme: light !important;
 }
 div {
     display: flex;
@@ -369,7 +370,7 @@ a:hover, button:hover {
 }
 
 .dnav {
-    background: var(--dnav);
+    background-color: rgb(172, 10, 10);
     color: white;
     border: none !important;
 }
@@ -424,8 +425,13 @@ a:hover, button:hover {
     font-size: 100%;
     i {
         font-size: calc(100% * 1.5);
-        width: 100% !important;
-        height: 100% !important;
+        width: 90% !important;
+        height: 90% !important;
+        border-radius: 50%;
+    }
+    img {
+        height: 90%;
+        width: 90%;
     }
 }
 
@@ -582,12 +588,14 @@ input, .searchBar, .selectBar {
     }
 }
 .searchBar input[type=search]:focus {
-    outline-color: transparent;
+    outline-color: none !important;
     background-color: transparent;
+    border: none !important;
 }
 .searchBar input[type=search]:hover {
-    outline-color: transparent;
+    outline-color: none !important;
     background-color: transparent;
+    border: none !important;
 }
 
 
@@ -901,7 +909,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .borderPrimary { border: 0.5px solid var(--primary); }
 
 .corner500 { border-radius: 50% !important;}
-.corner0 { border-radius: 0; }
+.corner0 { border-radius: 0 !important; }
 .corner1 { border-radius: 1px; }
 .corner2 { border-radius: 2px; }
 .corner3 { border-radius: 3px; }
@@ -3131,7 +3139,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .height100 { height: 100%; }
 
 /* Width */
-.width0 { width: auto; }
+.width0 { width: fit-content; }
 .width1 { width: 1%; }
 .width2 { width: 2%; }
 .width3 { width: 3%; }
@@ -6873,8 +6881,10 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 
 .sizeInherit { font-size: inherit; }
 
+
+            
 p + p {
-    margin-top: -0.6em !important;
+    margin-top: -0.05em !important;
 }
 
 .rem05 { font-size: 0.5rem; }
@@ -7275,6 +7285,7 @@ p + p {
 .bg0 { background: none; }
 .bgInherit { background: inherit; }
 .transparent { background-color: transparent; }
+.translucent { background-color: rgba(255, 255, 255, 0.688) ;}
 .bgModal1 { background-color: rgba(0, 0, 0, 0.1); }
 .bgModal2 { background-color: rgba(0, 0, 0, 0.2); }
 .bgModal3 { background-color: rgba(0, 0, 0, 0.3); }

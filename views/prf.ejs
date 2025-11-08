@@ -1,0 +1,63 @@
+<% layout('template') %>
+<style>
+    .floatF {
+        display: none !important;
+    }
+    .floatB {
+        display: flex !important;
+    }
+    
+  @media (max-width: 900px) {
+    .prfCard {
+        width: 100% !important;
+    }
+    #prfMain {
+        flex-direction: column;
+    }
+  }
+</style>
+
+<br>
+
+<div class="height0 width100" id="prfMain">
+
+    <div class="height0 width30 col padding10 prfCard">
+        <div class="width0 relative">
+            <img src="<%= user.photo ? '/uploads/' + user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500">
+            <a href="" class="nav cnav glass absolute bottom0 right0"><i class="fas fa-pen"></i></a>
+        </div>
+        <br>
+        <p class="rem2 str400"><%= user.fName %> <%= user.mName %> <%= user.lName %> <%= user.xName %></p>
+        <p class="rem16 str400"><%= user.role %> <i class="bi bi-patch-check-fill"></i></p>
+        <br>
+        <div class="bgWhite cornerRem1 col padding15 justifyStart alignStart colorPrimary">
+            <p class="rem1 str500 gray">Student Number</p>
+            <p class="rem12 str500"><%= user.schoolId ? user.schoolId : "--" %></p>
+            <br>
+            <p class="rem1 str500 gray">Campus</p>
+            <p class="rem12 str500"><%= user.campus || "--" %></p>
+            <br>
+            <p class="rem1 str500 gray">Course</p>
+            <p class="rem12 str500"><%= user.course || "--" %></p>
+            <br>
+            <p class="rem1 str500 gray">Year Level</p>
+            <p class="rem12 str500"><%= user.yearLevel || "--" %></p>
+            <% if (user.role === 'Alumni') { %>
+            <br>
+            <p class="rem1 str500 gray">Year Graduated</p>
+            <p class="rem12 str500"><%= user.yearLevel || "--" %></p>
+            <% } else if (user.role === 'Former') { %>
+            <br>
+            <p class="rem1 str500 gray">Year Last Attended</p>
+            <p class="rem12 str500"><%= user.yearLevel || "--" %></p>
+            <% } else { %>
+            <% } %>
+        </div>
+    </div>
+    
+    <div class="height0 width30 col padding10 prfCard">
+    </div>
+
+</div>
+
+<br>
