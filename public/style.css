@@ -150,6 +150,7 @@ html {
 div {
     display: flex;
     justify-content: center;
+    box-sizing: border-box !important;
     align-items: center;
     height: 100%;
     width: 100%;
@@ -6851,6 +6852,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     0 0 10px rgba(255, 255, 255, 0.2),
     0 0 20px rgba(61, 77, 255, 0.3),
     0 0 30px rgba(255, 255, 255, 0.2);
+    color-scheme: light !important;
 }
 
 .textLeft { text-align: left; }
