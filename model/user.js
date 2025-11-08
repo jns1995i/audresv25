@@ -11,17 +11,19 @@ const userSchema = new mongoose.Schema({
   verify: { type: Boolean, default: false },
   verifyAt: { type: Date },
   unverifyAt: { type: Date },
-  unverifyIs: { type: String, trim: true }, // reason for unverify
+  unverifyIs: { type: String, trim: true },
 
   suspend: { type: Boolean, default: false },
   suspendAt: { type: Date },
-  suspendIs: { type: String, trim: true }, // reason for suspend
+  suspendIs: { type: String, trim: true },
 
   role: {
     type: String,
-    enum: ['student', 'employee'],
+    enum: ['Student', 'Employee','Admin','Head','Alumni','Former'],
     required: true
   },
+
+  access: { type: Number, enum: [0, 1], default: 0 },
 
   position: { type: String, trim: true },
   department: { type: String, trim: true },
@@ -38,13 +40,13 @@ const userSchema = new mongoose.Schema({
   schoolId: { type: String, trim: true },
   yearLevel: { type: String, trim: true },
 
+  photo: { type: String, trim: true },
+  vId: { type: String, trim: true },
+
   username: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true }
 }, {
-  timestamps: true // adds createdAt & updatedAt automatically
+  timestamps: true
 });
-
-// No need to manually manage updatedAt anymore
-// Mongoose automatically includes `_id` in every document
 
 module.exports = mongoose.model('user', userSchema);

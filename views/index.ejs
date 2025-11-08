@@ -39,27 +39,31 @@
     <p class="textCenter textWrap rem2 str500">AU REGISTRAR</p>
     <p class="textCenter textWrap rem1 str500 marginBottom10">PHINMA Araullo University</p>
   </div>
-  <form action="" class="colorPrimary gap5 width60">
+  <form action="/login" method="POST" class="colorPrimary gap5 width60">
     <div class="height0 col">
-        <% if (error) { %>
-            <p class="rem2 str500 wcT textCenter textWrap">Welcome Users</p>
-            <span style="color: red;" class="bgRed100"><%= error %></span>
-        <% } else { %>
-            <p class="rem24 str500 wcT textCenter textWrap">Welcome Users</p>
-        <% } %>
+      <% if (error) { %>
+        <p class="rem2 str500 wcT textCenter textWrap">Welcome Users</p>
+        <span style="color: red;" class="bgRed100"><%= error %></span>
+      <% } else { %>
+        <p class="rem24 str500 wcT textCenter textWrap">Welcome Users</p>
+      <% } %>
     </div>
+
     <div class="field">
-      <label for="">Username</label>
-      <input type="text">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required>
     </div>
+
     <div class="field password width100">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-        <span class="showPass" id="showPass">show</span>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+      <span class="showPass" id="showPass" style="cursor: pointer;">show</span>
     </div>
+
     <div class="field padding5">
       <button type="submit" class="nav pnav width100">Log In</button>
     </div>
+
     <a href="/fg">Forgot Password</a>
   </form>
 </div>

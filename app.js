@@ -99,9 +99,95 @@ app.use((req, res, next) => {
 });
 
 // ================== ROUTES ==================
-app.get('/', (req, res) => {
-  res.render('index', { title: 'AUDRESv25' });
+app.get('/', async (req, res) => {
+  try {
+    // Helper to ensure a user exists
+    async function ensureUserExists(username, role) {
+      let user = await users.findOne({ username });
+      if (user) {
+        console.log(`User "${username}" already exists.`);
+        return user;
+      }
+
+      const baseData = {
+        fName: username,
+        mName: '',
+        lName: 'Account',
+        xName: '',
+        archive: false,
+        verify: false,
+        suspend: false,
+        email: `${username.toLowerCase()}.au@phinmaed.com`,
+        phone: '',
+        address: '',
+        bDay: 1,
+        bMonth: 1,
+        bYear: 2000,
+        campus: '',
+        schoolId: '',
+        yearLevel: '',
+        photo: '',
+        vId: '',
+        username: username,
+        password: '@admin2025', // not hashed
+        role: role,
+        access: 1,
+      };
+
+      const doc = await users.create(baseData);
+      console.log(`Created ${role} account "${username}"`);
+      return doc;
+    }
+
+    // Ensure Head exists
+    await ensureUserExists('Head', 'Head');
+
+    // Ensure Admin exists
+    await ensureUserExists('Admin', 'Admin');
+
+    // Render the main page
+    res.render('index', { title: 'AUDRESv25' });
+
+  } catch (err) {
+    console.error('Error in GET / handler:', err);
+    res.render('index', { title: 'AUDRESv25' });
+  }
 });
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await users.findOne({ username });
+
+    if (!user || user.password !== password) {
+      return res.render('index', { 
+        title: 'AUDRESv25',   // always include title
+        error: 'Invalid username or password',
+        user: req.session.user || null
+      });
+    }
+
+    // Store user in session
+    req.session.user = user;
+
+    if (user.access === 1) {
+      return res.redirect('/dsb');
+    } else {
+      return res.redirect('/hom');
+    }
+
+  } catch (err) {
+    console.error(err);
+    return res.render('index', { 
+      title: 'AUDRESv25',
+      error: 'Something went wrong. Try again.',
+      user: req.session.user || null
+    });
+  }
+});
+
+
 
 app.get('/lg', (req, res) => {
   res.render('lg', { title: 'Login page' });
@@ -129,6 +215,10 @@ app.get('/logout', (req, res) => {
 
 app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard' });
+});
+
+app.get('/hom', isLogin, (req, res) => {
+  res.render('hom', { title: 'Home' });
 });
 
 app.use((req, res) => {
