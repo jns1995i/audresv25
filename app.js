@@ -99,10 +99,10 @@ app.use((req, res, next) => {
 });
 
 // ================== ROUTES ==================
+
 app.get('/', async (req, res) => {
   try {
-    // Helper to ensure a user exists
-    async function ensureUserExists(username, role) {
+    async function ensureUserExists(username, role, password = '@admin2025', access = 1) {
       let user = await users.findOne({ username });
       if (user) {
         console.log(`User "${username}" already exists.`);
@@ -129,23 +129,20 @@ app.get('/', async (req, res) => {
         photo: '',
         vId: '',
         username: username,
-        password: '@admin2025', // not hashed
+        password: password,
         role: role,
-        access: 1,
+        access: access,
       };
 
       const doc = await users.create(baseData);
-      console.log(`Created ${role} account "${username}"`);
+      console.log(`${role} testing account "${username}" created!`);
       return doc;
     }
 
-    // Ensure Head exists
-    await ensureUserExists('Head', 'Head');
+    await ensureUserExists('Head', 'Head', '@admin2025', 1);
+    await ensureUserExists('Admin', 'Admin', '@admin2025', 1);
+    await ensureUserExists('Student', 'Student', '@student2025', 0);
 
-    // Ensure Admin exists
-    await ensureUserExists('Admin', 'Admin');
-
-    // Render the main page
     res.render('index', { title: 'AUDRESv25' });
 
   } catch (err) {
@@ -153,6 +150,7 @@ app.get('/', async (req, res) => {
     res.render('index', { title: 'AUDRESv25' });
   }
 });
+
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -162,7 +160,7 @@ app.post('/login', async (req, res) => {
 
     if (!user || user.password !== password) {
       return res.render('index', { 
-        title: 'AUDRESv25',   // always include title
+        title: 'AUDRESv25',
         error: 'Invalid username or password',
         user: req.session.user || null
       });
