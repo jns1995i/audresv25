@@ -39,7 +39,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '7d',
+  etag: true
+}));
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'ferry2025',
@@ -52,7 +55,7 @@ app.use(session({
 }));
 
 app.use((req, res, next) => {
-  console.log(`🆔 Session ID: ${req.sessionID}`);
+  console.log(`ID Session ID: ${req.sessionID}`);
   next();
 });
 
