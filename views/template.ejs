@@ -6,21 +6,56 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=1.0">
     <link rel="icon" href="/images/logo.png">
     <title><%= title ? `${title} | AUDRES25` : 'AUDRES25' %></title>
+    <style>
+  @media (max-width: 900px) {
+      .unau {
+        width: 100% !important;
+        border-radius: 0 !important;
+      }
+      body {
+        display: block;
+        overflow-y: auto;
+        padding: 0 !important;
+      }
+      .bodyF {
+        height: 900px;
+      }
+      .headF {
+        display: none;
+      }
+      .floatF {
+        display: flex !important;
+        position: fixed;
+        bottom: 20px;
+      }
+  }
+    </style>
 </head>
-<body class="padding0">
+<% if ( user.access === 0) { %>
+<body class="col">
 
-<div class="heigh0 absolute">
-    <% if (error) { %>
-    <p style="color: red;" class="bgRed100"><%= error %></p>
-  <% } else { %>
-    <p  class="bgGreen100">Welcome to AUDRES25!</p>
-  <% } %>
+<div class="headF height10 cornerRem1 abstractBG"></div>
+<div class="bodyF height95 abstractBG"><%- body %></div>
+<div class="floatF height0 liquid translateX width0 padding10 hidden gap5" style="border-radius: 30px;">
+  <a href="" class="nav cnav liquid"><i class="fas fa-home"></i></a>
+  <a href="" class="nav cnav liquid"><i class="fas fa-plus"></i></a>
+  |
+  <a href="" class="nav cnav liquid"><img src="/images/profile.jpg" alt=""></a>
 </div>
 
-    <%- body %>
-    
 </body>
+<% } else { %>
+<body class="padding0 abstractBG">
+  <div class="width30 bgSoft height0 cornerRem1 padding20 col colorPrimary unau">
+    <%- include('icons/warning') %>
+    <p class="rem3 str500">Unauthorized Access</p>
+    <p class="rem15 str400">Do not access this page!</p>
+    <br>
+    <a href="javascript:history.back()" class="nav"><i class="fas fa-chevron-left"></i>Go Back</a>
+  </div>
+</body>
+<% } %>
 </html>

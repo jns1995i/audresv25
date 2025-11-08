@@ -6,10 +6,20 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=1.0">
     <link rel="icon" href="/images/logo.png">
     <title><%= title ? `${title} | AUDRES25` : 'AUDRES25' %></title>
+    <style>
+  @media (max-width: 900px) {
+      .unau {
+        width: 100% !important;
+        border-radius: 0 !important;
+      }
+  }
+    </style>
 </head>
+
+<% if ( user.access === 1) { %>
 <body class="padding0">
 
 <div class="heigh0 absolute">
@@ -23,4 +33,15 @@
     <%- body %>
     
 </body>
+<% } else { %>
+<body class="padding0 abstractBG">
+  <div class="width30 bgSoft height0 cornerRem1 padding20 col colorPrimary unau">
+    <%- include('icons/warning') %>
+    <p class="rem3 str500">Unauthorized Access</p>
+    <p class="rem15 str400">Do not access this page!</p>
+    <br>
+    <a href="javascript:history.back()" class="nav"><i class="fas fa-chevron-left"></i>Go Back</a>
+  </div>
+</body>
+<% } %>
 </html>

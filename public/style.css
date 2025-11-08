@@ -182,15 +182,16 @@ hr { width: 100%; opacity: 0.5; border-width: 0.1px; }
 body {
     background-color: var(--white);
     position: relative;
-    height: 100vh;
+    height: 100vh !important;
     width: 100vw;
     display: flex;
-    justify-content: start;
-    align-items: start;
+    justify-content: center;
+    align-items: center !important;
     padding: 5px;
     gap: 10px;
     color: var(--shade10);
 }
+
 .mainf, .sidef {
     height: 100%;
     width: 100%;
@@ -309,8 +310,8 @@ a:hover, button:hover {
     transition: all 0.6s ease-in-out;
     font-size: 1rem;
     font-family: 'poppins', sans-serif;
-    color: var(--shade10);
-    gap: 2px;
+    color: var(--shade4);
+    gap: 5px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     i {
         height: 13px !important;
@@ -7117,7 +7118,7 @@ p + p {
 .red { color: red; }
 .green { color: green; }
 .blue { color: #040d6b; }
-.yellow { color: #ffc107; }
+.yellow { color: #ffa806; }
 .orange { color: orangered; }
 .purple { color: purple; }
 .pink { color: pink; }
