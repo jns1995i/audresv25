@@ -26,6 +26,9 @@
       .header1 .plate {
         height: 65px;
       }
+      #lgCard > div {
+        width: 80% !important;
+      }
   }
     </style>
 </head>
@@ -46,10 +49,49 @@
 </div>
 
 <div class="floatB hidden fixed height0 glass shadow2 translateX width0 padding10 gap5 bottom20" style="border-radius: 30px;">
-  <a href="/hom" class="nav cnav liquid"><i class="fas fa-chevron-left"></i></a>
+  <a href="/hom" class="nav cnav liquid"><i class="fas fa-home"></i></a>
+  <a href="/req" class="nav cnav liquid"><i class="fas fa-plus"></i></a>
   |
-  <a href="/logout" class="nav cnav liquid"><i class="fas fa-share-square"></i></a>
+  <a href="javascript:void(0)" class="nav cnav liquid" id="lgOpen"><i class="fas fa-share-square"></i></a>
 </div>
+
+
+<div class="absolute translateCenter bgModal8 hidden" id="lgCard">
+  <div class="bgWhite cornerRem2 height0 width25 col padding20">
+    <%- include('icons/bell') %>
+    <p class="rem14 textCenter">Are you sure you want to log out?</p>
+    <div class="height0 marginTop10 gap10">
+      <a href="javascript:void(0)" class="nav w100" id="lgClose"> Cancel</a>
+      <a href="/logout" class="nav pnav w100"> Log Out</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const lgOpen = document.getElementById('lgOpen');
+  const lgClose = document.getElementById('lgClose');
+  const lgCard = document.getElementById('lgCard');
+
+  // Open the logout modal
+  lgOpen.addEventListener('click', () => {
+    lgCard.classList.remove('hidden');
+  });
+
+  // Close the logout modal
+  lgClose.addEventListener('click', () => {
+    lgCard.classList.add('hidden');
+  });
+
+  // Optional: close modal when clicking outside
+  lgCard.addEventListener('click', (e) => {
+    if (e.target === lgCard) {
+      lgCard.classList.add('hidden');
+    }
+  });
+});
+</script>
+
 
 </body>
 <% } else { %>

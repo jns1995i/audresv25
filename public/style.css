@@ -39,6 +39,7 @@ html {
     --orange: #ff6425;
     --witch: #083a3c;
     --green: rgb(33, 200, 33);
+    --yellow: #ffa806;
     --blue: blue;
     --radial2: #10096c;
     --radial3: #170f8b;
@@ -564,6 +565,7 @@ input, .searchBar, .selectBar {
 }
 .selectBar:hover {
     border: 2px solid var(--tint3);
+    background-color: white !important;
 }
 
 .searchBar {

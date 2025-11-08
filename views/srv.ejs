@@ -1,0 +1,31 @@
+<% layout('layout') %>
+<h2>All Requests</h2>
+
+<% if (requests && requests.length > 0) { %>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Type</th>
+        <th>Purpose</th>
+        <th>Status</th>
+        <th>Submitted At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% requests.forEach(req => { %>
+        <tr>
+          <td><%= req._id %></td>
+          <td><%= req.requestBy ? req.requestBy.fName + ' ' + req.requestBy.lName : 'N/A' %></td>
+          <td><%= req.type %></td>
+          <td><%= req.purpose %></td>
+          <td><%= req.verify ? 'Verified' : 'Pending' %></td>
+          <td><%= req.createdAt.toLocaleString() %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } else { %>
+  <p>No requests found.</p>
+<% } %>

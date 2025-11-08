@@ -20,6 +20,7 @@ const requestSchema = new mongoose.Schema({
 
   proof: { type: String, trim: true },  // path or filename of proof
   tr: { type: String, trim: true },     // transaction reference or tracking
+  status: { type: String, trim: true },
 
   reviewAt: { type: Date },
   approveAt: { type: Date },

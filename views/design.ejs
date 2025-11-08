@@ -14,6 +14,10 @@
     p + p {
         margin-top: -0.6em !important;
     }
+    .rateStar:hover {
+        color: var(--yellow);
+        cursor: pointer;
+    }
       @media (max-width: 1024px) {
         body {
             display: block;
@@ -63,6 +67,9 @@
         #headF {
             flex-direction: column-reverse !important;
         }
+        #rateF {
+            bottom: 0 !important;
+        }
       }
     </style>
 </head>
@@ -81,6 +88,25 @@
                     <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
                         <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
                     </div>
+                </div>
+            </div>
+            <div class="height0 gap10 absolute left0 bottom20" id="rateF">
+                <div class="height0 width0">
+                    <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐</p>
+                </div>
+                |
+                <div class="height0 width0">
+                    <p>Total Ratings: <%= ratings.totalRatings %> votes</p>
+                </div>
+                |
+                <div class="height0 rating-stars gap5 width0">
+                <% for(let i = 1; i <= 5; i++) { %>
+                    <% if(i <= Math.round(ratings.averageRating)) { %>
+                    <i class="fas fa-star yellow"></i>
+                    <% } else { %>
+                    <i class="fas fa-star gray"></i>
+                    <% } %>
+                <% } %>
                 </div>
             </div>
         </div>

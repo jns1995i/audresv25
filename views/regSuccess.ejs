@@ -8,5 +8,73 @@
         <p class="rem26 upperCase marginBottom10">Awesome</p>
         <p class="rem12 textCenter">Your request has been successfully submitted. The information you provided will be reviewed before processing your requested documents. Account credentials will be issued once your verification is complete. You will be notified via your provided email. Please allow up to 24 hours for verification, excluding weekends</p>
 
+        <br><hr><br>
+        
+        <p class="rem12 marginBottom10">We’d love your feedback! Take a moment to rate us.</p>
+        <form id="rateForm" class="height0 padding0">
+            <div class="height0 gap10">
+                <i class="fas fa-star gray rateStar rem2" data-value="1"></i>
+                <i class="fas fa-star gray rateStar rem2" data-value="2"></i>
+                <i class="fas fa-star gray rateStar rem2" data-value="3"></i>
+                <i class="fas fa-star gray rateStar rem2" data-value="4"></i>
+                <i class="fas fa-star gray rateStar rem2" data-value="5"></i>
+            </div>
+            <input type="hidden" name="rating" id="ratingValue">
+            <button type="submit" class="hidden">Submit</button>
+        </form>
+        <div id="rateMessage" class="bgGreen100 textCenter marginBlock15 hidden width0"></div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const stars = document.querySelectorAll('.rateStar');
+  const ratingInput = document.getElementById('ratingValue');
+  const rateMessage = document.getElementById('rateMessage');
+  let submitted = false; // flag to prevent multiple submissions
+
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      if (submitted) return; // do nothing if already submitted
+      const value = Number(star.dataset.value);
+      ratingInput.value = value;
+
+      // Highlight stars
+      stars.forEach(s => {
+        if (Number(s.dataset.value) <= value) {
+          s.classList.add('yellow');
+          s.classList.remove('gray');
+        } else {
+          s.classList.remove('yellow');
+          s.classList.add('gray');
+        }
+      });
+
+      // Submit rating
+      fetch('/rate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: value })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          submitted = true; // lock further clicks
+          rateMessage.textContent = 'Thank you for your feedback!';
+          rateMessage.classList.remove('hidden');
+        } else {
+          rateMessage.textContent = 'Failed to submit rating. Please try again.';
+          rateMessage.classList.remove('hidden');
+        }
+      })
+      .catch(err => {
+        rateMessage.textContent = 'Error submitting rating. Please try again.';
+        rateMessage.classList.remove('hidden');
+      });
+    });
+  });
+
+  // Prevent fallback submit
+  const rateForm = document.getElementById('rateForm');
+  rateForm.addEventListener('submit', e => e.preventDefault());
+});
+</script>

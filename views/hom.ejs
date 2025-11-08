@@ -1,1 +1,26 @@
 <% layout('template') %>
+
+<div class="height0 col">
+    <% if (requests && requests.length > 0) { %>
+  <div class="request-list col">
+    <% requests.forEach(req => { %>
+      <div class="request-card col">
+        <p><strong>Type:</strong> <%= req.type %></p>
+        <p><strong>Purpose:</strong> <%= req.purpose %></p>
+        <p><strong>Quantity:</strong> <%= req.qty %></p>
+        <p><strong>Status:</strong> 
+          <% if (req.verify) { %>
+            Verified
+          <% } else { %>
+            Pending
+          <% } %>
+        </p>
+        <p><strong>Requested On:</strong> <%= req.createdAt.toLocaleString() %></p>
+      </div>
+    <% }) %>
+  </div>
+<% } else { %>
+  <p>You have no requests yet.</p>
+<% } %>
+
+</div>

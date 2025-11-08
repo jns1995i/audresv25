@@ -14,12 +14,15 @@
     #prfMain {
         flex-direction: column;
     }
+    .prfCard > .bgWhite {
+        width: 80% !important;
+    }
   }
 </style>
 
 <br>
 
-<div class="height0 width100" id="prfMain">
+<div class="height0 width100 alignStart" id="prfMain">
 
     <div class="height0 width30 col padding10 prfCard">
         <div class="width0 relative">
@@ -30,7 +33,11 @@
         <p class="rem2 str400"><%= user.fName %> <%= user.mName %> <%= user.lName %> <%= user.xName %></p>
         <p class="rem16 str400"><%= user.role %> <i class="bi bi-patch-check-fill"></i></p>
         <br>
-        <div class="bgWhite cornerRem1 col padding15 justifyStart alignStart colorPrimary">
+        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative" style="border-radius: 25px;">
+            <div class="absolute liquid height0 width0 padding10 gap5 top10 right10" style="border-radius: 30px;">
+                <a href="javascript:vod(0)" class="nav cnav"><i class="fas fa-key"></i></a>
+                <a href="javascript:vod(0)" class="nav cnav"><i class="fas fa-pen"></i></a>
+            </div>
             <p class="rem1 str500 gray">Student Number</p>
             <p class="rem12 str500"><%= user.schoolId ? user.schoolId : "--" %></p>
             <br>
@@ -52,10 +59,19 @@
             <p class="rem12 str500"><%= user.yearLevel || "--" %></p>
             <% } else { %>
             <% } %>
+            <br>
+            <p class="rem1 str500 gray">Email</p>
+            <p class="rem12 str500"><%= user.email || "--" %></p>
+            <br>
+            <p class="rem1 str500 gray">Contact Number</p>
+            <p class="rem12 str500"><%= user.phone || "--" %></p>
         </div>
     </div>
     
-    <div class="height0 width30 col padding10 prfCard">
+    <div class="height0 width30 col padding10 prfCard hidden">
+        <div class="height0 justifyStart marginTop10">
+            <img src="<%= user.vId ? user.vId : '/images/annPhoto2.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.png';" class="h300 cornerRem1">
+        </div>
     </div>
 
 </div>

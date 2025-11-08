@@ -4,7 +4,10 @@ const Request = require('../model/request');
 const isRequest = async (req, res, next) => {
   try {
     // Fetch all requests from DB
-    const requests = await Request.find({})
+    const requests = await Request.find({
+        archive: false, 
+        verify: false 
+      })
       .populate('requestBy')   // ✅ load full user data
       .populate('processBy')   // ✅ load full user data
       .populate('releaseBy')   // ✅ load full user data

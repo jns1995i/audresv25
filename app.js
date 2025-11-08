@@ -12,9 +12,12 @@ const multer = require('multer');
 
 const isLogin = require('./middleware/isLogin');
 const isRequest = require('./middleware/isRequest');
+const myRequest = require('./middleware/myRequest');
+const isRatings = require('./middleware/isRatings');
 
 const users = require('./model/user');
 const requests = require('./model/request');
+const Ratings = require('./model/Rating');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -101,6 +104,32 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(async (req, res, next) => {
+  try {
+    const ratingsSummary = await Ratings.aggregate([
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$rating" },
+          totalRatings: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const summary = ratingsSummary[0] || { averageRating: 0, totalRatings: 0 };
+
+    req.ratings = summary;           // optional if you want it in req
+    res.locals.ratings = summary;    // makes it available in all EJS templates
+
+    next();
+  } catch (err) {
+    console.error('⚠️ Error loading ratings:', err);
+    req.ratings = { averageRating: 0, totalRatings: 0 };
+    res.locals.ratings = { averageRating: 0, totalRatings: 0 };
+    next();
+  }
+});
+
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -151,7 +180,7 @@ function generatePassword() {
 
 // ================== ROUTES ==================
 
-app.get('/', async (req, res) => {
+app.get('/', isRatings, async (req, res) => {
   try {
     async function ensureUserExists(username, role, password = '@admin2025', access = 1) {
       let user = await users.findOne({ username });
@@ -324,7 +353,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       username: email,
       password: generatePassword(),
       archive: true,
-      verify: true
+      verify: true,
     });
 
     const savedUser = await newUser.save();
@@ -356,7 +385,8 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       semester: semestersArr[i] || '',
       proof: reqPhotoUrlsMap[i] || null,
       archive: true,
-      verify: true
+      verify: true,
+      status: "Pending"
     }));
 
     await requests.insertMany(requestDocs);
@@ -370,6 +400,25 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
 
 app.get('/regSuccess', (req, res) => {
   res.render('regSuccess', { title: 'Success' });
+});
+
+app.post('/rate', async (req, res) => {
+  console.log('Incoming rating:', req.body);
+  try {
+    const { rating } = req.body;
+    if (!rating) return res.status(400).json({ error: 'No rating provided' });
+
+    await Ratings.create({
+      rating: Number(rating),
+      createdAt: new Date(),
+      ip: req.ip
+    });
+
+    res.json({ success: true, message: 'Rating recorded' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
 });
 
 app.get('/check-studentNo', async (req, res) => {
@@ -407,8 +456,91 @@ app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard' });
 });
 
-app.get('/hom', isLogin, (req, res) => {
+app.get('/hom', isLogin, myRequest, (req, res) => {
   res.render('hom', { title: 'Home' });
+});
+
+app.get('/req', isLogin, (req, res) => {
+  res.render('req', { title: 'Request Form' });
+});
+
+app.post('/reqDoc', cpUpload, async (req, res) => {
+  try {
+    // Ensure user is logged in
+    if (!req.session?.user?._id) {
+      return res.render('req', { 
+        error: 'You must be logged in to submit a request!',
+        title: "AUDRESv25"
+      });
+    }
+
+    const { type, purpose, qty, schoolYear, semester } = req.body;
+
+    // Filter request photos
+    const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
+    const reqPhotoUrlsMap = await Promise.all(
+      reqPhotos.map(async file => {
+        if (!file.path) return null;
+        const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
+        return result.secure_url;
+      })
+    );
+
+    // Normalize fields into arrays
+    const typesArr = Array.isArray(type) ? type : [type];
+    const purposesArr = Array.isArray(purpose) ? purpose : [purpose];
+    const qtyArr = Array.isArray(qty) ? qty : [qty];
+    const schoolYearsArr = Array.isArray(schoolYear) ? schoolYear : [schoolYear];
+    const semestersArr = Array.isArray(semester) ? semester : [semester];
+
+    // Build request documents
+    const requestDocs = typesArr.map((t, i) => ({
+      requestBy: req.session.user._id, // MUST be logged-in user
+      type: t,
+      purpose: purposesArr[i],
+      qty: qtyArr[i],
+      schoolYear: schoolYearsArr[i] || '',
+      semester: semestersArr[i] || '',
+      proof: reqPhotoUrlsMap[i] || null,
+      archive: false,
+      verify: false,
+      status: "Pending"
+    }));
+
+    await requests.insertMany(requestDocs);
+
+    res.redirect('/reqSuccess');
+  } catch (err) {
+    console.error(err);
+    res.render('req', { 
+      error: 'Error submitting your document request!', 
+      title: "AUDRESv25" 
+    });
+  }
+});
+
+
+app.get('/reqSuccess', (req, res) => {
+  res.render('reqSuccess', { title: 'Success' });
+});
+
+app.post('/rate2', async (req, res) => {
+  console.log('Incoming rating:', req.body);
+  try {
+    const { rating } = req.body;
+    if (!rating) return res.status(400).json({ error: 'No rating provided' });
+
+    await Ratings.create({
+      rating: Number(rating),
+      createdAt: new Date(),
+      ip: req.ip
+    });
+
+    res.json({ success: true, message: 'Rating recorded' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
 });
 
 app.get('/prf', isLogin, (req, res) => {
