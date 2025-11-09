@@ -141,27 +141,13 @@
             
             <div class="height0 gap10 marginBottom20" id="rateF">
                 <div class="height0 width0">
-                    <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐</p>
-                </div>
-                |
-                <div class="height0 width0">
-                    <p>Total Ratings: <%= ratings.totalRatings %> votes</p>
-                </div>
-                |
-                <div class="height0 rating-stars gap5 width0">
-                <% for(let i = 1; i <= 5; i++) { %>
-                    <% if(i <= Math.round(ratings.averageRating)) { %>
-                    <i class="fas fa-star yellow"></i>
-                    <% } else { %>
-                    <i class="fas fa-star gray"></i>
-                    <% } %>
-                <% } %>
+                    <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
                 </div>
             </div>
 
-            <div class="liquid index50 col justifyStart height0 colorPrimary cornerRem1" id="">
+            <div class="bgWhite index50 col justifyStart height0 colorPrimary cornerRem1" id="">
                 <div class="height0 col justifyCenter alignStart padding20 relative">
-                    <p class="rem2 str400 marginBottom10">Data Privacy Notice</p>
+                    <p class="rem2 str500 marginBottom10">Data Privacy Notice</p>
                     <p class="rem11 str400 textJustify">
                         By submitting this form, you agree to provide your personal details and valid ID for identity verification purposes only. All information collected will be treated as confidential and will be used solely for processing your document request. In compliance with the Data Privacy Act of 2012, your data will be securely stored and accessed only by authorized personnel from the Registrar’s Office. Your information will not be shared with third parties and will be retained only as necessary.
                     </p>

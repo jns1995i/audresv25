@@ -141,21 +141,7 @@
             
             <div class="height0 gap10 marginBottom20" id="rateF">
                 <div class="height0 width0">
-                    <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐</p>
-                </div>
-                |
-                <div class="height0 width0">
-                    <p>Total Ratings: <%= ratings.totalRatings %> votes</p>
-                </div>
-                |
-                <div class="height0 rating-stars gap5 width0">
-                <% for(let i = 1; i <= 5; i++) { %>
-                    <% if(i <= Math.round(ratings.averageRating)) { %>
-                    <i class="fas fa-star yellow"></i>
-                    <% } else { %>
-                    <i class="fas fa-star gray"></i>
-                    <% } %>
-                <% } %>
+                    <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
                 </div>
             </div>
             

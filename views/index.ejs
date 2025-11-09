@@ -16,6 +16,7 @@
       form {
         width: 100%;
         padding-top: 0;
+        padding: 0;
       }
     }
     #getStat {
@@ -33,7 +34,7 @@
   }
 </style>
 
-<div class="height0 gap5 bgWhite cornerRem12 login colorPrimary width90 padding20">
+<div class="height0 gap5 bgWhite cornerRem12 login colorPrimary width100 padding10">
   <div class="height0 col width40">
     <img src="/images/logo3.png" alt="" class="width80">
     <p class="textCenter textWrap rem2 str500">AU REGISTRAR</p>
@@ -61,9 +62,9 @@
     </div>
 
     <div class="justifyBetween">
-      <input type="text" id="num1" class="width20 textCenter" readonly>
+      <input type="text" id="num1" class="width20 textCenter size14" readonly>
       <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-plus"></i></div>
-      <input type="text" id="num2" class="width20 textCenter" readonly>
+      <input type="text" id="num2" class="width20 textCenter size14" readonly>
       <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-equals"></i></div>
       <input type="text" id="answer" class="width20 textCenter str500" required>
       <div class="height0 width20 gap5 justifyEnd" style="width: 20%;">
@@ -83,6 +84,7 @@
     answerInput.value = '';
     answerInput.style.color = 'black';
     answerInput.style.fontWeight = 'bold';
+    answerInput.style.fontSize = '14px';
     answerInput.dataset.correct = num1 + num2;
 
     // Hide warning on reset
@@ -130,14 +132,14 @@
 
 <br>
 
-<div class="height0 liquid padding10 justifyBetween width90" id="getStat">
+<div class="height0 glass padding10 justifyBetween width100" id="getStat">
   <p class="rem13">No Account Yet? Make Your First Request Here</p>
-  <a href="/rg" class="nav liquid">Get Started Here</a>
+  <a href="/rg" class="nav liquid bgBlue glowImg3">Get Started Here</a>
 </div>
 
 <br>
 
-<div class="height0 padding15 gap10 width90 justifyStart liquid">
+<div class="height0 padding15 gap10 width100 justifyStart glass">
     <div class="height0 padding10 border0 borderRadius10 alignStart width50 col gap10 relative">
         <p class="rem18 gap10 alignCenter">Need Help?</p>
         <p class="rem11 gap10 alignCenter">Fullscreen the video or click below to access the Tutorial Section</p>
