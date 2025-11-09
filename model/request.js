@@ -11,6 +11,7 @@ const requestSchema = new mongoose.Schema({
     ref: 'user'
   },
 
+  tr: { type: String, required: true, trim: true },
   type: { type: String, required: true, trim: true },
   purpose: { type: String, trim: true },
   qty: { type: Number, default: 1 },

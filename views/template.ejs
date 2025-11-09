@@ -31,7 +31,10 @@
       }
       .floatF, .floatB {
         position: fixed !important;
-        bottom: 15vh !important;
+        bottom: 10vh !important;
+      }
+      #homePg {
+        flex-direction: column-reverse;
       }
   }
     </style>
@@ -40,23 +43,6 @@
 <body class="col padding0">
 <div class="mainF overflow-y1 block abstractBG">
   <%- body %>
-</div>
-<div class="floatF fixed height0 glass shadow2 translateX width0 padding10 gap5 bottom50" style="border-radius: 30px;">
-  <a href="/hom" class="nav cnav liquid glowImg3"><i class="fas fa-home"></i></a>
-  <a href="/req" class="nav cnav liquid"><i class="fas fa-plus"></i></a>
-  |
-  <a href="/prf" class="nav cnav">
-    <img src="<%= user.photo ? '/uploads/' + user.photo : '/images/profile.png' %>" 
-     alt="Profile"
-     onerror="this.onerror=null; this.src='/images/profile.png';">
-  </a>
-</div>
-
-<div class="floatB hidden fixed height0 glass shadow2 translateX width0 padding10 gap5 bottom20" style="border-radius: 30px;">
-  <a href="/hom" class="nav cnav liquid"><i class="fas fa-home"></i></a>
-  <a href="/req" class="nav cnav liquid"><i class="fas fa-plus"></i></a>
-  |
-  <a href="javascript:void(0)" class="nav cnav liquid" id="lgOpen"><i class="fas fa-share-square"></i></a>
 </div>
 
 
@@ -95,6 +81,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+
+    <script>
+        document.querySelectorAll('.showPass').forEach(button => {
+            button.addEventListener('click', function() {
+                const passwordInput = button.previousElementSibling;
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    button.textContent = 'hide';
+                } else {
+                    passwordInput.type = 'password';
+                    button.textContent = 'show';
+                }
+            });
+        });
+    </script>
 
 
 </body>

@@ -1,6 +1,107 @@
 <% layout('template') %>
+<style>
+  @media (max-width: 900px) {
+    .reqPlate {
+      flex-direction: column !important;
+      gap: 2px;
+      position: relative;
+    }
+    .reqPlate > div {
+      width: 100%;
+      justify-content: start;
+      height: auto;
+    }
+    .statIcon {
+      position: absolute;
+      height: auto;
+      top: 10px;
+      right: 10px;
+    }
+  }
+</style>
 
-<div class="height0 col">
+<div class="height0 padding10 justifyBetween">
+  <div class="height0 width0">
+    <div class="height0 padding5 width0 bgWhite cornerRem05"><img src="/images/logo1.jpg" alt="" class="h40"></div>
+  </div>
+  <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 30px;">
+    <a href="/req" class="nav cnav liquid"><i class="fas fa-bell"></i></a>
+    <a href="/prf" class="nav cnav liquid">
+      <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="borderPrimary">
+    </a>
+  </div>
+</div>
+
+<div class="height0 padding5 alignStart" id="homePg">
+  <div class="height0 padding20">
+    <div class="height0 padding15 gap10 width100 justifyStart glass">
+        <div class="height0 padding10 border0 borderRadius10 alignStart width50 col gap10 relative">
+            <p class="rem18 gap10 alignCenter">Need Help?</p>
+            <p class="rem11 gap10 alignCenter">Fullscreen the video or click below to access the Tutorial Section</p>
+            <a href="/ins2" class="nav liquid">Learn More <i class="fas fa-chevron-right"></i></a>
+            <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
+        </div>
+        <video autoplay muted loop playsinline controls class="width50 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
+    </div>
+  </div>
+  <div class="height0 padding10 col">
+    <div class="height0 justifyBetween padding10">
+      <p class="rem18 str400">Recent Request</p>
+      <a href="/req" class="nav glass"><i class="fas fa-plus"></i>Request Document</a>
+    </div>
+    <% if (requests && requests.length > 0) { %>
+      <div class="height0 bgSoft cornerRem1 colorPrimary padding20 gap10 col">
+        <% requests.slice(0, 5).forEach(req => { %>
+          <a href="" class="width100 shadow1 cornerRem1">
+            <div class="height0 padding15 bgWhite reqPlate">
+              <div class="height0 justifyStart width20">
+                <p class="rem1 str600">TR# <%= req.tr %></p>
+              </div>
+              <div class="height0 justifyStart width25">
+                <% 
+                  const options = { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                  }; 
+                  const formattedDate = new Date(req.createdAt).toLocaleString('en-US', options); 
+                %>
+                <p class="rem1 str400"><%= formattedDate %></p>
+              </div>
+              <div class="height0 justifyStart width25">
+                <p class="rem1 str500"><%= req.type %></p>
+              </div>
+              <div class="height0 width10">
+                <p class="rem1 str400"><%= req.qty %></p>
+              </div>
+              <div class="height0 width25 justifyEnd">
+                <div class="rem1 str400 padding5 cornerRem1 colorPrimary str500 width0 borderPrimary statIcon">
+                  <i class="fas fa-hourglass inline rem1 w15 h15"></i>
+                  <%= req.status %>
+                </div>
+              </div>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <br>
+      <div class="height0">
+        <p class="rem16">You have no requests yet!</p>
+      </div>
+    <% } %>
+    <div class="height0 justifyBetween padding10">
+      <a href="/reqAll" class="nav glass">See All Transactions <i class="fas fa-chevron-right"></i></a>
+      <p class="rem14"><%= requests.length %> Requests</p>
+    </div>
+    <hr>
+  </div>
+</div>
+
+<div class="height0 col hidden">
     <% if (requests && requests.length > 0) { %>
   <div class="request-list col">
     <% requests.forEach(req => { %>

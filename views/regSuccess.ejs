@@ -25,6 +25,12 @@
         <div id="rateMessage" class="bgGreen100 textCenter marginBlock15 hidden width0"></div>
     </div>
 </div>
+<br>
+<div class="height0 gap10 marginBottom20" id="rateF">
+    <div class="height0 width0">
+        <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
+    </div>
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const stars = document.querySelectorAll('.rateStar');

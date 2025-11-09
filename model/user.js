@@ -37,8 +37,11 @@ const userSchema = new mongoose.Schema({
   bYear: { type: Number },
 
   campus: { type: String, trim: true },
+  course: { type: String, trim: true },
   schoolId: { type: String, trim: true },
   yearLevel: { type: String, trim: true },
+  yearGraduated: { type: String, trim: true },
+  yearAttended: { type: String, trim: true },
 
   photo: { type: String, trim: true },
   vId: { type: String, trim: true },
