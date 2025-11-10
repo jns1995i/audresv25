@@ -38,7 +38,7 @@ html {
     
     --orange: #ff6425;
     --witch: #083a3c;
-    --green: rgb(33, 200, 33);
+    --green: rgb(17, 185, 17);
     --yellow: #ffa806;
     --blue: blue;
     --radial2: #10096c;
@@ -229,6 +229,17 @@ body {
     padding: 6px;
 }
 
+section {
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box !important;
+    align-items: center;
+    height: auto;
+    width: 100%;
+    border: none;
+    padding: 10px;
+}
+
 /*containers*/
 .section {
     height: auto;
@@ -366,7 +377,7 @@ a:hover, button:hover {
 }
 
 .gnav {
-    background-color: var(--shade5);
+    background-color: var(--green);
     color: white;
     border: none !important;
 }
@@ -7302,7 +7313,7 @@ p + p {
 .bgModal10 { background-color: rgba(0, 0, 0, 1); }
 
 .bgPrimary { background-color: var(--primary);}
-.bgWhite { background-color: white; }
+.bgWhite { background-color: white; color: var(--shade4); }
 .bgLight { background-color: rgb(253, 253, 253); }
 .bgSoft { background-color: rgb(237, 237, 237); }
 .bgGray { background-color: rgb(176, 176, 176); }

@@ -22,6 +22,7 @@ const requestSchema = new mongoose.Schema({
   proof: { type: String, trim: true },  // path or filename of proof
   tr: { type: String, trim: true },     // transaction reference or tracking
   status: { type: String, trim: true },
+  payPhoto: { type: String, trim: true },
 
   reviewAt: { type: Date },
   approveAt: { type: Date },
@@ -30,6 +31,9 @@ const requestSchema = new mongoose.Schema({
   verifyAt: { type: Date },
   turnAt: { type: Date },
   claimedAt: { type: Date },
+
+  holdAt: { type: Date },
+  declineAt: { type: Date },
 
   claimedBy: { type: String, trim: true }, // name of claimant
   releaseBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },

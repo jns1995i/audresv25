@@ -474,18 +474,10 @@ app.get('/check-email', async (req, res) => {
   }
 });
 
-
-app.get('/dsb', isLogin, (req, res) => {
-  res.render('dsb', { title: 'Dashboard' });
-});
-
-app.get('/hom', isLogin, myRequest, (req, res) => {
-  res.render('hom', { title: 'Home' });
-});
-
 app.get('/req', isLogin, (req, res) => {
   res.render('req', { title: 'Request Form' });
 });
+
 app.post('/reqDoc', cpUpload, async (req, res) => {
   try {
     // Ensure user is logged in
@@ -784,6 +776,53 @@ app.post('/pht', isLogin, uploadPhoto.single('photo'), async (req, res) => {
   }
 });
 
+
+app.get('/hom', isLogin, myRequest, (req, res) => {
+  res.render('hom', { title: 'Home' });
+});
+
+
+app.get('/reqView/:id', isLogin, async (req, res) => {
+  try {
+    const rq = await requests.findById(req.params.id)
+      .populate('requestBy')
+      .populate('processBy')
+      .populate('releaseBy');
+
+    if (!rq) {
+      return res.status(404).render('404', { title: 'Request Not Found' });
+    }
+
+    res.render('reqView', { 
+      title: 'View Request',
+      rq
+    });
+
+  } catch (err) {
+    console.error('❗ Error loading request:', err);
+    res.status(500).render('index', { 
+      title: 'Error',
+      error: 'Internal Server Error'
+    });
+  }
+});
+
+app.post("/update-status/:id", async (req, res) => {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    try {
+        await requests.findByIdAndUpdate(id, { status });
+        res.status(200).send("Updated");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error updating status");
+    }
+});
+
+app.get('/dsb', isLogin, (req, res) => {
+  res.render('dsb', { title: 'Dashboard' });
+});
 
 
 app.use((req, res) => {

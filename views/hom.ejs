@@ -17,45 +17,67 @@
       top: 10px;
       right: 10px;
     }
+    #helpCard {
+      flex-direction: column-reverse;
+      margin-bottom: 50px;
+    }
+    .mainCard {
+      width: 100%;
+    }
   }
 </style>
 
-<div class="height0 padding10 justifyBetween">
-  <div class="height0 width0">
-    <div class="height0 padding5 width0 bgWhite cornerRem05"><img src="/images/logo1.jpg" alt="" class="h40"></div>
-  </div>
-  <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 30px;">
-    <a href="/req" class="nav cnav liquid"><i class="fas fa-bell"></i></a>
-    <a href="/prf" class="nav cnav liquid">
-      <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="borderPrimary">
-    </a>
-  </div>
-</div>
 
 <div class="height0 padding5 alignStart" id="homePg">
-  <div class="height0 padding20">
-    <div class="height0 padding15 gap10 width100 justifyStart glass">
-        <div class="height0 padding10 border0 borderRadius10 alignStart width50 col gap10 relative">
-            <p class="rem18 gap10 alignCenter">Need Help?</p>
-            <p class="rem11 gap10 alignCenter">Fullscreen the video or click below to access the Tutorial Section</p>
-            <a href="/ins2" class="nav liquid">Learn More <i class="fas fa-chevron-right"></i></a>
-            <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
+  <div class="height0 padding20 col mainCard width40" id="helpCard">
+    <div class="height0 col padding20" id="headF">
+        <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
+            <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
         </div>
-        <video autoplay muted loop playsinline controls class="width50 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
+        <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+        <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
+    </div>
+    <div class="height0 padding15 gap10 width100 justifyStart glass col">
+        <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
+        <div class="height0 padding10 border0 borderRadius10 justifyBetween width100 gap10 relative">
+            <p class="rem16 gap10 alignCenter">Need Help?</p>
+            <a href="/ins2" class="nav liquid">Learn more here <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <video autoplay muted loop playsinline controls class="width100 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
     </div>
   </div>
-  <div class="height0 padding10 col">
+  <div class="height0 padding10 col mainCard width60">
+    <br><br>
+    <section class="col glass alignStart padding15 relative">
+      <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-file-lines"></i></a>
+      <section class="col alignStart relative">
+        <p class="rem2">Welcome <%= user.fName %></p>
+        <p class="rem1">Your documents made easy!</p>
+      </section>
+      <section class="padding10 width0 glass"><a href="/req" class="nav liquid">Start a new request <i class="fas fa-chevron-right"></i></a></section>
+      <div class="height0 glass shadow2 width0 padding10 gap5 absolute right10 top10" style="border-radius: 30px;">
+        <a href="/req" class="nav cnav liquid hidden"><i class="fas fa-bell"></i></a>
+        <a href="/prf" class="nav cnav liquid">
+          <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="borderPrimary">
+        </a>
+      </div>
+    </section>
+    <br>
+    <section class="bgYellow cornerRem1 col relative colorPrimary width99">
+      <i class="fas fa-thumbtack absolute right15 top10 size14" style="transform: rotate(45deg);"></i>
+      <p class="rem11 str500 textCenter width90">Take Note: Please be informed that document requests are only accepted from MONDAY to FRIDAY, between 8:00am to 5:00pm. Requests submitted beyond these hours will be processed on the next working day.</p>
+    </section>
+    <br>
     <div class="height0 justifyBetween padding10">
-      <p class="rem18 str400">Recent Request</p>
-      <a href="/req" class="nav glass"><i class="fas fa-plus"></i>Request Document</a>
+      <p class="rem18 str400">Your Recent Request</p>
     </div>
     <% if (requests && requests.length > 0) { %>
       <div class="height0 bgSoft cornerRem1 colorPrimary padding20 gap10 col">
-        <% requests.slice(0, 5).forEach(req => { %>
-          <a href="" class="width100 shadow1 cornerRem1">
+        <% requests.slice(0, 3).forEach(req => { %>
+          <a href="/reqView/<%= req._id %>" class="width100 shadow1 cornerRem1">
             <div class="height0 padding15 bgWhite reqPlate">
               <div class="height0 justifyStart width20">
-                <p class="rem1 str600">TR# <%= req.tr %></p>
+                <p class="size12 str600">TR# <%= req.tr %></p>
               </div>
               <div class="height0 justifyStart width25">
                 <% 
@@ -69,16 +91,16 @@
                   }; 
                   const formattedDate = new Date(req.createdAt).toLocaleString('en-US', options); 
                 %>
-                <p class="rem1 str400"><%= formattedDate %></p>
+                <p class="size12 str400"><%= formattedDate %></p>
               </div>
               <div class="height0 justifyStart width25">
-                <p class="rem1 str500"><%= req.type %></p>
+                <p class="size12 str500"><%= req.type %></p>
               </div>
               <div class="height0 width10">
-                <p class="rem1 str400"><%= req.qty %></p>
+                <p class="size12 str400"><%= req.qty %></p>
               </div>
               <div class="height0 width25 justifyEnd">
-                <div class="rem1 str400 padding5 cornerRem1 colorPrimary str500 width0 borderPrimary statIcon">
+                <div class="size12 str400 padding5 cornerRem1 colorPrimary str500 width0 borderPrimary statIcon">
                   <i class="fas fa-hourglass inline rem1 w15 h15"></i>
                   <%= req.status %>
                 </div>
@@ -93,35 +115,12 @@
         <p class="rem16">You have no requests yet!</p>
       </div>
     <% } %>
+    <br>
     <div class="height0 justifyBetween padding10">
       <a href="/reqAll" class="nav glass">See All Transactions <i class="fas fa-chevron-right"></i></a>
-      <p class="rem14"><%= requests.length %> Requests</p>
+      <p class="rem14 hidden"><%= requests.length %> Requests</p>
     </div>
     <hr>
   </div>
 </div>
 
-<div class="height0 col hidden">
-    <% if (requests && requests.length > 0) { %>
-  <div class="request-list col">
-    <% requests.forEach(req => { %>
-      <div class="request-card col">
-        <p><strong>Type:</strong> <%= req.type %></p>
-        <p><strong>Purpose:</strong> <%= req.purpose %></p>
-        <p><strong>Quantity:</strong> <%= req.qty %></p>
-        <p><strong>Status:</strong> 
-          <% if (req.verify) { %>
-            Verified
-          <% } else { %>
-            Pending
-          <% } %>
-        </p>
-        <p><strong>Requested On:</strong> <%= req.createdAt.toLocaleString() %></p>
-      </div>
-    <% }) %>
-  </div>
-<% } else { %>
-  <p>You have no requests yet.</p>
-<% } %>
-
-</div>
