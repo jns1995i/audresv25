@@ -295,6 +295,9 @@ app.get('/ins', (req, res) => {
   res.render('ins', { title: "Tutorial Page"});
 })
 
+app.get('/ins2', isLogin, (req, res) => {
+  res.render('ins2', { title: "Tutorial Page"});
+})
 
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {
