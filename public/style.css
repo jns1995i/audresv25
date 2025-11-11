@@ -7130,7 +7130,7 @@ p + p {
 
 
 .colorInherit { color: inherit; }/* Basic Colors */
-.colorPrimary { color: var(--shade4); }
+.colorPrimary { color: var(--shade4) !important; }
 /* --- Original Colors --- */
 .white { color: white; }
 .black { color: black; }
@@ -7313,7 +7313,7 @@ p + p {
 .bgModal10 { background-color: rgba(0, 0, 0, 1); }
 
 .bgPrimary { background-color: var(--primary);}
-.bgWhite { background-color: white; color: var(--shade4); }
+.bgWhite { background-color: white; color: var(--shade4) !important; }
 .bgLight { background-color: rgb(253, 253, 253); }
 .bgSoft { background-color: rgb(237, 237, 237); }
 .bgGray { background-color: rgb(176, 176, 176); }
