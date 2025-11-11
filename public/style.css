@@ -322,7 +322,7 @@ a:hover, button:hover {
     cursor: pointer;
     background-color: var(--tint13);
     transition: all 0.6s ease-in-out;
-    font-size: 1rem;
+    font-size: 12px;
     font-family: 'poppins', sans-serif;
     color: var(--shade4);
     gap: 5px;
@@ -341,7 +341,7 @@ a:hover, button:hover {
     background-color: transparent;
     color: white;
     border: none;
-    font-size: 1rem;
+    font-size: 12px;
     font-weight: 300;
     gap: 5px;
     i {
@@ -435,7 +435,7 @@ a:hover, button:hover {
     max-height: 39px;
     border-radius: 50% !important;
     padding: 0 !important;
-    font-size: 100%;
+    font-size: 98%;
     i {
         font-size: calc(100% * 1.5);
         width: 90% !important;
@@ -7690,6 +7690,9 @@ p + p {
   .responsive { display: none !important; }
   body { -webkit-overflow-scrolling: touch; }
   body::-webkit-scrollbar { display: none; }
+  a:hover, button:hover {
+    transform: scale(1);
+}
 }
 
 @media (min-width: 425px) {
@@ -7699,6 +7702,9 @@ p + p {
   .responsive { display: none !important; }
   body { -webkit-overflow-scrolling: touch; }
   body::-webkit-scrollbar { display: none; }
+  a:hover, button:hover {
+    transform: scale(1);
+}
 }
 
 @media (min-width: 768px) {
@@ -7708,6 +7714,9 @@ p + p {
   .responsive { display: none !important; }
   body { -webkit-overflow-scrolling: touch; }
   body::-webkit-scrollbar { display: none; }
+  a:hover, button:hover {
+    transform: scale(1);
+}
 }
 
 @media (min-width: 1024px) {

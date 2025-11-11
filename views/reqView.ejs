@@ -464,23 +464,46 @@
                                         <p class="size14"><%= rq.requestAt %></p>
                                     </div>
                                     <canvas id="qrcodeCanvas" width="100" height="100" class="hMax150 wMax150"></canvas>
-                                    <a href="javascript:void(0)" class="nav cnav absolute bottom5 right5 glass"><i class="fas fa-download"></i></a>
+                                    <a href="javascript:void(0)" class="nav cnav qrBtn absolute bottom5 right5 glass"><i class="fas fa-download"></i></a>
                                 </div>
                             </div>
                             <script>
-                            document.addEventListener('DOMContentLoaded', () => {
-                            const downloadBtn = document.querySelector('.cnav');
-                            const canvasEl = document.getElementById('qrcodeCanvas');
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const downloadBtn = document.querySelector('.qrBtn');
+                                    const canvasEl = document.getElementById('qrcodeCanvas');
 
-                            if (downloadBtn && canvasEl) {
-                                downloadBtn.addEventListener('click', () => {
-                                const link = document.createElement('a');
-                                link.download = 'qrcode.png';
-                                link.href = canvasEl.toDataURL('image/png');
-                                link.click();
+                                    if (!downloadBtn || !canvasEl) return;
+
+                                    downloadBtn.addEventListener('click', () => {
+                                        // Convert canvas to data URL first
+                                        const dataURL = canvasEl.toDataURL('image/png');
+
+                                        // Detect iPhone/iPad
+                                        const isIOS = /iP(hone|od|ad)/i.test(navigator.userAgent);
+
+                                        if (isIOS) {
+                                            // iOS does NOT support download attribute for data URLs
+                                            // Solution: open the image in a new tab
+                                            const tab = window.open();
+                                            tab.document.write(
+                                                `<img src="${dataURL}" style="width:100%;height:auto;" />`
+                                            );
+                                            return;
+                                        }
+
+                                        // Desktop + Android: force download
+                                        const link = document.createElement('a');
+                                        link.href = dataURL;
+                                        link.download = 'qrcode.png';
+
+                                        // Must be added to DOM for some mobile browsers
+                                        document.body.appendChild(link);
+
+                                        link.click();
+
+                                        document.body.removeChild(link);
+                                    });
                                 });
-                            }
-                            });
                             </script>
                             <script>
                                 // Format the data into a readable string indicating transaction verification
@@ -502,7 +525,7 @@
                             </script>
                             <br>
                             <div class="height0">
-                                <a href="/authorization" class="nav pnav" download onclick="setTimeout(() => location.reload(), 1000);">
+                                <a href="javascript:void(0)" class="nav pnav disabled" download onclick="setTimeout(() => location.reload(), 1000);">
                                     Download Authorization Form
                                 </a>
                             </div>
