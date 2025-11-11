@@ -1,0 +1,285 @@
+<% layout('template') %>
+<style>
+  @media (max-width: 900px) {
+    .reqPlate {
+      flex-direction: column !important;
+      gap: 2px;
+      position: relative;
+    }
+    .reqPlate > div {
+      width: 100%;
+      justify-content: start;
+      height: auto;
+    }
+    .statIcon {
+      position: absolute;
+      height: auto;
+      top: 10px;
+      right: 10px;
+    }
+    #helpCard {
+      flex-direction: column;
+    }
+    .mainCard {
+      width: 100%;
+    }
+    #homePg {
+      flex-direction: column;
+      margin-bottom: 100px;
+      height: auto;
+    }
+    .mainF {
+        overflow-y: auto !important;
+    }
+    .mainF::-webkit-scrollbar {
+        display: none;
+    }
+    .sub, .sub .ctrl.right {
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+        align-items: end;
+    }
+    #totalRecords, #displayT {
+        display: none;
+    }
+    ::-webkit-scrollbar {
+        display: none;
+    }
+  }
+</style>
+
+
+<div class="height100 padding5" id="homePg">
+  <div class="height0 padding20 col mainCard width40" id="helpCard">
+    <div class="height0 col padding20" id="headF">
+        <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
+            <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+        </div>
+        <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+        <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
+    </div>
+    <section class="padding0 justifyBetween">
+        <a href="/hom" class="nav glass"><i class="fas fa-chevron-left"></i> Go Back to Home Page</a>
+        <div class="searchBar colorPrimary">
+            <i class="fas fa-search"></i>
+            <input type="search" id="univ">
+        </div>
+    </section>
+    <br>
+    <section class="col glass alignStart padding5 relative">
+      <section class="col alignStart relative">
+        <p class="rem2">Request History</p>
+        <% if (requests && requests.length > 0) { %>
+            <p class="rem11"><%= requests.length %> Total Requests</p>
+        <% } else { %>
+            <p class="rem11">You have no request yet!</p>
+        <% } %>
+      </section>
+      <div class="height0 glass shadow2 width0 gap5 absolute right10 translateY">
+        <a href="/req" class="nav glass"><i class="fas fa-plus"></i> Request</a>
+      </div>
+    </section>
+  </div>
+  <div class="block height0 padding10 col mainCard width60 justifyStart gap5 overflow-y1">
+    <div class="height0 col block overflow-y1 gap5" style="max-height: 620px;">
+        <% if (requests && requests.length > 0) { %>
+        <div class="height0 bgSoft cornerRem1 colorPrimary padding20 gap10 col">
+            <div class="col gap5" id="noRecords" style="display: none;">
+                <%- include('icons/notFound') %>
+                <p class="size14 str500">No Records Found</p>
+            </div>
+            <% requests.forEach(req => { %>
+            <a href="/reqView/<%= req._id %>" class="width100 shadow1 cornerRem1" id="reqCards1">
+                <div class="height0 padding15 bgWhite reqPlate">
+                <div class="height0 justifyStart width20">
+                    <p class="size12 str600">TR# <%= req.tr %></p>
+                </div>
+                <div class="height0 justifyStart width25">
+                    <% 
+                    const options = { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: 'numeric', 
+                        minute: '2-digit', 
+                        hour12: true 
+                    }; 
+                    const formattedDate = new Date(req.createdAt).toLocaleString('en-US', options); 
+                    %>
+                    <p class="size12 str400"><%= formattedDate %></p>
+                </div>
+                <div class="height0 justifyStart width25">
+                    <p class="size12 str500"><%= req.type %></p>
+                </div>
+                <div class="height0 width10">
+                    <p class="size12 str400"><%= req.qty %></p>
+                </div>
+                <div class="height0 width25 justifyEnd">
+                    <div class="size12 str400 padding5 cornerRem1 colorPrimary str500 width0 borderPrimary statIcon">
+                    <i class="fas fa-hourglass inline rem1 w15 h15"></i>
+                    <%= req.status %>
+                    </div>
+                </div>
+                </div>
+            </a>
+            <% }) %>
+        </div>
+        <% } else { %>
+        <br>
+        <div class="height0">
+            <p class="rem16">You have no requests yet!</p>
+        </div>
+        <% } %>
+    </div>
+    <div class="sub height0 row flex marginTop10 bgYellow colorPrimary corner10 padding5">
+        <div class="ctrl left height0 width50">
+            <span id="totalRecords" class="totalRecords"></span>
+        </div>
+        <div class="ctrl right height0 width50">
+            <div class="height0 gap5 width0">
+                <p>
+                    Display: &nbsp;
+                </p>
+                <div class="selectBar" style="width: 70px;"> 
+                    <select id="rowsPerPage" onchange="updateRowsPerPage()" style="width: 100px">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="1000000000000">All</option>
+                    </select>
+                </div>
+            </div>
+            <div class="pagination colorPrimary" id="pagination"></div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cardsContainer = document.querySelector(".height0.col.block.overflow-y1.gap5");
+    const cards = Array.from(cardsContainer.querySelectorAll("#reqCards1"));
+    const paginationContainer = document.getElementById("pagination");
+    const rowsPerPageSelect = document.getElementById("rowsPerPage");
+    const totalRecordsLabel = document.getElementById("totalRecords");
+    const searchInput = document.getElementById("univ");
+    const noRecordsMessage = document.getElementById("noRecords");
+    const subDiv = document.querySelector(".sub");
+
+    let currentPage = 1;
+    let rowsPerPage = parseInt(rowsPerPageSelect.value);
+    let filteredCards = [...cards];
+
+    function renderCards() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        // Hide all cards first
+        cards.forEach(card => card.style.display = "none");
+
+        if (filteredCards.length === 0) {
+            noRecordsMessage.style.display = "flex"; // show "No Records"
+            paginationContainer.style.display = "none"; // hide pagination
+            return;
+        } else {
+            noRecordsMessage.style.display = "none";
+        }
+
+        // Show only the cards for current page (for pagination)
+        filteredCards.slice(start, end).forEach(card => card.style.display = "flex");
+
+        // Update total records
+        totalRecordsLabel.innerText = `Total Records: ${filteredCards.length}`;
+
+        // Show/hide pagination only when search is empty
+        if (searchInput.value.trim() === "") {
+            paginationContainer.style.display = filteredCards.length <= rowsPerPage ? "none" : "flex";
+        } else {
+            paginationContainer.style.display = "none"; // hide pagination during search
+        }
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        paginationContainer.innerHTML = "";
+        if (searchInput.value.trim()) return;
+
+        const totalPages = Math.ceil(filteredCards.length / rowsPerPage);
+        if (totalPages <= 1) return;
+
+        const createPageButton = (text, page = null, isEllipsis = false) => {
+            const btn = document.createElement("button");
+            btn.innerHTML = text;
+            btn.disabled = isEllipsis || (page !== null && (page < 1 || page > totalPages));
+            if (page !== null && !isEllipsis) {
+                btn.className = page === currentPage ? "active" : "";
+                btn.onclick = () => {
+                    currentPage = page;
+                    renderCards();
+                };
+            }
+            return btn;
+        };
+
+        // Previous button
+        paginationContainer.appendChild(createPageButton("« Previous", currentPage - 1));
+
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) {
+                paginationContainer.appendChild(createPageButton(i, i));
+            }
+        } else {
+            const startPages = [1, 2, 3];
+            const endPages = [totalPages - 2, totalPages - 1, totalPages];
+            const middlePages = [currentPage - 1, currentPage, currentPage + 1];
+
+            // First pages
+            startPages.forEach(p => {
+                if (p <= totalPages) paginationContainer.appendChild(createPageButton(p, p));
+            });
+
+            // Ellipsis after start pages
+            if (currentPage > 4) paginationContainer.appendChild(createPageButton("...", null, true));
+
+            // Middle pages
+            middlePages.forEach(p => {
+                if (p > 3 && p < totalPages - 2) paginationContainer.appendChild(createPageButton(p, p));
+            });
+
+            // Ellipsis before end pages
+            if (currentPage < totalPages - 3) paginationContainer.appendChild(createPageButton("...", null, true));
+
+            // Last pages
+            endPages.forEach(p => {
+                if (p > 3) paginationContainer.appendChild(createPageButton(p, p));
+            });
+        }
+
+        // Next button
+        paginationContainer.appendChild(createPageButton("Next »", currentPage + 1));
+    }
+
+    function updateRowsPerPage() {
+        rowsPerPage = parseInt(rowsPerPageSelect.value);
+        currentPage = 1;
+        renderCards();
+    }
+
+    function searchCards() {
+        const query = searchInput.value.toLowerCase().trim();
+        filteredCards = cards.filter(card =>
+            card.textContent.toLowerCase().includes(query)
+        );
+        currentPage = 1;
+        renderCards();
+    }
+
+    rowsPerPageSelect.addEventListener("change", updateRowsPerPage);
+    searchInput.addEventListener("input", searchCards);
+
+    renderCards();
+});
+</script>

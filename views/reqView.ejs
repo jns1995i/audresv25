@@ -31,6 +31,7 @@
         }
         .dtl {
             align-items: start;
+            width: 100%;
         }
       }
     </style>
@@ -77,7 +78,7 @@
     </section>
 
     <section class="gap20 alignStart" id="mainF">
-        <section class="col alignStart width40">
+        <section class="col alignStart width35">
             <div class="height0 col padding20" id="headF">
                 <div class="corner500 h60 w60 liquid borderWhite logoF glowImg3">
                     <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
@@ -85,16 +86,13 @@
                 <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
                 <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
             </div>
-            <section class="width0">
+            <section class="justifyBetween">
                 <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
+                <p class="rem2 str400">Request Details</p>
             </section>
-            <section class="bgWhite padding25 col shadow1 cornerRem1 col colorPrimary">
-                <section class="cornerRem1 abstractBG dtlCard">
-                    <section class="col alignStart dtl">
-                        <p class="rem1"><i class="fas fa-receipt"></i> Transaction Number</p>
-                        <p class="rem18"><%= rq.tr %></p>
-                    </section>
-                    <section class="col alignEnd dtl">
+            <section class="bgWhite padding15 col shadow1 corner20 col colorPrimary">
+                <section class="corner20 abstractBG dtlCard justifyBetween">
+                    <section class="col alignStart dtl width0">
                         <p class="rem1"><i class="fas fa-receipt"></i> Date Requested</p>
                         <% 
                         const options = { 
@@ -109,6 +107,10 @@
                         %>
                         <p class="rem18"><%= formattedDate %></p>
                     </section>
+                    <section class="col alignEnd dtl width0">
+                        <p class="rem1"><i class="fas fa-receipt"></i> Transaction Number</p>
+                        <p class="rem18"><%= rq.tr %></p>
+                    </section>
                 </section>
                 <section class="col alignStart">
                     <p class="rem18 str500"><%= rq.type %></p>
@@ -117,107 +119,13 @@
                         <p class="rem12 str400">for <%= rq.purpose %> Purpose</p>
                     </section>
                 </section>
-                <hr><br>
-                <section class="bgYellow textCenter colorPrimary col cornerRem1 padding20">
-                    <% if (rq.status === "Pending") { %>
-                    <p class="rem1">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed. Thank you for your patience!</p>
-                    <% } else if (rq.status === "Reviewed") { %>
-                        <p class="rem1">Good news! Your request has been reviewed. The Accounting Office is now assessing your account for any remaining balance.</p>
-                    <% } else if (rq.status === "Assessed") { %>
-                        <p class="rem1">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt and upload it below.</p>
-                        <br>
-                        <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
-                            <input type="hidden" name="id" value="<%= rq.id %>">
-                            <div class="field">
-                                <label for="">Payment Method</label>
-                                <div class="selectBar">
-                                    <select name="payMode" id="payMode" required>
-                                        <option value="">Select Method</option>
-                                        <option value="Cash">Cash</option>
-                                        <option value="GCash">GCash</option>
-                                        <option value="Maya">Maya</option>
-                                        <option value="Bank Deposit">Bank Deposit</option>
-                                        <option value="Bank Transfer">Bank Transfer</option>
-                                        <option value="Credit Card">Credit Card</option>
-                                        <option value="Debit Card">Debit Card</option>
-                                        <option value="Bayad Center">Bayad Center</option>
-                                        <option value="7-Eleven">7-Eleven (Cliqq/Bills Payment)</option>
-                                    </select>                            
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label for="">Upload your Proof of Payment here</label>
-                                <input name="payPhoto" type="file" required>
-                            </div>
-                            <div class="field alignEnd">
-                                <button class="nav pnav w120">Upload</button>
-                            </div>
-                        </form>
-                    <% } else if (rq.status === "For Verification") { %>
-                        <p class="rem1">Please give us 24 hours to verify your payment. Thank you.</p>
-                    <% } else if (rq.status === "Verified") { %>
-                        <p class="rem1">Your payment has been verified. We will notify you via the email you provided once your document is ready for release.</p>
-                    <% } else if (rq.status === "For Release") { %>
-                        <p><i class="fas fa-check-circle blue corner500" style="font-size: 12px; outline: 1px solid rgb(3, 18, 106, 0.2);"></i>
-                        Great News! you can now claim your document anytime as of today
-                        <%= new Date(rq.claimedAt).toLocaleString('en-US', { month: 'short', day: '2-digit' }) %>, 
-                        <%= new Date(rq.claimedAt).getFullYear() %>.
-                        <% if (rq.purpose === 'Board Exam') { %>
-                            Please proceed to the Registrar’s Office to claim your document. Kindly bring two (2) photocopies of your 2x2 ID picture.
-                        <% } %>
-                        Upon claiming, please present the QR code below to verify your transaction details.
-                        <br><br>
-                            
-                        <div class="bgWhite height0 gap5 justifyCenter alignCenter width0 padding5 corner10 darkShadow">
-                            <div class="height0 col hidden">
-                                <p class="size14">
-                                    <%= rq.studentFirstName %> <%= rq.studentMiddleName %> <%= rq.studentLastName %> <%= rq.studentExtName %>
-                                </p>
-                                <p class="size14"><%= rq.role %></p>
-                                <p class="size14"><%= rq.course %></p>
-                                <p class="size14"><%= rq.tr %></p>
-                                <p class="size14"><%= rq.requestAt %></p>
-                            </div>
-                            <canvas id="qrcodeCanvas" width="100" height="100" class="hMax150 wMax150"></canvas>
-                        </div>
-                        <script>
-                            // Format the data into a readable string indicating transaction verification
-                            const requestDataFormatted = `Transaction Verified: 
-                            Name: ${"<%= rq.studentFirstName %>"} ${"<%= rq.studentMiddleName %>"} ${"<%= rq.studentLastName %>"} ${"<%= rq.studentExtName %>"},
-                            Role: ${"<%= rq.role %>"},
-                            Course: ${"<%= rq.course %>"},
-                            TR: ${"<%= rq.tr %>"}`;
-                        
-                            // Generate the QR code with formatted data
-                            const canvas = document.getElementById('qrcodeCanvas');
-                            QRCode.toCanvas(canvas, requestDataFormatted, function (error) {
-                                if (error) {
-                                    console.error(error);
-                                } else {
-                                    console.log('QR code generated successfully');
-                                }
-                            });
-                        </script>
-                        <br>
-                        <p>
-                            If someone will be claiming the document on your behalf, they must present a signed authorization letter along with a valid ID and 1 photocopy of picture.
-                        </p><br>
-                        <a href="/authorization" class="nav pnav" download onclick="setTimeout(() => location.reload(), 1000);">
-                            Download Authorization Form
-                        </a>
-                    <% } else if (rq.status === "Claimed") { %>
-                        <p class="rem1">Your document has been claimed!</p>
-                    <% } else { %>
-                    <p class="rem1">No Remarks</p>
-                    <% } %>
-                </section>
             </section>
         </section>
-        <section class="col width40">
+        <section class="col width35">
             <section class="justifyStart">
                 <p class="rem2 str400">Status Tracker</p>
             </section>
-            <section class="padding10 cornerRem1 col bgWhite">
+            <section class="padding10 corner20 col bgWhite">
                 <% if ( rq.status === "Pending") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
@@ -251,7 +159,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase rem1 str500">Registrar</p>
+                        <p class="upperCase str500">Registrar</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
                 </section>
@@ -261,7 +169,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase rem1 str500">Accounting</p>
+                        <p class="upperCase str500">Accounting</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
                 </section>
@@ -271,7 +179,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase rem1 str500">Payment</p>
+                        <p class="upperCase str500">Payment</p>
                     </div>
                     <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Payment</a>
                 </section>
@@ -280,7 +188,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase rem1 str500">Registrar</p>
+                        <p class="upperCase  str500">Registrar</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
                 </section>
@@ -290,7 +198,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase rem1 str500">Accounting</p>
+                        <p class="upperCase  str500">Accounting</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
                 </section>
@@ -300,7 +208,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase rem1 str500">Payment</p>
+                        <p class="upperCase  str500">Payment</p>
                     </div>
                     <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Verification</a>
                 </section>
@@ -309,7 +217,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase rem1 str500">Registrar</p>
+                        <p class="upperCase  str500">Registrar</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
                 </section>
@@ -319,7 +227,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase rem1 str500">Accounting</p>
+                        <p class="upperCase  str500">Accounting</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
                 </section>
@@ -329,7 +237,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase rem1 str500">Payment</p>
+                        <p class="upperCase  str500">Payment</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Verified</a>
                 </section>
@@ -338,7 +246,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase rem1 str500">Registrar</p>
+                        <p class="upperCase  str500">Registrar</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
                 </section>
@@ -348,7 +256,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase rem1 str500">Accounting</p>
+                        <p class="upperCase  str500">Accounting</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
                 </section>
@@ -358,7 +266,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase rem1 str500">Payment</p>
+                        <p class="upperCase  str500">Payment</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Verified</a>
                 </section>
@@ -368,7 +276,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-check-circle green"></i></a>
-                        <p class="upperCase rem1 str500 green">Approved</p>
+                        <p class="upperCase  str500 green">Releasing</p>
                     </div>
                     <a href="" class="nav disabled gnav"><i class="fas fa-box-open w15"></i> For Release</a>
                 </section>
@@ -377,7 +285,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase rem1 str500">Registrar</p>
+                        <p class="upperCase  str500">Registrar</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
                 </section>
@@ -387,7 +295,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase rem1 str500">Accounting</p>
+                        <p class="upperCase  str500">Accounting</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
                 </section>
@@ -397,7 +305,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase rem1 str500">Payment</p>
+                        <p class="upperCase  str500">Payment</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Verified</a>
                 </section>
@@ -407,8 +315,9 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-check-circle"></i></a>
-                        <p class="upperCase rem1 str500">Claimed at <%= rq.claimedAt %></p>
+                        <p class="upperCase  str500">Releasing</p>
                     </div>
+                    <a href="" class="nav disabled pnav"><i class="fas fa-flag w15"></i> Claimed</a>
                 </section>
 
                 <% } else { %>
@@ -422,7 +331,7 @@
 
                 <section class="height0 justifyBetween bgRed100" style="border-radius: 1.5rem !important;">
                     <div class="height0 width0 gap5 paddingInline10">
-                        <p class="rem1 str500"><%= rq.holdAt %>Sample Date</p>
+                        <p class=" str500"><%= rq.holdAt %>Sample Date</p>
                     </div>
                     <a href="" class="nav disabled dnav"><i class="fas fa-clock"></i> On Hold</a>
                 </section>
@@ -435,25 +344,138 @@
 
                 <section class="height0 justifyBetween bgGray100" style="border-radius: 1.5rem !important;">
                     <div class="height0 width0 gap5 paddingInline10">
-                        <p class="rem1 str500 black"><%= rq.holdAt %>Sample Date</p>
+                        <p class=" str500 black"><%= rq.holdAt %>Sample Date</p>
                     </div>
                     <a href="" class="nav disabled bgBlack5 white"><i class="fas fa-xmark-circle"></i> Declined</a>
                 </section>
                 
                 <% } %>
 
-            </section>
-            <% if ( rq.payPhoto ) { %>
-            <br>
-            <hr>
-            <section class="justifyStart"><p class="rem18">Payment Details</p></section>
-            <section class="cornerRem1 col bgWhite">
-                <section class="justifyStart"><p class="rem12">Method: <%= rq.payMeth || 'Gcash' %></p></section>
-                <img src="<%= rq.payPhoto ? rq.payPhoto : '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary width100 cornerRem1">
-            </section>
-            <% } %>
+                <section class=" bgWhite padding0 marginTop10 relative">
+                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
+                    <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
+                        <% if (rq.status === "Pending") { %>
+                        <p class="">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed. Thank you for your patience!</p>
+                        <% } else if (rq.status === "Reviewed") { %>
+                            <p class="">Good news! Your request has been reviewed and has now been forwarded to the Accounting Department for assessment.</p>
+                        <% } else if (rq.status === "Assessed") { %>
+                            <p class="">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt and upload it below.</p>
+                            <br>
+                            <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
+                                <input type="hidden" name="id" value="<%= rq.id %>">
+                                <div class="field">
+                                    <label for="">Payment Method</label>
+                                    <div class="selectBar">
+                                        <select name="payMode" id="payMode" required>
+                                            <option value="">Select Method</option>
+                                            <option value="Cash">Cash</option>
+                                            <option value="GCash">GCash</option>
+                                            <option value="Maya">Maya</option>
+                                            <option value="Bank Deposit">Bank Deposit</option>
+                                            <option value="Bank Transfer">Bank Transfer</option>
+                                            <option value="Credit Card">Credit Card</option>
+                                            <option value="Debit Card">Debit Card</option>
+                                            <option value="Bayad Center">Bayad Center</option>
+                                            <option value="7-Eleven">7-Eleven (Cliqq/Bills Payment)</option>
+                                        </select>                            
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label for="">Upload your Proof of Payment here</label>
+                                    <input name="payPhoto" type="file" required>
+                                </div>
+                                <div class="field alignEnd">
+                                    <button class="nav pnav w120">Upload</button>
+                                </div>
+                            </form>
+                        <% } else if (rq.status === "For Verification") { %>
+                            <p class="">Please give us 24 hours to verify your payment. Thank you.</p>
+                        <% } else if (rq.status === "Verified") { %>
+                            <p class="">Your payment has been verified. We will notify you via the email you provided once your document is ready for release.</p>
+                        <% } else if (rq.status === "For Release") { %>
+                            <div class="height0 col bgSoft padding20 corner15">
+                                <p><i class="fas fa-check-circle blue corner500" style="font-size: 12px; outline: 1px solid rgb(3, 18, 106, 0.2);"></i>
+                                Great News! you can now claim your document anytime.
+                                <% if (rq.purpose === 'Board Exam') { %>
+                                    Please proceed to the Registrar’s Office to claim your document. Kindly bring two (2) photocopies of your 2x2 ID picture.
+                                <% } %>
+                                Upon claiming, please present the QR code below to verify your transaction details. If someone will be claiming the document on your behalf, they must present a signed authorization letter along with a valid ID and 1 photocopy of picture. 
+                                <br><br>
+                                    
+                                <div class="bgWhite height0 gap5 justifyCenter alignCenter width0 padding5 corner10 darkShadow relative">
+                                    <div class="height0 col hidden">
+                                        <p class="size14">
+                                            <%= user.fName %> <%= user.mName %> <%= user.lName %> <%= user.xName %>
+                                        </p>
+                                        <p class="size14"><%= user.role %></p>
+                                        <p class="size14"><%= user.course %></p>
+                                        <p class="size14"><%= rq.tr %></p>
+                                        <p class="size14"><%= rq.requestAt %></p>
+                                    </div>
+                                    <canvas id="qrcodeCanvas" width="100" height="100" class="hMax150 wMax150"></canvas>
+                                    <a href="javascript:void(0)" class="nav cnav absolute bottom5 right5 glass"><i class="fas fa-download"></i></a>
+                                </div>
+                            </div>
+                            <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                            const downloadBtn = document.querySelector('.cnav');
+                            const canvasEl = document.getElementById('qrcodeCanvas');
 
+                            if (downloadBtn && canvasEl) {
+                                downloadBtn.addEventListener('click', () => {
+                                const link = document.createElement('a');
+                                link.download = 'qrcode.png';
+                                link.href = canvasEl.toDataURL('image/png');
+                                link.click();
+                                });
+                            }
+                            });
+                            </script>
+                            <script>
+                                // Format the data into a readable string indicating transaction verification
+                                const requestDataFormatted = `Transaction Verified! 
+                                Name: ${"<%= user.fName %>"} ${"<%= user.mName %>"} ${"<%= user.lName %>"} ${"<%= user.xName %>"},
+                                Role: ${"<%= user.role %>"},
+                                Course: ${"<%= user.course %>"},
+                                TR: ${"<%= rq.tr %>"}`;
+                            
+                                // Generate the QR code with formatted data
+                                const canvas = document.getElementById('qrcodeCanvas');
+                                QRCode.toCanvas(canvas, requestDataFormatted, function (error) {
+                                    if (error) {
+                                        console.error(error);
+                                    } else {
+                                        console.log('QR code generated successfully');
+                                    }
+                                });
+                            </script>
+                            <br>
+                            <div class="height0">
+                                <a href="/authorization" class="nav pnav" download onclick="setTimeout(() => location.reload(), 1000);">
+                                    Download Authorization Form
+                                </a>
+                            </div>
+                        <% } else if (rq.status === "Claimed") { %>
+                            <p class="">Your document has been claimed!</p>
+                        <% } else { %>
+                        <p class="">No Remarks</p>
+                        <% } %>
+                    </section>
+                </section>
+
+            </section>
         </section>
+        <% if ( rq.status !== "Pending" && rq.status !== "Reviewed" && rq.status !== "Assessed" ) { %>
+            <% if ( rq.payPhoto ) { %>
+                <section class="col width20">
+                    <section class="justifyStart"><p class="rem18">Payment Details</p></section>
+                    <section class="corner20 col bgWhite gap5">
+                        <section class="justifyStart bgYellow corner14"><p class="size12">Method: <%= rq.payMode || 'Gcash' %></p></section>
+                        <img src="<%= rq.payPhoto ? rq.payPhoto : '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary width100 corner20">
+                    </section>
+                </section>
+            <% } %>
+        <% } %>
     </section>
 </body>
 </html>

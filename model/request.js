@@ -23,6 +23,7 @@ const requestSchema = new mongoose.Schema({
   tr: { type: String, trim: true },     // transaction reference or tracking
   status: { type: String, trim: true },
   payPhoto: { type: String, trim: true },
+  payMode: { type: String, trim: true },
 
   reviewAt: { type: Date },
   approveAt: { type: Date },

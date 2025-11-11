@@ -54,7 +54,7 @@
         <p class="rem2">Welcome <%= user.fName %></p>
         <p class="rem1">Your documents made easy!</p>
       </section>
-      <section class="padding10 width0 glass"><a href="/req" class="nav liquid">Start a new request <i class="fas fa-chevron-right"></i></a></section>
+      <a href="/req" class="nav liquid bgShade6">Start a new request <i class="fas fa-chevron-right"></i></a>
       <div class="height0 glass shadow2 width0 padding10 gap5 absolute right10 top10" style="border-radius: 30px;">
         <a href="/req" class="nav cnav liquid hidden"><i class="fas fa-bell"></i></a>
         <a href="/prf" class="nav cnav liquid">
@@ -70,6 +70,7 @@
     <br>
     <div class="height0 justifyBetween padding10">
       <p class="rem18 str400">Your Recent Request</p>
+      <a href="/reqAll" class="nav glass">See All <i class="fas fa-chevron-right"></i></a>
     </div>
     <% if (requests && requests.length > 0) { %>
       <div class="height0 bgSoft cornerRem1 colorPrimary padding20 gap10 col">
@@ -115,12 +116,6 @@
         <p class="rem16">You have no requests yet!</p>
       </div>
     <% } %>
-    <br>
-    <div class="height0 justifyBetween padding10">
-      <a href="/reqAll" class="nav glass">See All Transactions <i class="fas fa-chevron-right"></i></a>
-      <p class="rem14 hidden"><%= requests.length %> Requests</p>
-    </div>
-    <hr>
   </div>
 </div>
 

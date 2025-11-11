@@ -820,6 +820,69 @@ app.post("/update-status/:id", async (req, res) => {
     }
 });
 
+app.post('/paymentUpload', isLogin, uploadPhoto.single('payPhoto'), async (req, res) => {
+  try {
+    const requestId = req.body.id;
+
+    if (!req.file) {
+      const rq = await requests.findById(requestId)
+        .populate('requestBy')
+        .populate('processBy')
+        .populate('releaseBy');
+
+      return res.render('reqView', { 
+        title: 'View Request',
+        rq,
+        messagePass: 'No photo uploaded!'
+      });
+    }
+
+    const payMode = req.body.payMode;
+    const payPhoto = req.file.path; // Cloudinary URL
+
+    // Update the request
+    await requests.findByIdAndUpdate(
+      requestId,
+      {
+        payMode,
+        payPhoto,
+        regStatus: 'For Verification'    // ✅ updated as requested
+      }
+    );
+
+    const rq = await requests.findById(requestId)
+      .populate('requestBy')
+      .populate('processBy')
+      .populate('releaseBy');
+
+    return res.render('reqView', { 
+      title: 'View Request',
+      rq,
+      messageSuccess: 'Payment uploaded successfully!'
+    });
+
+  } catch (err) {
+    console.error('Payment Upload Error:', err);
+
+    const requestId = req.body.id;
+    const rq = await requests.findById(requestId)
+      .populate('requestBy')
+      .populate('processBy')
+      .populate('releaseBy');
+
+    return res.render('reqView', { 
+      title: 'View Request',
+      rq,
+      messagePass: 'Failed to upload payment!'
+    });
+  }
+});
+
+app.get('/reqAll', isLogin, myRequest, (req, res) => {
+  res.render('reqAll', { title: 'Request History' });
+});
+
+
 app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard' });
 });

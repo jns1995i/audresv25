@@ -815,20 +815,21 @@ th {
 }
 
 #pagination .active {
-    background: var(--pnav);
+    background: var(--primary);
     color: white;
 }
 
 #pagination button:hover {
     background-color: #f0f0f0;
+    color: inherit;
     transform: scale(1);
     transition: all 0.3s ease;
     opacity: 0.8;
 }
 .totalRecords {
-    font-size: 0.9vw;
+    font-size: 14px;
     font-weight: 500;
-    color: #083a3c;
+    color: inherit;
 }
 
 progress {
@@ -7689,6 +7690,8 @@ p + p {
     font-size: 8px;
   }
   .responsive { display: none !important; }
+  body { -webkit-overflow-scrolling: touch; }
+  body::-webkit-scrollbar { display: none; }
 }
 
 @media (min-width: 425px) {
@@ -7696,6 +7699,8 @@ p + p {
     font-size: 10px;
   }
   .responsive { display: none !important; }
+  body { -webkit-overflow-scrolling: touch; }
+  body::-webkit-scrollbar { display: none; }
 }
 
 @media (min-width: 768px) {
@@ -7703,6 +7708,8 @@ p + p {
     font-size: 10px;
   }
   .responsive { display: none !important; }
+  body { -webkit-overflow-scrolling: touch; }
+  body::-webkit-scrollbar { display: none; }
 }
 
 @media (min-width: 1024px) {
