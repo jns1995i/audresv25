@@ -3,6 +3,46 @@
     .rqCard {
         height: 400px;
     }
+    .searchBar {
+        padding: 8px 8px;
+        flex-direction: row;
+        border-radius: 12px;
+        width: 50%;
+        max-height: 40px;
+        transition: 1s ease;
+    }
+    .searchBar:hover {
+        border: 2px solid white;
+    }
+    .searchBar:hover i {
+        color: white;
+    }
+    .searchBar input[type=search] {
+        border-radius: 0.5em;
+        border: none;
+        padding: none;
+        i {
+            width: 24px;
+            opacity: 0.6;
+            color: inherit;
+        }
+    }
+    .searchBar input[type=search]:focus {
+        outline-color: none !important;
+        background-color: transparent;
+        border: none !important;
+        color: inherit;
+        i {
+            width: 24px;
+            opacity: 0.6;
+            color: inherit;
+        }
+    }
+    .searchBar input[type=search]:hover {
+        outline-color: none !important;
+        background-color: transparent;
+        border: none !important;
+    }
   @media (max-width: 900px) {
     .reqPlate {
       flex-direction: column !important;
@@ -43,9 +83,6 @@
         gap: 5px;
         align-items: end;
     }
-    #totalRecords, #displayT {
-        display: none;
-    }
     ::-webkit-scrollbar {
         display: none;
     }
@@ -67,17 +104,10 @@
 
     <div class="section gap10 padding0" id="hCard">
         <section class="col padding0">
-            <section class="paddingInline5 paddingBlock10 justifyBetween">
-                <a href="/hom" class="nav glass"><i class="fas fa-chevron-left"></i> Go Back to Home Page</a>
-                <div class="searchBar colorPrimary">
-                    <i class="fas fa-search"></i>
-                    <input type="search" id="univ">
-                </div>
-            </section>
             <section class="glass padding10 corner10 marginBottom5 col gap5 alignEnd relative">
                 <a href="javascript:void(0)" class="nav cnav absolute left10 top10 liquid" style="transform: scale(2.3); opacity: 0.15;"><i class="fas fa-list"></i></a>
                 <p class="rem16">Request History</p>
-                <section class="justifyBetween bgYellow colorPrimary corner14 alignStart padding5 relative">
+                <section class="justifyBetween bgYellow colorPrimary corner14 padding5 relative">
                     <section class="col alignStart relative width0">
                         <% if (requests && requests.length > 0) { %>
                             <p class="rem14"><%= requests.length %> Total Requests</p>
@@ -88,6 +118,14 @@
                     <div class="height0 width0 liquid"><a href="/req" class="nav"><i class="fas fa-plus"></i> Request</a></div>
                 </section>
             </section>
+            <section class="paddingInline5 paddingBlock10 justifyBetween">
+                <a href="/hom" class="nav glass"><i class="fas fa-chevron-left"></i>Back</a>
+                <div class="searchBar glass" style="width: 78% !important;">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="univ" class="transparent">
+                </div>
+            </section>
+            <br>
         </section>
         <div class="height0 col padding20" id="headF">
             <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
@@ -175,14 +213,14 @@
         <% } %>
     </div>
     <div class="sub height0 row flex marginTop10 bgSoft colorPrimary corner10 padding10">
-        <div class="ctrl left height0 width50 justifyStart">
-            <span id="totalRecords" class="totalRecords"></span>
+        <div class="ctrl left height0 width50 justifyStart hidden">
         </div>
-        <div class="ctrl right height0 width50 justifyEnd">
+        <div class="ctrl right height0 justifyEnd">
             <div class="height0 gap5 width0">
-                <p>
-                    Display: &nbsp;
-                </p>
+                <div class="size14 gap5">
+                <span id="totalRecords" class="totalRecords"></span>
+                    | Display: &nbsp;
+                </div>
                 <div class="selectBar" style="width: 70px;"> 
                     <select id="rowsPerPage" onchange="updateRowsPerPage()" style="width: 100px">
                         <option value="5">5</option>
