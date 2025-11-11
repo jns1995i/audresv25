@@ -582,13 +582,11 @@ input, .searchBar, .selectBar {
 .searchBar {
     padding: 8px 8px;
     flex-direction: row;
-    width: 150px;
+    width: 50%;
     transition: 1s ease;
 }
 .searchBar:hover {
     border: 2px solid var(--tint3);
-    width: 250px;
-    max-width: 250px;
 }
 .searchBar:hover i {
     color: var(--tint3);

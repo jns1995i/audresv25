@@ -795,14 +795,43 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
 
     res.render('reqView', { 
       title: 'View Request',
-      rq
+      rq,
+      back: 'Home'
     });
 
   } catch (err) {
     console.error('❗ Error loading request:', err);
     res.status(500).render('index', { 
       title: 'Error',
-      error: 'Internal Server Error'
+      error: 'Internal Server Error',
+      back: 'Home'
+    });
+  }
+});
+
+app.get('/reqView2/:id', isLogin, async (req, res) => {
+  try {
+    const rq = await requests.findById(req.params.id)
+      .populate('requestBy')
+      .populate('processBy')
+      .populate('releaseBy');
+
+    if (!rq) {
+      return res.status(404).render('404', { title: 'Request Not Found' });
+    }
+
+    res.render('reqView', { 
+      title: 'View Request',
+      rq,
+      back: 'Req'
+    });
+
+  } catch (err) {
+    console.error('❗ Error loading request:', err);
+    res.status(500).render('index', { 
+      title: 'Error',
+      error: 'Internal Server Error',
+      back: 'Req'
     });
   }
 });

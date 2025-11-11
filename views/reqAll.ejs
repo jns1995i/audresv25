@@ -1,5 +1,8 @@
 <% layout('template') %>
 <style>
+    .rqCard {
+        height: 400px;
+    }
   @media (max-width: 900px) {
     .reqPlate {
       flex-direction: column !important;
@@ -46,43 +49,56 @@
     ::-webkit-scrollbar {
         display: none;
     }
+    #hCard {
+        flex-direction: column-reverse !important;
+    }
+    .rqCrd {
+        height: auto !important;
+        max-height: 650px !important;
+    }
   }
 </style>
 
 
-<div class="height100 padding5" id="homePg">
-  <div class="height0 padding20 col mainCard width40" id="helpCard">
-    <div class="height0 col padding20" id="headF">
-        <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
-            <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
-        </div>
-        <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-        <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
-    </div>
-    <section class="padding0 justifyBetween">
-        <a href="/hom" class="nav glass"><i class="fas fa-chevron-left"></i> Go Back to Home Page</a>
-        <div class="searchBar colorPrimary">
-            <i class="fas fa-search"></i>
-            <input type="search" id="univ">
-        </div>
-    </section>
-    <br>
-    <section class="col glass alignStart padding5 relative">
-      <section class="col alignStart relative">
-        <p class="rem2">Request History</p>
-        <% if (requests && requests.length > 0) { %>
-            <p class="rem11"><%= requests.length %> Total Requests</p>
-        <% } else { %>
-            <p class="rem11">You have no request yet!</p>
-        <% } %>
-      </section>
-      <div class="height0 glass shadow2 width0 gap5 absolute right10 translateY">
-        <a href="/req" class="nav glass"><i class="fas fa-plus"></i> Request</a>
-      </div>
-    </section>
+<div class="height0 padding5 alignStart" id="homePg">
+  <div class="height0 padding20 col mainCard width40 hidden" id="helpCard">
   </div>
   <div class="block height0 padding10 col mainCard width60 justifyStart gap5 overflow-y1">
-    <div class="height0 col block overflow-y1 gap5" style="max-height: 620px;">
+
+    <div class="section gap10 padding0" id="hCard">
+        <section class="col padding0">
+            <section class="paddingInline5 paddingBlock10 justifyBetween">
+                <a href="/hom" class="nav glass"><i class="fas fa-chevron-left"></i> Go Back to Home Page</a>
+                <div class="searchBar colorPrimary">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="univ">
+                </div>
+            </section>
+            <section class="glass padding10 corner10 marginBottom5 col gap5 alignEnd relative">
+                <a href="javascript:void(0)" class="nav cnav absolute left10 top10 liquid" style="transform: scale(2.3); opacity: 0.15;"><i class="fas fa-list"></i></a>
+                <p class="rem16">Request History</p>
+                <section class="col bgYellow colorPrimary corner14 alignStart padding5 relative">
+                    <section class="col alignStart relative">
+                        <% if (requests && requests.length > 0) { %>
+                            <p class="rem14"><%= requests.length %> Total Requests</p>
+                        <% } else { %>
+                            <p class="rem14">You have no request yet!</p>
+                        <% } %>
+                    </section>
+                    <a href="/req" class="nav liquid bgShade6 absolute right5 top5"><i class="fas fa-plus"></i> Request</a>
+                </section>
+            </section>
+        </section>
+        <div class="height0 col padding20" id="headF">
+            <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
+                <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+            </div>
+            <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+            <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
+        </div>
+    </div>
+
+    <div class="height0 col block overflow-y1 gap5 rqCrd">
         <% if (requests && requests.length > 0) { %>
         <div class="height0 bgSoft cornerRem1 colorPrimary padding20 gap10 col">
             <div class="col gap5" id="noRecords" style="display: none;">
@@ -90,7 +106,7 @@
                 <p class="size14 str500">No Records Found</p>
             </div>
             <% requests.forEach(req => { %>
-            <a href="/reqView/<%= req._id %>" class="width100 shadow1 cornerRem1" id="reqCards1">
+            <a href="/reqView2/<%= req._id %>" class="width100 shadow1 cornerRem1" id="reqCards1">
                 <div class="height0 padding15 bgWhite reqPlate">
                 <div class="height0 justifyStart width20">
                     <p class="size12 str600">TR# <%= req.tr %></p>
@@ -116,10 +132,36 @@
                     <p class="size12 str400"><%= req.qty %></p>
                 </div>
                 <div class="height0 width25 justifyEnd">
-                    <div class="size12 str400 padding5 cornerRem1 colorPrimary str500 width0 borderPrimary statIcon">
-                    <i class="fas fa-hourglass inline rem1 w15 h15"></i>
-                    <%= req.status %>
-                    </div>
+                    <% if ( req.holdAt ) { %>
+                        <div class="size12 str400 padding5 cornerRem1 str500 width0 statIcon bgRed100">
+                            On Hold
+                        </div>
+                    <% } else if ( req.declineAt ) { %>
+                        <div class="size12 str400 padding5 cornerRem1 str500 width0 statIcon bgRed100">
+                            Declined
+                        </div>
+                    <% } else { %>
+                        <div class="size12 str400 padding5 cornerRem1 str500 width0 statIcon
+                        <% if ( req.status === "Pending" ) { %>
+                            bgBlue100
+                        <% } else if ( req.status === "Reviewed" ) { %>
+                            bgViolet100
+                        <% } else if ( req.status === "Assessed" ) { %>
+                            bgYellow100
+                        <% } else if ( req.status === "Verified" ) { %>
+                            bgGreen100
+                        <% } else if ( req.status === "For Release" ) { %>
+                            bgGreen100
+                        <% } else if ( req.status === "Claimed" ) { %>
+                            bgGray100
+                        <% } else { %>
+                            bgBlue100
+                        <% } %>
+                        ">
+                            <i class="fas fa-hourglass inline rem1 w15 h15 hidden"></i>
+                            <%= req.status %>
+                        </div>
+                    <% } %>
                 </div>
                 </div>
             </a>
@@ -132,11 +174,11 @@
         </div>
         <% } %>
     </div>
-    <div class="sub height0 row flex marginTop10 bgYellow colorPrimary corner10 padding5">
-        <div class="ctrl left height0 width50">
+    <div class="sub height0 row flex marginTop10 bgSoft colorPrimary corner10 padding10">
+        <div class="ctrl left height0 width50 justifyStart">
             <span id="totalRecords" class="totalRecords"></span>
         </div>
-        <div class="ctrl right height0 width50">
+        <div class="ctrl right height0 width50 justifyEnd">
             <div class="height0 gap5 width0">
                 <p>
                     Display: &nbsp;
@@ -191,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function() {
         filteredCards.slice(start, end).forEach(card => card.style.display = "flex");
 
         // Update total records
-        totalRecordsLabel.innerText = `Total Records: ${filteredCards.length}`;
+        totalRecordsLabel.innerText = `Showing ${filteredCards.length} Records`;
 
         // Show/hide pagination only when search is empty
         if (searchInput.value.trim() === "") {
