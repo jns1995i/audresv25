@@ -19,6 +19,11 @@
     .hidden {
         display: none !important;
     }
+    .fcrd {
+        padding: 20px !important;
+        width: 95% !important;
+        border-radius: 25px;
+    }
     
   @media (max-width: 900px) {
     .prfCard {
@@ -29,21 +34,26 @@
         margin-bottom: 100px;
     }
     .prfCard > .bgWhite, #controls {
-        width: 80% !important;
+        width: 95% !important;
+    }
+    .fcrd {
+        padding: 20px !important;
+        width: 95% !important;
+        border-radius: 18px;
     }
   }
 </style>
 
 <br>
 
-<div class="height0 width100 alignStart" id="prfMain">
+<div class="height0 width100" id="prfMain">
 
     <div class="height0 width30 col padding10 prfCard">
         <div class="height0 width0 relative corner15">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
-            <a href="javascript:void(0)" class="nav cnav glass absolute bottom0 right0" id="photoBtn"><i class="fas fa-camera"></i></a>
+            <a href="javascript:void(0)" class="nav cnav glass2 absolute bottom1 right1" id="photoBtn"><i class="fas fa-camera"></i></a>
         </div>
-        <div class="height0 marginTop10 bgWhite corner30 padding20 col relative prfCard colorPrimary justifyStart alignStart hidden" id="photoCard">
+        <div class="height0 marginTop10 bgWhite corner30 padding20 col relative prfCard fcrd colorPrimary justifyStart alignStart hidden" id="photoCard">
             <p class="rem18 str500">Change Photo</p>
             <hr class="width70"><br>
             <div class="bgBlue100 col alignStart">
@@ -85,7 +95,7 @@
             </div>
         </div>
         <br>
-        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative" style="border-radius: 25px;" id="info">
+        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
             <p class="rem18 str500">Student's Information</p>
             <hr class="width70"><br>
             <% if (typeof messageSuccess !== 'undefined' && messageSuccess) { %>
@@ -118,8 +128,8 @@
         </div>
     </div>
     
-    <div class="height0 width30 col padding10 prfCard hidden" id="resetCard">
-        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative" style="border-radius: 25px;" id="info">
+    <div class="height0 width30 col prfCard padding10 hidden" id="resetCard">
+        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
             <p class="rem18 str500">Reset Password</p>
             <hr class="width70"><br>
             <div class="bgViolet100 col alignStart">
@@ -167,7 +177,7 @@
     </div>
 
     <div class="height0 width30 col padding10 prfCard hidden" id="editCard">
-        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative" style="border-radius: 25px;" id="info">
+        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
             <p class="rem18 str500">Update Contact</p>
             <hr class="width70"><br>
             <div class="bgGreen100 col alignStart">
