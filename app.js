@@ -14,10 +14,12 @@ const isLogin = require('./middleware/isLogin');
 const isRequest = require('./middleware/isRequest');
 const myRequest = require('./middleware/myRequest');
 const isRatings = require('./middleware/isRatings');
+const isSeed = require('./middleware/isSeed');
 
 const users = require('./model/user');
 const requests = require('./model/request');
 const Ratings = require('./model/Rating');
+const documents = require('./model/document');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -80,6 +82,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+
+app.use(isSeed);
 
 // Global variables na ipapasok sa lahat ng page
 app.use((req, res, next) => {
@@ -194,7 +199,7 @@ function generatePassword() {
 
 app.get('/', isRatings, async (req, res) => {
   try {
-    async function ensureUserExists(username, role, password = '@admin2025', access = 1) {
+    async function ensureUserExists(username, role, password = 'all456', access = 1, custom = {}) {
       let user = await users.findOne({ username });
       if (user) {
         console.log(`User "${username}" already exists.`);
@@ -203,27 +208,28 @@ app.get('/', isRatings, async (req, res) => {
 
       const baseData = {
         fName: username,
-        mName: '',
-        lName: 'Account',
-        xName: '',
+        mName: 'Reyes',
+        lName: 'Santos',
+        xName: 'III',
         archive: false,
         verify: false,
         suspend: false,
         email: `${username.toLowerCase()}.au@phinmaed.com`,
-        phone: '',
-        address: '',
+        phone: '09001234567',
+        address: 'Cabanatuan City',
         bDay: 1,
         bMonth: 1,
         bYear: 2000,
-        campus: '',
-        schoolId: '',
-        yearLevel: '',
+        campus: 'South',
+        schoolId: '001',
+        yearLevel: 'Second Year',
         photo: '',
         vId: '',
-        username: username,
-        password: password,
-        role: role,
-        access: access,
+        username,
+        password,
+        role,
+        access,
+        ...custom
       };
 
       const doc = await users.create(baseData);
@@ -231,9 +237,19 @@ app.get('/', isRatings, async (req, res) => {
       return doc;
     }
 
-    await ensureUserExists('Head', 'Head', '@admin2025', 1);
-    await ensureUserExists('Admin', 'Admin', '@admin2025', 1);
-    await ensureUserExists('Student', 'Student', '@student2025', 0);
+    await ensureUserExists('Head', 'Head', 'all456', 1);
+    await ensureUserExists('Admin', 'Admin', 'all456', 1);
+    await ensureUserExists('Student', 'Student', 'all456', 0);
+    await ensureUserExists('Dev', 'Dev', 'all456', 1, {
+      email: 'jnsantiago.au@phinmaed.com',
+      phone: '09296199578'
+    });
+    await ensureUserExists('Seed', 'Seed', 'all456', 1, {
+      email: 'registrar.au@phinmaed.com',
+      phone: '09386571406',
+      fName: 'Araullo',
+      lName: 'University'
+    });
 
     res.render('index', { title: 'AUDRESv25' });
 
@@ -242,6 +258,7 @@ app.get('/', isRatings, async (req, res) => {
     res.render('index', { title: 'AUDRESv25' });
   }
 });
+
 
 
 app.post('/login', async (req, res) => {

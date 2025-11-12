@@ -134,7 +134,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase rem1 str500">Registrar</p>
+                        <p class="upperCase str500">Registrar</p>
                     </div>
                     <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Review</a>
                 </section>
@@ -143,7 +143,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase rem1 str500">Registrar</p>
+                        <p class="upperCase str500">Registrar</p>
                     </div>
                     <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
                 </section>
@@ -154,7 +154,7 @@
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase rem1 str500">Accounting</p>
+                        <p class="upperCase str500">Accounting</p>
                     </div>
                     <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Assessment</a>
                 </section>
@@ -387,14 +387,14 @@
                         <% } else if ( rq.remarks === "Balance") { %>
                             Remaining Balance on Account.
                         <% } else { %>
-                        <% } %>
+                        <% } %> For further assistance, please visit the Registrar’s Office on your campus, or contact us through our official hotline at <%= seedUser.phone %> or via email at <%= seedUser.email %>
                     </section>
                 </section>
                 <% } else if ( rq.declineAt ) { %>
                 <section class=" bgWhite padding0 marginTop10 relative col">
                     <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
-                        We regret to inform you that your request has been declined! Please visit The Registrar Office on your campus or contact us here at //
+                        We regret to inform you that your request has been declined. For further assistance, please visit the Registrar’s Office on your campus, or contact us through our official hotline at <%= seedUser.phone %> or via email at <%= seedUser.email %>
                         <% if ( rq.remarks === "Incomplete") { %>
                         <% } else if ( rq.remarks === "Balance") { %>
                         <% } else { %>

@@ -8,7 +8,7 @@
         flex-direction: row;
         border-radius: 12px;
         width: 50%;
-        max-height: 40px;
+        max-height: 39px;
         transition: 1s ease;
     }
     .searchBar:hover {
@@ -104,13 +104,13 @@
 
     <div class="section gap10 padding0" id="hCard">
         <section class="col padding0">
-            <section class="glass padding10 corner10 marginBottom5 col gap5 alignEnd relative">
-                <a href="javascript:void(0)" class="nav cnav absolute left10 top10 liquid" style="transform: scale(2.3); opacity: 0.15;"><i class="fas fa-list"></i></a>
+            <section class="glass padding10 corner10 marginBottom5 col gap5 alignStart relative">
+                <a href="javascript:void(0)" class="nav cnav absolute right10 top10 liquid" style="transform: scale(2.3); opacity: 0.15;"><i class="fas fa-list"></i></a>
                 <p class="rem16">Request History</p>
                 <section class="justifyBetween bgYellow colorPrimary corner14 padding5 relative">
                     <section class="col alignStart relative width0">
                         <% if (requests && requests.length > 0) { %>
-                            <p class="rem14"><%= requests.length %> Total Requests</p>
+                            <p class="rem14 str500"><%= requests.length %> Total Requests</p>
                         <% } else { %>
                             <p class="rem14">You have no request yet!</p>
                         <% } %>
@@ -118,7 +118,7 @@
                     <div class="height0 width0 liquid"><a href="/req" class="nav"><i class="fas fa-plus"></i> Request</a></div>
                 </section>
             </section>
-            <section class="paddingInline5 paddingBlock10 justifyBetween">
+            <section class="paddingInline5 paddingBlock10 justifyBetween corner10">
                 <a href="/hom" class="nav glass"><i class="fas fa-chevron-left"></i>Back</a>
                 <div class="searchBar glass" style="width: 78% !important;">
                     <i class="fas fa-search"></i>

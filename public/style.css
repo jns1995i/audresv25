@@ -315,7 +315,7 @@ a:hover, button:hover {
     justify-content: center;
     align-items: center;
     text-decoration: none;
-    padding: 11px;
+    padding: 10px;
     border-radius: 14px;
     font-weight: 600;
     border: 0.5px solid rgb(224, 224, 224);
@@ -6876,14 +6876,14 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 /* Font Size */
 
 .gradientText {
-  background: linear-gradient(to right, rgb(255, 255, 255), var(--tint7), white);
+  background: linear-gradient(to right,white,  white, var(--tint8), white, white);
    background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow:
     0 0 10px rgba(255, 255, 255, 0.2),
-    0 0 20px rgba(61, 77, 255, 0.3),
-    0 0 30px rgba(255, 255, 255, 0.2);
+    0 0 8px rgba(61, 77, 255, 0.3),
+    0 0 10px rgba(255, 255, 255, 0.2);
     color-scheme: light !important;
 }
 
@@ -7216,12 +7216,12 @@ p + p {
 .abstractBG {
     color: white;
     background: 
-        radial-gradient(circle at 10% 5%, var(--shade9), transparent 25%),
-        radial-gradient(circle at 87% 15%,  var(--radial3), transparent 30%),
-        radial-gradient(circle at 50% 50%,  var(--radial2), transparent 80%);
+        radial-gradient(circle at 10% 5%, var(--shade7), transparent 25%),
+        radial-gradient(circle at 87% 15%,  var(--radial4), transparent 30%),
+        radial-gradient(circle at 50% 50%,  var(--radial3), transparent 80%);
     background-blend-mode: exclusion;
     backdrop-filter: blur(10px);
-    background-color: var(--shade9);
+    background-color: var(--shade7);
 }
 .glass {
     background: linear-gradient(
@@ -7332,7 +7332,7 @@ p + p {
 .bgGreen { background-color: green; }
 .bgBlue { background-color: #040d6b; }
 .bgLightblue { background-color: #dbdeff; }
-.bgYellow { background-color: #ffc107; }
+.bgYellow { background-color: #fcc728; }
 .bgOrange { background-color: orangered; }
 .bgPurple { background-color: purple; }
 .bgPink { background-color: pink; }
