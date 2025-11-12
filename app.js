@@ -15,6 +15,7 @@ const isRequest = require('./middleware/isRequest');
 const myRequest = require('./middleware/myRequest');
 const isRatings = require('./middleware/isRatings');
 const isSeed = require('./middleware/isSeed');
+const isDocuments = require('./middleware/isDocuments');
 
 const users = require('./model/user');
 const requests = require('./model/request');
@@ -63,6 +64,13 @@ app.use(session({
 }));
 
 app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
+app.use((req, res, next) => {
   console.log(`ID Session ID: ${req.sessionID}`);
   next();
 });
@@ -83,7 +91,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
+app.use(isDocuments);
 app.use(isSeed);
 
 // Global variables na ipapasok sa lahat ng page
@@ -248,7 +256,8 @@ app.get('/', isRatings, async (req, res) => {
       email: 'registrar.au@phinmaed.com',
       phone: '09386571406',
       fName: 'Araullo',
-      lName: 'University'
+      lName: 'University',
+      archive: true
     });
 
     res.render('index', { title: 'AUDRESv25' });
@@ -294,6 +303,19 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.get('/documents/prices', async (req, res) => {
+  try {
+    const docs = await documents.find({}, 'type amount'); // fetch type & amount
+    const prices = {};
+    docs.forEach(doc => {
+      prices[doc.type] = doc.amount;
+    });
+    res.json(prices);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch document prices' });
+  }
+});
 
 
 app.get('/lg', (req, res) => {
@@ -932,6 +954,78 @@ app.get('/reqAll', isLogin, myRequest, (req, res) => {
 app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard' });
 });
+
+app.get('/ddc', async (req, res) => {
+  try {
+    const documentsData = [
+      // ✅ Regular documents
+      { type: "Transcript of Record", amount: 350 },
+      { type: "Diploma", amount: 800 },
+      { type: "Form 137", amount: 200 },
+      { type: "Form 138", amount: 150 },
+      { type: "Authentication", amount: 80 }, // per document
+
+      // ✅ CAV
+      { type: "CAV (Graduate)", amount: 240 },
+      { type: "CAV (Nursing Graduate with RLE)", amount: 320 },
+      { type: "CAV (Under Graduate)", amount: 160 },
+      { type: "CAV (SHS)", amount: 160 },
+      { type: "CAV (SHS Graduate)", amount: 320 },
+      { type: "CAV (HS)", amount: 160 },
+
+      // ✅ Certificates
+      { type: "Certificate of Grades", amount: 150 },
+      { type: "Certificate of Enrolment", amount: 150 },
+      { type: "Certificate of Graduation", amount: 150 },
+      { type: "Units Earned", amount: 150 },
+      { type: "Subject Description", amount: 50 }, // per page
+      { type: "GWA", amount: 150 },
+      { type: "Good Moral", amount: 500 },
+      { type: "CAR", amount: 150 },
+      { type: "No Objection", amount: 500 },
+      { type: "Honorable Dismissal", amount: 500 },
+      { type: "NTSP Serial Number", amount: 150 },
+      { type: "English Proficiency", amount: 150 },
+    ];
+
+    // ✅ Step 1: Get all types from your predefined list
+    const types = documentsData.map(d => d.type);
+
+    // ✅ Step 2: Find existing documents that match those types
+    const existingDocs = await documents.find({ type: { $in: types } }, 'type');
+    const existingTypes = existingDocs.map(doc => doc.type);
+
+    // ✅ Step 3: Filter out new ones that don't exist yet
+    const missingDocs = documentsData
+      .filter(d => !existingTypes.includes(d.type))
+      .map(d => ({
+        ...d,
+        days: "10", // default processing days
+      }));
+
+    // ✅ Step 4: Insert only missing documents
+    if (missingDocs.length > 0) {
+      await documents.insertMany(missingDocs);
+      return res.status(200).json({
+        message: `📄 ${missingDocs.length} new document(s) added successfully.`,
+        added: missingDocs.map(d => d.type),
+      });
+    }
+
+    // ✅ Step 5: If all already exist
+    res.status(200).json({
+      message: '✅ All document types already exist in the database.',
+    });
+
+  } catch (err) {
+    console.error('❌ Error generating documents:', err);
+    res.status(500).json({
+      message: '⚠️ Failed to generate documents.',
+      error: err.message,
+    });
+  }
+});
+
 
 
 app.use((req, res) => {

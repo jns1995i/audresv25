@@ -174,16 +174,9 @@
                                         <div class="selectBar">
                                             <select class="document-type" name="type[]" onchange="handleDocumentTypeChange(this)" required>
                                                 <option value="">Select</option>
-                                                <option value="Certificate of Enrollment">Certificate of Enrollment</option>
-                                                <option value="Certificate of Grades">Certificate of Grades</option>
-                                                <option value="Certificate of Graduation">Certificate of Graduation</option>
-                                                <option value="Diploma">Diploma</option>
-                                                <option value="Form 137">Form 137</option>
-                                                <option value="GWA">GWA</option>
-                                                <option value="MA Curriculum">MA Curriculum</option>
-                                                <option value="Medium of Instruction">Medium of Instruction</option>
-                                                <option value="Subject Description">Subject Description</option>
-                                                <option value="Transcript of Record">Transcript of Record</option>
+                                                <% documents.forEach(doc => { %>
+                                                    <option value="<%= doc.type %>"><%= doc.type %></option>
+                                                <% }) %>
                                             </select>
                                         </div>
                                     </div>
@@ -341,18 +334,24 @@
     });
 </script>
 <script>
-const documentPrices = {
-    "Certificate of Enrollment": 150,
-    "Certificate of Grades": 150,
-    "Certificate of Graduation": 150,
-    "Diploma": 800,
-    "Form 137": 200,
-    "GWA": 150,
-    "MA Curriculum": 150,
-    "Medium of Instruction": 150,
-    "Subject Description": 150,
-    "Transcript of Record": 350
-};
+
+let documentPrices = {};
+
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const res = await fetch('/documents/prices');
+        documentPrices = await res.json();
+        console.log("✅ Document prices loaded:", documentPrices);
+
+        // Initialize existing fieldset
+        const container = document.getElementById("fieldsetsContainer");
+        const firstFieldset = container.querySelector("fieldset");
+        const typeSelect = firstFieldset.querySelector("select[name='type[]']");
+        handleDocumentTypeChange(typeSelect);
+    } catch (err) {
+        console.error("⚠️ Failed to load document prices:", err);
+    }
+});
 
 // Handle document type change for a specific fieldset
 function handleDocumentTypeChange(select) {
@@ -371,6 +370,12 @@ function handleDocumentTypeChange(select) {
         optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
         optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
     } else if (select.value === "Form 137") {
+        optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
+        optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
+    } else if (select.value === "No Objection") {
+        optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
+        optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
+    } else if (select.value === "NSTP Serial Number") {
         optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
         optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
     } else {

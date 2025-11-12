@@ -21,12 +21,13 @@
 <% if ( user.access === 1) { %>
 <body class="padding0">
 
-<div class="heigh0 absolute">
+<div class="heigh0 absolute col gap10">
     <% if (error) { %>
     <p style="color: red;" class="bgRed100"><%= error %></p>
   <% } else { %>
     <p  class="bgGreen100">Welcome to AUDRES25!</p>
   <% } %>
+  <a href="/logout" class="nav">Log Out</a>
 </div>
 
     <%- body %>
