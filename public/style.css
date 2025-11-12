@@ -84,37 +84,37 @@ html {
     --gray14: #929292;
     --gray15: #898989;
 
-    --tint1:  #030033;
-    --tint2:  #1a1a66; 
-    --tint3:  #333399; 
-    --tint4:  #4d4dbf; 
-    --tint5:  #6666e0; 
-    --tint6:  #8080ff;
-    --tint7:  #6699ff;
-    --tint8:  #80b3ff; 
-    --tint9:  #99ccff; 
-    --tint10: #b3ddff; 
-    --tint11: #cce9ff; 
-    --tint12: #e0f2ff; 
-    --tint13: #f0f9ff; 
-    --tint14: #f7fcff; 
-    --tint15: #ffffff;
+    --tint1: #001b40;
+    --tint2: #00214d; /* Primary */
+    --tint3: #002b64;
+    --tint4: #00357b;
+    --tint5: #004093;
+    --tint6: #004daa;
+    --tint7: #005ac1;
+    --tint8: #196cd0;
+    --tint9: #3f80db;
+    --tint10: #6695e3;
+    --tint11: #8da9eb;
+    --tint12: #b4bef2;
+    --tint13: #dce0f8;
+    --tint14: #eef2fc;
+    --tint15: #f9fbfe;
 
-    --shade1: #9999cc;
-    --shade2: #6666b3;
-    --shade3: #404080;
-    --shade4: #262659;
-    --shade5: #131340;
-    --shade6: #030033;
-    --shade7: #020029;
-    --shade8: #010022;
-    --shade9: #01001c;
-    --shade10: #000016;
-    --shade11: #000012;
-    --shade12: #00000e;
-    --shade13: #00000a;
-    --shade14: #000006;
-    --shade15: #000003;
+    --shade1: #1f406b;
+    --shade2: #1b375f;
+    --shade3: #17315a;
+    --shade4: #142c54;
+    --shade5: #102549;
+    --shade6: #0e1f45;
+    --shade7: #0c1a3a;
+    --shade8: #1a3660; /* Primary Dark */
+    --shade9: #161f53;
+    --shade10: #14194a;
+    --shade11: #12143f;
+    --shade12: #0e0f35;
+    --shade13: #0c0b2a;
+    --shade14: #0a071f;
+    --shade15: #080512; /* Darkest */
 
 }
 
@@ -321,7 +321,7 @@ a:hover, button:hover {
     font-weight: 600;
     border: 0.5px solid rgb(224, 224, 224);
     cursor: pointer;
-    background-color: var(--tint13);
+    background-color: white;
     transition: all 0.6s ease-in-out;
     font-size: 12px;
     font-family: 'poppins', sans-serif;
@@ -7218,14 +7218,14 @@ p + p {
 .abstractBG {
     color: white;
     background: 
-        radial-gradient(circle at 10% 5%, var(--shade7), transparent 25%),
+        radial-gradient(circle at 10% 5%, var(--shade15), transparent 25%),
         radial-gradient(circle at 95% 10%,  var(--radial2), transparent 30%),
         radial-gradient(circle at 95% 90%,  var(--radial1), transparent 24%),
         radial-gradient(circle at 30% 50%,  var(--radial2), transparent 26%),
         radial-gradient(circle at 50% 50%,  var(--radial2), transparent 80%);
-    background-blend-mode: exclusion;
+    background-blend-mode: lighten;
     backdrop-filter: blur(10px);
-    background-color: var(--radial4);
+    background-color: var(--shade12);
 }
 .glass {
     background: linear-gradient(
@@ -7773,6 +7773,7 @@ p + p {
 }
 
 @media (max-width: 1023px) {
+    /*
     .abstractBG {
         color: white;
         background: 
@@ -7785,4 +7786,5 @@ p + p {
         backdrop-filter: blur(10px);
         background-color: rgb(1, 1, 31);
     }
+        */
 }
