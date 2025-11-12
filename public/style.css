@@ -41,9 +41,10 @@ html {
     --green: rgb(17, 185, 17);
     --yellow: #ffa806;
     --blue: blue;
+    --radial1: rgb(11, 11, 214);
     --radial2: #10096c;
     --radial3: #170f8b;
-    --radial4: #030033;
+    --radial4: rgb(1, 1, 31);
     
     --primary: #030033;
     --secondary: #ffc107;
@@ -7213,15 +7214,18 @@ p + p {
 .transparent { color: transparent; }
 
 /* Background Colors */
+
 .abstractBG {
     color: white;
     background: 
-        radial-gradient(circle at 10% 5%, var(--shade8), transparent 25%),
-        radial-gradient(circle at 87% 15%,  var(--radial2), transparent 30%),
-        radial-gradient(circle at 50% 50%,  var(--radial3), transparent 80%);
-    background-blend-mode: lighten;
+        radial-gradient(circle at 10% 5%, var(--shade7), transparent 25%),
+        radial-gradient(circle at 95% 10%,  var(--radial2), transparent 30%),
+        radial-gradient(circle at 95% 90%,  var(--radial1), transparent 24%),
+        radial-gradient(circle at 30% 50%,  var(--radial2), transparent 26%),
+        radial-gradient(circle at 50% 50%,  var(--radial2), transparent 80%);
+    background-blend-mode: exclusion;
     backdrop-filter: blur(10px);
-    background-color: var(--shade8);
+    background-color: var(--radial4);
 }
 .glass {
     background: linear-gradient(
@@ -7754,16 +7758,16 @@ p + p {
 }
 
 @media (max-width: 1023px) {
- .abstractBG {
-    color: white;
-    background: 
-        radial-gradient(circle at 10% 5%, var(--shade7), transparent 25%),
-        radial-gradient(circle at 95% 10%,  var(--radial2), transparent 30%),
-        radial-gradient(circle at 95% 90%,  rgb(11, 11, 214), transparent 24%),
-        radial-gradient(circle at 10% 60%,  rgb(9, 9, 189), transparent 20%),
-        radial-gradient(circle at 50% 50%,  var(--radial2), transparent 80%);
-    background-blend-mode: exclusion;
-    backdrop-filter: blur(10px);
-    background-color: rgb(1, 1, 31);
-}
+    .abstractBG {
+        color: white;
+        background: 
+            radial-gradient(circle at 10% 5%, var(--shade7), transparent 25%),
+            radial-gradient(circle at 95% 10%,  var(--radial2), transparent 30%),
+            radial-gradient(circle at 95% 90%,  rgb(11, 11, 214), transparent 24%),
+            radial-gradient(circle at 10% 60%,  rgb(9, 9, 189), transparent 20%),
+            radial-gradient(circle at 50% 50%,  var(--radial2), transparent 80%);
+        background-blend-mode: exclusion;
+        backdrop-filter: blur(10px);
+        background-color: rgb(1, 1, 31);
+    }
 }
