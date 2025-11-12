@@ -10,28 +10,38 @@
     <link rel="icon" href="/images/logo.png">
     <title><%= title ? `${title} | AUDRES25` : 'AUDRES25' %></title>
     <style>
-  @media (max-width: 900px) {
-      .unau {
-        width: 80% !important;
+      body {
+        gap: 0 !important;
       }
-  }
+      @media (max-width: 900px) {
+          .unau {
+            width: 80% !important;
+          }
+      }
     </style>
 </head>
 
 <% if ( user.access === 1) { %>
-<body class="padding0">
+<body class="">
+  <div class="sidef"></div>
+    <div class="mainf">
+      <div class="height0 col gap10">
+        <% if (error) { %>
+          <p style="color: red;" class="bgRed100"><%= error %></p>
+        <% } else { %>
+          <p  class="bgBlue100">Welcome to AUDRES25!</p>
+        <% } %>
+          <a href="/logout" class="nav">Log Out</a>
+      </div>
 
-<div class="heigh0 absolute col gap10">
-    <% if (error) { %>
-    <p style="color: red;" class="bgRed100"><%= error %></p>
-  <% } else { %>
-    <p  class="bgGreen100">Welcome to AUDRES25!</p>
-  <% } %>
-  <a href="/logout" class="nav">Log Out</a>
-</div>
+      <div class="h200 w400 abstractBG1 corner10 size14">
+        <a href="/logout" class="nav">Log Out</a>
+      </div>
 
-    <%- body %>
-    
+        <%- body %>
+    </div>
+
+      
 </body>
 <% } else { %>
 <body class="padding0 abstractBG">

@@ -43,13 +43,13 @@
     <section class="corner10 col">
       <p class="textCenter"><i class="fas fa-phone"></i> <%= seedUser.phone %> &nbsp; | &nbsp; <i class="fas fa-envelope"></i> <%= seedUser.email %></p>
     </section>
-    <div class="height0 padding15 gap10 width100 justifyStart glass col">
+    <div class="height0 padding15 gap10 width100 justifyStart liquid col">
         <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
         <div class="height0 padding10 border0 borderRadius10 justifyBetween width100 gap10 relative">
             <p class="rem16 gap10 alignCenter">Need Help?</p>
             <a href="/ins2" class="nav liquid">Learn more here <i class="fas fa-chevron-right"></i></a>
         </div>
-        <video autoplay muted loop playsinline controls class="width100 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls class="width100 cornerRem1" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
     </div>
   </div>
   <div class="height0 padding10 col mainCard width60" style="z-index: 10;">
@@ -62,9 +62,9 @@
         <p class="rem1">Your documents made easy!</p>
       </section>
       <a href="/req" class="nav"><i class="fas fa-plus"></i> Start a new request</a>
-      <div class="height0 glass shadow2 width0 padding10 gap5 absolute right10 top10" style="border-radius: 30px;">
+      <div class="height0 liquid shadow2 width0 padding5 gap5 absolute right10 top10" style="border-radius: 30px;">
         <a href="/req" class="nav cnav liquid hidden"><i class="fas fa-bell"></i></a>
-        <a href="/prf" class="nav cnav liquid">
+        <a href="/prf" class="nav cnav">
           <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="borderPrimary">
         </a>
       </div>
