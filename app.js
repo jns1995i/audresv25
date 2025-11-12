@@ -23,7 +23,7 @@ const Ratings = require('./model/Rating');
 const documents = require('./model/document');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // Database Connection to!
 mongoose.connect(process.env.MONGO_URI)
