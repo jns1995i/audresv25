@@ -21,6 +21,9 @@
       flex-direction: column-reverse;
       margin-bottom: 50px;
     }
+    #homePg {
+      margin-bottom: 50px;
+    }
     .mainCard {
       width: 100%;
     }
@@ -49,10 +52,11 @@
         <video autoplay muted loop playsinline controls class="width100 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
     </div>
   </div>
-  <div class="height0 padding10 col mainCard width60">
+  <div class="height0 padding10 col mainCard width60" style="z-index: 10;">
     <br><br>
     <section class="col glass alignStart padding15 relative gap10">
-      <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-file-lines"></i></a>
+
+    <img src="/images/au.png" alt="" class="absolute h100 w100 bgWhite corner500 hidden" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0; bottom: -20px; left: -20px; transform: scale(1.8);" id="watermark">
       <section class="col alignStart relative padding0">
         <p class="rem2">Welcome <%= user.fName %></p>
         <p class="rem1">Your documents made easy!</p>
@@ -66,14 +70,16 @@
       </div>
     </section>
     <br>
-    <section class="bgYellow cornerRem1 col relative colorPrimary width99">
+    <section class="bgYellow corner14 col relative colorPrimary width99">
       <i class="fas fa-thumbtack absolute right15 top10 size14" style="transform: rotate(45deg);"></i>
       <p class="rem11 str500 textCenter width90">Take Note: Please be informed that document requests are only accepted from MONDAY to FRIDAY, between 8:00am to 5:00pm. Requests submitted beyond these hours will be processed on the next working day.</p>
     </section>
     <br>
     <div class="height0 justifyBetween padding10">
       <p class="rem18 str400">Your Recent Request</p>
-      <a href="/reqAll" class="rem16">See All &nbsp; <i class="fas fa-chevron-right"></i></a>
+      <% if (requests && requests.length < 0) { %>
+      <a href="/reqAll" class="rem16 paddingLeft10">See All &nbsp; <i class="fas fa-chevron-right"></i></a>
+      <% } %>
     </div>
     <% if (requests && requests.length > 0) { %>
       <div class="height0 bgSoft cornerRem1 colorPrimary padding20 gap10 col">
@@ -140,8 +146,7 @@
         <% }) %>
       </div>
     <% } else { %>
-      <br>
-      <div class="height0">
+      <div class="height0 bgSoft corner14 colorPrimary padding20 gap10 col">
         <p class="rem16">You have no requests yet!</p>
       </div>
     <% } %>

@@ -41,7 +41,7 @@
     <div class="height0 width30 col padding10 prfCard">
         <div class="height0 width0 relative corner15">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
-            <a href="javascript:void(0)" class="nav cnav glass absolute bottom0 right0" id="photoBtn"><i class="fas fa-pen"></i></a>
+            <a href="javascript:void(0)" class="nav cnav glass absolute bottom0 right0" id="photoBtn"><i class="fas fa-camera"></i></a>
         </div>
         <div class="height0 marginTop10 bgWhite corner30 padding20 col relative prfCard colorPrimary justifyStart alignStart hidden" id="photoCard">
             <p class="rem18 str500">Change Photo</p>
@@ -78,8 +78,8 @@
                 <a href="/hom" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
             </div>
             <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 30px;">
-                <a href="javascript:vod(0)" class="nav cnav liquid" id="resetBtn"><i class="fas fa-key"></i></a>
                 <a href="javascript:vod(0)" class="nav cnav liquid" id="editBtn"><i class="fas fa-pen"></i></a>
+                <a href="javascript:vod(0)" class="nav cnav liquid" id="resetBtn"><i class="fas fa-key"></i></a>
                 |
                 <a href="javascript:void(0)" class="nav cnav liquid" id="lgOpen"><i class="fas fa-share-square"></i></a>
             </div>
@@ -122,7 +122,7 @@
         <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative" style="border-radius: 25px;" id="info">
             <p class="rem18 str500">Reset Password</p>
             <hr class="width70"><br>
-            <div class="bgBlue100 col alignStart">
+            <div class="bgViolet100 col alignStart">
                     <p class="rem1">Take Note! Password must contain the following:</p>
                     <p class="rem1">&bull; Atleast 1 Special Character</p>
                     <p class="rem1">&bull; Atleast 1 Upper Case Letter</p>
