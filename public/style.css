@@ -7216,12 +7216,12 @@ p + p {
 .abstractBG {
     color: white;
     background: 
-        radial-gradient(circle at 10% 5%, var(--shade7), transparent 25%),
-        radial-gradient(circle at 87% 15%,  var(--radial4), transparent 30%),
+        radial-gradient(circle at 10% 5%, var(--shade8), transparent 25%),
+        radial-gradient(circle at 87% 15%,  var(--radial2), transparent 30%),
         radial-gradient(circle at 50% 50%,  var(--radial3), transparent 80%);
-    background-blend-mode: exclusion;
+    background-blend-mode: lighten;
     backdrop-filter: blur(10px);
-    background-color: var(--shade7);
+    background-color: var(--shade8);
 }
 .glass {
     background: linear-gradient(
@@ -7757,11 +7757,13 @@ p + p {
  .abstractBG {
     color: white;
     background: 
-        radial-gradient(circle at 10% 5%, var(--shade6), transparent 25%),
-        radial-gradient(circle at 87% 15%,  var(--radial2), transparent 30%),
+        radial-gradient(circle at 10% 5%, var(--shade7), transparent 25%),
+        radial-gradient(circle at 95% 10%,  var(--radial2), transparent 30%),
+        radial-gradient(circle at 95% 90%,  rgb(11, 11, 214), transparent 24%),
+        radial-gradient(circle at 10% 60%,  rgb(9, 9, 189), transparent 20%),
         radial-gradient(circle at 50% 50%,  var(--radial2), transparent 80%);
     background-blend-mode: exclusion;
     backdrop-filter: blur(10px);
-    background-color: rgb(8, 8, 57);
+    background-color: rgb(1, 1, 31);
 }
 }
