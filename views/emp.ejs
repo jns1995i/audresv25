@@ -1,0 +1,68 @@
+<% layout('layout') %>
+<style>
+    .empCard a {
+        transition: all 0.6s ease-in-out;
+    }
+    .empCard a:hover {
+        transform: scale(1.02);
+        filter: drop-shadow(0 2px 1px #0000002e);
+    }
+    .mainf {
+        padding: 20px;
+    }
+</style>
+
+<% if (!users || users.length === 0) { %>
+<% } else { %>
+    <p class="size20 str500 marginLeft10">Admins</p>
+    <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+        <% users.forEach(user => { %>
+            <% if ( user.role === "Head") { %>
+            <a href="" class="height0 w120 col">
+                <img src="/images/profile.jpg" class="h80 w80 corner500 shadow1">
+                <p class="size14 textWrap textCenter str500"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Main' %></p>
+            </a>
+            <% } %>
+        <% }) %>
+            <div href="" class="height0 w120 col gap5">
+                <a href="" class="h80 w80 corner500 borderDotted"><i class="fas fa-plus size30 gray"></i></a>
+            </div>
+    </section>
+
+    <br>
+    
+    <p class="size20 str500 marginLeft10">Registrar</p>
+    <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+        <% users.forEach(user => { %>
+            <% if ( user.role === "Registrar") { %>
+            <a href="" class="height0 w120 col gap5">
+                <img src="/images/profile.jpg" class="h80 w80 corner500 shadow1">
+                <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Main' %></p>
+            </a>
+            <% } %>
+        <% }) %>
+            <div href="" class="height0 w120 col gap5">
+                <a href="" class="h80 w80 corner500 borderDotted"><i class="fas fa-plus size30 gray"></i></a>
+            </div>
+    </section>
+
+    <br>
+    
+    <p class="size20 str500 marginLeft10">Accounting</p>
+    <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+        <% users.forEach(user => { %>
+            <% if ( user.role === "Accounting") { %>
+            <a href="" class="height0 w120 col gap5">
+                <img src="/images/profile.jpg" class="h80 w80 corner500 shadow1">
+                <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Main' %></p>
+            </a>
+            <% } %>
+        <% }) %>
+            <div href="" class="height0 w120 col gap5">
+                <a href="" class="h80 w80 corner500 borderDotted"><i class="fas fa-plus size30 gray"></i></a>
+            </div>
+    </section>
+<% } %>

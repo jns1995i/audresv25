@@ -150,18 +150,7 @@
                     <p class="size12 str600">TR# <%= req.tr %></p>
                 </div>
                 <div class="height0 justifyStart width25">
-                    <% 
-                    const options = { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric', 
-                        hour: 'numeric', 
-                        minute: '2-digit', 
-                        hour12: true 
-                    }; 
-                    const formattedDate = new Date(req.createdAt).toLocaleString('en-US', options); 
-                    %>
-                    <p class="size12 str400"><%= formattedDate %></p>
+                    <p class="size12 str400"><%= req.createdAtFormatted %></p>
                 </div>
                 <div class="height0 justifyStart width25">
                     <p class="size12 str500"><%= req.type %></p>

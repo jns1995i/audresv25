@@ -9,6 +9,7 @@ const engine = require('ejs-mate');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+const dayjs = require('dayjs');
 
 const isLogin = require('./middleware/isLogin');
 const isRequest = require('./middleware/isRequest');
@@ -16,11 +17,14 @@ const myRequest = require('./middleware/myRequest');
 const isRatings = require('./middleware/isRatings');
 const isSeed = require('./middleware/isSeed');
 const isDocuments = require('./middleware/isDocuments');
+const isStaff = require('./middleware/isStaff');
+const isEmp = require('./middleware/isEmp');
 
 const users = require('./model/user');
 const requests = require('./model/request');
 const Ratings = require('./model/Rating');
 const documents = require('./model/document');
+const { isWeakMap } = require('util/types');
 
 const app = express();
 const PORT = process.env.PORT;
@@ -950,11 +954,6 @@ app.get('/reqAll', isLogin, myRequest, (req, res) => {
   res.render('reqAll', { title: 'Request History' });
 });
 
-
-app.get('/dsb', isLogin, (req, res) => {
-  res.render('dsb', { title: 'Dashboard' });
-});
-
 app.get('/ddc', async (req, res) => {
   try {
     const documentsData = [
@@ -1028,6 +1027,280 @@ app.get('/ddc', async (req, res) => {
 
 
 
+app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
+  // Pending transactions
+  const filteredRequests = req.requests.filter(
+    rq => rq.status === 'Pending' && !rq.declineAt
+  );
+  res.render('srv', { 
+    title: 'Transactions', 
+    active: 'srv', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+app.get('/vrf', isLogin, isRequest, isStaff, (req, res) => {
+  // To Verify
+  const filteredRequests = req.requests.filter(
+    rq => rq.status === 'To Verify' && !rq.declineAt
+  );
+  res.render('srv', { 
+    title: 'To Verify', 
+    active: 'srv', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+app.get('/prc', isLogin, isRequest, isStaff, (req, res) => {
+  // Processing statuses
+  const processingStatuses = [
+    'Reviewed',
+    'Assessed',
+    'For Verification',
+    'For Payment'
+  ];
+  const filteredRequests = req.requests.filter(
+    rq => processingStatuses.includes(rq.status) && !rq.declineAt
+  );
+  res.render('srv', { 
+    title: 'Processing', 
+    active: 'srv', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+app.get('/apr', isLogin, isRequest, isStaff, (req, res) => {
+  // Approved
+  const filteredRequests = req.requests.filter(
+    rq => rq.status === 'Verified' && !rq.declineAt
+  );
+  res.render('srv', { 
+    title: 'Approved', 
+    active: 'srv', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+app.get('/rel', isLogin, isRequest, isStaff, (req, res) => {
+  // For Release
+  const filteredRequests = req.requests.filter(
+    rq => rq.status === 'For Release' && !rq.declineAt
+  );
+  res.render('srv', { 
+    title: 'For Release', 
+    active: 'srv', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+
+app.patch('/req/processBy/:id', isLogin, isRequest, isStaff, async (req, res) => {
+  try {
+    const { processBy } = req.body;
+    const rq = await requests.findById(req.params.id);
+    if (!rq) return res.status(404).json({ error: 'Request not found' });
+
+    rq.processBy = processBy || null;
+    rq.assignAt = processBy ? new Date() : null;
+    await rq.save();
+
+    console.log('✅ Updated processBy for request:', rq._id); // debugging
+    res.status(200).json({ message: 'Staff successfully assigned!' });
+  } catch (err) {
+    console.error('❌ Error in PATCH /req/processBy/:id', err);
+    res.status(500).json({ error: 'Something went wrong while assigning staff.' });
+  }
+});
+
+app.get('/srvView/:id', isLogin, isRequest, isStaff, async (req, res) => {
+  try {
+    const requestId = req.params.id;
+
+    // find the request by ID and populate necessary fields
+    const rq = req.requests.find(r => r._id.toString() === requestId);
+
+    if (!rq) {
+      return res.status(404).render('srvView', { 
+        title: 'Request Not Found', 
+        back: 'srv',
+        active: 'srv',
+        error: 'Request not found.' 
+      });
+    }
+
+    res.render('srvView', { 
+      title: 'Request Details',
+      back: 'srv',
+      active: 'srv',
+      request: rq 
+    });
+  } catch (err) {
+    console.error('❌ Error in /srvView/:id route:', err);
+    res.status(500).render('srvView', { 
+      title: 'Error', 
+      back: 'srv',
+      active: 'srv',
+      error: 'Something went wrong while loading the request.' 
+    });
+  }
+});
+
+app.get('/prcView/:id', isLogin, isRequest, isStaff, async (req, res) => {
+  try {
+    const requestId = req.params.id;
+
+    // find the request by ID and populate necessary fields
+    const rq = req.requests.find(r => r._id.toString() === requestId);
+
+    if (!rq) {
+      return res.status(404).render('srvView', { 
+        title: 'Request Not Found', 
+        back: 'prc',
+        active: 'srv',
+        error: 'Request not found.' 
+      });
+    }
+
+    res.render('srvView', { 
+      title: 'Request Details',
+      back: 'prc',
+      active: 'srv',
+      request: rq 
+    });
+  } catch (err) {
+    console.error('❌ Error in /srvView/:id route:', err);
+    res.status(500).render('srvView', { 
+      title: 'Error', 
+      back: 'prc',
+      active: 'srv',
+      error: 'Something went wrong while loading the request.' 
+    });
+  }
+});
+
+app.get('/relView/:id', isLogin, isRequest, isStaff, async (req, res) => {
+  try {
+    const requestId = req.params.id;
+
+    // find the request by ID and populate necessary fields
+    const rq = req.requests.find(r => r._id.toString() === requestId);
+
+    if (!rq) {
+      return res.status(404).render('srvView', { 
+        title: 'Request Not Found', 
+        back: 'rel',
+        active: 'srv',
+        error: 'Request not found.' 
+      });
+    }
+
+    res.render('srvView', { 
+      title: 'Request Details',
+      back: 'rel',
+      active: 'srv',
+      request: rq 
+    });
+  } catch (err) {
+    console.error('❌ Error in /srvView/:id route:', err);
+    res.status(500).render('srvView', { 
+      title: 'Error', 
+      back: 'rel',
+      active: 'srv',
+      error: 'Something went wrong while loading the request.' 
+    });
+  }
+});
+
+app.get('/aprView/:id', isLogin, isRequest, isStaff, async (req, res) => {
+  try {
+    const requestId = req.params.id;
+
+    // find the request by ID and populate necessary fields
+    const rq = req.requests.find(r => r._id.toString() === requestId);
+
+    if (!rq) {
+      return res.status(404).render('srvView', { 
+        title: 'Request Not Found', 
+        back: 'apr',
+        active: 'srv',
+        error: 'Request not found.' 
+      });
+    }
+
+    res.render('srvView', { 
+      title: 'Request Details',
+      back: 'apr',
+      active: 'srv',
+      request: rq 
+    });
+  } catch (err) {
+    console.error('❌ Error in /srvView/:id route:', err);
+    res.status(500).render('srvView', { 
+      title: 'Error', 
+      back: 'apr',
+      active: 'srv',
+      error: 'Something went wrong while loading the request.' 
+    });
+  }
+});
+
+app.get('/vrfView/:id', isLogin, isRequest, isStaff, async (req, res) => {
+  try {
+    const requestId = req.params.id;
+
+    // find the request by ID and populate necessary fields
+    const rq = req.requests.find(r => r._id.toString() === requestId);
+
+    if (!rq) {
+      return res.status(404).render('srvView', { 
+        title: 'Request Not Found', 
+        back: 'apr',
+        active: 'srv',
+        error: 'Request not found.' 
+      });
+    }
+
+    res.render('srvView', { 
+      title: 'Request Details',
+      back: 'vrf',
+      active: 'srv',
+      request: rq 
+    });
+  } catch (err) {
+    console.error('❌ Error in /srvView/:id route:', err);
+    res.status(500).render('srvView', { 
+      title: 'Error', 
+      back: 'vrf',
+      active: 'srv',
+      error: 'Something went wrong while loading the request.' 
+    });
+  }
+});
+
+
+
+app.get('/emp', isLogin, isEmp, (req, res) => {
+  res.render('emp', { title: 'Employees', active: 'emp' });
+});
+
+app.get('/dsb', isLogin, (req, res) => {
+  res.render('dsb', { title: 'Dashboard', active: 'dsb' });
+});
+
+app.get('/stu', isLogin, (req, res) => {
+  res.render('stu', { title: 'Students', active: 'stu' });
+});
+
+
+app.get('/cog', isLogin, (req, res) => {
+  res.render('cog', { title: 'Settings', active: 'cog' });
+});
+
 app.use((req, res) => {
   res.status(404);
   res.locals.error = 'Oops! Page cannot be found!';
@@ -1040,6 +1313,7 @@ app.use((err, req, res, next) => {
   res.locals.error = 'Oh no! Page is missing!';
   res.status(500).render('index', { 
     title: 'File Missing',
+    message: `OH NO! File in Directory is missing!' ${err.message}`,
     error: 'OH NO! File in Directory is missing!'
   });
 });

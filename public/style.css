@@ -226,7 +226,7 @@ body {
     justify-content: start;
     align-items: start;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     padding: 6px;
 }
 
@@ -353,7 +353,7 @@ a:hover, button:hover {
 }
 
 .mnav:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
     color: white !important;
     width: 100%;
     transform: 0;
@@ -361,13 +361,49 @@ a:hover, button:hover {
 }
 
 .mnav.active {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.1);
     width: 100%;
     transition: all 0.6s ease;
     font-weight: 500;
 }
 .mnav.active:hover {
-    background-color: var(--tint8);
+    background-color: var(--tint14);
+    color: var(--shade12) !important;
+}
+
+
+.tnav {
+    justify-content: start;
+    align-items: center;
+    transition: all 0.6s ease-in-out;
+    background-color: transparent;
+    color: white;
+    border: none;
+    font-size: 12px;
+    font-weight: 300;
+    gap: 5px;
+    i {
+        font-size: inherit;
+        height: 15px !important;
+        width: 16px !important;
+    }
+}
+
+.tnav:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white !important;
+    transform: 0;
+    transition: all 0.6s ease-in-out;
+}
+
+.tnav.active {
+    background-color: white;
+    transition: all 0.6s ease;
+    font-weight: 500;
+    color: var(--accent1)
+}
+.tnav.active:hover {
+    background-color: var(--tint14);
     color: var(--shade12) !important;
 }
 
@@ -576,7 +612,6 @@ input, .searchBar, .selectBar {
     padding-block: 0;
 }
 .selectBar:hover {
-    border: 2px solid var(--tint3);
     background-color: white !important;
 }
 
@@ -931,6 +966,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .borderGray { border: 0.5px solid lightgray; }
 .borderWhite { border: 0.5px solid white; }
 .borderPrimary { border: 0.5px solid var(--primary); }
+.borderDotted { border: 5px dotted var(--gray7); }
 
 .corner500 { border-radius: 50% !important;}
 .corner0 { border-radius: 0 !important; }

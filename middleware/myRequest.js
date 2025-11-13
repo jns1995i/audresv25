@@ -1,4 +1,8 @@
 // middleware/myRequest.js
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
+dayjs.extend(relativeTime);
+
 const Request = require('../model/request');
 
 const myRequest = async (req, res, next) => {
@@ -11,23 +15,56 @@ const myRequest = async (req, res, next) => {
 
     const userId = req.session.user._id;
 
-    // Fetch only requests created by the logged-in user
+    // 🔍 Fetch only requests created by the logged-in user
     const requests = await Request.find({ 
         requestBy: userId, 
         archive: false, 
         verify: false 
       })
-      .populate('requestBy')   // load full user data
-      .populate('processBy')   // load full user data if assigned
-      .populate('releaseBy')   // load full user data if assigned
-      .sort({ createdAt: -1 }); // latest first
+      .populate('requestBy')
+      .populate('processBy')
+      .populate('releaseBy')
+      .sort({ createdAt: -1 });
 
-    // Attach to req and res.locals
-    req.requests = requests;
-    res.locals.requests = requests;
+    // 🗓️ Format all date fields before passing to frontend
+    const dateFields = [
+      'createdAt',
+      'updatedAt',
+      'reviewAt',
+      'approveAt',
+      'assessAt',
+      'payAt',
+      'verifyAt',
+      'turnAt',
+      'claimedAt',
+      'holdAt',
+      'declineAt',
+      'assignAt'
+    ];
 
-    console.log(`📦 Loaded ${requests.length} requests for user ${userId}`);
+    const formattedRequests = requests.map(reqDoc => {
+      const formatted = reqDoc.toObject();
+
+      dateFields.forEach(field => {
+        const dateValue = reqDoc[field];
+        formatted[`${field}Formatted`] = dateValue
+          ? dayjs(dateValue).format('MMM D, YYYY h:mm A') // e.g. Nov 13, 2025 2:45 PM
+          : '—';
+        formatted[`${field}Ago`] = dateValue
+          ? dayjs(dateValue).fromNow()
+          : '—';
+      });
+
+      return formatted;
+    });
+
+    // 📦 Attach to req and res.locals
+    req.requests = formattedRequests;
+    res.locals.requests = formattedRequests;
+
+    console.log(`📦 Loaded ${formattedRequests.length} requests for user ${userId} (with formatted dates)`);
     next();
+
   } catch (err) {
     console.error('⚠️ Error in myRequest middleware:', err);
     res.status(500).render('index', { 

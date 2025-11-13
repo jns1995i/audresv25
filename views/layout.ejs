@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <link rel="stylesheet" href="/style.css?v=1.0">
     <link rel="icon" href="/images/logo.png">
     <title><%= title ? `${title} | AUDRES25` : 'AUDRES25' %></title>
@@ -22,27 +23,70 @@
 </head>
 
 <% if ( user.access === 1) { %>
-<body class="">
-  <div class="sidef"></div>
-    <div class="mainf">
-      <div class="height0 col gap10">
-        <% if (error) { %>
-          <p style="color: red;" class="bgRed100"><%= error %></p>
-        <% } else { %>
-          <p  class="bgBlue100">Welcome to AUDRES25!</p>
-        <% } %>
-          <a href="/logout" class="nav">Log Out</a>
-      </div>
-
-      <div class="h200 w400 abstractBG1 corner10 size14">
-        <a href="/logout" class="nav">Log Out</a>
-      </div>
-
-        <%- body %>
+<body class="bgSoft">
+  <div class="sidef">
+    <div class="height10 abstractBG2 corner14">
+      <img src="/images/au.png" alt="" class="h55 w55 wMin55 corner500 shadow2">
+      <img src="/images/phinma.png" alt="" class="hidden h50 h50 corner500 liquid glowImg3">
     </div>
+    <div class="height80 menu relative">
+      <br>
+      <a href="/dsb" class="nav mnav <% if ( active === 'dsb') { %> active <% } %>"> <i class="bi bi-grid-fill"></i> Dashboard</a>
+      <a href="/srv" class="nav mnav <% if ( active === 'srv') { %> active <% } %>"> <i class="fas fa-receipt"></i> Transactions</a>
+      <a href="/emp" class="nav mnav <% if ( active === 'emp') { %> active <% } %>"> <i class="fas fa-user-tie"></i> Employees</a>
+      <a href="/stu" class="nav mnav <% if ( active === 'stu') { %> active <% } %>"> <i class="fas fa-user-friends"></i> Students</a>
+      <a href="/cog" class="nav mnav <% if ( active === 'cog') { %> active <% } %>"> <i class="fas fa-cog"></i> Settings</a>
+      <div class="height0 absolute bottom5 translateX">
+        <a href="/logout" class="nav glass width100 <% if ( active === '') { %> active <% } %>" style="opacity: 0;"> <i class="fas fa-share-square"></i> Log Out</a>
+      </div>
 
-      
+    </div>
+    <div class="height10 justifyStart glass padding10">
+      <a href="" class="liquid corner500 h50 w50" style="min-width: 50px;"><img src="/images/profile.jpg" alt="" class="h50 w50"></a>
+      <section class="width0 col alignStart">
+        <p class="rem11 str400 textWrap"><%= user.fName %> <%= user.lName %></p>
+        <p class="rem09 str400 textWrap">Welcome <%= user.role %></p>
+      </section>
+    </div>
+  </div>
+  <div class="mainf padding5">
+      <%- body %>
+  </div>
+
+<% if ( active === "srv" ) { %>
+  <div class="absolute left0 top0 width20 bgWhite col shadow3 block overflow-y1 padding10 hidden">
+    <section class="col alignStart">
+      <p class="size20 str500">Registrar Staff</p>
+      <hr>
+    </section>
+    <% users.forEach(user => { %>
+      <div class="height0 col marginBottom10 shadow1 corner12 padding10">
+          <p><%= user.fName %> <%= user.lName %></p>
+          <p>Total requests: <%= user.requestSummary.total %></p>
+          <p>Pending: <%= user.requestSummary.pending %>, Processing: <%= user.requestSummary.processing %></p>
+          <p>Approved: <%= user.requestSummary.approved %>, For Release: <%= user.requestSummary.forRelease %></p>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<% if (error) { %>
+  <div class="col gap10 absolute bgModal8">
+    <p style="color: red;" class="bgRed100"><%= error %></p>
+  </div>
+<% } else { %>
+<% } %>
+
 </body>
+
+
+
+
+
+
+
+
+
 <% } else { %>
 <body class="padding0 abstractBG">
   <div class="width30 bgWhite height0 cornerRem12 padding20 col colorPrimary unau">

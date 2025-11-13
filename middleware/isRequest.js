@@ -1,24 +1,62 @@
 // middleware/isRequest.js
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
+dayjs.extend(relativeTime);
+
 const Request = require('../model/request');
 
 const isRequest = async (req, res, next) => {
   try {
-    // Fetch all requests from DB
     const requests = await Request.find({
-        archive: false, 
-        verify: false 
+        archive: false,
+        verify: false
       })
-      .populate('requestBy')   // ✅ load full user data
-      .populate('processBy')   // ✅ load full user data
-      .populate('releaseBy')   // ✅ load full user data
-      .sort({ createdAt: -1 }); // latest first
+      .populate('requestBy')
+      .populate('processBy')
+      .populate('releaseBy')
+      .sort({ createdAt: -1 });
 
-    // Attach to req and res.locals
-    req.requests = requests;
-    res.locals.requests = requests;
+    // ✅ Define *all* date fields from your schema
+    const dateFields = [
+      'createdAt',
+      'updatedAt',
+      'reviewAt',
+      'approveAt',
+      'assessAt',
+      'payAt',
+      'verifyAt',
+      'turnAt',
+      'claimedAt',
+      'holdAt',
+      'declineAt',
+      'assignAt'
+    ];
 
-    console.log(`📦 Loaded ${requests.length} full requests from DB (with user data)`);
+    // ✅ Map and format all dates before sending to frontend
+    const formattedRequests = requests.map(reqDoc => {
+      const formatted = reqDoc.toObject();
+
+      dateFields.forEach(field => {
+        const dateValue = reqDoc[field];
+        formatted[`${field}Formatted`] = dateValue
+          ? dayjs(dateValue).format('MMM D, YYYY h:mm A') // e.g., "Nov 13, 2025 2:45 PM"
+          : '—'; // fallback if missing
+
+        // (Optional) also include relative time, e.g., "2 days ago"
+        formatted[`${field}Ago`] = dateValue
+          ? dayjs(dateValue).fromNow()
+          : '—';
+      });
+
+      return formatted;
+    });
+
+    req.requests = formattedRequests;
+    res.locals.requests = formattedRequests;
+
+    console.log(`📦 Loaded ${formattedRequests.length} requests (all dates formatted).`);
     next();
+
   } catch (err) {
     console.error('⚠️ Error in isRequest middleware:', err);
     res.status(500).render('index', { 

@@ -25,6 +25,7 @@ const requestSchema = new mongoose.Schema({
   payPhoto: { type: String, trim: true },
   payMode: { type: String, trim: true },
 
+  assignAt: { type: Date },
   reviewAt: { type: Date },
   approveAt: { type: Date },
   assessAt: { type: Date },

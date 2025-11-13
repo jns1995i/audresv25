@@ -1,31 +1,263 @@
 <% layout('layout') %>
-<h2>All Requests</h2>
+<style>
+  a:hover {
+    transform: scale(1.02);
+  }
+  .searchBar {
+    width: fit-content !important;
+    max-width: 30%;
+  }
+  .borderGreen {
+    border: 1px solid rgb(2, 192, 2);
+  }
+  .rqCard .selectBar:hover {
+    background-color: transparent !important;
+  }
+</style>
 
-<% if (requests && requests.length > 0) { %>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>User</th>
-        <th>Type</th>
-        <th>Purpose</th>
-        <th>Status</th>
-        <th>Submitted At</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% requests.forEach(req => { %>
-        <tr>
-          <td><%= req._id %></td>
-          <td><%= req.requestBy ? req.requestBy.fName + ' ' + req.requestBy.lName : 'N/A' %></td>
-          <td><%= req.type %></td>
-          <td><%= req.purpose %></td>
-          <td><%= req.verify ? 'Verified' : 'Pending' %></td>
-          <td><%= req.createdAt.toLocaleString() %></td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+<div class="height0 abstractBG padding10 corner12 gap5">
+  <section class="width0 padding0 gap5">
+    <a href="srv" class="nav tnav <% if ( title === 'Transactions' && active === 'srv') { %> active <% } %>"><i class="fas fa-hourglass"></i> Pending</a>
+    <a href="prc" class="nav tnav <% if ( title === 'Processing' && active === 'srv') { %> active <% } %>"><i class="fas fa-clock"></i> Processing</a>
+    <a href="apr" class="nav tnav <% if ( title === 'Approved' && active === 'srv') { %> active <% } %>"><i class="fas fa-check-circle"></i> Approved</a>
+    <a href="rel" class="nav tnav <% if ( title === 'For Release' && active === 'srv') { %> active <% } %>"><i class="fas fa-box-open wMin20"></i> For Release</a>
+  </section>
+</div>
+
+
+<% if (totalCount === 0) { %>
+  <div class="height0 marginTop5 corner12 gap5">
+    <div class="width90 gap5">
+      <p class="rem28 str400">
+        No Transaction
+    </p>
+    </div>
+  </div>
+<% } else if (totalCount === 1) { %>
+  <div class="height0 marginTop5 corner12 gap5">
+    <div class="width90 justifyBetween gap5">
+      <p class="rem28 str400">
+       1 Transaction
+      </p>
+      <div class="width50 gap5 justifyEnd">
+        <div class="searchBar colorPrimary hidden">
+          <i class="fas fa-search"></i>
+          <input type="search" name="" id="univ" class="width0 widthMin30 widthMax0">
+        </div>
+        <div class="selectBar hidden">
+          <i class="fas fa-filter colorPrimary"></i>
+          <select name="" id="">
+            <option value="Today">Today</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
 <% } else { %>
-  <p>No requests found.</p>
+  <div class="height0 marginTop5 corner12 gap5">
+    <div class="width90 justifyBetween gap5">
+      <p class="rem28 str400">
+       <%= totalCount %> Transactions
+      </p>
+      <div class="width50 gap5 justifyEnd">
+        <div class="searchBar colorPrimary">
+          <i class="fas fa-search"></i>
+          <input type="search" name="" id="univ" class="width0 widthMin30 widthMax0">
+        </div>
+        <div class="selectBar hidden">
+          <i class="fas fa-filter colorPrimary"></i>
+          <select name="" id="">
+            <option value="Today">Today</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
 <% } %>
+
+<section class="col">
+  <% if (requests.length === 0) { %>
+    <div class="h500 borderDotted corner16">
+    </div>
+  <% } else { %>
+    <section class="width0 col hidden" id="NoRecords">
+      <%- include('icons/notFound') %>
+      <p class="size18 str400">Sorry, No Record Found!</p>
+    </section>
+    <% requests.forEach((rq, i) => { %>
+      <% if (!rq.declineAt) { %>
+      <div class="height0 padding8 rqCard">
+        <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
+            <% if ( rq.status === "Pending") { %>
+              <% if (rq.processBy) { %>
+              <div class="width18 justifyStart"><img src="<%= rq.processBy ? rq.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
+              <div class="width82 col alignStart gap5">
+                <p class="str400"> Assigned To </p>
+                <div class="selectBar widthMin100">
+                  <select name="processBy" class="processByDropdown" data-request-id="<%= rq._id %>">
+                    <option value="" selected>-- Select Staff --</option>
+                    <% users.forEach(user => { %>
+                      <option value="<%= user._id %>" 
+                        <%= rq.processBy && rq.processBy._id.toString() === user._id.toString() ? 'selected' : '' %>>
+                        <%= user.fName %> <%= user.lName %> <%= user.xName %>
+                      </option>
+                    <% }) %>
+                  </select>
+                </div>
+              </div>
+              <% } else { %>
+              <div class="width100 col alignStart gap5">
+                <p class="str400"> Unassigned </p>
+                <div class="selectBar widthMin100 bgSoft">
+                  <select name="processBy" class="processByDropdown bgSoft" data-request-id="<%= rq._id %>">
+                    <option value="" selected>-- Select Staff --</option>
+                    <% users.forEach(user => { %>
+                      <option value="<%= user._id %>" 
+                        <%= rq.processBy && rq.processBy._id.toString() === user._id.toString() ? 'selected' : '' %>>
+                        <%= user.fName %> <%= user.lName %> <%= user.xName %>
+                      </option>
+                    <% }) %>
+                  </select>
+                </div>
+              </div>
+              <% } %>
+            <% } else { %>
+                <div class="width18 justifyStart"><img src="<%= rq.processBy ? rq.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
+                <div class="width82 col alignStart gap5">
+                  <p class="str400"> Assigned At <%= rq.assignAtFormatted %></p>
+                  <p class="str500 bgSoft corner5 padding2"><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
+                  <% if (rq.status === 'For Release') { %>
+                  <p class="str400 green"><i class="fas fa-check-circle"></i> Processed</p>
+                  <% } else if (rq.status === 'Claimed') { %>
+                  <p class="str400 green"><i class="fas fa-flag"></i> Released</p>
+                  <% } else if (rq.status === 'Pending') { %>
+                  <p class="str400 navy"><i class="fas fa-hourglass"></i> Waiting For Review ..</p>
+                  <% } else { %>
+                  <p class="str400 yellow"><i class="fas fa-clock"></i> Already Processing .. </p>
+                  <% } %>
+                </div>
+            <% } %>
+        </div>
+        <i class="fas fa-ellipsis"></i><i class="fas fa-ellipsis"></i>
+        <% if ( title === 'Transactions') { %>
+          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === 'For Release') { %>
+          <a href="/relView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === 'Processing') { %>
+          <a href="/prcView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === 'Approved') { %>
+          <a href="/aprView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else { %>
+          <a href="" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } %>
+          <p class="absolute top20 right20"><%= rq.createdAtFormatted %></p>
+
+          <% if ( rq.holdAt) { %>
+            <p class="str400 absolute bottom20 right20 bgRed100"> On Hold</p>
+          <% } else if ( rq.declineAt) { %>
+            <p class="str400 absolute bottom20 right20 bgRed100"> Declined</p>
+          <% } else { %>
+            <p class="str400 absolute bottom20 right20 bgBlue100"> <%= rq.status ? rq.status : '' %></p>
+          <% } %>
+
+          <div class="width10 justifyStart"><img src="<%= rq.requestBy ? rq.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
+          <div class="width90 col alignStart">
+            <p class="size14 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
+            <p class="str400"><%= rq.requestBy?.course || '--' %></p>
+            <p class="str400 marginBottom5 blue"> <i class="fas fa-receipt"></i> <%= rq.tr ? rq.tr : '' %> &bull; <i class="fas fa-file-lines"></i> <%= rq.type ? rq.type : '' %></p>
+          </div>
+        </a>
+      </div>
+      <% } %>
+    <% }) %>
+  <% } %>
+</section>
+
+<div id="processMessageModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999; opacity: 0;" class="hidden">
+  <div style="background:#fff; padding:20px; border-radius:8px; min-width:250px; text-align:center;">
+    <p id="processMessageText" style="font-weight:500;"></p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById('univ');
+  const cards = document.querySelectorAll('.rqCard'); 
+  const noFound = document.getElementById('NoRecords');
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    let found = 0;
+
+    cards.forEach(card => {
+      // Clone the card text
+      let cardText = card.textContent.toLowerCase();
+
+      // Remove text of unselected options from the card text
+      const unselectedOptions = card.querySelectorAll('.processByDropdown option:not(:checked)');
+      unselectedOptions.forEach(opt => {
+        const optText = opt.textContent.toLowerCase();
+        cardText = cardText.replace(optText, '');
+      });
+
+      if (cardText.includes(query)) {
+        card.style.display = ''; // show
+        found++;
+      } else {
+        card.style.display = 'none'; // hide
+      }
+    });
+
+    noFound.style.display = found === 0 ? 'flex' : 'none';
+  });
+});
+</script>
+
+
+<script>
+const messageModal = document.getElementById('processMessageModal');
+const messageText = document.getElementById('processMessageText');
+
+document.querySelectorAll('.processByDropdown').forEach(dropdown => {
+  dropdown.addEventListener('change', async (e) => {
+    const requestId = e.target.dataset.requestId;
+    const userId = e.target.value;
+
+    console.log('🟡 Assigning staff:', userId, 'for request:', requestId);
+
+    try {
+      const res = await fetch(`/req/processBy/${requestId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ processBy: userId })
+      });
+
+      const data = await res.json();
+      console.log('🟢 Server response:', data);
+
+      if (res.ok) {
+        messageText.textContent = data.message || 'Updated successfully.';
+        messageText.style.color = 'green';
+        messageModal.style.display = 'flex';
+
+        setTimeout(() => {
+          console.log('🔁 Redirecting to /srv');
+          window.location.href = '/srv';
+        }, 0);
+      } else {
+        messageText.textContent = data.error || 'Update failed.';
+        messageText.style.color = 'red';
+        messageModal.style.display = 'flex';
+        setTimeout(() => messageModal.style.display = 'none', 3000);
+      }
+
+    } catch (err) {
+      console.error('❌ Fetch error:', err);
+      messageText.textContent = 'Something went wrong.';
+      messageText.style.color = 'red';
+      messageModal.style.display = 'flex';
+      setTimeout(() => messageModal.style.display = 'none', 3000);
+    }
+  });
+});
+</script>
