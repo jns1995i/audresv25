@@ -7,9 +7,12 @@ const Request = require('../model/request');
 
 const isStaff = async (req, res, next) => {
   try {
-    // Fetch all users with role 'Registrar'
-    const staffUsers = await User.find({ role: 'Registrar', archive: false })
-      .sort({ createdAt: -1 });
+    // Fetch all users with role 'Registrar'/
+
+    const staffUsers = await User.find({
+      role: { $in: ['Registrar', 'Admin'] },
+      archive: false
+    }).sort({ createdAt: -1 });
 
     // Fetch all requests with an assigned staff
     const requests = await Request.find({ archive: false })

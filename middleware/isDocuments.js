@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
 
       // Certificates
       { type: "Certificate of Grades", amount: 150 },
-      { type: "Certificate of Enrolment", amount: 150 },
+      { type: "Certificate of Enrollment", amount: 150 },
       { type: "Certificate of Graduation", amount: 150 },
       { type: "Units Earned", amount: 150 },
       { type: "Subject Description", amount: 50 },

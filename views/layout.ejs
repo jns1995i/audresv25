@@ -11,9 +11,6 @@
     <link rel="icon" href="/images/logo.png">
     <title><%= title ? `${title} | AUDRES25` : 'AUDRES25' %></title>
     <style>
-      body {
-        gap: 0 !important;
-      }
       @media (max-width: 900px) {
           .unau {
             width: 80% !important;
@@ -23,7 +20,17 @@
 </head>
 
 <% if ( user.access === 1) { %>
-<body class="bgSoft">
+<body class="bgSoft gap0 <% if ( active === 'acc') { %> gap10 <% } %> ">
+  <div class="absolute translateCenter bgModal8 index5 hidden" id="lgCard">
+  <div class="bgWhite cornerRem2 height0 width25 col padding20">
+    <%- include('icons/lg') %>
+    <p class="rem14 textCenter">Are you sure you want to log out?</p>
+    <div class="height0 marginTop10 gap10">
+      <a href="javascript:void(0)" class="nav w100" id="lgClose"> Cancel</a>
+      <a href="/logout" class="nav pnav w100"> Log Out</a>
+    </div>
+  </div>
+</div>
   <div class="sidef">
     <div class="height10 abstractBG2 corner14">
       <img src="/images/au.png" alt="" class="h55 w55 wMin55 corner500 shadow2">
@@ -42,14 +49,26 @@
 
     </div>
     <div class="height10 justifyStart glass padding10">
-      <a href="" class="liquid corner500 h50 w50" style="min-width: 50px;"><img src="/images/profile.jpg" alt="" class="h50 w50"></a>
-      <section class="width0 col alignStart">
-        <p class="rem11 str400 textWrap"><%= user.fName %> <%= user.lName %></p>
-        <p class="rem09 str400 textWrap">Welcome <%= user.role %></p>
-      </section>
+      <% if (active === 'acc') { %>
+        <a href="/acc" class="liquid corner500 h50 w50" style="min-width: 50px;">
+            <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 borderWhite">
+        </a>
+        <section class="width0 col alignStart">
+          <p class="rem11 str400 textWrap">Profile</p>
+          <p class="rem11 str400 textWrap">Management</p>
+        </section>
+      <% } else { %>
+        <a href="/acc" class="liquid corner500 h50 w50" style="min-width: 50px;">
+            <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 borderWhite">
+        </a>
+        <section class="width0 col alignStart">
+          <p class="rem11 str400 textWrap"><%= user.fName %> <%= user.lName %></p>
+          <p class="rem09 str400 textWrap">Welcome <%= user.role %></p>
+        </section>
+      <% } %>
     </div>
   </div>
-  <div class="mainf padding5">
+  <div class="mainf padding5 <% if ( active === 'acc') { %> abstractBG corner15 <% } %>">
       <%- body %>
   </div>
 
@@ -99,3 +118,29 @@
 </body>
 <% } %>
 </html>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const lgOpen = document.getElementById('lgOpen');
+  const lgClose = document.getElementById('lgClose');
+  const lgCard = document.getElementById('lgCard');
+
+  // Open the logout modal
+  lgOpen.addEventListener('click', () => {
+    lgCard.classList.remove('hidden');
+  });
+
+  // Close the logout modal
+  lgClose.addEventListener('click', () => {
+    lgCard.classList.add('hidden');
+  });
+
+  // Optional: close modal when clicking outside
+  lgCard.addEventListener('click', (e) => {
+    if (e.target === lgCard) {
+      lgCard.classList.add('hidden');
+    }
+  });
+});
+</script>

@@ -13,6 +13,7 @@ const dayjs = require('dayjs');
 
 const isLogin = require('./middleware/isLogin');
 const isRequest = require('./middleware/isRequest');
+const isVerify = require('./middleware/isVerify');
 const myRequest = require('./middleware/myRequest');
 const isRatings = require('./middleware/isRatings');
 const isSeed = require('./middleware/isSeed');
@@ -359,13 +360,13 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       yearGraduated, yearAttended
     } = req.body;
 
-        // 1️⃣ Check for existing email
+    // 1️⃣ Check existing email
     const existingEmail = await users.findOne({ email: email.toLowerCase() });
     if (existingEmail) {
       return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" });
     }
 
-    // 2️⃣ Check for existing student number (only if role is Student)
+    // 2️⃣ Check existing student number
     if (role === 'Student' && studentNo) {
       const existingStudent = await users.findOne({ schoolId: studentNo });
       if (existingStudent) {
@@ -373,7 +374,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       }
     }
 
-    // Find vId file from req.files
+    // 3️⃣ Upload vId file
     const vIdFile = req.files.find(f => f.fieldname === 'vId');
     let vIdUrl = null;
     if (vIdFile) {
@@ -381,14 +382,15 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       vIdUrl = result.secure_url;
     }
 
-    // Convert month to number
+    // 4️⃣ Convert month to number
     const monthMap = {
       January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
       July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
     };
-    const bMonthNum = monthMap[bMonth] || null;
+    const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1;
+    const paddedMonth = String(bMonthNum).padStart(2, '0');
 
-    // Create new user
+    // 5️⃣ Create new user
     const newUser = new users({
       fName: firstName,
       mName: middleName,
@@ -396,7 +398,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       xName: extName,
       address,
       phone: number,
-      email,
+      email: email.toLowerCase(),
       bDay: Number(bDay),
       bMonth: bMonthNum,
       bYear: Number(bYear),
@@ -416,7 +418,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
 
     const savedUser = await newUser.save();
 
-    // Filter request photos
+    // 6️⃣ Upload request photos
     const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
     const reqPhotoUrlsMap = await Promise.all(
       reqPhotos.map(async file => {
@@ -426,25 +428,28 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       })
     );
 
-    // Normalize fields into arrays
-    const typesArr = Array.isArray(type) ? type : [type];
-    const purposesArr = Array.isArray(purpose) ? purpose : [purpose];
-    const qtyArr = Array.isArray(qty) ? qty : [qty];
-    const schoolYearsArr = Array.isArray(schoolYear) ? schoolYear : [schoolYear];
-    const semestersArr = Array.isArray(semester) ? semester : [semester];
+    // 7️⃣ Normalize request fields to arrays
+    const typesArr = [].concat(type || []);
+    const purposesArr = [].concat(purpose || []);
+    const qtyArr = [].concat(qty || []);
+    const schoolYearsArr = [].concat(schoolYear || []);
+    const semestersArr = [].concat(semester || []);
 
-    // Build request documents
-    const requestDocs = typesArr.map((t, i) => {
+    // 8️⃣ Build request documents (one TR per document)
+    const requestDocs = [];
+
+    for (let i = 0; i < typesArr.length; i++) {
       const lastTwo = savedUser._id.toString().slice(-2);
       const seq = String(i + 1).padStart(3, '0');
-      const monthNum = bMonthNum || new Date().getMonth() + 1;
-      const tr = `AU25-${monthNum}${lastTwo}${seq}`;
-      
-      return {
+
+      // Generate TR per document
+      const tr = `AU25-${paddedMonth}${lastTwo}${seq}`;
+
+      requestDocs.push({
         requestBy: savedUser._id,
-        type: t,
-        purpose: purposesArr[i],
-        qty: qtyArr[i],
+        type: typesArr[i] || '',
+        purpose: purposesArr[i] || '',
+        qty: qtyArr[i] || '',
         schoolYear: schoolYearsArr[i] || '',
         semester: semestersArr[i] || '',
         proof: reqPhotoUrlsMap[i] || null,
@@ -452,17 +457,20 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
         verify: true,
         status: "Pending",
         tr
-      };
-    });
+      });
+    }
 
     await requests.insertMany(requestDocs);
 
+    // 9️⃣ Redirect to success page
     res.redirect('/regSuccess');
+
   } catch (err) {
     console.error(err);
     res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
   }
 });
+
 
 app.get('/regSuccess', (req, res) => {
   res.render('regSuccess', { title: 'Success' });
@@ -523,7 +531,6 @@ app.get('/req', isLogin, (req, res) => {
 
 app.post('/reqDoc', cpUpload, async (req, res) => {
   try {
-    // Ensure user is logged in
     if (!req.session?.user?._id) {
       return res.render('req', { 
         error: 'You must be logged in to submit a request!',
@@ -531,58 +538,54 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       });
     }
 
-    const { type, purpose, qty, schoolYear, semester } = req.body;
+    // Normalize all form fields into arrays
+    const typesArr = [].concat(req.body.type || []);
+    const purposesArr = [].concat(req.body.purpose || []);
+    const qtyArr = [].concat(req.body.qty || []);
+    const schoolYearsArr = [].concat(req.body.schoolYear || []);
+    const semestersArr = [].concat(req.body.semester || []);
 
-    // Filter request photos
+    // Filter uploaded files
     const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
-    const reqPhotoUrlsMap = await Promise.all(
-      reqPhotos.map(async file => {
-        if (!file.path) return null;
+
+    // Upload each photo to Cloudinary
+    const reqPhotoUrls = await Promise.all(
+      reqPhotos.map(async (file) => {
         const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
         return result.secure_url;
       })
     );
 
-    // Normalize fields into arrays
-    const typesArr = Array.isArray(type) ? type : [type];
-    const purposesArr = Array.isArray(purpose) ? purpose : [purpose];
-    const qtyArr = Array.isArray(qty) ? qty : [qty];
-    const schoolYearsArr = Array.isArray(schoolYear) ? schoolYear : [schoolYear];
-    const semestersArr = Array.isArray(semester) ? semester : [semester];
+    const requestDocs = [];
 
-    // Build request documents with TR code
-    const requestDocs = typesArr.map((t, i) => {
-      // Last two characters from requestBy id
+    for (let i = 0; i < typesArr.length; i++) {
       const userIdStr = req.session.user._id.toString();
       const lastTwo = userIdStr.slice(-2);
+      const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // e.g., 01-12
+      const seq = String(i + 1).padStart(3, '0'); // 001, 002, ...
 
-      // Sequence number padded to 3 digits
-      const seq = String(i + 1).padStart(3, '0');
-
-      // Current month for TR code
-      const monthNum = new Date().getMonth() + 1; // 1-12
-
-      // Generate TR code
+      // Generate TR per document
       const tr = `AU25-${monthNum}${lastTwo}${seq}`;
 
-      return {
+      requestDocs.push({
         requestBy: req.session.user._id,
-        type: t,
+        type: typesArr[i],
         purpose: purposesArr[i],
         qty: qtyArr[i],
-        schoolYear: schoolYearsArr[i] || '',
-        semester: semestersArr[i] || '',
-        proof: reqPhotoUrlsMap[i] || null,
+        schoolYear: schoolYearsArr[i] || "",
+        semester: semestersArr[i] || "",
+        proof: reqPhotoUrls[i] || null,
         archive: false,
         verify: false,
         status: "Pending",
-        tr // transaction code
-      };
-    });
+        tr // unique per document
+      });
+    }
 
     await requests.insertMany(requestDocs);
 
     res.redirect('/reqSuccess');
+
   } catch (err) {
     console.error(err);
     res.render('req', { 
@@ -591,6 +594,7 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     });
   }
 });
+
 
 
 
@@ -639,13 +643,17 @@ app.get('/getUser', async (req, res) => {
 });
 
 app.get('/prf', isLogin, (req, res) => {
-  res.render('prf', { 
+  const msg = req.session.msg;
+  delete req.session.msg;
+
+  res.render('prf', {
     title: 'Profile',
     user: req.session.user,
-    messagePass: '',
-    messageSuccess: ''
+    messageSuccess: msg?.type === 'success' ? msg.text : '',
+    messagePass: msg?.type === 'error' ? msg.text : ''
   });
 });
+
 
 app.post('/check-pass', async (req, res) => {
     try {
@@ -675,149 +683,130 @@ app.post('/check-pass', async (req, res) => {
 });
 
 app.post('/rst', async (req, res) => {
-    try {
-        if (!req.session.user) {
-            return res.redirect('/login');
-        }
-
-        const userId = req.session.user._id;
-        const { currentPass, createPass, confirmPass } = req.body;
-
-        const currentUser = await users.findById(userId);
-        if (!currentUser) {
-            return res.render('prf', { user: req.session.user, messagePass: "User not found!", title: "Profile" });
-        }
-
-        // Check current password
-        if (currentPass.trim() !== currentUser.password.trim()) {
-            return res.render('prf', { user: req.session.user, messagePass: "Current password is incorrect!", title: "Profile" });
-        }
-
-        // Validate new password rules
-        const hasUpper = /[A-Z]/.test(createPass);
-        const hasSpecial = /[\W_]/.test(createPass);
-        const hasNumber = /\d/.test(createPass);
-        const longEnough = createPass.length >= 8;
-
-        if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-            return res.render('prf', { user: req.session.user, messagePass: "New password does not meet requirements!", title: "Profile" });
-        }
-
-        // Confirm password match
-        if (createPass !== confirmPass) {
-            return res.render('prf', { user: req.session.user, messagePass: "New password and confirm password do not match!", title: "Profile" });
-        }
-
-        // Update password (plaintext)
-        currentUser.password = createPass;
-        await currentUser.save();
-
-        return res.render('prf', { user: req.session.user, messagePass: "Password updated successfully!", title: "Profile", messageSuccess: "Password updated successfully!" });
-
-    } catch (err) {
-        console.error(err);
-        return res.render('prf', { user: req.session.user, messagePass: "Server error!", title: "Profile" });
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
     }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/prf');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/prf');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/prf');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/prf');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    await currentUser.save();
+
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    return res.redirect('/prf');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/prf');
+  }
 });
 
 app.post('/edt', async (req, res) => {
   try {
-    // Ensure user is logged in
     if (!req.session.user?._id) {
-      return res.redirect('/lg'); // redirect to login if not logged in
+      return res.redirect('/');
     }
 
     const userId = req.session.user._id;
     const { email, phone, address } = req.body;
 
-    // Validate inputs
+    // Validation
     if (!email || !phone || !address) {
-      return res.render('prf', {
-        user: req.session.user,
-        messagePass: 'Email and phone are required!',
-        messageSuccess: '',
-        title: 'Profile'
-      });
+      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
+      return res.redirect('/prf');
     }
 
-    // Check if email is already used by another user
-    const existingUser = await users.findOne({ email: email.toLowerCase(), _id: { $ne: userId } });
+    // Check email duplication
+    const existingUser = await users.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: userId }
+    });
+
     if (existingUser) {
-      return res.render('prf', {
-        user: req.session.user,
-        messagePass: 'Email is already in use!',
-        messageSuccess: '',
-        title: 'Profile'
-      });
+      req.session.msg = { type: "error", text: "Email is already in use!" };
+      return res.redirect('/prf');
     }
 
-    // Update user in DB
+    // Update user
     const updatedUser = await users.findByIdAndUpdate(
       userId,
       { email: email.toLowerCase(), phone, address },
       { new: true }
     );
 
-    // Update session user data
     req.session.user = updatedUser;
 
-    return res.render('prf', {
-      user: updatedUser,
-      messagePass: '',
-      messageSuccess: 'Profile updated successfully!',
-      title: 'Profile'
-    });
+    req.session.msg = { type: "success", text: "Profile updated successfully!" };
+    return res.redirect('/prf');
 
   } catch (err) {
-    console.error('Error in /edt:', err);
-    return res.render('prf', {
-      user: req.session.user,
-      messagePass: 'Server error!',
-      messageSuccess: '',
-      title: 'Profile'
-    });
+    console.error("Error in /edt:", err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/prf');
   }
 });
 
 app.post('/pht', isLogin, uploadPhoto.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.render('prf', { 
-        user: req.session.user, 
-        messagePass: 'No photo uploaded!', 
-        title: 'Profile' 
-      });
+      req.session.msg = { type: "error", text: "No photo uploaded!" };
+      return res.redirect('/prf');
     }
 
     const userId = req.session.user._id;
-    const photoUrl = req.file.path; // Cloudinary URL
+    const photoUrl = req.file.path;
 
-    // Update user's photo in DB
     const updatedUser = await users.findByIdAndUpdate(
       userId,
       { photo: photoUrl },
       { new: true }
     );
 
-    // Update session data
     req.session.user = updatedUser;
 
-    // Success message
-    return res.render('prf', { 
-      user: req.session.user, 
-      messageSuccess: 'Photo updated successfully!', 
-      title: 'Profile' 
-    });
+    req.session.msg = { type: "success", text: "Photo updated successfully!" };
+    return res.redirect('/prf');
 
   } catch (err) {
-    console.error('Error uploading photo:', err);
-    return res.render('prf', { 
-      user: req.session.user, 
-      messagePass: 'Failed to upload photo!', 
-      title: 'Profile' 
-    });
+    console.error("Error uploading photo:", err);
+    req.session.msg = { type: "error", text: "Failed to upload photo!" };
+    return res.redirect('/prf');
   }
 });
+
 
 
 app.get('/hom', isLogin, myRequest, (req, res) => {
@@ -1040,10 +1029,10 @@ app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
   });
 });
 
-app.get('/vrf', isLogin, isRequest, isStaff, (req, res) => {
+app.get('/vrf', isLogin, isVerify, isStaff, (req, res) => {
   // To Verify
   const filteredRequests = req.requests.filter(
-    rq => rq.status === 'To Verify' && !rq.declineAt
+    rq => rq.status === 'Pending' && !rq.declineAt
   );
   res.render('srv', { 
     title: 'To Verify', 
@@ -1249,7 +1238,7 @@ app.get('/aprView/:id', isLogin, isRequest, isStaff, async (req, res) => {
   }
 });
 
-app.get('/vrfView/:id', isLogin, isRequest, isStaff, async (req, res) => {
+app.get('/vrfView/:id', isLogin, isStaff, isVerify, async (req, res) => {
   try {
     const requestId = req.params.id;
 
@@ -1265,15 +1254,15 @@ app.get('/vrfView/:id', isLogin, isRequest, isStaff, async (req, res) => {
       });
     }
 
-    res.render('srvView', { 
+    res.render('vrfView', { 
       title: 'Request Details',
       back: 'vrf',
       active: 'srv',
       request: rq 
     });
   } catch (err) {
-    console.error('❌ Error in /srvView/:id route:', err);
-    res.status(500).render('srvView', { 
+    console.error('❌ Error in /vrfView/:id route:', err);
+    res.status(500).render('vrfView', { 
       title: 'Error', 
       back: 'vrf',
       active: 'srv',
@@ -1283,13 +1272,152 @@ app.get('/vrfView/:id', isLogin, isRequest, isStaff, async (req, res) => {
 });
 
 
-
 app.get('/emp', isLogin, isEmp, (req, res) => {
   res.render('emp', { title: 'Employees', active: 'emp' });
 });
 
 app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard', active: 'dsb' });
+});
+
+
+app.get('/acc', isLogin, (req, res) => {
+  const msg = req.session.msg;
+  delete req.session.msg;
+
+  res.render('acc', {
+    user: req.session.user,
+    title: 'Profile',
+    active: 'acc',
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null
+  });
+});
+
+app.post('/rst2', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/acc');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/acc');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/acc');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/acc');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    await currentUser.save();
+
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    return res.redirect('/acc');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/acc');
+  }
+});
+
+app.post('/edt2', async (req, res) => {
+  try {
+    if (!req.session.user?._id) {
+      return res.redirect('/');
+    }
+
+    const userId = req.session.user._id;
+    const { email, phone, address } = req.body;
+
+    // Validate required fields
+    if (!email || !phone || !address) {
+      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
+      return res.redirect('/acc');
+    }
+
+    // Check if email is already used by another user
+    const existingUser = await users.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: userId }
+    });
+
+    if (existingUser) {
+      req.session.msg = { type: "error", text: "Email is already in use!" };
+      return res.redirect('/acc');
+    }
+
+    // Update user
+    const updatedUser = await users.findByIdAndUpdate(
+      userId,
+      { email: email.toLowerCase(), phone, address },
+      { new: true }
+    );
+
+    req.session.user = updatedUser;
+
+    req.session.msg = { type: "success", text: "Profile updated successfully!" };
+    return res.redirect('/acc');
+
+  } catch (err) {
+    console.error("Error in /edt2:", err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/acc');
+  }
+});
+
+
+app.post('/pht2', isLogin, uploadPhoto.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      req.session.msg = { type: "error", text: "No photo uploaded!" };
+      return res.redirect('/acc');
+    }
+
+    const userId = req.session.user._id;
+    const photoUrl = req.file.path;
+
+    const updatedUser = await users.findByIdAndUpdate(
+      userId,
+      { photo: photoUrl },
+      { new: true }
+    );
+
+    req.session.user = updatedUser;
+
+    req.session.msg = { type: "success", text: "Photo updated successfully!" };
+    return res.redirect('/acc');   // <<< redirect, not render()
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Failed to upload photo!" };
+    return res.redirect('/acc');
+  }
 });
 
 app.get('/stu', isLogin, (req, res) => {

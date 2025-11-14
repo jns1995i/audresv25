@@ -1,102 +1,34 @@
-<% layout('template') %>
+<% layout('layout') %>
+
 <style>
-    .floatF {
-        display: none !important;
-    }
-    .floatB {
-        display: flex !important;
-    }
-    #info p i {
-        width: 20px !important;
-        display: inline;
-        margin-right: 5px;
-    }
-    #info p {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .hidden {
-        display: none !important;
-    }
     .fcrd {
         padding: 20px !important;
         width: 95% !important;
         border-radius: 25px;
     }
-    
-  @media (max-width: 900px) {
-    .prfCard {
-        width: 100% !important;
-    }
-    #prfMain {
-        flex-direction: column;
-        margin-bottom: 100px;
-    }
-    .prfCard > .bgWhite, #controls {
-        width: 95% !important;
-    }
-    .fcrd {
-        padding: 20px !important;
-        width: 95% !important;
-        border-radius: 18px;
-    }
-  }
 </style>
 
-<br>
 
-<div class="height0 width100" id="prfMain">
+<div class="width100" id="prfMain">
 
-    <div class="height0 width30 col padding10 prfCard">
+    <div class="height0 width40 col padding10 prfCard">
         <div class="height0 width0 relative corner15">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
-            <a href="javascript:void(0)" class="nav cnav glass2 absolute bottom1 right1" id="photoBtn"><i class="fas fa-camera"></i></a>
         </div>
-        <div class="height0 marginTop10 bgWhite corner30 padding20 col relative prfCard fcrd colorPrimary justifyStart alignStart hidden" id="photoCard">
-            <p class="rem18 str500">Change Photo</p>
-            <hr class="width70"><br>
-            <div class="bgBlue100 col alignStart">
-                <p class="rem1">Photo Upload Guidelines:</p>
-                <p class="rem1">&bull; Maximum file size: 5MB</p>
-                <p class="rem1">&bull; Allowed formats: JPG, JPEG, PNG</p>
-                <p class="rem1">&bull; Recommended dimensions: 400x400px (square)</p>
-                <p class="rem1">&bull; Clear and recognizable photo of yourself</p>
-                <p class="rem1">&bull; Avoid background clutter or dark images</p>
-            </div>
-            <br>
-            <form action="/pht" method="POST" class="padding0" enctype="multipart/form-data">
-                <div class="field">
-                    <label for="photo">Upload Photo Here</label>
-                    <input type="file" name="photo" id="photo" accept="image/*">
-                </div>
-                <br>
-                <div class="field alignEnd">
-                    <button type="submit" class="nav pnav w100">
-                        <i class="fas fa-check-circle"></i>Upload
-                    </button>
-                </div>
-            </form>
-            <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute" id="closePhotoCard"><i class="fas fa-xmark"></i></a>
-        </div>
-        <br>
+        <p class="rem16 str400"><i class="bi bi-patch-check-fill rem14"></i> <%= user.role %></p>
         <p class="rem2 str400"><%= user.fName %> <%= user.mName %> <%= user.lName %> <%= user.xName %></p>
-        <p class="rem16 str400"><%= user.role %> <i class="bi bi-patch-check-fill"></i></p>
-        <br>
-        <div class="height0 gap20 padding5 justifyBetween" id="controls">
-            <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 20px;">
-                <a href="/hom" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
-            </div>
+        
+        <div class="height0 gap20 padding5" id="controls">
             <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 30px;">
                 <a href="javascript:vod(0)" class="nav cnav liquid" id="editBtn"><i class="fas fa-pen"></i></a>
                 <a href="javascript:vod(0)" class="nav cnav liquid" id="resetBtn"><i class="fas fa-key"></i></a>
+                <a href="javascript:void(0)" class="nav cnav liquid" id="photoBtn"><i class="fas fa-camera"></i></a>
                 |
-                <a href="javascript:void(0)" class="nav cnav liquid" id="lgOpen"><i class="fas fa-share-square"></i></a>
+                <a href="javascript:void(0)" class="nav liquid" id="lgOpen" style="margin-left: auto; border-radius: 30px;"> <i class="fas fa-share-square"></i> Log Out</a>
             </div>
         </div>
-        <br>
         <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
-            <p class="rem18 str500">Student's Information</p>
+            <p class="rem18 str500">Personal Information</p>
             <hr class="width70"><br>
             <% if (typeof messageSuccess !== 'undefined' && messageSuccess) { %>
             <p class="bgBlue100"><i class="fas fa-exclamation-circle"></i> <%= messageSuccess %></p>
@@ -127,8 +59,35 @@
             <img src="<%= user.vId ? user.vId : '/images/annPhoto2.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.png';" class="h300 cornerRem1">
         </div>
     </div>
+
+    <div class="width40 height0 bgWhite corner30 padding20 col relative prfCard colorPrimary justifyStart alignStart hidden" id="photoCard">
+        <p class="rem18 str500">Change Photo</p>
+        <hr class="width70"><br>
+        <div class="bgBlue100 col alignStart">
+            <p class="rem1">Photo Upload Guidelines:</p>
+            <p class="rem1">&bull; Maximum file size: 5MB</p>
+            <p class="rem1">&bull; Allowed formats: JPG, JPEG, PNG</p>
+            <p class="rem1">&bull; Recommended dimensions: 400x400px (square)</p>
+            <p class="rem1">&bull; Clear and recognizable photo of yourself</p>
+            <p class="rem1">&bull; Avoid background clutter or dark images</p>
+        </div>
+        <br>
+        <form action="/pht2" method="POST" class="padding0" enctype="multipart/form-data">
+            <div class="field">
+                <label for="photo">Upload Photo Here</label>
+                <input type="file" name="photo" id="photo" accept="image/*">
+            </div>
+            <br>
+            <div class="field alignEnd">
+                <button type="submit" class="nav pnav w100">
+                    <i class="fas fa-check-circle"></i>Upload
+                </button>
+            </div>
+        </form>
+        <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute" id="closePhotoCard"><i class="fas fa-xmark"></i></a>
+    </div>
     
-    <div class="height0 width30 col prfCard padding10 hidden" id="resetCard">
+    <div class="height0 width40 col prfCard padding10 hidden" id="resetCard">
         <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
             <p class="rem18 str500">Reset Password</p>
             <hr class="width70"><br>
@@ -140,7 +99,7 @@
                     <p class="rem1">&bull; Minimum of 8 characters</p>
             </div>
             <br>
-            <form action="/rst" method="POST" class="padding0 corner0 gap5">
+            <form action="/rst2" method="POST" class="padding0 corner0 gap5">
                 <div class="field password width100">
                     <label for="">Current Password</label>
                     <input type="password" name="currentPass" id="currentPass" required>
@@ -176,12 +135,12 @@
         </div>
     </div>
 
-    <div class="height0 width30 col padding10 prfCard hidden" id="editCard">
+    <div class="height0 width40 col padding10 prfCard hidden" id="editCard">
         <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
             <p class="rem18 str500">Update Contact</p>
             <hr class="width70"><br>
             <div class="bgGreen100 col alignStart">
-                    <p class="rem1 textCenter">Take Note! Only phone number, address and email can be modified. For mispelling and incorrect information, You may contact us through our office hotline at <%= seedUser.phone %> or email us at <%= seedUser.email %>. Thank you</p>
+                    <p class="rem1 textCenter">Take Note! Only phone number and address can be modified. For mispelling and incorrect information, please contact Admin.</p>
             </div>
             <br>
             <form id="editForm" method="POST" class="padding0 corner0 gap5">
@@ -209,8 +168,6 @@
 
 </div>
 
-<br>
-
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -228,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById('editForm');
-    form.action = '/edt'; // set dynamically
+    form.action = '/edt2'; // set dynamically
 });
 </script>
 <script>

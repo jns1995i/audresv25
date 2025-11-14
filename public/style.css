@@ -8,7 +8,8 @@ html {
     color-scheme: light !important;
 }
 :root {
-
+    
+    color-scheme: light !important;
     --bs-blue: #1e30f3;
     --bs-indigo: #6610f2;
     --bs-purple: #6f42c1;

@@ -17,6 +17,7 @@
 
 <div class="height0 abstractBG padding10 corner12 gap5">
   <section class="width0 padding0 gap5">
+    <a href="vrf" class="nav tnav <% if ( title === 'To Verify' && active === 'srv') { %> active <% } %>"><i class="fas fa-user-check"></i> To Verify</a>
     <a href="srv" class="nav tnav <% if ( title === 'Transactions' && active === 'srv') { %> active <% } %>"><i class="fas fa-hourglass"></i> Pending</a>
     <a href="prc" class="nav tnav <% if ( title === 'Processing' && active === 'srv') { %> active <% } %>"><i class="fas fa-clock"></i> Processing</a>
     <a href="apr" class="nav tnav <% if ( title === 'Approved' && active === 'srv') { %> active <% } %>"><i class="fas fa-check-circle"></i> Approved</a>
@@ -147,8 +148,10 @@
           <a href="/prcView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } else if ( title === 'Approved') { %>
           <a href="/aprView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === 'To Verify') { %>
+          <a href="/vrfView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } else { %>
-          <a href="" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } %>
           <p class="absolute top20 right20"><%= rq.createdAtFormatted %></p>
 
@@ -163,8 +166,16 @@
           <div class="width10 justifyStart"><img src="<%= rq.requestBy ? rq.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
           <div class="width90 col alignStart">
             <p class="size14 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
-            <p class="str400"><%= rq.requestBy?.course || '--' %></p>
-            <p class="str400 marginBottom5 blue"> <i class="fas fa-receipt"></i> <%= rq.tr ? rq.tr : '' %> &bull; <i class="fas fa-file-lines"></i> <%= rq.type ? rq.type : '' %></p>
+            <p class="str400"><span class="green"><%= rq.requestBy ? rq.requestBy.role : '' %> &bull; </span> <%= rq.requestBy?.course || '--' %></p>
+            <% if ( title === "To Verify") { %>
+              <p class="str400 marginBottom5 blue">
+                <i class="bi bi-building"></i> <%= rq.requestBy?.campus || '--' %>
+                &nbsp; | &nbsp;
+                <i class="fas fa-address-card"></i> <%= rq.requestBy?.schoolId || 'No Student Number' %>
+              </p>
+            <% } else { %>
+              <p class="str400 marginBottom5 blue"> <i class="fas fa-receipt"></i> <%= rq.tr ? rq.tr : '' %> &bull; <i class="fas fa-file-lines"></i> <%= rq.type ? rq.type : '' %></p>
+            <% } %>
           </div>
         </a>
       </div>
