@@ -1,0 +1,360 @@
+<% layout('layout') %>
+
+<style>
+    .fcrd {
+        padding: 20px !important;
+        width: 100% !important;
+        border-radius: 25px;
+    }
+</style>
+
+<a href="<% if ( back === 'stu') { %> /stu
+<% } else if ( back === 'crt') { %> /crt
+<% } else if ( back === 'alm') { %> /alm
+<% } else if ( back === 'frm') { %> /frm
+<% } else { %> /stu <% } %> " class="nav absolute left10 top10"><i class="fas fa-chevron-left"></i> Previous</a>
+
+<div class="width100 gap10" id="prfMain">
+
+    <div class="height0 width40 col padding10 prfCard bgWhite corner30 shadow1">
+        <div class="height0 padding20 alignStart col relative corner20 abstractBG2">
+            <img src="<%= student.photo ? student.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
+            <p class="rem2 str400"><%= student.fName %> <%= student.mName %> <%= student.lName %> <%= student.xName %></p>
+            <p class="rem14 str400"><i class="bi bi-patch-check-fill rem14"></i> <%= student.role %></p>
+
+            <div class="height0 width0 gap20 padding5 absolute top10 right10" id="controls">
+                <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 30px;">
+                    <a href="javascript:vod(0)" class="nav cnav liquid" id="editBtn"><i class="fas fa-pen"></i></a>
+                    <a href="javascript:void(0)" class="nav cnav liquid" id="photoBtn"><i class="fas fa-camera"></i></a>
+                    <a href="javascript:vod(0)" class="nav cnav liquid" id="resetBtn"><i class="fas fa-key"></i></a>
+                    |
+                    <a href="javascript:void(0)" class="nav cnav liquid" id="idBtn"><i class="fas fa-address-card"></i></a>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
+            <% if (typeof messageSuccess !== 'undefined' && messageSuccess) { %>
+            <p class="bgBlue100"><i class="fas fa-exclamation-circle"></i> <%= messageSuccess %></p>
+            <br>
+            <% } %>
+            <% if (typeof messagePass !== 'undefined' && messagePass) { %>
+            <p class="bgRed100"><i class="fas fa-exclamation-circle"></i> <%= messagePass %></p>
+            <br>
+            <% } %>
+            <p class="rem12 str500"><i class="fas fa-address-card w15"></i> <%= student.schoolId ? student.schoolId : "--" %></p>
+            <p class="rem12 str500"><i class="fas fa-building w15"></i> <%= student.campus || "--" %></p>
+            <p class="rem12 str500"><i class="fas fa-layer-group w15"></i> <%= student.course || "--" %></p>
+            <p class="rem12 str500"><i class="fas fa-stream w15"></i> <%= student.yearLevel || "--" %></p>
+            <% if (student.role === 'Alumni') { %>
+            <p class="rem12 str500"><i class="fas fa-graduation-cap w15"></i> <%= student.yearGraduated || "--" %></p>
+            <% } else if (student.role === 'Former') { %>
+            <p class="rem12 str500"><i class="fas fa-calendar w15"></i> <%= student.yearAttended || "--" %></p>
+            <% } else { %>
+            <% } %>
+            <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= student.email || "--" %></p>
+            <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= student.phone || "--" %></p>
+            <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= student.address || "--" %></p>
+        </div>
+    </div>
+
+    <div class="width40 height0 bgWhite corner30 padding20 col relative prfCard colorPrimary justifyStart alignStart hidden" id="photoCard">
+        <p class="rem18 str500">Change Photo</p>
+        <hr class="width70"><br>
+        <div class="bgBlue100 col alignStart">
+            <p class="rem1">Photo Upload Guidelines:</p>
+            <p class="rem1">&bull; Maximum file size: 5MB</p>
+            <p class="rem1">&bull; Allowed formats: JPG, JPEG, PNG</p>
+            <p class="rem1">&bull; Recommended dimensions: 400x400px (square)</p>
+            <p class="rem1">&bull; Clear and recognizable photo of yourself</p>
+            <p class="rem1">&bull; Avoid background clutter or dark images</p>
+        </div>
+        <br>
+        <form action="/pht3" method="POST" class="padding0" enctype="multipart/form-data">
+            <input type="hidden" name="studentId" value="<%= student._id %>">
+            <input type="hidden" name="redirectUrl" value="<%= redirectUrl  %>">
+            <div class="field">
+                <label for="photo">Upload Photo Here</label>
+                <input type="file" name="photo" id="photo" accept="image/*">
+            </div>
+            <br>
+            <div class="field alignEnd">
+                <button type="submit" class="nav pnav w100">
+                    <i class="fas fa-check-circle"></i>Upload
+                </button>
+            </div>
+        </form>
+        <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute" id="closePhotoCard"><i class="fas fa-xmark"></i></a>
+    </div>
+    
+    <div class="height0 width40 col prfCard padding10 hidden" id="resetCard">
+        <div class="bgWhite col padding30 justifyStart colorPrimary relative fcrd" id="info">
+            <p class="rem18 str500"><i class="fas fa-key"></i> Auto Generate</p>
+            <hr class="">
+            <section class="col textCenter">
+                <p class="rem1">This will <strong>reset the user's password</strong> and generate a new one automatically. The user will receive an <strong>email</strong> containing the newly generated password.</p>
+            </section>
+            <section class="bgViolet100 col padding15 textCenter">
+                <p class="rem12">This action cannot be undone!</p>
+            </section>
+            <br>
+            <div class="section gap10">
+                <a href="javascript:vod(0)" class="nav width100"  id="closeResetCard"> Cancel</a>
+                <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute hidden"><i class="fas fa-xmark"></i></a>
+                <a href="/autoPass" class="nav pnav width100"> Generate</a>
+            </div>
+            <div class="section padding0 col alignStart hidden">
+                <br>
+                -or-
+                <br><br>
+                
+                <p class="rem18 str500">Reset Password</p>
+                <hr class="width70"><br>
+                <div class="bgViolet100 col alignStart">
+                        <p class="rem1">Take Note! Password must contain the following:</p>
+                        <p class="rem1">&bull; Atleast 1 Special Character</p>
+                        <p class="rem1">&bull; Atleast 1 Upper Case Letter</p>
+                        <p class="rem1">&bull; Combination of Letter and Numbers</p>
+                        <p class="rem1">&bull; Minimum of 8 characters</p>
+                </div>
+                <br>
+                <form action="/rst3" method="POST" class="padding0 corner0 gap5">
+                    <input type="hidden" name="studentId" value="<%= student._id %>">
+                    <input type="hidden" name="redirectUrl" value="<%= redirectUrl  %>">
+                    <div class="field password width100">
+                        <label for="">Current Password</label>
+                        <input type="password" name="currentPass" id="currentPass" required>
+                        <span class="showPass" id="showPass" style="cursor: pointer;">show</span>
+                    </div>
+                    <div class="height0 col alignStart">
+                        <p class="bgGreen100 hidden" id="warning1"><i class="fas fa-check-circle"></i> Password Verified!</p>
+                        <span class="bgRed100 hidden" id="warning2"><i class="fas fa-exclamation-circle"></i> Incorrect Password!</span>
+                    </div>
+                    <div class="field password">
+                        <label for="">Create Password</label>
+                        <input type="password" name="createPass" id="createPass" required>
+                        <span class="showPass" id="showPass" style="cursor: pointer;">show</span>
+                    </div>
+                    <div class="height0 col alignStart">
+                        <p class="bgGreen100 hidden" id="warning3"><i class="fas fa-check-circle"></i> Strong Password!</p>
+                        <span class="bgRed100 hidden" id="warning4"><i class="fas fa-exclamation-circle"></i> Weak Password!</span>
+                    </div>
+                    <div class="field password">
+                        <label for="">Confirm Password</label>
+                        <input type="password" name="confirmPass" id="confirmPass" required>
+                        <span class="showPass" id="showPass" style="cursor: pointer;">show</span>
+                    </div>
+                    <div class="height0 col alignStart">
+                        <p class="bgGreen100 hidden" id="warning5"><i class="fas fa-check-circle"></i> Password Confirmed!</p>
+                        <span class="bgRed100 hidden" id="warning6"><i class="fas fa-exclamation-circle"></i> Password Didn't Matched!</span>
+                    </div>
+                    <div class="field alignEnd">
+                        <button type="submit" class="nav pnav w100"><i class="fas fa-check-circle"></i>Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="height0 width40 col padding10 prfCard hidden" id="editCard">
+        <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
+            <p class="rem18 str500">Update Contact</p>
+            <hr class="width70"><br>
+            <div class="bgGreen100 col alignStart">
+                    <p class="rem1 textCenter">Take Note! Only phone number and address can be modified. For mispelling and incorrect information, please contact Admin.</p>
+            </div>
+            <br>
+            <form id="editForm" method="POST" class="padding0 corner0 gap5">
+                <input type="hidden" name="studentId" value="<%= student._id %>">
+                <input type="hidden" name="redirectUrl" value="<%= redirectUrl  %>">
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="<%= student.email %>">
+                </div>
+                <div class="field">
+                    <label for="phone">Contact</label>
+                    <input type="phone" id="phone" name="phone" value="<%= student.phone %>">
+                </div>
+                <div class="field">
+                    <label for="address">Address</label>
+                    <input type="address" id="address" name="address" value="<%= student.address %>">
+                </div>
+                <div class="field alignEnd">
+                    <button type="submit" class="nav pnav w100">
+                    <i class="fas fa-check-circle"></i> Update
+                    </button>
+                </div>
+            </form>
+            <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute" id="closeEditCard"><i class="fas fa-xmark"></i></a>
+        </div>
+    </div>
+    
+    <div class="height0 width35 col prfCard bgWhite corner30 shadow1 relative hidden"  id="idCard">
+            <img src="<%= student.vId ? student.vId : '/images/annPhoto2.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.png';" class="width100">
+            <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute" id="closeIdCard"><i class="fas fa-xmark"></i></a>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById('editForm');
+    form.action = '/edt3'; // set dynamically
+});
+</script>
+<script>
+  // Cards and buttons
+  const resetCard = document.getElementById('resetCard');
+  const resetBtn = document.getElementById('resetBtn');
+  const closeResetCard = document.getElementById('closeResetCard');
+
+  const editCard = document.getElementById('editCard');
+  const editBtn = document.getElementById('editBtn');
+  const closeEditCard = document.getElementById('closeEditCard');
+
+  const photoCard = document.getElementById('photoCard');
+  const photoBtn = document.getElementById('photoBtn');
+  const closePhotoCard = document.getElementById('closePhotoCard');
+
+  const idCard = document.getElementById('idCard');
+  const idBtn = document.getElementById('idBtn');
+  const closeIdCard = document.getElementById('closeIdCard');
+
+  // Utility function to hide all cards
+  function hideAllCards() {
+    resetCard.classList.add('hidden');
+    editCard.classList.add('hidden');
+    photoCard.classList.add('hidden');
+    idCard.classList.add('hidden');
+  }
+
+  // Open Reset Password Card
+  resetBtn.addEventListener('click', () => {
+    hideAllCards();
+    resetCard.classList.remove('hidden');
+  });
+
+  closeResetCard.addEventListener('click', () => {
+    resetCard.classList.add('hidden');
+  });
+
+  // Open Edit Profile Card
+  editBtn.addEventListener('click', () => {
+    hideAllCards();
+    editCard.classList.remove('hidden');
+  });
+
+  closeEditCard.addEventListener('click', () => {
+    editCard.classList.add('hidden');
+  });
+
+  // Open Photo Card
+  photoBtn.addEventListener('click', () => {
+    hideAllCards();
+    photoCard.classList.remove('hidden');
+  });
+
+  closePhotoCard.addEventListener('click', () => {
+    photoCard.classList.add('hidden');
+  });
+
+  
+  // Open ID Card
+  idBtn.addEventListener('click', () => {
+    hideAllCards();
+    idCard.classList.remove('hidden');
+  });
+
+  closeIdCard.addEventListener('click', () => {
+    idCard.classList.add('hidden');
+  });
+</script>
+
+<script>
+    const currentPass = document.getElementById('currentPass');
+    const warning1 = document.getElementById('warning1'); // correct
+    const warning2 = document.getElementById('warning2'); // incorrect
+
+    const createPass = document.getElementById('createPass');
+    const warning3 = document.getElementById('warning3'); // strong
+    const warning4 = document.getElementById('warning4'); // weak
+
+    const confirmPass = document.getElementById('confirmPass');
+    const warning5 = document.getElementById('warning5'); // matched
+    const warning6 = document.getElementById('warning6'); // not matched
+
+
+    // 1. CHECK CURRENT PASSWORD (LIVE)
+    currentPass.addEventListener('keyup', function () {
+        fetch('/check-pass3', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                currentPass: this.value,
+                studentId: "<%= student._id %>" // pass the viewed student's ID
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (this.value === "") {
+                warning1.classList.add('hidden');
+                warning2.classList.add('hidden');
+                return;
+            }
+
+            if (data.valid) {
+                warning1.classList.remove('hidden');
+                warning2.classList.add('hidden');
+            } else {
+                warning2.classList.remove('hidden');
+                warning1.classList.add('hidden');
+            }
+        });
+    });
+
+
+    // 2. CHECK NEW PASSWORD STRENGTH
+    createPass.addEventListener('keyup', function () {
+        const pass = this.value;
+
+        const hasUpper = /[A-Z]/.test(pass);
+        const hasSpecial = /[\W_]/.test(pass);
+        const hasNumber = /\d/.test(pass);
+        const longEnough = pass.length >= 8;
+
+        if (pass === "") {
+            warning3.classList.add('hidden');
+            warning4.classList.add('hidden');
+            return;
+        }
+
+        if (hasUpper && hasSpecial && hasNumber && longEnough) {
+            warning3.classList.remove('hidden'); // strong
+            warning4.classList.add('hidden');
+        } else {
+            warning4.classList.remove('hidden'); // weak
+            warning3.classList.add('hidden');
+        }
+    });
+
+
+    // 3. CONFIRM PASSWORD MATCH
+    confirmPass.addEventListener('keyup', function () {
+        if (this.value === "") {
+            warning5.classList.add('hidden');
+            warning6.classList.add('hidden');
+            return;
+        }
+
+        if (this.value === createPass.value) {
+            warning5.classList.remove('hidden');
+            warning6.classList.add('hidden');
+        } else {
+            warning6.classList.remove('hidden');
+            warning5.classList.add('hidden');
+        }
+    });
+
+</script>
+

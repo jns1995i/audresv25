@@ -20,7 +20,7 @@
 </head>
 
 <% if ( user.access === 1) { %>
-<body class="bgSoft gap0 <% if ( active === 'acc') { %> gap10 <% } %> ">
+<body class="bgSoft gap0 <% if (active === 'acc') { %> gap10 <% } %> ">
   <div class="absolute translateCenter bgModal8 index5 hidden" id="lgCard">
   <div class="bgWhite cornerRem2 height0 width25 col padding20">
     <%- include('icons/lg') %>
@@ -68,7 +68,7 @@
       <% } %>
     </div>
   </div>
-  <div class="mainf padding5 <% if ( active === 'acc') { %> abstractBG corner15 <% } %>">
+  <div class="mainf padding5 <% if (active === 'acc') { %> abstractBG corner15 <% } %> ">
       <%- body %>
   </div>
 
@@ -144,3 +144,18 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+
+    <script>
+        document.querySelectorAll('.showPass').forEach(button => {
+            button.addEventListener('click', function() {
+                const passwordInput = button.previousElementSibling;
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    button.textContent = 'hide';
+                } else {
+                    passwordInput.type = 'password';
+                    button.textContent = 'show';
+                }
+            });
+        });
+    </script>
