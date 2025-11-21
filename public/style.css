@@ -7222,9 +7222,6 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     0 0 8px rgba(61, 77, 255, 0.3),
     0 0 10px rgba(255, 255, 255, 0.2);
     color-scheme: light !important;
-    -webkit-print-color-adjust: exact; /* prevent color alterations */
-    -webkit-text-fill-color: initial; /* reset text fill */
-    print-color-adjust: exact;         /* Standard property */
 }
 
 .textLeft { text-align: left; }
