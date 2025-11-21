@@ -7210,7 +7210,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 /* Font Size */
 
 .gradientText {
-  background: linear-gradient(to right,white,  white, var(--tint8), white, white);
+  background: linear-gradient(to bottom,white,  white, var(--tint8));
    background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -7892,7 +7892,7 @@ p + p {
 
 @media (prefers-color-scheme: dark) {
 .gradientText {
-  background: linear-gradient(to right,white,  white, var(--tint8), white, white);
+  background: linear-gradient(to bottom,white,  white, var(--tint8));
    background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -7901,6 +7901,5 @@ p + p {
     0 0 8px rgba(61, 77, 255, 0.3),
     0 0 10px rgba(255, 255, 255, 0.2);
     color-scheme: light !important;
-    color: white !important;
 }
 }
