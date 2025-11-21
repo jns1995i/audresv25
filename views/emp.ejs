@@ -9,8 +9,159 @@
     }
     .mainf {
         padding: 20px;
+        overflow-y: hidden;
+    }
+    #empCard.seen {
+        position: relative !important;
+        margin-bottom: 200px;
+        height: 100% !important;
     }
 </style>
+
+<div class="bgYellow unseen corner15 col padding10" id="empCard">
+    <section class="justifyEnd padding0 width80">
+        <a href="javascript:void(0)" class="nav" id="empClose"><i class="fas fa-xmark"></i> Close</a>
+    </section>
+    <br>
+    <form action="" class="gap30 row padding30 width80 alignStart">
+        <section class="col alignStart width40 gap10">
+            <p class="rem24 str500">New Employee</p>
+            <div class="field gap5">
+                <label for="">First Name*</label>
+                <input type="text" name="firstName" required>
+            </div>
+            <div class="field gap5">
+                <label for="">Middle Name</label>
+                <input type="text" name="middleName">
+            </div>
+            <div class="field gap5">
+                <label for="">Last Name*</label>
+                <input type="text" name="lastName" required>
+            </div>
+            <div class="field gap5">
+                <label for="">Ext</label>
+                <input type="text" name="extName">
+            </div>
+            <div class="row height0 width100 gap10 colF1">
+            </div>
+            <div class="row height0 width100 gap10 colF1">
+                <div class="field gap5">
+                    <label for="">Address*</label>
+                    <input type="text" name="address" required>
+                </div>
+            </div>
+        </section>
+        <section class="col alignStart width60 gap10">
+            <br>
+            <div class="row height0 width100 gap10 colF1">
+                <div class="field col alignStart gap5">
+                    <label for="birthday">Birthday*</label>
+                    <div class="height0 gap5">
+                        <div class="selectBar">
+                            <select id="bMonth" name="bMonth" required>
+                                <option value="">Month</option>
+                            </select>
+                        </div>
+                        <div class="selectBar">
+                            <select id="bDay" name="bDay" required>
+                                <option value="">Day</option>
+                            </select>
+                        </div>
+                        <div class="selectBar">
+                            <select id="bYear" name="bYear" required>
+                                <option value="">Year</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="height0 width100 gap10 alignEnd colF1">
+                <div class="field gap5">
+                    <label for="">Email*</label>
+                    <input type="email" name="email" id="em" required>
+                </div>
+                <div class="field gap5">
+                    <label for="">Phone Number*</label>
+                    <input type="text" id="number" name="number" inputmode="numeric" required class="number">
+                </div>
+                <script>
+                    document.getElementById('em').addEventListener('input', function () {
+                        const email = this.value;
+                    
+                        fetch(`/check-email?email=${encodeURIComponent(email)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const errorMsg = document.getElementById('error');
+                                if (data.exists) {
+                                    errorMsg.classList.remove('hidden');
+                                } else {
+                                    errorMsg.classList.add('hidden');
+                                }
+                            });
+                    });
+                    </script>
+            </div>
+            
+            <section class="bgRed100 hidden width0" id="error">Email is already used by an existing account!</section>
+
+            <br><hr><br>
+            <div class="row height0 gap10 colF1">
+                <div class="field gap5">
+                    <div class="height0 justifyBetween">
+                        <label for="sn" id="snLabel">Employee Number <span class="hidden">(Optional)</span></label>
+                    </div>
+                    <input type="text" id="sn" name="studentNo" placeholder="">
+                </div>
+                <script>
+                    document.getElementById('sn').addEventListener('input', function () {
+                        const studentNo = this.value;
+                    
+                        fetch(`/check-studentNo?studentNo=${encodeURIComponent(studentNo)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const errorMsg = document.getElementById('error2');
+                                if (data.exists) {
+                                    errorMsg.classList.remove('hidden');
+                                } else {
+                                    errorMsg.classList.add('hidden');
+                                }
+                            });
+                    });
+                </script>
+                <div class="field gap5">
+                    <label for="">Campus*</label>
+                    <div class="selectBar">
+                        <select name="campus" id="campus" required>
+                            <option value="" selected disabled>Select</option>
+                            <option value="Main">Main</option>
+                            <option value="South">South</option>
+                            <option value="San Jose">San Jose</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <section class="bgRed100 width0 hidden" id="error2">Student number is already registered!</section>
+            <div class="height0 gap10 colF1">
+                <div class="field gap5 height0">
+                    <label for="">Role*</label>
+                    <div class="selectBar">
+                        <select name="role" id="role" required>
+                            <option value="" selected disabled>Select</option>
+                            <option value="Head">Head</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Registrar">Registrar</option>
+                            <option value="Accounting">Accounting</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <section class="justifyBetween padding0">
+                <button type="reset" class="nav"><i class="fas fa-rotate"></i>Clear Form</button>
+                <button type="submit" class="nav pnav"><i class="fas fa-plus"></i>Create Account</button>
+            </section>
+        </section>
+    </form>
+</div>
 
 <% if (!users || users.length === 0) { %>
 <% } else { %>
@@ -18,15 +169,15 @@
     <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
         <% users.forEach(user => { %>
             <% if ( user.role === "Head") { %>
-            <a href="" class="height0 w120 col">
-                <img src="/images/profile.jpg" class="h80 w80 corner500 shadow1">
+            <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
+                <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
                 <p class="size14 textWrap textCenter str500"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
-                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Main' %></p>
+                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
             </a>
             <% } %>
         <% }) %>
             <div href="" class="height0 w120 col gap5">
-                <a href="" class="h80 w80 corner500 borderDotted"><i class="fas fa-plus size30 gray"></i></a>
+                <a href="javascript:void(0)" class="h80 w80 corner500 borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
             </div>
     </section>
 
@@ -36,15 +187,15 @@
     <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
         <% users.forEach(user => { %>
             <% if ( user.role === "Registrar") { %>
-            <a href="" class="height0 w120 col gap5">
-                <img src="/images/profile.jpg" class="h80 w80 corner500 shadow1">
+            <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
+                <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
                 <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
-                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Main' %></p>
+                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
             </a>
             <% } %>
         <% }) %>
             <div href="" class="height0 w120 col gap5">
-                <a href="" class="h80 w80 corner500 borderDotted"><i class="fas fa-plus size30 gray"></i></a>
+                <a href="javascript:void(0)" class="h80 w80 corner500 borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
             </div>
     </section>
 
@@ -54,15 +205,81 @@
     <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
         <% users.forEach(user => { %>
             <% if ( user.role === "Accounting") { %>
-            <a href="" class="height0 w120 col gap5">
-                <img src="/images/profile.jpg" class="h80 w80 corner500 shadow1">
+            <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
+                <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
                 <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
-                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Main' %></p>
+                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
             </a>
             <% } %>
         <% }) %>
             <div href="" class="height0 w120 col gap5">
-                <a href="" class="h80 w80 corner500 borderDotted"><i class="fas fa-plus size30 gray"></i></a>
+                <a href="javascript:void(0)" class="h80 w80 corner500 borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
             </div>
     </section>
 <% } %>
+
+<script>
+    document.querySelectorAll(".empBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const empCard = document.getElementById("empCard");
+        empCard.classList.remove("unseen");
+        empCard.classList.add("seen");
+    });
+});
+
+document.getElementById("empClose").addEventListener("click", () => {
+    const empCard = document.getElementById("empCard");
+    empCard.classList.remove("seen");
+    empCard.classList.add("unseen");
+});
+
+</script>
+<script>
+    // Populate Day Dropdown (1-31)
+    const daySelect = document.getElementById("bDay");
+    for (let i = 1; i <= 31; i++) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        daySelect.appendChild(option);
+    }
+
+    // Populate Month Dropdown (January-December) with values as words
+const monthSelect = document.getElementById("bMonth");
+const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+];
+
+months.forEach(month => {
+    let option = document.createElement("option");
+    option.value = month; // Store month name as value
+    option.textContent = month;
+    monthSelect.appendChild(option);
+});
+
+
+    // Populate Year Dropdown (Current Year to 1980)
+    const yearSelect = document.getElementById("bYear");
+    const currentYear = new Date().getFullYear();
+    const maxYear = currentYear - 18; // Must be 18 or older
+
+    for (let i = maxYear; i >= 1980; i--) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        yearSelect.appendChild(option);
+    }
+</script>
+<script>
+    function enforceNumericInput(event) {
+        event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const phoneInputs = document.querySelectorAll('.number');
+        phoneInputs.forEach(input => {
+            input.addEventListener('input', enforceNumericInput);
+        });
+    });
+</script>

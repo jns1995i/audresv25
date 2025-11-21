@@ -99,6 +99,15 @@ app.use((req, res, next) => {
 
 app.use(isDocuments);
 app.use(isSeed);
+const flash = require('connect-flash');
+
+app.use(flash());
+
+app.use((req, res, next) => {
+  res.locals.messageSuccess = req.flash('messageSuccess');
+  res.locals.messagePass = req.flash('messagePass');
+  next();
+});
 
 // Global variables na ipapasok sa lahat ng page
 app.use((req, res, next) => {
@@ -237,7 +246,7 @@ app.get('/', isRatings, async (req, res) => {
         bDay: 1,
         bMonth: 1,
         bYear: 2000,
-        campus: 'South',
+        campus: 'Main',
         schoolId: '001',
         yearLevel: 'Second Year',
         photo: '',
@@ -1280,6 +1289,192 @@ app.get('/emp', isLogin, isEmp, (req, res) => {
   res.render('emp', { title: 'Employees', active: 'emp' });
 });
 
+app.get('/empView/:id', isLogin, isEmp, async (req, res) => {
+  try {
+  const msg = req.session.msg;
+  delete req.session.msg;
+    const userId = req.params.id;
+
+    const student = req.users.find(u => u._id.toString() === userId);
+
+    if (!student) {
+      return res.status(404).render('empView', {
+        title: 'Employees',
+        back: 'emp',
+        active: 'emp',
+        error: 'Student not found.',
+        user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      });
+    }
+
+    res.render('empView', {
+      title: 'Employees',
+      back: 'emp',
+      active: 'emp',
+      student,      // the student being viewed
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    });
+
+  } catch (err) {
+    console.error('❌ Error in /empView/:id route:', err);
+    res.status(500).render('empView', {
+      title: 'Employees',
+      back: 'emp',
+      active: 'emp',
+      error: 'Something went wrong while loading the student.',
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null
+    });
+  }
+});
+
+app.post('/check-pass4', async (req, res) => {
+    try {
+        const { currentPass, studentId } = req.body;
+
+        if (!studentId) {
+            return res.json({ valid: false, error: "Student ID not provided" });
+        }
+
+        // Fetch the student by ID
+        const student = await users.findById(studentId); // or your students collection
+
+        if (!student) {
+            return res.json({ valid: false, error: "Student not found" });
+        }
+
+        // Compare password directly (if not hashed)
+        const valid = currentPass === student.password;
+
+        res.json({ valid });
+
+    } catch (err) {
+        console.error(err);
+        res.json({ valid: false, error: "Server error" });
+    }
+});
+
+app.post('/rst4', async (req, res) => {
+  try {
+    const { studentId, currentPass, createPass, confirmPass, redirectUrl } = req.body;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "Student ID not provided!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    const student = await users.findById(studentId);
+    if (!student) {
+      req.session.msg = { type: "error", text: "Student not found!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    if (currentPass.trim() !== student.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    student.password = createPass;
+    await student.save();
+
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    return res.redirect(redirectUrl || '/emp');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect(req.body.redirectUrl || '/emp');
+  }
+});
+
+
+app.post('/edt4', async (req, res) => {
+  try {
+    const { studentId, email, phone, address, redirectUrl } = req.body;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "Student ID not provided!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    if (!email || !phone || !address) {
+      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    const existingUser = await users.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: studentId }
+    });
+
+    if (existingUser) {
+      req.session.msg = { type: "error", text: "Email is already in use!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    await users.findByIdAndUpdate(studentId, { email: email.toLowerCase(), phone, address });
+
+    req.session.msg = { type: "success", text: "Profile updated successfully!" };
+    return res.redirect(redirectUrl || '/emp');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect(req.body.redirectUrl || '/emp');
+  }
+});
+
+
+app.post('/pht4', uploadPhoto.single('photo'), async (req, res) => {
+  try {
+    const { studentId, redirectUrl } = req.body;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "Student ID not provided!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    if (!req.file) {
+      req.session.msg = { type: "error", text: "No photo uploaded!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    const photoUrl = req.file.path;
+    await users.findByIdAndUpdate(studentId, { photo: photoUrl });
+
+    req.session.msg = { type: "success", text: "Photo updated successfully!" };
+    return res.redirect(redirectUrl || '/emp');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Failed to upload photo!" };
+    return res.redirect(req.body.redirectUrl || '/emp');
+  }
+});
+
 app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard', active: 'dsb' });
 });
@@ -1796,17 +1991,23 @@ app.post('/pht3', uploadPhoto.single('photo'), async (req, res) => {
 
 app.get('/cog', isLogin, isDocuments, async (req, res) => {
   try {
-    const allDocs = await documents.find({}).sort({ type: 1 });;
+    const allDocs = await documents.find({}).sort({ type: 1 });
 
-    const msg = req.session.cogMsg;
-    req.session.cogMsg = null; // clear only for this page
+    // Separate messages in session for each form
+    const seedMsg = req.session.seedMsg;
+    const docMsg = req.session.docMsg;
+    req.session.seedMsg = null;
+    req.session.docMsg = null;
 
     res.render('cog', {
       title: 'Settings',
       active: 'cog',
       documents: allDocs,
-      messageSuccess: msg?.type === 'success' ? msg.text : null,
-      messagePass: msg?.type === 'error' ? msg.text : null
+      seedUser: req.seedUser,
+      seedSuccess: seedMsg?.type === 'success' ? seedMsg.text : null,
+      seedError: seedMsg?.type === 'error' ? seedMsg.text : null,
+      docSuccess: docMsg?.type === 'success' ? docMsg.text : null,
+      docError: docMsg?.type === 'error' ? docMsg.text : null
     });
   } catch (err) {
     console.error(err);
@@ -1814,43 +2015,78 @@ app.get('/cog', isLogin, isDocuments, async (req, res) => {
       title: 'Settings',
       active: 'cog',
       documents: [],
-      messageSuccess: null,
-      messagePass: 'Failed to load documents.'
+      seedUser: req.seedUser,
+      seedSuccess: null,
+      seedError: 'Failed to load seed user.',
+      docSuccess: null,
+      docError: 'Failed to load documents.'
     });
   }
 });
 
-
-app.get('/dcc', isLogin, isDocuments, async (req, res) => {
+app.post('/validate-password', isLogin, async (req, res) => {
   try {
-    const allDocs = await documents.find({}).sort({ type: 1 });;
+    const { password } = req.body;
+    const user = await users.findById(req.session.user._id);
 
-    const msg = req.session.cogMsg;
-    req.session.cogMsg = null; // clear only for this page
+    if (!user || user.password !== password) {
+      return res.json({ valid: false });
+    }
 
-    res.render('dcc', {
-      title: 'Settings',
-      active: 'cog',
-      documents: allDocs,
-      messageSuccess: msg?.type === 'success' ? msg.text : null,
-      messagePass: msg?.type === 'error' ? msg.text : null
-    });
+    res.json({ valid: true });
   } catch (err) {
     console.error(err);
-    res.render('dcc', {
-      title: 'Settings',
-      active: 'cog',
-      documents: [],
-      messageSuccess: null,
-      messagePass: 'Failed to load documents.'
-    });
+    res.json({ valid: false });
   }
 });
 
 
-app.post('/update-documents', async (req, res) => {
+
+app.post('/updateSeed', isSeed, isDocuments, async (req, res) => {
   try {
-    const docs = req.body.docs;
+    const { email, phone, confirmPasswordHidden } = req.body;
+    const seedUser = req.seedUser;
+    const currentUser = req.session.user;
+
+    if (!seedUser) {
+      req.session.seedMsg = { type: 'error', text: 'Data cannot be found!' };
+      return res.redirect('/cog');
+    }
+
+    // Verify logged-in user's password (plain text)
+    const user = await users.findById(currentUser._id);
+    if (!user || user.password !== confirmPasswordHidden) {
+      req.session.seedMsg = { type: 'error', text: 'Incorrect password! Try Again Later' };
+      return res.redirect('/cog');
+    }
+
+    // Update seed user info
+    seedUser.email = email;
+    seedUser.phone = phone;
+    await seedUser.save();
+
+    req.session.seedMsg = { type: 'success', text: 'School contact info updated successfully!' };
+    res.redirect('/cog');
+  } catch (err) {
+    console.error('Error updating Seed user:', err);
+    req.session.seedMsg = { type: 'error', text: 'Failed to update.' };
+    res.redirect('/cog');
+  }
+});
+
+app.post('/update-documents', isLogin, async (req, res) => {
+  try {
+    const { docs, confirmPasswordHidden } = req.body;
+    const currentUser = req.session.user;
+
+    // Verify logged-in user's password (plain text)
+    const user = await users.findById(currentUser._id);
+    if (!user || user.password !== confirmPasswordHidden) {
+      req.session.docMsg = { type: 'error', text: 'Incorrect password! Try Again Later' };
+      return res.redirect('/cog');
+    }
+
+    // Update documents
     for (const doc of docs) {
       await documents.findByIdAndUpdate(doc.id, {
         type: doc.type,
@@ -1859,14 +2095,15 @@ app.post('/update-documents', async (req, res) => {
       });
     }
 
-    req.session.cogMsg = { type: "success", text: "Documents updated successfully!" };
-    res.redirect('/dcc');
+    req.session.docMsg = { type: "success", text: "Documents updated successfully!" };
+    res.redirect('/cog');
   } catch (err) {
     console.error(err);
-    req.session.cogMsg = { type: "error", text: "Failed to update documents!" };
-    res.redirect('/dcc');
+    req.session.docMsg = { type: "error", text: "Failed to update documents!" };
+    res.redirect('/cog');
   }
 });
+
 
 
 app.use((req, res) => {

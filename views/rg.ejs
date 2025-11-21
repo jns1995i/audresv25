@@ -55,12 +55,14 @@
   img.logo {
       height: 70%;
   }
+    body::-webkit-scrollbar { display: initial; }
       @media (max-width: 1024px) {
         body {
             display: block;
             overflow-y: auto;
             height: 100vh;
         }
+        body::-webkit-scrollbar { display: none; }
         .mainF {
             flex-direction: column;
             height: auto;

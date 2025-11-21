@@ -41,7 +41,7 @@
     <p class="textCenter textWrap rem2 str500">AU REGISTRAR</p>
     <p class="textCenter textWrap rem1 str500 marginBottom10">PHINMA Araullo University</p>
   </div>
-  <form action="/login" method="POST" class="colorPrimary gap5 width60">
+  <form action="/login" method="POST" class="colorPrimary gap5 width60" id="loginForm">
     <div class="height0 col">
       <% if (error) { %>
         <p class="rem2 str500 wcT textCenter textWrap">Welcome Users</p>
@@ -62,7 +62,7 @@
       <span class="showPass" id="showPass" style="cursor: pointer;">show</span>
     </div>
 
-    <div class="justifyBetween">
+    <div class="justifyBetween" id="MathRecaptcha">
       <input type="text" id="num1" class="width20 textCenter size14" readonly>
       <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-plus"></i></div>
       <input type="text" id="num2" class="width20 textCenter size14" readonly>
@@ -149,3 +149,21 @@
     </div>
     <video autoplay muted loop playsinline controls class="width50 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
 </div>
+
+<script>
+  const loginForm = document.getElementById('loginForm');
+  const answerInput = document.getElementById('answer');
+  const warning = document.getElementById('warning20');
+
+  loginForm.addEventListener('submit', function(e) {
+    const correct = Number(answerInput.dataset.correct);
+    const userAnswer = Number(answerInput.value.trim());
+
+    if (userAnswer !== correct) {
+      e.preventDefault(); // stop form submission
+      warning.classList.remove('hidden');
+      answerInput.style.color = 'red';
+      answerInput.focus();
+    }
+  });
+</script>
