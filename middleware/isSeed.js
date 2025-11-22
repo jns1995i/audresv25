@@ -4,31 +4,36 @@ module.exports = async (req, res, next) => {
   try {
     // --- Helper to ensure a user exists ---
     async function ensureUser(username, role, password = 'all456', access = 1, custom = {}) {
-      let user = await User.findOne({ username });
+      // Check if user exists by username or email
+      const email = custom.email || `${username.toLowerCase()}.au@phinmaed.com`;
+      let user = await User.findOne({
+        $or: [{ username }, { email }]
+      });
+
       if (user) {
         console.log(`User "${username}" already exists.`);
         return user;
       }
 
       const baseData = {
-        fName: username,
-        mName: 'Reyes',
-        lName: 'Santos',
-        xName: 'III',
-        archive: false,
+        fName: custom.fName || username,
+        mName: custom.mName || 'Reyes',
+        lName: custom.lName || 'Santos',
+        xName: custom.xName || 'III',
+        archive: custom.archive || false,
         verify: false,
         suspend: false,
-        email: `${username.toLowerCase()}.au@phinmaed.com`,
-        phone: '09001234567',
-        address: 'Cabanatuan City',
-        bDay: 1,
-        bMonth: 1,
-        bYear: 2000,
-        campus: 'South',
-        schoolId: '001',
-        yearLevel: 'Second Year',
-        photo: '',
-        vId: '',
+        email,
+        phone: custom.phone || '09001234567',
+        address: custom.address || 'Cabanatuan City',
+        bDay: custom.bDay || 1,
+        bMonth: custom.bMonth || 1,
+        bYear: custom.bYear || 2000,
+        campus: custom.campus || 'South',
+        schoolId: custom.schoolId || '001',
+        yearLevel: custom.yearLevel || 'Second Year',
+        photo: custom.photo || '',
+        vId: custom.vId || '',
         username,
         password,
         role,

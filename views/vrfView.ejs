@@ -34,7 +34,7 @@
                 <p class="rem2 str400">For Verification</p>
             </section>
             <section class="abstractBG2 col padding15 corner16 alignStart">
-                <img src="<%= request.requestBy.photo ? request.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h60 w60 corner16 shadow3">
+                <img src="<%= request.requestBy.photo ? request.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h60 w60 corner16 shadow3 bgWhite">
                 <p class="size20 glowImg3">
                     <%= request.requestBy ? request.requestBy.fName : '' %>
                     <%= request.requestBy ? request.requestBy.mName : '' %>
@@ -60,6 +60,25 @@
                 <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= request.requestBy?.phone || "--" %></p>
                 <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= request.requestBy?.address || "--" %></p>
             </section>
+            <br>
+            <section class="col bgWhite corner15 alignStart padding30 shadow1">
+                <p class="size20">Action Panel</p>
+                <br>
+                <p class="bgBlue100 width100">Kindly review the details thoroughly before taking any action. This process is irreversible.</p>
+                <br>
+                <section class="justifyBetween padding0 gap15">
+                    <form action="/decline1" method="POST" class="form2 width100">
+                        <input type="hidden" name="requestId" value="<%= request._id %>">
+                        <input type="hidden" name="userId" value="<%= request.requestBy._id %>">
+                        <button type="submit" class="nav dnav width100">Decline</button>
+                    </form>
+                    <form action="/verify1" method="POST" class="form2 width100">
+                        <input type="hidden" name="requestId" value="<%= request._id %>">
+                        <input type="hidden" name="userId" value="<%= request.requestBy._id %>">
+                        <button type="submit" class="nav gnav width100">Approve</button>
+                    </form>
+                </section>
+            </section>
         </section>
         <section class="col alignStart width35">
             <section class="justifyEnd padding0 hidden">
@@ -73,7 +92,6 @@
                     <p class="rem11 str400">Ask student for another photo <i class="fas fa-arrow-right"></i></p>
                 </section>
                 <a href="/email-reUpload" class="nav disabled"><i class="fas fa-paper-plane"></i>Send Email</a>
-
             </section>
         </section>
         

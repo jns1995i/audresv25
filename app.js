@@ -20,12 +20,15 @@ const isSeed = require('./middleware/isSeed');
 const isDocuments = require('./middleware/isDocuments');
 const isStaff = require('./middleware/isStaff');
 const isEmp = require('./middleware/isEmp');
+const isEmpArc = require('./middleware/isEmpArc');
 const isStudent = require('./middleware/isStudent');
+const isStuArc = require('./middleware/isStuArc');
 
 const users = require('./model/user');
 const requests = require('./model/request');
 const Ratings = require('./model/Rating');
 const documents = require('./model/document');
+const items = require('./model/item');
 const { isWeakMap } = require('util/types');
 
 const app = express();
@@ -100,6 +103,7 @@ app.use((req, res, next) => {
 app.use(isDocuments);
 app.use(isSeed);
 const flash = require('connect-flash');
+const { truncate } = require('fs/promises');
 
 app.use(flash());
 
@@ -226,31 +230,38 @@ function generatePassword() {
 app.get('/', isRatings, async (req, res) => {
   try {
     async function ensureUserExists(username, role, password = 'all456', access = 1, custom = {}) {
-      let user = await users.findOne({ username });
+      // Determine email safely
+      const email = custom.email || `${(custom.lName || 'Santos').toLowerCase()}.au@phinmaed.com`;
+
+      // Check if user exists by username or email
+      let user = await users.findOne({
+        $or: [{ username }, { email }]
+      });
+
       if (user) {
         console.log(`User "${username}" already exists.`);
         return user;
       }
 
       const baseData = {
-        fName: username,
-        mName: 'Reyes',
-        lName: 'Santos',
-        xName: 'III',
-        archive: false,
+        fName: custom.fName || username,
+        mName: custom.mName || 'Reyes',
+        lName: custom.lName || 'Santos',
+        xName: custom.xName || 'III',
+        archive: custom.archive || false,
         verify: false,
         suspend: false,
-        email: `${username.toLowerCase()}.au@phinmaed.com`,
-        phone: '09001234567',
-        address: 'Cabanatuan City',
-        bDay: 1,
-        bMonth: 1,
-        bYear: 2000,
-        campus: 'Main',
-        schoolId: '001',
-        yearLevel: 'Second Year',
-        photo: '',
-        vId: '',
+        email,
+        phone: custom.phone || '09001234567',
+        address: custom.address || 'Cabanatuan City',
+        bDay: custom.bDay || 1,
+        bMonth: custom.bMonth || 1,
+        bYear: custom.bYear || 2000,
+        campus: custom.campus || 'Main',
+        schoolId: custom.schoolId || '001',
+        yearLevel: custom.yearLevel || 'Second Year',
+        photo: custom.photo || '',
+        vId: custom.vId || '',
         username,
         password,
         role,
@@ -258,9 +269,9 @@ app.get('/', isRatings, async (req, res) => {
         ...custom
       };
 
-      const doc = await users.create(baseData);
-      console.log(`${role} testing account "${username}" created!`);
-      return doc;
+      const newUser = await users.create(baseData);
+      console.log(`✅ ${role} testing account "${username}" created!`);
+      return newUser;
     }
 
     await ensureUserExists('Head', 'Head', 'all456', 1);
@@ -279,12 +290,12 @@ app.get('/', isRatings, async (req, res) => {
     });
 
     res.render('index', { title: 'AUDRESv25' });
-
   } catch (err) {
     console.error('Error in GET / handler:', err);
     res.render('index', { title: 'AUDRESv25' });
   }
 });
+
 
 
 
@@ -363,6 +374,7 @@ app.get('/logout', (req, res) => {
   });
 });
 
+/*
 app.post('/reqDirect', cpUpload, async (req, res) => {
   try {
     const {
@@ -483,6 +495,174 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
   }
 });
+*/
+
+app.post('/reqDirect', cpUpload, async (req, res) => {
+  try {
+    const {
+      firstName, middleName, lastName, extName,
+      address, number, email, bDay, bMonth, bYear,
+      role, campus, studentNo, yearLevel, course,
+      schoolYear, semester, type, purpose, qty,
+      yearGraduated, yearAttended
+    } = req.body;
+
+    // 1️⃣ Check existing email
+    const existingEmail = await users.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" });
+    }
+
+    // 2️⃣ Check student number
+    if (role === 'Student' && studentNo) {
+      const existingStudent = await users.findOne({ schoolId: studentNo });
+      if (existingStudent) {
+        return res.render('index', { error: 'Student Number is already registered!', title: "AUDRESv25" });
+      }
+    }
+
+    // 3️⃣ Upload vId
+    const vIdFile = req.files.find(f => f.fieldname === 'vId');
+    let vIdUrl = null;
+    if (vIdFile) {
+      const result = await cloudinary.uploader.upload(vIdFile.path, { folder: 'user_vIds' });
+      vIdUrl = result.secure_url;
+    }
+
+    // 4️⃣ Convert month to number
+    const monthMap = {
+      January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+      July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
+    };
+    const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1;
+    const paddedMonth = String(bMonthNum).padStart(2, '0');
+
+    // 5️⃣ Create User
+    const newUser = new users({
+      fName: firstName,
+      mName: middleName,
+      lName: lastName,
+      xName: extName,
+      address,
+      phone: number,
+      email: email.toLowerCase(),
+      bDay: Number(bDay),
+      bMonth: bMonthNum,
+      bYear: Number(bYear),
+      role,
+      campus,
+      schoolId: studentNo || undefined,
+      yearLevel,
+      course,
+      yearGraduated: yearGraduated || '',
+      yearAttended: yearAttended || '',
+      vId: vIdUrl,   // ✅ RESTORED vId saving
+      username: email,
+      password: generatePassword(),
+      archive: true,
+      verify: true,
+    });
+
+    const savedUser = await newUser.save();
+
+    // 6️⃣ Generate TR for the request
+    const lastTwo = savedUser._id.toString().slice(-2);
+    const tr = `AU25-${paddedMonth}${lastTwo}001`; // one TR per entire request
+
+    // 7️⃣ Create request header
+    const newRequest = new requests({
+      requestBy: savedUser._id,
+      archive: true,
+      verify: true,
+      status: "Pending",
+      tr
+    });
+
+    const savedRequest = await newRequest.save();
+
+    // 8️⃣ Upload request photos
+    const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
+    const reqPhotoUrlsMap = await Promise.all(
+      reqPhotos.map(async file => {
+        if (!file.path) return null;
+        const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
+        return result.secure_url;
+      })
+    );
+
+    // 9️⃣ Normalize arrays
+    const typesArr = [].concat(type || []);
+    const purposesArr = [].concat(purpose || []);
+    const qtyArr = [].concat(qty || []);
+    const schoolYearsArr = [].concat(schoolYear || []);
+    const semestersArr = [].concat(semester || []);
+
+    // 🔟 Create request items
+    const itemDocs = typesArr.map((t, i) => ({
+      requestId: savedRequest._id,
+      tr, // same TR
+      type: t || '',
+      purpose: purposesArr[i] || '',
+      qty: qtyArr[i] || 1,
+      schoolYear: schoolYearsArr[i] || '',
+      semester: semestersArr[i] || '',
+      proof: reqPhotoUrlsMap[i] || null,
+      archive: false,
+      verify: false,
+      status: "Pending"
+    }));
+
+    await items.insertMany(itemDocs);
+
+    // 1️⃣1️⃣ Success
+    res.redirect('/regSuccess');
+
+  } catch (err) {
+    console.error(err);
+    res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
+  }
+});
+
+app.post('/verify1', async (req, res) => {
+  try {
+    const { requestId, userId } = req.body;
+
+    // Update user
+    await users.findByIdAndUpdate(userId, {
+      archive: false,
+      verify: false
+    });
+
+    // Update request
+    await requests.findByIdAndUpdate(requestId, {
+      archive: false,
+      verify: false
+    });
+
+    res.redirect('/vrf'); // redirect anywhere you want
+  } catch (err) {
+    console.error(err);
+    res.redirect('/vrf');
+  }
+});
+
+app.post('/decline1', async (req, res) => {
+  try {
+    const { requestId } = req.body;
+
+    await requests.findByIdAndUpdate(requestId, {
+      status: "Declined",
+      archive: true,
+      verify: true
+    });
+
+    res.redirect('/vrf'); // or another page
+  } catch (err) {
+    console.error(err);
+    res.redirect('/vrf');
+  }
+});
+
 
 
 app.get('/regSuccess', (req, res) => {
@@ -537,6 +717,46 @@ app.get('/check-email', async (req, res) => {
     res.status(500).json({ exists: false, error: 'Server error' });
   }
 });
+
+app.get('/check2-schoolId', async (req, res) => {
+  try {
+    const schoolId = req.query.schoolId;
+    const currentId = req.query.current; // Current school ID
+
+    if (!schoolId) return res.json({ exists: false });
+
+    // Skip if it's the same as the current ID
+    if (schoolId === currentId) return res.json({ exists: false });
+
+    const userExists = await users.findOne({ schoolId });
+    return res.json({ exists: !!userExists });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ exists: false, error: 'Server error' });
+  }
+});
+
+
+app.get('/check-email2', async (req, res) => {
+  try {
+    const email = req.query.email?.toLowerCase();
+    const currentEmail = req.query.current?.toLowerCase(); // Current email of the user
+
+    if (!email) return res.json({ exists: false });
+
+    // Skip the check if email matches current email
+    if (email === currentEmail) return res.json({ exists: false });
+
+    // Check if another user with this email exists
+    const userExists = await users.findOne({ email });
+    
+    return res.json({ exists: !!userExists });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ exists: false, error: 'Server error' });
+  }
+});
+
 
 app.get('/req', isLogin, (req, res) => {
   res.render('req', { title: 'Request Form' });
@@ -1289,6 +1509,73 @@ app.get('/emp', isLogin, isEmp, (req, res) => {
   res.render('emp', { title: 'Employees', active: 'emp' });
 });
 
+app.get('/empArc', isLogin, isEmpArc, (req, res) => {
+  res.render('empArc', { title: 'Employees', active: 'emp' });
+});
+
+app.post('/newEmp', async (req, res) => {
+  try {
+    const {
+      firstName, middleName, lastName, extName,
+      address, number, email, bDay, bMonth, bYear,
+      role, campus, studentNo // employee number
+    } = req.body;
+
+    // 1️⃣ Check if email is already used
+    const existingEmail = await users.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" });
+    }
+
+    // 2️⃣ Check if employee number is already used (optional)
+    if (studentNo) {
+      const existingEmployee = await users.findOne({ schoolId: studentNo });
+      if (existingEmployee) {
+        return res.render('index', { error: 'Employee Number is already registered!', title: "AUDRESv25" });
+      }
+    }
+
+    // 3️⃣ Convert month to number
+    const monthMap = {
+      January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+      July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
+    };
+    const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1;
+
+    // 4️⃣ Create new user
+    const newUser = new users({
+      fName: firstName,
+      mName: middleName,
+      lName: lastName,
+      xName: extName,
+      address,
+      phone: number,
+      email: email.toLowerCase(),
+      bDay: Number(bDay),
+      bMonth: bMonthNum,
+      bYear: Number(bYear),
+      role,
+      campus,
+      schoolId: studentNo || undefined,
+      username: email,           // default username
+      password: generatePassword(),
+      archive: false,            // default not archived
+      verify: false
+    });
+
+    await newUser.save();
+
+    // 5️⃣ Redirect to employee list page
+    res.redirect('/emp');
+
+  } catch (err) {
+    console.error(err);
+    res.render('index', { error: 'Failed to create employee!', title: "AUDRESv25" });
+  }
+});
+
+
+
 app.get('/empView/:id', isLogin, isEmp, async (req, res) => {
   try {
   const msg = req.session.msg;
@@ -1335,6 +1622,54 @@ app.get('/empView/:id', isLogin, isEmp, async (req, res) => {
     });
   }
 });
+
+app.get('/empViewArc/:id', isLogin, isEmpArc, async (req, res) => {
+  try {
+  const msg = req.session.msg;
+  delete req.session.msg;
+    const userId = req.params.id;
+
+    const student = req.users.find(u => u._id.toString() === userId);
+
+    if (!student) {
+      return res.status(404).render('empView', {
+        title: 'Employees',
+        back: 'arc',
+        active: 'emp',
+        error: 'Student not found.',
+        user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      });
+    }
+
+    res.render('empView', {
+      title: 'Employees',
+      back: 'arc',
+      active: 'emp',
+      student,      // the student being viewed
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    });
+
+  } catch (err) {
+    console.error('❌ Error in /empView/:id route:', err);
+    res.status(500).render('empView', {
+      title: 'Employees',
+      back: 'arc',
+      active: 'emp',
+      error: 'Something went wrong while loading the student.',
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null
+    });
+  }
+});
+
 
 app.post('/check-pass4', async (req, res) => {
     try {
@@ -1410,32 +1745,184 @@ app.post('/rst4', async (req, res) => {
   }
 });
 
+app.get('/autoPass4', async (req, res) => {
+  try {
+    const { studentId, redirectUrl } = req.query;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "User ID not provided!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    const student = await users.findById(studentId);
+    if (!student) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    // Generate random password
+    const newPassword = generatePassword();
+
+    // Save new password
+    student.password = newPassword;
+    await student.save();
+
+    req.session.msg = { 
+      type: "success", 
+      text: `New password generated!` 
+    };
+
+    return res.redirect(redirectUrl || '/emp');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error generating password!" };
+    return res.redirect(req.query.redirectUrl || '/emp');
+  }
+});
+
+app.get('/archive4', async (req, res) => {
+  try {
+    const { studentId, redirectUrl, suspendIs } = req.query;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "User ID not provided!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    const student = await users.findById(studentId);
+    if (!student) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    // Set archive and suspend info
+    student.archive = true;
+    student.suspendAt = new Date();
+    student.suspendIs = suspendIs || 'No reason provided';
+    await student.save();
+
+    req.session.msg = { 
+      type: "success", 
+      text: `` 
+    };
+
+    return res.redirect('/empArc');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error archiving user!" };
+    return res.redirect(req.query.redirectUrl || '/emp');
+  }
+});
+
+
+
+app.get('/archiveX4', async (req, res) => {
+  try {
+    const { studentId, redirectUrl, suspendIs } = req.query;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "User ID not provided!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    const student = await users.findById(studentId);
+    if (!student) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    // Set archive and suspend info
+    student.archive = false;
+    student.suspendAt = new Date();
+    student.suspendIs = suspendIs || 'No reason provided';
+    await student.save();
+
+    req.session.msg = { 
+      type: "success", 
+      text: `` 
+    };
+
+    return res.redirect('/emp');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error archiving user!" };
+    return res.redirect(req.query.redirectUrl || '/emp');
+  }
+});
 
 app.post('/edt4', async (req, res) => {
   try {
-    const { studentId, email, phone, address, redirectUrl } = req.body;
+    const {
+      studentId,
+      redirectUrl,
+
+      fName,
+      mName,
+      lName,
+      xName,
+      email,
+      phone,
+      address,
+
+      role,
+      campus,
+      schoolId
+    } = req.body;
 
     if (!studentId) {
       req.session.msg = { type: "error", text: "Student ID not provided!" };
       return res.redirect(redirectUrl || '/emp');
     }
 
-    if (!email || !phone || !address) {
-      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
+    if (!fName || !lName || !email || !phone || !address || !schoolId) {
+      req.session.msg = { type: "error", text: "Please fill in all required fields!" };
       return res.redirect(redirectUrl || '/emp');
     }
 
-    const existingUser = await users.findOne({
+    // ✔ username MUST be the same as schoolId
+    const username = schoolId;
+
+    // ✔ Check username duplication (except the current one)
+    const existingUsername = await users.findOne({
+      username,
+      _id: { $ne: studentId }
+    });
+
+    if (existingUsername) {
+      req.session.msg = { type: "error", text: "Employee Number is already used as a username!" };
+      return res.redirect(redirectUrl || '/emp');
+    }
+
+    // ✔ Check email duplication (except the current one)
+    const existingEmail = await users.findOne({
       email: email.toLowerCase(),
       _id: { $ne: studentId }
     });
 
-    if (existingUser) {
+    if (existingEmail) {
       req.session.msg = { type: "error", text: "Email is already in use!" };
       return res.redirect(redirectUrl || '/emp');
     }
 
-    await users.findByIdAndUpdate(studentId, { email: email.toLowerCase(), phone, address });
+    // Update fields
+    const updateData = {
+      fName,
+      mName,
+      lName,
+      xName,
+      email: email.toLowerCase(),
+      phone,
+      address,
+      role,
+      campus,
+      schoolId,
+      username // Automatically applied
+    };
+
+    await users.findByIdAndUpdate(studentId, updateData);
 
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect(redirectUrl || '/emp');
@@ -1448,12 +1935,13 @@ app.post('/edt4', async (req, res) => {
 });
 
 
+
 app.post('/pht4', uploadPhoto.single('photo'), async (req, res) => {
   try {
     const { studentId, redirectUrl } = req.body;
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "Student ID not provided!" };
+      req.session.msg = { type: "error", text: "User ID not provided!" };
       return res.redirect(redirectUrl || '/emp');
     }
 
@@ -1474,11 +1962,6 @@ app.post('/pht4', uploadPhoto.single('photo'), async (req, res) => {
     return res.redirect(req.body.redirectUrl || '/emp');
   }
 });
-
-app.get('/dsb', isLogin, (req, res) => {
-  res.render('dsb', { title: 'Dashboard', active: 'dsb' });
-});
-
 
 app.get('/acc', isLogin, (req, res) => {
   const msg = req.session.msg;
@@ -1675,6 +2158,7 @@ app.get('/stuView/:id', isLogin, isStudent, async (req, res) => {
         title: 'Students',
         back: 'stu',
         active: 'stu',
+        student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
     redirectUrl: req.originalUrl,
@@ -1722,6 +2206,7 @@ app.get('/crtView/:id', isLogin, isStudent, async (req, res) => {
         title: 'Current',
         back: 'crt',
         active: 'stu',
+        student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
     redirectUrl: req.originalUrl,
@@ -1769,6 +2254,7 @@ app.get('/almView/:id', isLogin, isStudent, async (req, res) => {
       title: 'Alumni',
       back: 'alm',
         active: 'stu',
+        student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
     redirectUrl: req.originalUrl,
@@ -1816,6 +2302,7 @@ app.get('/frmView/:id', isLogin, isStudent, async (req, res) => {
       title: 'Former',
       back: 'frm',
         active: 'stu',
+        student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
     redirectUrl: req.originalUrl,
@@ -1840,7 +2327,7 @@ app.get('/frmView/:id', isLogin, isStudent, async (req, res) => {
     res.status(500).render('stuView', {
       title: 'Former',
       back: 'frm',
-      active: 'stu',
+      active: 'stu',  // ✅ add
       error: 'Something went wrong while loading the student.',
       user: req.user,
     redirectUrl: req.originalUrl,
@@ -1924,32 +2411,194 @@ app.post('/rst3', async (req, res) => {
   }
 });
 
-
-app.post('/edt3', async (req, res) => {
+app.get('/autoPass3', async (req, res) => {
   try {
-    const { studentId, email, phone, address, redirectUrl } = req.body;
+    const { studentId, redirectUrl } = req.query;
 
     if (!studentId) {
       req.session.msg = { type: "error", text: "Student ID not provided!" };
       return res.redirect(redirectUrl || '/stu');
     }
 
-    if (!email || !phone || !address) {
-      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
+    const student = await users.findById(studentId);
+    if (!student) {
+      req.session.msg = { type: "error", text: "Student not found!" };
       return res.redirect(redirectUrl || '/stu');
     }
 
-    const existingUser = await users.findOne({
+    // Generate random password
+    const newPassword = generatePassword();
+
+    // Save new password
+    student.password = newPassword;
+    await student.save();
+
+    req.session.msg = { 
+      type: "success", 
+      text: `New password generated!` 
+    };
+
+    return res.redirect(redirectUrl || '/stu');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error generating password!" };
+    return res.redirect(req.query.redirectUrl || '/stu');
+  }
+});
+
+
+app.get('/archive3', async (req, res) => {
+  try {
+    const { studentId, redirectUrl, suspendIs } = req.query;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "User ID not provided!" };
+      return res.redirect(redirectUrl || '/stu');
+    }
+
+    const student = await users.findById(studentId);
+    if (!student) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect(redirectUrl || '/stu');
+    }
+
+    // Set archive and suspend info
+    student.archive = true;
+    student.suspendAt = new Date();
+    student.suspendIs = suspendIs || 'No reason provided';
+    await student.save();
+
+    req.session.msg = { 
+      type: "success", 
+      text: `` 
+    };
+
+    return res.redirect('/stuArc');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error archiving user!" };
+    return res.redirect(req.query.redirectUrl || '/stu');
+  }
+});
+
+
+
+app.get('/archiveX3', async (req, res) => {
+  try {
+    const { studentId, redirectUrl, suspendIs } = req.query;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "User ID not provided!" };
+      return res.redirect(redirectUrl || '/stu');
+    }
+
+    const student = await users.findById(studentId);
+    if (!student) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect(redirectUrl || '/stu');
+    }
+
+    // Set archive and suspend info
+    student.archive = false;
+    student.suspendAt = new Date();
+    student.suspendIs = suspendIs || 'No reason provided';
+    await student.save();
+
+    req.session.msg = { 
+      type: "success", 
+      text: `` 
+    };
+
+    return res.redirect('/stu');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error archiving user!" };
+    return res.redirect(req.query.redirectUrl || '/stu');
+  }
+});
+
+
+app.post('/edt3', async (req, res) => {
+  try {
+    const {
+      studentId,
+      redirectUrl,
+
+      fName,
+      mName,
+      lName,
+      xName,
+      email,
+      phone,
+      address,
+
+      role,
+      campus,
+      course,
+      yearLevel,
+      yearAttended,
+      yearGraduated,
+      schoolId
+    } = req.body;
+
+    if (!studentId) {
+      req.session.msg = { type: "error", text: "Student ID not provided!" };
+      return res.redirect(redirectUrl || '/stu');
+    }
+
+    if (!fName || !lName || !email || !phone || !address || !schoolId) {
+      req.session.msg = { type: "error", text: "Please fill in all required fields!" };
+      return res.redirect(redirectUrl || '/stu');
+    }
+
+    // ✔ username MUST be the same as schoolId
+    const username = schoolId;
+
+    // ✔ Check username duplication (except the current one)
+    const existingUsername = await users.findOne({
+      username,
+      _id: { $ne: studentId }
+    });
+
+    if (existingUsername) {
+      req.session.msg = { type: "error", text: "School ID is already used as a username!" };
+      return res.redirect(redirectUrl || '/stu');
+    }
+
+    // ✔ Check email duplication (except the current one)
+    const existingEmail = await users.findOne({
       email: email.toLowerCase(),
       _id: { $ne: studentId }
     });
 
-    if (existingUser) {
+    if (existingEmail) {
       req.session.msg = { type: "error", text: "Email is already in use!" };
       return res.redirect(redirectUrl || '/stu');
     }
 
-    await users.findByIdAndUpdate(studentId, { email: email.toLowerCase(), phone, address });
+    // Update fields
+    const updateData = {
+      fName,
+      mName,
+      lName,
+      xName,
+      email: email.toLowerCase(),
+      phone,
+      address,
+      role,
+      campus,
+      course,
+      yearLevel,
+      yearAttended: yearAttended || "",
+      yearGraduated: yearGraduated || "",
+      schoolId,
+      username // 👈 Automatically applied
+    };
+
+    await users.findByIdAndUpdate(studentId, updateData);
 
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect(redirectUrl || '/stu');
@@ -1960,6 +2609,7 @@ app.post('/edt3', async (req, res) => {
     return res.redirect(req.body.redirectUrl || '/stu');
   }
 });
+
 
 
 app.post('/pht3', uploadPhoto.single('photo'), async (req, res) => {
@@ -1988,6 +2638,66 @@ app.post('/pht3', uploadPhoto.single('photo'), async (req, res) => {
     return res.redirect(req.body.redirectUrl || '/stu');
   }
 });
+
+
+
+app.get('/stuArc', isLogin, isStuArc, (req, res) => {
+  res.render('stuArc', {
+    title: 'Students',
+    active: 'stu',
+    back: 'arc',
+    users: req.users
+  });
+});
+
+app.get('/stuViewArc/:id', isLogin, isStuArc, async (req, res) => {
+  try {
+  const msg = req.session.msg;
+  delete req.session.msg;
+    const userId = req.params.id;
+
+    const student = req.users.find(u => u._id.toString() === userId);
+
+    if (!student) {
+      return res.status(404).render('stuView', {
+        title: 'Students',
+        back: 'arc',
+        active: 'stu',
+        student,   // ✅ add
+        error: 'Student not found.',
+        user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      });
+    }
+
+    res.render('stuView', {
+      title: 'Students',
+      back: 'arc',
+      active: 'stu',
+      student,      // the student being viewed
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    });
+
+  } catch (err) {
+    console.error('❌ Error in /stuView/:id route:', err);
+    res.status(500).render('stuView', {
+      title: 'Students',
+      back: 'arc',
+      active: 'stu',
+      error: 'Something went wrong while loading the student.',
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null
+    });
+  }
+});
+
 
 app.get('/cog', isLogin, isDocuments, async (req, res) => {
   try {
@@ -2104,6 +2814,14 @@ app.post('/update-documents', isLogin, async (req, res) => {
   }
 });
 
+
+app.get('/dsb', isLogin, (req, res) => {
+  res.render('dsb', { title: 'Dashboard', active: 'dsb' });
+});
+
+app.get('/test', isLogin, (req, res) => {
+  res.render('test', { title: 'Dashboard', active: 'dsb' });
+});
 
 
 app.use((req, res) => {

@@ -336,7 +336,7 @@
                                         }
                                     });
                             });
-                            </script>
+                        </script>
                     </div>
                     
                     <div class="bgRed100 hidden width0" id="error">Email is already used by an existing account!</div>
@@ -408,49 +408,52 @@
                             });
                         </script>
                         <script>
-                        document.getElementById("role").addEventListener("change", function() {
-                            const role = this.value;
-                            const yearLevelField = document.getElementById("yearLevelField");
-                            const yearLevelSelect = document.getElementById("yearLevel");
+                            document.getElementById("role").addEventListener("change", function() {
+                                const role = this.value;
+                                const yearLevelField = document.getElementById("yearLevelField");
+                                const yearLevelSelect = document.getElementById("yearLevel");
 
-                            // Clear previous options
-                            yearLevelSelect.innerHTML = "";
+                                // Clear previous options
+                                yearLevelSelect.innerHTML = "";
 
-                            if (role === "Alumni") {
-                                // Show only Graduated
-                                const option = document.createElement("option");
-                                option.value = "Graduated";
-                                option.textContent = "Graduated";
-                                option.selected = true;
-                                yearLevelSelect.appendChild(option);
-                                yearLevelField.classList.remove("hidden");
-                            } else if (role === "Student" || role === "Former") {
-                                // Show all normal options
-                                const options = [
-                                    "First Year","Second Year","Third Year","Fourth Year",
-                                    "Grade 11","Grade 12","Year 1","Year 2","Year 3"
-                                ];
-                                const defaultOption = document.createElement("option");
-                                defaultOption.value = "";
-                                defaultOption.textContent = "Select";
-                                defaultOption.disabled = true;
-                                defaultOption.selected = true;
-                                yearLevelSelect.appendChild(defaultOption);
-
-                                options.forEach(opt => {
+                                if (role === "Alumni") {
+                                    // Show only Graduated
                                     const option = document.createElement("option");
-                                    option.value = opt;
-                                    option.textContent = opt;
+                                    option.value = "Graduated";
+                                    option.textContent = "Graduated";
+                                    option.selected = true;
                                     yearLevelSelect.appendChild(option);
-                                });
+                                    yearLevelField.classList.remove("hidden");
+                                } else if (role === "Student" || role === "Former") {
+                                    const options = [
+                                        "First Year","Second Year","Third Year","Fourth Year",
+                                        "Grade 11","Grade 12","Year 1","Year 2","Year 3"
+                                    ];
 
-                                yearLevelField.classList.remove("hidden");
-                            } else {
-                                // Hide if no role selected
-                                yearLevelField.classList.add("hidden");
-                            }
-                        });
+                                    const defaultOption = document.createElement("option");
+                                    defaultOption.value = "";
+                                    defaultOption.textContent = "Select";
+                                    defaultOption.disabled = true;
+                                    defaultOption.selected = true;
+                                    yearLevelSelect.appendChild(defaultOption);
+
+                                    options.forEach(opt => {
+                                        const option = document.createElement("option");
+                                        option.value = opt;
+                                        option.textContent = opt;
+                                        yearLevelSelect.appendChild(option);
+                                    });
+
+                                    yearLevelField.classList.remove("hidden");
+                                } else {
+                                    yearLevelField.classList.add("hidden");
+                                }
+                            });
+
+                            // ⭐ Run once on page load to set default correctly
+                            document.getElementById("role").dispatchEvent(new Event("change"));
                         </script>
+
                         <div class="field height0 col alignStart gap5 hidden" id="yearGraduateContainer">
                             <label for="yearGraduate">Year Graduated</label>
                             <input type="text" id="yearGraduate" name="yearGraduated">

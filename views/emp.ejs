@@ -15,15 +15,16 @@
         position: relative !important;
         margin-bottom: 200px;
         height: 100% !important;
+        padding: 10px;
     }
 </style>
 
-<div class="bgYellow unseen corner15 col padding10" id="empCard">
+<div class="bgYellow unseen corner15 col empCard2" id="empCard">
     <section class="justifyEnd padding0 width80">
         <a href="javascript:void(0)" class="nav" id="empClose"><i class="fas fa-xmark"></i> Close</a>
     </section>
     <br>
-    <form action="" class="gap30 row padding30 width80 alignStart">
+    <form action="/newEmp" method="POST" class="gap30 row padding30 width80 alignStart empCard2">
         <section class="col alignStart width40 gap10">
             <p class="rem24 str500">New Employee</p>
             <div class="field gap5">
@@ -163,25 +164,19 @@
     </form>
 </div>
 
-<% if (!users || users.length === 0) { %>
-<% } else { %>
-    <p class="size20 str500 marginLeft10">Admins</p>
-    <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
-        <% users.forEach(user => { %>
-            <% if ( user.role === "Head") { %>
-            <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
-                <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
-                <p class="size14 textWrap textCenter str500"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
-                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
-            </a>
-            <% } %>
-        <% }) %>
-            <div href="" class="height0 w120 col gap5">
-                <a href="javascript:void(0)" class="h80 w80 corner500 borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
-            </div>
-    </section>
 
-    <br>
+<section class="justifyBetween bgWhite corner20">
+    <p class="size36 str400 marginLeft10">Employee Accounts Management</p>
+    <a href="/empArc" class="nav"><i class="fas fa-archive"></i> Archive</a>
+</section>
+<br>
+
+<% if (!users || users.length === 0) { %>
+    <section class="height50 corner20 empCard paddingInline0 borderGray borderDotted marginBlock20 col">
+        <%- include('icons/notFound') %>
+        <p class="size20 str500">No Record Found!</p>
+    </section>
+<% } else { %>
     
     <p class="size20 str500 marginLeft10">Registrar</p>
     <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
@@ -195,43 +190,68 @@
             <% } %>
         <% }) %>
             <div href="" class="height0 w120 col gap5">
-                <a href="javascript:void(0)" class="h80 w80 corner500 borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
+                <a href="javascript:void(0)" class="h80 w80 corner500 borderGray borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
+                <p class="size14 textWrap textCenter str500 opacity0"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                <p class="size10 textWrap textCenter green opacity0"><i class="fas fa-user-cog"></i> <%= user.role || 'Unknown' %></p>
             </div>
     </section>
 
     <br>
-    
-    <p class="size20 str500 marginLeft10">Accounting</p>
-    <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
-        <% users.forEach(user => { %>
-            <% if ( user.role === "Accounting") { %>
-            <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
-                <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
-                <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
-                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
-            </a>
-            <% } %>
-        <% }) %>
-            <div href="" class="height0 w120 col gap5">
-                <a href="javascript:void(0)" class="h80 w80 corner500 borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
-            </div>
-    </section>
+    <section class="padding0 gap20"> 
+        <section class="col alignStart padding0 width45">
+            <p class="size20 str500 marginLeft10">Admins</p>
+            <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+                <% users.forEach(user => { %>
+                    <% if ( user.role === "Head"  || user.role === "Admin") { %>
+                    <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
+                        <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
+                        <p class="size14 textWrap textCenter str500"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                        <p class="size10 textWrap textCenter green"><i class="fas fa-user-cog"></i> <%= user.role || 'Unknown' %></p>
+                    </a>
+                    <% } %>
+                <% }) %>
+                    <div href="" class="height0 w120 col gap5">
+                        <a href="javascript:void(0)" class="h80 w80 corner500 borderGray borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
+                        <p class="size14 textWrap textCenter str500 opacity0"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                        <p class="size10 textWrap textCenter green opacity0"><i class="fas fa-user-cog"></i> <%= user.role || 'Unknown' %></p>
+                    </div>
+            </section>
+        </section>
+        <section class="col alignStart padding0 width55">
+            <p class="size20 str500 marginLeft10">Accounting</p>
+            <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+                <% users.forEach(user => { %>
+                    <% if ( user.role === "Accounting") { %>
+                    <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
+                        <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
+                        <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                        <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
+                    </a>
+                    <% } %>
+                <% }) %>
+                    <div href="" class="height0 w120 col gap5">
+                        <a href="javascript:void(0)" class="h80 w80 corner500 borderGray borderDotted empBtn"><i class="fas fa-plus size30 gray"></i></a>
+                        <p class="size14 textWrap textCenter str500 opacity0"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
+                        <p class="size10 textWrap textCenter green opacity0"><i class="fas fa-user-cog"></i> <%= user.role || 'Unknown' %></p>
+                    </div>
+            </section>
+        </section>
+    </section>   
 <% } %>
 
 <script>
-    document.querySelectorAll(".empBtn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        const empCard = document.getElementById("empCard");
-        empCard.classList.remove("unseen");
-        empCard.classList.add("seen");
+function toggleCards(show) {
+    document.querySelectorAll(".empCard2").forEach(card => {
+        card.classList.toggle("seen", show);
+        card.classList.toggle("unseen", !show);
     });
+}
+
+document.querySelectorAll(".empBtn").forEach(btn => {
+    btn.addEventListener("click", () => toggleCards(true));
 });
 
-document.getElementById("empClose").addEventListener("click", () => {
-    const empCard = document.getElementById("empCard");
-    empCard.classList.remove("seen");
-    empCard.classList.add("unseen");
-});
+document.getElementById("empClose").addEventListener("click", () => toggleCards(false));
 
 </script>
 <script>

@@ -6,25 +6,34 @@
         width: 100% !important;
         border-radius: 25px;
     }
+    #warningIcon {background-color:rgb(245,235,255);border:0.5px solid rgba(138,43,226,0.6);color:blueviolet !important; padding: 5px; border-radius: 0.7rem; text-align: center;
+    }
 </style>
 
 <a href="<% if ( back === 'emp') { %> /emp
-<% } else if ( back === 'empArc') { %> /empArc
+<% } else if ( back === 'arc') { %> /empArc
 <% } else { %> /emp <% } %> " class="nav absolute left10 top10"><i class="fas fa-chevron-left"></i> Previous</a>
 
 <div class="width100 gap10" id="prfMain">
 
     <div class="height0 width40 col padding10 prfCard bgWhite corner30 shadow1" id="mCard">
         <div class="height0 padding20 alignStart col relative corner20 abstractBG2">
-            <img src="<%= student.photo ? student.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
+            <div class="height0 width0 relative corner15">
+                <img src="<%= student.photo ? student.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
+                <a href="javascript:void(0)" class="nav cnav porcelain absolute left0 bottom0" id="photoBtn"><i class="fas fa-camera"></i></a>
+            </div>
             <p class="rem2 str400"><%= student.fName %> <%= student.mName %> <%= student.lName %> <%= student.xName %></p>
             <p class="rem14 str400"><i class="bi bi-patch-check-fill rem14"></i> <%= student.role %></p>
 
             <div class="height0 width0 gap20 padding5 absolute top10 right10" id="controls">
                 <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 30px;">
+                    <% if ( student.archive === true ) { %>
+                    <a href="javascript:vod(0)" class="nav liquid corner30" id="archiveBtnX"><i class="fas fa-rotate"></i>Restore</a>
+                    <% } else { %>
                     <a href="javascript:vod(0)" class="nav cnav liquid" id="editBtn"><i class="fas fa-pen"></i></a>
-                    <a href="javascript:void(0)" class="nav cnav liquid" id="photoBtn"><i class="fas fa-camera"></i></a>
                     <a href="javascript:vod(0)" class="nav cnav liquid" id="resetBtn"><i class="fas fa-key"></i></a>
+                    <a href="javascript:vod(0)" class="nav liquid corner30" id="archiveBtn"><i class="fas fa-archive"></i>Archive</a>
+                    <% } %>
                 </div>
             </div>
             
@@ -76,9 +85,9 @@
         <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute" id="closePhotoCard"><i class="fas fa-xmark"></i></a>
     </div>
     
-    <div class="height0 width40 col prfCard padding10 hidden" id="resetCard">
+    <div class="height0 width35 col prfCard padding10 hidden" id="resetCard">
         <div class="bgWhite col padding30 justifyStart colorPrimary relative fcrd" id="">
-            <%- include('icons/password') %>
+            <%- include('icons/warning') %>
             <p class="size30 str500">WARNING!</p>
             <section class="col textCenter">
                 <p class="rem1">This will <strong>reset the user's password</strong> and generate a new one automatically. The user will receive an <strong>email</strong> containing the newly generated password.</p>
@@ -90,7 +99,11 @@
             <div class="section gap10">
                 <a href="javascript:vod(0)" class="nav width100"  id="closeResetCard"> Cancel</a>
                 <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute hidden"><i class="fas fa-xmark"></i></a>
-                <a href="/autoPass4" class="nav pnav width100"> Generate</a>
+                <form action="/autoPass4" class="form2 width100">
+                    <input type="hidden" name="studentId" value="<%= student._id %>">
+                    <input type="hidden" name="redirectUrl" value="<%= redirectUrl  %>">
+                    <button type="submit" class="nav pnav width100"> Generate</a>
+                </form>
             </div>
             <div class="section padding0 col alignStart hidden">
                 <br>
@@ -145,34 +158,148 @@
         </div>
     </div>
 
+     <div class="height0 width35 col prfCard padding10 hidden" id="archiveCard">
+        <div class="bgWhite col padding30 justifyStart colorPrimary shadow2 relative fcrd" id="">
+            <%- include('icons/danger') %>
+            <p class="size30 str500">WARNING!</p>
+            <section class="col textCenter">
+                <p class="rem1">Are you sure you want to move the user to archive?</p>
+            </section>
+            <section class="bgRed100 col padding15 textCenter">
+                <p class="rem12">This action cannot be undone!</p>
+            </section>
+            <br>
+            <div class="section gap10">
+                <a href="javascript:vod(0)" class="nav width100"  id="closeArchiveCard"> Cancel</a>
+                <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute hidden"><i class="fas fa-xmark"></i></a>
+                <form action="/archive4" class="form2 width100">
+                    <input type="hidden" name="studentId" value="<%= student._id %>">
+                    <input type="hidden" name="redirectUrl" value="<%= redirectUrl  %>">
+                    <button type="submit" class="nav dnav width100"> Move</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="height0 width35 col prfCard padding10 hidden" id="archiveCardX">
+        <div class="bgWhite col padding30 justifyStart colorPrimary shadow2 relative fcrd" id="">
+            <%- include('icons/warning') %>
+            <p class="size30 str500">WARNING!</p>
+            <section class="col textCenter">
+                <p class="rem1">Are you sure you want to remove the user from archive?</p>
+            </section>
+            <section class="bgViolet100 col padding15 textCenter">
+                <p class="rem12">This action cannot be undone!</p>
+            </section>
+            <br>
+            <div class="section gap10">
+                <a href="javascript:vod(0)" class="nav width100"  id="closeArchiveCardX"> Cancel</a>
+                <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute hidden"><i class="fas fa-xmark"></i></a>
+                <form action="/archiveX4" class="form2 width100">
+                    <input type="hidden" name="studentId" value="<%= student._id %>">
+                    <input type="hidden" name="redirectUrl" value="<%= redirectUrl  %>">
+                    <button type="submit" class="nav pnav width100"> Restore</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="height0 width40 col padding10 prfCard hidden" id="editCard">
         <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
             <p class="rem18 str500">Update Contact</p>
             <hr class="width70"><br>
-            <div class="bgGreen100 col alignStart">
-                    <p class="rem1 textCenter">Take Note! Only phone number and address can be modified. For mispelling and incorrect information, please contact Admin.</p>
-            </div>
-            <br>
             <form id="editForm" method="POST" class="padding0 corner0 gap5">
                 <input type="hidden" name="studentId" value="<%= student._id %>">
-                <input type="hidden" name="redirectUrl" value="<%= redirectUrl  %>">
-                <div class="field">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" value="<%= student.email %>">
-                </div>
-                <div class="field">
-                    <label for="phone">Contact</label>
-                    <input type="phone" id="phone" name="phone" value="<%= student.phone %>">
-                </div>
-                <div class="field">
-                    <label for="address">Address</label>
-                    <input type="address" id="address" name="address" value="<%= student.address %>">
-                </div>
-                <div class="field alignEnd">
-                    <button type="submit" class="nav pnav w100">
-                    <i class="fas fa-check-circle"></i> Update
-                    </button>
-                </div>
+                <input type="hidden" name="redirectUrl" value="<%= redirectUrl %>">
+
+                <section class="padding0 gap10 alignStart">
+                    <section class="padding0 col alignStart gap5">
+
+                        <div class="field">
+                            <label>First Name</label>
+                            <input type="text" id="fName" name="fName" value="<%= student.fName %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Middle Name</label>
+                            <input type="text" id="mName" name="mName" value="<%= student.mName %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Last Name</label>
+                            <input type="text" id="lName" name="lName" value="<%= student.lName %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Ext Name</label>
+                            <input type="text" id="xName" name="xName" value="<%= student.xName %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Email</label>
+                            <input type="email" id="email" name="email" value="<%= student.email %>">
+                        </div>
+
+                        <div class="bgRed100 width0 hidden" id="error">Email is already used by an existing account!</div>
+
+                        <div class="field">
+                            <label>Contact</label>
+                            <input type="text" id="phone" name="phone" class="phone" value="<%= student.phone %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Address</label>
+                            <input type="text" id="address" name="address" value="<%= student.address %>">
+                        </div>
+
+                    </section>
+
+                    <section class="padding0 col alignStart gap5">
+                        
+                        <div class="field">
+                            <label>Role</label>
+                            <div class="selectBar">
+                                <select name="role" id="role">
+                                    <option disabled>Select</option>
+                                    <option value="Head" <%= student.role === "Head" ? "selected" : "" %>>Head</option>
+                                    <option value="Admin" <%= student.role === "Admin" ? "selected" : "" %>>Admin</option>
+                                    <option value="Registrar" <%= student.role === "Registrar" ? "selected" : "" %>>Registrar</option>
+                                    <option value="Accounting" <%= student.role === "Accounting" ? "selected" : "" %>>Accounting</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- CAMPUS -->
+                        <div class="field">
+                            <label>Campus</label>
+                            <div class="selectBar">
+                                <select name="campus" id="campus">
+                                    <option disabled>Select</option>
+                                    <option value="Main" <%= student.campus === "Main" ? "selected" : "" %>>Main</option>
+                                    <option value="South" <%= student.campus === "South" ? "selected" : "" %>>South</option>
+                                    <option value="San Jose" <%= student.campus === "San Jose" ? "selected" : "" %>>San Jose</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Student Number -->
+                        <div class="field">
+                            <label>Employee Number</label>
+                            <input type="text" id="schoolId" name="schoolId" value="<%= student.schoolId %>">
+                        </div>
+                        
+                    
+                        <div class="bgRed100 width0 hidden" id="error2">Employee number is already registered!</div>
+
+                        <div class="field alignEnd">
+                            <button type="submit" class="nav pnav w100">
+                                <i class="fas fa-check-circle"></i> Update
+                            </button>
+                        </div>
+
+                    </section>
+                </section>
             </form>
             <a href="javascript:vod(0)" class="nav cnav  top15 right15 absolute" id="closeEditCard"><i class="fas fa-xmark"></i></a>
         </div>
@@ -192,80 +319,51 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script>
-  // Cards and buttons
   const mCard = document.getElementById('mCard');
 
-  const resetCard = document.getElementById('resetCard');
-  const resetBtn = document.getElementById('resetBtn');
-  const closeResetCard = document.getElementById('closeResetCard');
+  // Map each card to its button and close button
+  const cards = [
+    { card: 'resetCard', open: 'resetBtn', close: 'closeResetCard' },
+    { card: 'editCard', open: 'editBtn', close: 'closeEditCard' },
+    { card: 'photoCard', open: 'photoBtn', close: 'closePhotoCard' },
+    { card: 'archiveCard', open: 'archiveBtn', close: 'closeArchiveCard' },
+    { card: 'archiveCardX', open: 'archiveBtnX', close: 'closeArchiveCardX' }
+  ];
 
-  const editCard = document.getElementById('editCard');
-  const editBtn = document.getElementById('editBtn');
-  const closeEditCard = document.getElementById('closeEditCard');
-
-  const photoCard = document.getElementById('photoCard');
-  const photoBtn = document.getElementById('photoBtn');
-  const closePhotoCard = document.getElementById('closePhotoCard');
-
-  const idCard = document.getElementById('idCard');
-  const idBtn = document.getElementById('idBtn');
-  const closeIdCard = document.getElementById('closeIdCard');
-
-  // Utility function to hide all cards and also hide mCard
   function hideAllCards() {
-    resetCard.classList.add('hidden');
-    editCard.classList.add('hidden');
-    photoCard.classList.add('hidden');
-    idCard.classList.add('hidden');
-
-    // Hide the main card whenever any special card opens
-    mCard.classList.add('hidden');
+    cards.forEach(c => {
+      const cardEl = document.getElementById(c.card);
+      if (cardEl) cardEl.classList.add('hidden');
+    });
+    mCard.classList.add('hidden'); // hide main card when any card opens
   }
 
-  // Reset Password Card
-  resetBtn.addEventListener('click', () => {
-    hideAllCards();
-    resetCard.classList.remove('hidden');
-  });
-
-  closeResetCard.addEventListener('click', () => {
-    resetCard.classList.add('hidden');
-    mCard.classList.remove('hidden'); // Show back
-  });
-
-  // Edit Profile Card
-  editBtn.addEventListener('click', () => {
-    hideAllCards();
-    editCard.classList.remove('hidden');
-  });
-
-  closeEditCard.addEventListener('click', () => {
-    editCard.classList.add('hidden');
+  function showMainCard() {
     mCard.classList.remove('hidden');
-  });
+  }
 
-  // Photo Card
-  photoBtn.addEventListener('click', () => {
-    hideAllCards();
-    photoCard.classList.remove('hidden');
-  });
+  // Set up event listeners for all cards, only if elements exist
+  cards.forEach(c => {
+    const cardEl = document.getElementById(c.card);
+    const openBtn = document.getElementById(c.open);
+    const closeBtn = document.getElementById(c.close);
 
-  closePhotoCard.addEventListener('click', () => {
-    photoCard.classList.add('hidden');
-    mCard.classList.remove('hidden');
-  });
+    if (cardEl && openBtn) {
+      openBtn.addEventListener('click', () => {
+        hideAllCards();
+        cardEl.classList.remove('hidden');
+      });
+    }
 
-  // ID Card
-  idBtn.addEventListener('click', () => {
-    hideAllCards();
-    idCard.classList.remove('hidden');
-  });
-
-  closeIdCard.addEventListener('click', () => {
-    idCard.classList.add('hidden');
-    mCard.classList.remove('hidden');
+    if (cardEl && closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        cardEl.classList.add('hidden');
+        showMainCard();
+      });
+    }
   });
 </script>
+
 
 <script>
     const currentPass = document.getElementById('currentPass');
@@ -352,5 +450,57 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+</script>
+
+
+<script>
+    function enforceNumericInput(event) {
+        event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const phoneInputs = document.querySelectorAll('.phone');
+        phoneInputs.forEach(input => {
+            input.addEventListener('input', enforceNumericInput);
+        });
+    });
+</script>
+
+                        
+<script>
+    const currentEmail = "<%= student.email %>";
+
+    document.getElementById('email').addEventListener('input', function () {
+        const email = this.value;
+
+        fetch(`/check-email2?email=${encodeURIComponent(email)}&current=${encodeURIComponent(currentEmail)}`)
+            .then(response => response.json())
+            .then(data => {
+                const errorMsg = document.getElementById('error');
+                if (data.exists) {
+                    errorMsg.classList.remove('hidden');
+                } else {
+                    errorMsg.classList.add('hidden');
+                }
+            });
+    });
+</script>
+<script>
+const currentSchoolId = "<%= student.schoolId %>";
+
+document.getElementById('schoolId').addEventListener('input', function () {
+    const schoolId = this.value;
+
+    fetch(`/check2-schoolId?schoolId=${encodeURIComponent(schoolId)}&current=${encodeURIComponent(currentSchoolId)}`)
+        .then(response => response.json())
+        .then(data => {
+            const errorMsg = document.getElementById('error2');
+            if (data.exists) {
+                errorMsg.classList.remove('hidden');
+            } else {
+                errorMsg.classList.add('hidden');
+            }
+        });
+});
 </script>
 

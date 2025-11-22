@@ -1,0 +1,177 @@
+<% layout('layout') %>
+<style>
+    .empCard a {
+        transition: all 0.6s ease-in-out;
+    }
+    .empCard a:hover {
+        transform: scale(1.02);
+        filter: drop-shadow(0 2px 1px #0000002e);
+    }
+    .mainf {
+        padding: 20px;
+        overflow-y: hidden;
+    }
+    #empCard.seen {
+        position: relative !important;
+        margin-bottom: 200px;
+        height: 100% !important;
+    }
+</style>
+
+<a href="/emp" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
+
+<% if (!users || users.length === 0) { %>
+    <section class="height50 corner20 empCard paddingInline0 borderGray borderDotted marginBlock20 col">
+        <%- include('icons/notFound') %>
+        <p class="size20 str500">No Record Found!</p>
+    </section>
+<% } else { %>
+
+    
+
+    <% 
+        const reg = users.filter(user => user.role === "Registrar");
+        if (reg.length > 0) { 
+    %>
+        <br>
+        <p class="size20 str500 marginLeft10">Registrar</p>
+        <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+            <% reg.forEach(user => { %>
+                <a href="/empViewArc/<%= user._id %>" class="height0 w120 col gap5">
+                    <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" 
+                        alt="Profile" 
+                        onerror="this.onerror=null; this.src='/images/profile.jpg';" 
+                        class="h80 w80 corner500 shadow1">
+                    <p class="size14 textWrap textCenter str500">
+                        <%= user.fName %> <i class="bi bi-patch-check-fill navy"></i>
+                    </p>
+                    <p class="size10 textWrap textCenter green">
+                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
+                    </p>
+                </a>
+            <% }) %>
+        </section>
+    <% } else { %>
+    <% } %>
+
+    <br>
+
+<section class="padding0 gap20 justifyStart"> 
+        <% 
+            const headsOrAdmins = users.filter(user => user.role === "Head" || user.role === "Admin");
+            if (headsOrAdmins.length > 0) { 
+        %>
+            <section class="col alignStart padding0">
+                <p class="size20 str500 marginLeft10">Admins</p>
+                <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+                    <% headsOrAdmins.forEach(user => { %>
+                        <a href="/empViewArc/<%= user._id %>" class="height0 w120 col gap5">
+                            <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" 
+                                alt="Profile" 
+                                onerror="this.onerror=null; this.src='/images/profile.jpg';" 
+                                class="h80 w80 corner500 shadow1">
+                            <p class="size14 textWrap textCenter str500">
+                                <%= user.fName %> <i class="bi bi-patch-check-fill navy"></i>
+                            </p>
+                            <p class="size10 textWrap textCenter green">
+                                <i class="fas fa-user-cog"></i> <%= user.role || 'Unknown' %>
+                            </p>
+                        </a>
+                    <% }) %>
+                </section>
+            </section>
+        <% } else { %>
+        <% } %>
+        
+        <% 
+            const accounting = users.filter(user => user.role === "Accounting");
+            if (accounting.length > 0) { 
+        %>
+            <section class="col alignStart padding0">
+                <p class="size20 str500 marginLeft10">Accounting</p>
+                <section class="bgWhite corner20 justifyStart wrap alignStart empCard paddingInline0">
+                    <% accounting.forEach(user => { %>
+                        <a href="/empViewArc/<%= user._id %>" class="height0 w120 col gap5">
+                            <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" 
+                                alt="Profile" 
+                                onerror="this.onerror=null; this.src='/images/profile.jpg';" 
+                                class="h80 w80 corner500 shadow1">
+                            <p class="size14 textWrap textCenter str500">
+                                <%= user.fName %> <i class="bi bi-patch-check-fill navy"></i>
+                            </p>
+                            <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
+              
+                        </a>
+                    <% }) %>
+                </section>
+            </section>
+        <% } else { %>
+        <% } %>
+</section>  
+
+<% } %>
+
+<script>
+function toggleCards(show) {
+    document.querySelectorAll(".empCard2").forEach(card => {
+        card.classList.toggle("seen", show);
+        card.classList.toggle("unseen", !show);
+    });
+}
+
+document.querySelectorAll(".empBtn").forEach(btn => {
+    btn.addEventListener("click", () => toggleCards(true));
+});
+
+document.getElementById("empClose").addEventListener("click", () => toggleCards(false));
+
+</script>
+<script>
+    // Populate Day Dropdown (1-31)
+    const daySelect = document.getElementById("bDay");
+    for (let i = 1; i <= 31; i++) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        daySelect.appendChild(option);
+    }
+
+    // Populate Month Dropdown (January-December) with values as words
+const monthSelect = document.getElementById("bMonth");
+const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+];
+
+months.forEach(month => {
+    let option = document.createElement("option");
+    option.value = month; // Store month name as value
+    option.textContent = month;
+    monthSelect.appendChild(option);
+});
+
+
+    // Populate Year Dropdown (Current Year to 1980)
+    const yearSelect = document.getElementById("bYear");
+    const currentYear = new Date().getFullYear();
+    const maxYear = currentYear - 18; // Must be 18 or older
+
+    for (let i = maxYear; i >= 1980; i--) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.textContent = i;
+        yearSelect.appendChild(option);
+    }
+</script>
+<script>
+    function enforceNumericInput(event) {
+        event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const phoneInputs = document.querySelectorAll('.number');
+        phoneInputs.forEach(input => {
+            input.addEventListener('input', enforceNumericInput);
+        });
+    });
+</script>

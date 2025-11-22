@@ -12,9 +12,9 @@
     }
 </style>
 
- <section class="gap5 alignStart padding0" id="">
-        <section class="col alignStart width40">
-            <section class="justifyBetween">
+ <section class="gap20 alignStart padding0" id="">
+        <section class="col width40">
+            <section class="justifyBetween padding0">
                 <% if ( back === "srv" ) { %>
                     <a href="/srv" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
                 <% } else if ( back === "prc") { %>
@@ -30,61 +30,53 @@
                 <% } else { %>
                     <a href="/srv" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
                 <% } %>
-                <p class="rem16 str400">Request Details</p>
+                <p class="rem2 str400">Request By</p>
             </section>
-            <section class="padding0 col colorPrimary">
-                <section class="col alignStart abstractBG1 corner20 padding20">
-                    <p class="rem18 str400"><%= request.type %></p>
-                    <section class="gap5 dtl2 justifyStart padding0">
-                        <p class="rem12 str400"><%= request.qty %> copies</p>
-                        <p class="rem12 str400">for <%= request.purpose %> Purpose</p>
-                    </section>
-                    <p class="rem12 str400 bgYellow colorPrimary corner5 padding3"><%= request.amount %>P150.00</p>
-                </section>
-                <section class="dtlCard justifyBetween">
-                    <section class="col alignStart dtl width0">
-                        <p class="rem1"><i class="fas fa-receipt"></i> Date Requested</p>
-                        <%
-                        const options = { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric', 
-                            hour: 'numeric', 
-                            minute: '2-digit', 
-                            hour12: true 
-                        }; 
-                        const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); 
-                        %>
-                        <p class="rem14 str500"><%= formattedDate %></p>
-                    </section>
-                    <section class="col alignEnd dtl width0">
-                        <p class="rem1"><i class="fas fa-receipt"></i> Transaction Number</p>
-                        <p class="rem14 str500"><%= request.tr %></p>
-                    </section>
-                </section>
-            </section>
-            <section class="col alignStart info bgWhite corner16 padding5">
-                <section class="abstractBG2 col padding15 corner16 alignStart">
-                    <img src="<%= request.requestBy.photo ? request.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h60 w60 corner16 shadow3">
-                    <p class="size20 glowImg3">
+            
+            <section class="col alignStart info corner16 padding5">
+                <section class="col padding15 corner16 alignStart relative">
+                    <img src="<%= request.requestBy.photo ? request.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 shadow1 absolute right10 top10">
+                    <p class="size24 str500">
                         <%= request.requestBy ? request.requestBy.fName : '' %>
                         <%= request.requestBy ? request.requestBy.mName : '' %>
                         <%= request.requestBy ? request.requestBy.lName : '' %>
                         <%= request.requestBy ? request.requestBy.xName : '' %>
                     </p>
+                    <section class="width0 gap20 padding0">
+                        <p class="rem12">
+                            <i class="bi bi-patch-check-fill"></i>
+                            <%= request.requestBy ? request.requestBy.role : '' %>
+                        </p>
+                        <p class="rem12">
+                            <i class="bi bi-buildings-fill"></i>
+                            <%= request.requestBy ? request.requestBy.campus : '' %>
+                        </p>
+                        <p class="rem12">
+                            <i class="fas fa-address-card"></i>
+                            <%= request.requestBy?.schoolId || "--" %>
+                        </p>
+                    </section>
                 </section>
-                <section class="paddingInline10 col alignStart">
-                    <p class="rem12 str500"><i class="fas fa-address-card w15"></i> <%= request.requestBy?.schoolId || "--" %></p>
-                    <p class="rem12 str500"><i class="fas fa-building w15"></i> <%= request.requestBy?.campus || "--" %></p>
-                    <p class="rem12 str500"><i class="fas fa-layer-group w15"></i> <%= request.requestBy?.course || "--" %></p>
-                    <p class="rem12 str500"><i class="fas fa-stream w15"></i> <%= request.requestBy?.yearLevel || "--" %></p>
+                <section class="paddingInline10 col alignStart porcelain corner15">
+                    <p class="rem12 str500"><i class="fas fa-layer-group w15 wMin15"></i> <%= request.requestBy?.course || "--" %></p>
 
-                    <% if (request.requestBy) { %>
-                        <% if (request.requestBy.role === 'Alumni') { %>
-                            <p class="rem12 str500"><i class="fas fa-graduation-cap w15"></i> <%= request.requestBy.yearGraduated || "--" %></p>
-                        <% } else if (request.requestBy.role === 'Former') { %>
-                            <p class="rem12 str500"><i class="fas fa-calendar w15"></i> <%= request.requestBy.yearAttended || "--" %></p>
-                        <% } %>
+                    <% if (request.requestBy?.role === 'Alumni') { %>
+                        <p class="rem12 str500">
+                            <i class="fas fa-graduation-cap w15"></i>
+                            Graduated in <%= request.requestBy.yearGraduated || "--" %>
+                        </p>
+
+                    <% } else if (request.requestBy?.role === 'Former') { %>
+                        <p class="rem12 str500">
+                            <i class="fas fa-stream w15"></i>
+                            <%= request.requestBy?.yearLevel || "--" %> last <%= request.requestBy?.yearAttended || "--" %>
+                        </p>
+
+                    <% } else { %>
+                        <p class="rem12 str500">
+                            <i class="fas fa-stream w15"></i>
+                            <%= request.requestBy?.yearLevel || "--" %>
+                        </p>
                     <% } %>
 
                     <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= request.requestBy?.email || "--" %></p>
@@ -92,21 +84,8 @@
                     <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= request.requestBy?.address || "--" %></p>
                 </section>
             </section>
-            <br><hr><br>
-            <section class="col alignStart gap5">
-                <% if ( request.processBy) { %>
-                <p class="rem1 str400 marginLeft5">Assigned at <%= request.assignAtFormatted %></p>
-                <section class="bgWhite corner10 gap5 justifyStart width0">
-                    <img src="<%= request.processBy ? request.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h20 w20 wMin20 borderPrimary corner500">
-                    <p class="rem12 str500"> <%= request.processBy?.fName || "" %> <%= request.processBy?.lName || "" %></p>
-                </section>
-                <% } else { %>
-                    <p class="red bgRed100"><i class="fas fa-exclamation-circle"></i> Unassigned</p>
-                <% } %>
-            </section>
-        </section>
-        <section class="col width35">
-            <section class="justifyStart hidden">
+            <br>
+            <section class="justifyStart">
                 <p class="rem2 str400">Status Tracker</p>
             </section>
             <section class="padding10 corner20 col bgWhite">
@@ -383,10 +362,9 @@
                 </section>
                 <% } else { %>
                 <section class=" bgWhite padding0 marginTop10 relative">
-                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         <% if (request.status === "Pending") { %>
-                        <p class="">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed. Thank you for your patience!</p>
+                        <p class="">Documents Require Action! <i class="bi bi-arrow-right"></i></p>
                         <% } else if (request.status === "Reviewed") { %>
                             <p class="">Good news! Your request has been reviewed and has now been forwarded to the Accounting Department for assessment.</p>
                         <% } else if (request.status === "Assessed") { %>
@@ -499,16 +477,95 @@
                         <% } else if (request.status === "Claimed") { %>
                             <p class="">Your document has been claimed!</p>
                         <% } else { %>
-                        <p class="">No Remarks</p>
                         <% } %>
                     </section>
                 </section>
                 <% } %>
 
             </section>
+            <br><hr><br>
+            <section class="col alignStart gap5">
+                <% if ( request.processBy) { %>
+                <p class="rem1 str400 marginLeft5">Assigned at <%= request.assignAtFormatted %></p>
+                <section class="bgWhite corner10 gap5 justifyStart width0">
+                    <img src="<%= request.processBy ? request.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h20 w20 wMin20 borderPrimary corner500">
+                    <p class="rem12 str500"> <%= request.processBy?.fName || "" %> <%= request.processBy?.lName || "" %></p>
+                </section>
+                <% } else { %>
+                    <p class="red bgRed100"><i class="fas fa-exclamation-circle"></i> Unassigned</p>
+                <% } %>
+            </section>
+        </section>
+        <section class="col alignStart width55 bgWhite shadow1 justifyStart corner15">
+            <section class="col padding0 corner15">
+                <section class="padding0 col abstractBG1 corner15">
+                    <section class="dtlCard justifyBetween">
+                        <section class="col alignStart dtl width0">
+                            <p class="rem12"><i class="fas fa-receipt"></i> Date Requested</p>
+                            <%
+                            const options = { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric', 
+                                hour: 'numeric', 
+                                minute: '2-digit', 
+                                hour12: true 
+                            }; 
+                            const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); 
+                            %>
+                            <p class="rem14 str400"><%= formattedDate %></p>
+                        </section>
+                        <section class="col alignEnd dtl width0">
+                            <p class="rem12"><i class="fas fa-receipt"></i> Transaction Number</p>
+                            <p class="rem14 str400"><%= request.tr %></p>
+                        </section>
+                    </section>
+                </section>
+                <% if (request.items && request.items.length > 0) { %>
+                    <% request.items.forEach(item => { %>
+                        <section class="gap10 alignStart justifyStart bgSoft corner15 marginTop10 padding15 relative">
+                            <section class="padding0 alignStart col width65">
+                                <p class="rem14 str500"><%= item.qty %> <%= item.type %></p>
+                                <p class="rem12 green">
+                                    <%= item.purpose %>
+                                    <% if ( item.proof ) { %>
+                                        &nbsp; <a href="javascript:(0)" class="navy inline"><i class="fas fa-exclamation-circle w15"></i> View Requirements</a>
+                                    <% } %>
+                                </p>
+                                <p class="rem12"><%= item.semester + ` Semester` %> <%= `• ` + item.schoolYear %></p>
+                            </section>
+                            <section class="padding5 gap5 porcelain width0 bgWhite corner20 absolute right10 bottom10">
+                                <form action="" class="form2">
+                                    <button type="submit" class="nav dnav"><i class="fas fa-xmark-circle"></i> Decline</button>
+                                </form>
+                                <form action="" class="form2">
+                                    <button type="submit" class="nav gnav"><i class="fas fa-check-circle"></i> Approve</button>
+                                </form>
+                            </section>
+                        </section>
+                    <% }); %>
+                <% } else { %>
+                    <p>No items found for this request.</p>
+                <% } %>
+            </section>
+            <br>
+            <section class="gap10 justifyBetween corner15">
+                <p class="rem14 str500">Quick Action <i class="fas fa-arrow-right"></i></p>
+                <section class="padding0 gap10 width0">
+                    <form action="" class="form2">
+                        <button type="submit" class="nav dnav"><i class="fas fa-xmark-circle"></i> Decline Transaction</button>
+                    </form>
+                    <form action="" class="form2">
+                        <button type="submit" class="nav ynav"><i class="fas fa-clock"></i> Hold Transaction</button>
+                    </form>
+                    <form action="" class="form2">
+                        <button type="submit" class="nav pnav"><i class="fas fa-check-circle"></i> Approve All</button>
+                    </form>
+                </section>
+            </section>
         </section>
         <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
-            <section class="col width20">
+            <section class="col width40 absolute bgWhite translateCenter corner30 shadow2 hidden">
                 <section class="justifyStart"><p class="rem18">Payment Details</p></section>
                 <section class="corner20 col bgWhite gap5">
                     <section class="justifyStart bgYellow corner14"><p class="size12">Method: <%= request.payMode || 'Gcash' %></p></section>

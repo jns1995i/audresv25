@@ -78,7 +78,7 @@
 
 <section class="col">
   <% if (requests.length === 0) { %>
-    <div class="h500 borderDotted corner16">
+    <div class="h500 borderGray borderDotted corner16">
     </div>
   <% } else { %>
     <section class="width0 col hidden" id="NoRecords">
@@ -88,7 +88,7 @@
     <% requests.forEach((rq, i) => { %>
       <% if (!rq.declineAt) { %>
       <div class="height0 padding8 rqCard">
-        <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
+        <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderGray borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
             <% if ( rq.status === "Pending") { %>
               <% if (rq.processBy) { %>
               <div class="width18 justifyStart"><img src="<%= rq.processBy ? rq.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>

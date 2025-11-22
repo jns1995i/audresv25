@@ -32,13 +32,13 @@
         
         <div class="field">
             <label for="email">Email</label>
-            <input type="email" name="email" id="email" value="<%= seedUser.email %>" required>
+            <input type="email" name="email" id="email" value="<%= seedUser ? seedUser.email : '' %>" required>
         </div>
         <br>
 
         <div class="field">
             <label for="phone">Phone</label>
-            <input type="text" name="phone" id="phone" value="<%= seedUser.phone %>" required>
+            <input type="text" name="phone" id="phone" value="<%= seedUser ? seedUser.phone : '' %>" required>
         </div>
         <br>
 

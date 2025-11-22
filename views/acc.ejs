@@ -148,9 +148,12 @@
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email">
                 </div>
+                
+                <div class="bgRed100 width0 hidden" id="error">Email is already used by an existing account!</div>
+
                 <div class="field">
                     <label for="phone">Contact</label>
-                    <input type="phone" id="phone" name="phone">
+                    <input type="phone" id="phone" class="phone" name="phone">
                 </div>
                 <div class="field">
                     <label for="address">Address</label>
@@ -322,4 +325,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+</script>
+<script>
+    function enforceNumericInput(event) {
+        event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const phoneInputs = document.querySelectorAll('.phone');
+        phoneInputs.forEach(input => {
+            input.addEventListener('input', enforceNumericInput);
+        });
+    });
+</script>
+<script>
+    const currentEmail = "<%= user.email %>";
+
+    document.getElementById('email').addEventListener('input', function () {
+        const email = this.value;
+
+        fetch(`/check-email2?email=${encodeURIComponent(email)}&current=${encodeURIComponent(currentEmail)}`)
+            .then(response => response.json())
+            .then(data => {
+                const errorMsg = document.getElementById('error');
+                if (data.exists) {
+                    errorMsg.classList.remove('hidden');
+                } else {
+                    errorMsg.classList.add('hidden');
+                }
+            });
+    });
 </script>

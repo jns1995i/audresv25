@@ -12,7 +12,7 @@ const requestSchema = new mongoose.Schema({
   },
 
   tr: { type: String, required: true, trim: true },
-  type: { type: String, required: true, trim: true },
+  type: { type: String, required: false, trim: true },
   purpose: { type: String, trim: true },
   qty: { type: Number, default: 1 },
 
@@ -20,7 +20,6 @@ const requestSchema = new mongoose.Schema({
   semester: { type: String, trim: true },
 
   proof: { type: String, trim: true },  // path or filename of proof
-  tr: { type: String, trim: true },     // transaction reference or tracking
   status: { type: String, trim: true },
   payPhoto: { type: String, trim: true },
   payMode: { type: String, trim: true },

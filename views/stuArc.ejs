@@ -9,20 +9,14 @@
 </style>
 
 <div class="height0 padding10 justifyBetween corner12 gap5">
-  <section class="width0 padding0 gap5">
-    <a href="/stu" class="nav <% if ( title === 'Students' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user-friends"></i> All Users</a>
-    <a href="/crt" class="nav <% if ( title === 'Current' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user"></i> Current</a>
-    <a href="/alm" class="nav <% if ( title === 'Alumni' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user-graduate"></i> Alumni</a>
-    <a href="/frm" class="nav <% if ( title === 'Former' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-exchange"></i> Former</a>
-  </section>
   <article>
-    <a href="/stuArc" class="nav <% if ( title === 'Student Archive' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-archive"></i> Archive</a>
+    <a href="/stu" class="nav <% if ( title === 'Student Archive' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-chevron-left"></i> Go Back</a>
   </article>
 </div>
 
 
 <div class="justifyBetween height20 padding20 bgWhite col alignStart corner10 relative">
-    <p class="rem3">Student Account Management</p>
+    <p class="rem3">Archived Student Accounts</p>
     <div class="searchBar colorPrimary width20">
         <i class="fas fa-search"></i>
         <input type="search" name="" id="univ" class="">
@@ -64,7 +58,7 @@
                         <td>
                             <a href="
                             <% if ( title === 'Students') { %>
-                            /stuView/<%= user._id %>
+                            /stuViewArc/<%= user._id %>
                             <% } else if ( title === 'Current') { %>
                             /crtView/<%= user._id %>
                             <% } else if ( title === 'Alumni') { %>
