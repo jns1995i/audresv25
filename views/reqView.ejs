@@ -11,11 +11,17 @@
     <link rel="icon" href="/images/logo.png">
     <title><%= title ? `${title}` : 'AUDRES25' %></title>
     <style>
+        body::-webkit-scrollbar {
+            display: block;
+        }
       @media (max-width: 1024px) {
         body {
             display: block;
             overflow-y: auto;
             height: 100vh;
+        }
+        body::-webkit-scrollbar {
+            display: none;
         }
         #mainF {
             flex-direction: column;
@@ -116,12 +122,36 @@
                         <p class="rem18"><%= rq.tr %></p>
                     </section>
                 </section>
-                <section class="col alignStart">
-                    <p class="rem18 str500"><%= rq.type %></p>
-                    <section class="gap5 dtl2 justifyStart padding0">
-                        <p class="rem12 str400"><%= rq.qty %> copies</p>
-                        <p class="rem12 str400">for <%= rq.purpose %> Purpose</p>
-                    </section>
+                <% if (items.length === 0) { %>
+                    <p class="str400 rem14">No items found for this request.</p>
+                <% } else { %>
+                    <% items.forEach((it, index) => { %>
+                        <section class="bgSoft corner15 padding15 relative marginTop15">
+                            <section class="padding0 alignStart justifyCenter col">
+                                <p class="rem16 str500"><%= it.qty %> <%= it.type %></p>
+                                <p class="size12">for <%= it.purpose %> Purpose</p>
+                                <p class="size12"><%= it.semester %> Semester &bull; <%= it.schoolYear %></p>
+                                <% if (it.remarks) { %>
+                                    <p class="size10 str400 bgYellow100 padding5" style="margin-top: 5px !important;">
+                                        <i class="fas fa-info-circle"></i> Note: <%= it.remarks %>
+                                    </p>
+                                <% } %>
+                            </section>
+                            <section class="padding0 justifyEnd absolute right20 translateY">
+                                <% if (it.status === "Declined") { %>
+                                    <a href="" class="nav cnav disabled bgRed100"><i class="fas fa-xmark-circle"></i></a>
+                                <% } else if ( it.status === "Approved") { %>
+                                    <a href="" class="nav cnav disabled bgGreen100"><i class="fas fa-check-circle"></i></a>
+                                <% } else { %>
+                                    <a href="" class="nav cnav disabled bgBlue100"><i class="fas fa-hourglass-half"></i></a>
+                                <% } %>
+                            </section>
+                        </section>
+                    <% }) %>
+                <% } %>
+                <section class="bgBlue100 corner15 justifyBetween padding10 marginTop15" style="align-self: center;">
+                    <p class="size16"><i class="fas fa-info-circle"></i> Total Payables</p>
+                    <p class="size16 str500">&#8369;<%= totalAmount || "0" %>.00</p>
                 </section>
             </section>
         </section>

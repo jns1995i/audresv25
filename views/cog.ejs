@@ -47,7 +47,7 @@
         </div>
     </form>
     <div class="width65 abstractBG1 corner15 padding30 relative h300">
-        <img src="<%= seedUser.photo %>" alt="" class="absolute right30 bottom10 h120 w120 scale3 opacity05">
+        <img src="<%= seedUser.photo ? seedUser.photo : '/images/annPhoto2.jpg' %>" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" alt="logo" class="absolute right30 bottom10 h120 w120 scale3 opacity05">
     </div>
 </section>
 

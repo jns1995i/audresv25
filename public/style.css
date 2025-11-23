@@ -445,6 +445,13 @@ a:hover, button:hover {
     color: rgba(74, 1, 1, 0.958);
 }
 
+
+.ynav {
+    background-color: #fcc728;
+    color: var(--accent3) !important;
+    border: none !important;
+}
+
 .pnav {
     background-color: var(--tint3);
     color: white;
@@ -500,6 +507,10 @@ a:hover, button:hover {
     }
 }
 
+.actnav {
+    border-radius: 10px !important;
+}
+
 
 /*forms*/
 form {
@@ -524,6 +535,8 @@ form {
     align-items: center;
     padding: 0;
     margin: 0;
+    border-radius: 0;
+    background-color: transparent;
 }
 
 .field {
@@ -1179,6 +1192,17 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .bgBlue { background-color: #040d6b; }
 .bgLightblue { background-color: #dbdeff; }
 .bgYellow { background-color: #fcc728; }
+.bgYellow2 {
+    color: white;
+    background: 
+        radial-gradient(circle at 10% 5%, #ffca2c, transparent 25%),
+        radial-gradient(circle at 95% 10%,  rgb(255, 187, 0), transparent 30%),
+        radial-gradient(circle at 95% 90%,  rgb(255, 196, 0), transparent 24%),
+        radial-gradient(circle at 50% 50%,  rgb(240, 213, 7), transparent 60%);
+    background-blend-mode: lighten;
+    backdrop-filter: blur(10px);
+    background-color: #ffca2c;
+}
 .bgOrange { background-color: orangered; }
 .bgPurple { background-color: purple; }
 .bgPink { background-color: pink; }
@@ -1203,6 +1227,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .bgBlue100{background-color:rgb(235,245,255);border:0.5px solid rgba(0,102,255,0.6);color:royalblue; padding: 5px; border-radius: 0.7rem; text-align: center;}
 .bgViolet100{background-color:rgb(245,235,255);border:0.5px solid rgba(138,43,226,0.6);color:blueviolet; padding: 5px; border-radius: 0.7rem; text-align: center;}
 .bgGray100 {background-color: rgb(236, 236, 236); border: 1px solid rgba(128, 128, 128, 0.684); color: gray; padding: 5px; border-radius: 0.7rem; text-align: center;}
+.bgBlack100 {background-color: rgb(236, 236, 236); border: 1px solid rgba(0, 0, 0, 0.684); color: rgb(0, 0, 0); padding: 5px; border-radius: 0.7rem; text-align: center;}
 
 
 /* Black colors */

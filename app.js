@@ -1046,7 +1046,6 @@ app.get('/hom', isLogin, myRequest, (req, res) => {
   res.render('hom', { title: 'Home' });
 });
 
-
 app.get('/reqView/:id', isLogin, async (req, res) => {
   try {
     const rq = await requests.findById(req.params.id)
@@ -1054,22 +1053,41 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
       .populate('processBy')
       .populate('releaseBy');
 
-    if (!rq) {
-      return res.status(404).render('404', { title: 'Request Not Found' });
+    if (!rq) return res.status(404).render('404', { title: 'Request Not Found' });
+
+    const rqItems = await items.find({ tr: rq.tr });
+
+    let totalAmount = 0;
+    const approvedItems = rqItems.filter(it => it.status === "Approved");
+    const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } });
+
+    approvedItems.forEach(it => {
+      const doc = docs.find(d => d.type === it.type);
+      if (doc) totalAmount += doc.amount * Number(it.qty || 0);
+    });
+
+    let message = null;
+    switch (req.query.msg) {
+      case 'noPhoto': message = 'No photo uploaded!'; break;
+      case 'success': message = 'Payment uploaded successfully!'; break;
+      case 'error': message = 'Failed to upload payment!'; break;
     }
 
-    res.render('reqView', { 
+    res.render('reqView', {
       title: 'View Request',
       rq,
-      back: 'Home'
+      items: rqItems,
+      totalAmount,
+      back: 'hom',
+      message
     });
 
   } catch (err) {
     console.error('❗ Error loading request:', err);
-    res.status(500).render('index', { 
+    res.status(500).render('index', {
       title: 'Error',
       error: 'Internal Server Error',
-      back: 'Home'
+      back: 'hom'
     });
   }
 });
@@ -1081,22 +1099,41 @@ app.get('/reqView2/:id', isLogin, async (req, res) => {
       .populate('processBy')
       .populate('releaseBy');
 
-    if (!rq) {
-      return res.status(404).render('404', { title: 'Request Not Found' });
+    if (!rq) return res.status(404).render('404', { title: 'Request Not Found' });
+
+    const rqItems = await items.find({ tr: rq.tr });
+
+    let totalAmount = 0;
+    const approvedItems = rqItems.filter(it => it.status === "Approved");
+    const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } });
+
+    approvedItems.forEach(it => {
+      const doc = docs.find(d => d.type === it.type);
+      if (doc) totalAmount += doc.amount * Number(it.qty || 0);
+    });
+
+    let message = null;
+    switch (req.query.msg) {
+      case 'noPhoto': message = 'No photo uploaded!'; break;
+      case 'success': message = 'Payment uploaded successfully!'; break;
+      case 'error': message = 'Failed to upload payment!'; break;
     }
 
-    res.render('reqView', { 
+    res.render('reqView', {
       title: 'View Request',
       rq,
-      back: 'Req'
+      items: rqItems,
+      totalAmount,
+      back: 'reqAll',
+      message
     });
 
   } catch (err) {
     console.error('❗ Error loading request:', err);
-    res.status(500).render('index', { 
+    res.status(500).render('index', {
       title: 'Error',
       error: 'Internal Server Error',
-      back: 'Req'
+      back: 'reqAll'
     });
   }
 });
@@ -1119,58 +1156,33 @@ app.post('/paymentUpload', isLogin, uploadPhoto.single('payPhoto'), async (req, 
     const requestId = req.body.id;
 
     if (!req.file) {
-      const rq = await requests.findById(requestId)
-        .populate('requestBy')
-        .populate('processBy')
-        .populate('releaseBy');
-
-      return res.render('reqView', { 
-        title: 'View Request',
-        rq,
-        messagePass: 'No photo uploaded!'
-      });
+      // No photo uploaded → redirect back with query message
+      return res.redirect(`/reqView/${requestId}?msg=noPhoto`);
     }
 
     const payMode = req.body.payMode;
-    const payPhoto = req.file.path; // Cloudinary URL
+    const payPhoto = req.file.path;
+    const payAt = new Date();
 
-    // Update the request
-    await requests.findByIdAndUpdate(
-      requestId,
-      {
-        payMode,
-        payPhoto,
-        regStatus: 'For Verification'    // ✅ updated as requested
-      }
-    );
-
-    const rq = await requests.findById(requestId)
-      .populate('requestBy')
-      .populate('processBy')
-      .populate('releaseBy');
-
-    return res.render('reqView', { 
-      title: 'View Request',
-      rq,
-      messageSuccess: 'Payment uploaded successfully!'
+    // Update request
+    await requests.findByIdAndUpdate(requestId, {
+      payMode,
+      payPhoto,
+      status: 'For Verification',
+      payAt
     });
+
+    // ✅ Redirect to GET route after POST
+    res.redirect(`/reqView/${requestId}?msg=success`);
 
   } catch (err) {
     console.error('Payment Upload Error:', err);
-
     const requestId = req.body.id;
-    const rq = await requests.findById(requestId)
-      .populate('requestBy')
-      .populate('processBy')
-      .populate('releaseBy');
-
-    return res.render('reqView', { 
-      title: 'View Request',
-      rq,
-      messagePass: 'Failed to upload payment!'
-    });
+    res.redirect(`/reqView/${requestId}?msg=error`);
   }
 });
+
+
 
 app.get('/reqAll', isLogin, myRequest, (req, res) => {
   res.render('reqAll', { title: 'Request History' });
@@ -1250,7 +1262,6 @@ app.get('/ddc', async (req, res) => {
 
 
 app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
-  // Pending transactions
   const filteredRequests = req.requests.filter(
     rq => rq.status === 'Pending' && !rq.declineAt
   );
@@ -1261,6 +1272,16 @@ app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
     totalCount: filteredRequests.length
   });
 });
+
+app.get('/srvAll', isLogin, isRequest, isStaff, (req, res) => {
+  res.render('srvAll', { 
+    title: 'All Transactions', 
+    active: 'srv', 
+    requests: req.requests,
+    totalCount: req.requests.length
+  });
+});
+
 
 app.get('/vrf', isLogin, isVerify, isStaff, (req, res) => {
   // To Verify
@@ -1339,170 +1360,424 @@ app.patch('/req/processBy/:id', isLogin, isRequest, isStaff, async (req, res) =>
   }
 });
 
-app.get('/srvView/:id', isLogin, isRequest, isStaff, async (req, res) => {
+// Generic handler to display a request
+async function renderRequest(req, res, backRoute, viewName = 'srvView') {
   try {
     const requestId = req.params.id;
 
-    // find the request by ID and populate necessary fields
+    // Find the request
     const rq = req.requests.find(r => r._id.toString() === requestId);
 
     if (!rq) {
-      return res.status(404).render('srvView', { 
+      return res.status(404).render(viewName, { 
         title: 'Request Not Found', 
-        back: 'srv',
+        back: backRoute,
         active: 'srv',
         error: 'Request not found.' 
       });
     }
 
-    res.render('srvView', { 
-      title: 'Request Details',
-      back: 'srv',
-      active: 'srv',
-      request: rq 
-    });
-  } catch (err) {
-    console.error('❌ Error in /srvView/:id route:', err);
-    res.status(500).render('srvView', { 
-      title: 'Error', 
-      back: 'srv',
-      active: 'srv',
-      error: 'Something went wrong while loading the request.' 
-    });
-  }
-});
+    // Find all items for this request
+    const rqItems = rq.items || []; // assuming req.requests contains items array
 
-app.get('/prcView/:id', isLogin, isRequest, isStaff, async (req, res) => {
-  try {
-    const requestId = req.params.id;
+    // Filter approved items
+    const approvedItems = rqItems.filter(it => it.status === "Approved");
 
-    // find the request by ID and populate necessary fields
-    const rq = req.requests.find(r => r._id.toString() === requestId);
-
-    if (!rq) {
-      return res.status(404).render('srvView', { 
-        title: 'Request Not Found', 
-        back: 'prc',
-        active: 'srv',
-        error: 'Request not found.' 
-      });
+    // Calculate totalAmount
+    let totalAmount = 0;
+    if (approvedItems.length > 0) {
+      for (const it of approvedItems) {
+        // Find document that matches this item type
+        const doc = req.documents.find(d => d.type === it.type);
+        if (doc) totalAmount += doc.amount * it.qty;
+      }
     }
 
-    res.render('srvView', { 
+    res.render(viewName, { 
       title: 'Request Details',
-      back: 'prc',
+      back: backRoute,
       active: 'srv',
-      request: rq 
+      request: rq,
+      items: rqItems,
+      totalAmount,
+      hasPending: rqItems.some(it => it.status === "Pending")
     });
+    
   } catch (err) {
-    console.error('❌ Error in /srvView/:id route:', err);
-    res.status(500).render('srvView', { 
+    console.error(`❌ Error in /${backRoute}/:id route:`, err);
+    res.status(500).render(viewName, { 
       title: 'Error', 
-      back: 'prc',
+      back: backRoute,
       active: 'srv',
       error: 'Something went wrong while loading the request.' 
     });
   }
-});
+}
 
-app.get('/relView/:id', isLogin, isRequest, isStaff, async (req, res) => {
-  try {
-    const requestId = req.params.id;
+// Then your routes become:
+app.get('/srvView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'srv'));
+app.get('/srvAllView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'srvAll'));
+app.get('/prcView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'prc'));
+app.get('/relView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'rel'));
+app.get('/aprView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'apr'));
+app.get('/vrfView/:id', isLogin, isStaff, isVerify, (req, res) => renderRequest(req, res, 'vrf', 'vrfView'));
 
-    // find the request by ID and populate necessary fields
-    const rq = req.requests.find(r => r._id.toString() === requestId);
 
-    if (!rq) {
-      return res.status(404).render('srvView', { 
-        title: 'Request Not Found', 
-        back: 'rel',
-        active: 'srv',
-        error: 'Request not found.' 
-      });
+/* Approval Routes */
+
+app.post("/decItem", async (req, res) => {
+    const { requestId, itemId, back, itemRemarks } = req.body; // read itemRemarks
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        // Find the specific item to decline
+        const itemDoc = await items.findById(itemId);
+        if (!itemDoc) return res.status(404).send("Item not found");
+
+        // Update item status and remarks
+        itemDoc.status = "Declined";
+        itemDoc.remarks = itemRemarks || itemDoc.remarks;
+        await itemDoc.save();
+
+        // Remove declineAt & holdAt if approving any item
+        requestDoc.holdAt = null;
+
+        // Fetch all items for this request
+        const allItems = await items.find({ tr: requestDoc.tr });
+
+        const hasPending = allItems.some(it => it.status === "Pending");
+        const allDeclined = allItems.every(it => it.status === "Declined");
+
+        if (!hasPending) {
+            if (allDeclined) {
+                requestDoc.declineAt = new Date(); // all declined
+            } else {
+                requestDoc.status = "Reviewed";
+                requestDoc.approveAt = new Date();
+            }
+            await requestDoc.save();
+        }
+
+        // Redirect to the correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
     }
-
-    res.render('srvView', { 
-      title: 'Request Details',
-      back: 'rel',
-      active: 'srv',
-      request: rq 
-    });
-  } catch (err) {
-    console.error('❌ Error in /srvView/:id route:', err);
-    res.status(500).render('srvView', { 
-      title: 'Error', 
-      back: 'rel',
-      active: 'srv',
-      error: 'Something went wrong while loading the request.' 
-    });
-  }
 });
 
-app.get('/aprView/:id', isLogin, isRequest, isStaff, async (req, res) => {
-  try {
-    const requestId = req.params.id;
+app.post("/appItem", async (req, res) => {
+    const { requestId, itemId, back } = req.body;
 
-    // find the request by ID and populate necessary fields
-    const rq = req.requests.find(r => r._id.toString() === requestId);
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
 
-    if (!rq) {
-      return res.status(404).render('srvView', { 
-        title: 'Request Not Found', 
-        back: 'apr',
-        active: 'srv',
-        error: 'Request not found.' 
-      });
+        // Find the specific item
+        const itemDoc = await items.findById(itemId);
+        if (!itemDoc) return res.status(404).send("Item not found");
+
+        // Update item status
+        itemDoc.status = "Approved";
+        await itemDoc.save();
+
+        // Remove declineAt & holdAt if approving any item
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+
+        // Check if any items are still pending
+        const pendingItems = await items.find({ tr: requestDoc.tr, status: "Pending" });
+
+        // If no pending items left → mark request as Reviewed
+        if (pendingItems.length === 0) {
+            requestDoc.status = "Reviewed";
+            requestDoc.approveAt = new Date();
+        }
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
     }
-
-    res.render('srvView', { 
-      title: 'Request Details',
-      back: 'apr',
-      active: 'srv',
-      request: rq 
-    });
-  } catch (err) {
-    console.error('❌ Error in /srvView/:id route:', err);
-    res.status(500).render('srvView', { 
-      title: 'Error', 
-      back: 'apr',
-      active: 'srv',
-      error: 'Something went wrong while loading the request.' 
-    });
-  }
 });
 
-app.get('/vrfView/:id', isLogin, isStaff, isVerify, async (req, res) => {
-  try {
-    const requestId = req.params.id;
+app.post("/appAllItem", async (req, res) => {
+    const { requestId, back } = req.body;
 
-    // find the request by ID and populate necessary fields
-    const rq = req.requests.find(r => r._id.toString() === requestId);
+    try {
+        // Find request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
 
-    if (!rq) {
-      return res.status(404).render('srvView', { 
-        title: 'Request Not Found', 
-        back: 'apr',
-        active: 'srv',
-        error: 'Request not found.' 
-      });
+        // Get all items for this request (same TR)
+        const allItems = await items.find({ tr: requestDoc.tr });
+
+        if (allItems.length === 0) {
+            return res.status(400).send("No items found for this request");
+        }
+
+        // Approve all items
+        await items.updateMany(
+            { tr: requestDoc.tr },
+            { 
+                $set: {
+                    status: "Approved",
+                    remarks: null
+                }
+            }
+        );
+
+        // Update request info
+        requestDoc.status = "Reviewed";
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+        requestDoc.approveAt = new Date();
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
     }
-
-    res.render('vrfView', { 
-      title: 'Request Details',
-      back: 'vrf',
-      active: 'srv',
-      request: rq 
-    });
-  } catch (err) {
-    console.error('❌ Error in /vrfView/:id route:', err);
-    res.status(500).render('vrfView', { 
-      title: 'Error', 
-      back: 'vrf',
-      active: 'srv',
-      error: 'Something went wrong while loading the request.' 
-    });
-  }
 });
+
+app.post("/decline3", async (req, res) => {
+    const { requestId, back, requestRemarks } = req.body;
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        // Decline all items under this request
+        await items.updateMany(
+            { tr: requestDoc.tr },
+            { status: "Declined" }
+        );
+
+        requestDoc.declineAt = new Date();
+        requestDoc.holdAt = null;
+        requestDoc.remarks = requestRemarks || "";
+        requestDoc.status = "Pending";
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+    } catch (err) {
+        console.error("Decline Error:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+
+app.post("/hold3", async (req, res) => {
+    const { requestId, back, requestRemarks } = req.body;
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = new Date();
+        requestDoc.remarks = requestRemarks || "";
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+    } catch (err) {
+        console.error("Decline Error:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/restore3", async (req, res) => {
+    const { requestId, back } = req.body;
+
+    try {
+        // Find request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        // Get all items for this request (same TR)
+        const allItems = await items.find({ tr: requestDoc.tr });
+
+        if (allItems.length === 0) {
+            return res.status(400).send("No items found for this request");
+        }
+
+        // Approve all items
+        await items.updateMany(
+            { tr: requestDoc.tr },
+            { 
+                $set: {
+                    status: "Pending",
+                    remarks: null
+                }
+            }
+        );
+
+        // Update request info
+        requestDoc.status = "Pending";
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+        requestDoc.updatedAt = new Date();
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/fRel", async (req, res) => {
+    const { requestId, back } = req.body;
+
+    try {
+        // Find request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        // Get all items for this request (same TR)
+        const allItems = await items.find({ tr: requestDoc.tr });
+
+        if (allItems.length === 0) {
+            return res.status(400).send("No items found for this request");
+        }
+
+
+        // Update request info
+        requestDoc.status = "For Release";
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+        requestDoc.remarks = null;
+        requestDoc.turnAt = new Date();
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/claim3", async (req, res) => {
+    const { requestId, back, claimedBy } = req.body;
+
+    try {
+        // Find request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        // Get all items for this request (same TR)
+        const allItems = await items.find({ tr: requestDoc.tr });
+
+        if (allItems.length === 0) {
+            return res.status(400).send("No items found for this request");
+        }
+
+
+        // Update request info
+        requestDoc.status = "Claimed";
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+        requestDoc.remarks = null;
+        requestDoc.claimedBy = claimedBy;
+        requestDoc.claimedAt = new Date();
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            srv: `/srvView/${requestId}`,
+            prc: `/prcView/${requestId}`,
+            rel: `/relView/${requestId}`,
+            apr: `/aprView/${requestId}`,
+            vrf: `/vrfView/${requestId}`
+        };
+
+        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
+    }
+});
+
+/* end of Approval Routes */
 
 
 app.get('/emp', isLogin, isEmp, (req, res) => {

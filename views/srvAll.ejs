@@ -87,7 +87,6 @@
       <p class="size18 str400">Sorry, No Record Found!</p>
     </section>
     <% requests.forEach((rq, i) => { %>
-      <% if (!rq.declineAt) { %>
       <div class="height0 padding8 rqCard">
         <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderGray borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
             <% if ( rq.status === "Pending") { %>
@@ -153,6 +152,8 @@
           <a href="/aprView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } else if ( title === 'To Verify') { %>
           <a href="/vrfView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === 'All Transactions') { %>
+          <a href="/srvAllView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } else { %>
           <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } %>
@@ -182,7 +183,6 @@
           </div>
         </a>
       </div>
-      <% } %>
     <% }) %>
   <% } %>
 </section>
