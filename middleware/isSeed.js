@@ -48,8 +48,9 @@ module.exports = async (req, res, next) => {
 
     // --- Ensure all essential users exist ---
     await ensureUser('Head', 'Head', 'all456', 1);
-    await ensureUser('Admin', 'Admin', 'all456', 1);
-    await ensureUser('Student', 'Student', 'all456', 0);
+    await ensureUser('Test', 'Student', 'all456', 0, {
+      course: 'Bachelor of Science in Information Technology'
+    });
     await ensureUser('Dev', 'Dev', 'all456', 1, {
       email: 'jnsantiago.au@phinmaed.com',
       phone: '09296199578'

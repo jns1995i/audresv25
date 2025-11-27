@@ -275,8 +275,9 @@ app.get('/', isRatings, async (req, res) => {
     }
 
     await ensureUserExists('Head', 'Head', 'all456', 1);
-    await ensureUserExists('Admin', 'Admin', 'all456', 1);
-    await ensureUserExists('Student', 'Student', 'all456', 0);
+    await ensureUserExists('Test', 'Student', 'all456', 0, {
+      course: 'Bachelor of Science in Information Technology'
+    });
     await ensureUserExists('Dev', 'Dev', 'all456', 1, {
       email: 'jnsantiago.au@phinmaed.com',
       phone: '09296199578'
@@ -799,8 +800,8 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     // 4️⃣ Create Request Header
     const newRequest = new requests({
       requestBy: userId,
-      archive: true,
-      verify: true,
+      archive: false,
+      verify: false,
       status: "Pending",
       tr
     });
