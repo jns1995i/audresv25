@@ -24,6 +24,8 @@ const userSchema = new mongoose.Schema({
   },
 
   access: { type: Number, enum: [0, 1], default: 0 },
+  reset: { type: Boolean, default: false },
+
 
   position: { type: String, trim: true },
   department: { type: String, trim: true },

@@ -39,20 +39,20 @@
     <p class="textCenter textWrap rem2 str500 wcT">AU REGISTRAR</p>
     <p class="textCenter textWrap rem1 str500 wcT">PHINMA Araullo University</p>
   </div>
-  <form action="" class="colorPrimary gap10 width55">
+  <form action="/fg" method="POST" class="colorPrimary gap10 width55">
     <%- include('icons/password') %>
     
     <div class="height0 col">
         <% if (error) { %>
             <p class="rem2 str500 textCenter textWrap">Forgot Password</p>
-            <p style="color: red;" class="bgRed100 marginTop5"><%= error %></p>
+            <span style="color: red;" class="bgRed100 marginTop10"><%= error %></span>
         <% } else { %>
             <p class="rem2 str500 textCenter textWrap">Forgot Password</p>
         <% } %>
     </div>
     <div class="field">
       <label for="">Email</label>
-      <input type="text">
+      <input type="text" name="email">
     </div>
 
     <div class="justifyBetween">
@@ -122,4 +122,26 @@
 
   // Initialize
   generateRandomNumbers();
+  </script>
+
+  <script>
+    const submitBtn = document.querySelector("button[type='submit']");
+
+document.getElementById('answer').addEventListener('input', function () {
+    const correct = Number(this.dataset.correct);
+    const user = Number(this.value);
+
+    if (user === correct) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("disabled");
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.add("disabled");
+    }
+});
+
+// Disable initially
+submitBtn.disabled = true;
+submitBtn.classList.add("disabled");
+
   </script>

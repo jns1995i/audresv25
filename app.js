@@ -362,6 +362,50 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.post('/fg', async (req, res) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+
+    if (!email) {
+      req.session.error = "Enter a valid email!";
+      return res.redirect('/fg');
+    }
+
+    // 🔍 Find user by email
+    const user = await users.findOne({ email });
+
+    if (!user) {
+      req.session.error = "Email not found!";
+      return res.redirect('/fg');
+    }
+
+    // 🔐 Generate new password
+    const newPass = generatePassword();
+
+    // 🔑 Update user password + mark reset=true
+    user.password = newPass;
+    user.reset = true;
+    await user.save();
+
+    console.log(`🔑 User ${email} got new password: ${newPass}`);
+
+    // 📌 Flash success
+    req.session.success = "Temporary password has been sent to your email!";
+    req.session.error = "Temporary password has been sent to your email!";
+    
+    // ❗ NOTE: You can integrate email sending later.
+    // For now, we will show the temp password in console.
+    
+    return res.redirect('/');
+
+  } catch (err) {
+    console.error("⚠️ Forgot Password Error:", err);
+    req.session.error = "Something went wrong!";
+    return res.redirect('/fg');
+  }
+});
+
+
 app.get('/documents/prices', async (req, res) => {
   try {
     const docs = await documents.find({}, 'type amount'); // fetch type & amount
@@ -1084,8 +1128,16 @@ app.post('/pht', isLogin, uploadPhoto.single('photo'), async (req, res) => {
 
 
 app.get('/hom', isLogin, myRequest, (req, res) => {
+  if (req.user.reset === true) {
+    return res.redirect('/resetPage');
+  }
   res.render('hom', { title: 'Home' });
 });
+
+app.get('/resetPage', isLogin, myRequest, (req, res) => {
+  res.render('resetPage', { title: 'Home' });
+});
+
 
 app.get('/reqView/:id', isLogin, async (req, res) => {
   try {
@@ -3132,6 +3184,9 @@ app.post('/update-documents', isLogin, async (req, res) => {
 
 
 app.get('/dsb', isLogin, (req, res) => {
+  if (req.user.reset === true) {
+    return res.redirect('/resetPage');
+  }
   res.render('dsb', { title: 'Dashboard', active: 'dsb' });
 });
 
