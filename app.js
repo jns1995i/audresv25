@@ -1381,7 +1381,7 @@ async function renderRequest(req, res, backRoute, viewName = 'srvView') {
     const rqItems = rq.items || []; // assuming req.requests contains items array
 
     // Filter approved items
-    const approvedItems = rqItems.filter(it => it.status === "Approved");
+    const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
 
     // Calculate totalAmount
     let totalAmount = 0;

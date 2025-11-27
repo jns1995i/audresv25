@@ -202,7 +202,7 @@
                                     </div>
                                     <div class="field">
                                         <label>No. Copies</label>
-                                        <input name="qty[]" type="number" required>
+                                        <input name="qty[]" type="number" id="number" class="cpy" required>
                                     </div>
                                 </div>
                                 <div class="row gap10">
@@ -252,6 +252,7 @@
                             </fieldset>
                         </div>
                         <p class="height0 bgBlue100 hidden textCenter" id="warning1"><i class="fas fa-exclamation-circle"></i> Please fill out all the required fields before adding a new one!</p>
+                        <div class="height0 bgSoft darkGray corner10 padding10 textCenter str500 width100 justifyCenter alignCenter"><i class="fas fa-info-circle marginRight5"></i> Dismissal Form is Available. &nbsp; <a href="" class="underline colorPrimary str500 width0 padding0 margin0 size12">Download Here</a></div>
                         <div class="height0 justifyBetween padding5">
                             <p class=" str500">Need Another Document?</p>
                             <a href="javascript:void(0)" class="nav pnav" id="addDoc"><i class="fas fa-plus"></i> Additional</a>
@@ -269,21 +270,35 @@
                     <div class="row height0 width100 gap10 colF1">
                         <div class="field gap5 width30">
                             <label for="">First Name*</label>
-                            <input type="text" name="firstName" required>
+                            <input type="text" name="firstName" class="sname" required>
                         </div>
                         <div class="field gap5 width30">
                             <label for="">Middle Name</label>
-                            <input type="text" name="middleName">
+                            <input type="text" name="middleName" class="sname">
                         </div>
                         <div class="field gap5 width30">
                             <label for="">Last Name*</label>
-                            <input type="text" name="lastName" required>
+                            <input type="text" name="lastName" class="sname" required>
                         </div>
                         <div class="field gap5 width10">
                             <label for="">Ext</label>
-                            <input type="text" name="extName">
+                            <input type="text" name="extName" class="sname">
                         </div>
                     </div>
+                    <script>
+                        function enforceNameFormat(event) {
+                            // Allow only letters and dash
+                            event.target.value = event.target.value.replace(/[^A-Za-z-.\s]/g, '');
+                        }
+
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const nameInputs = document.querySelectorAll('.sname');
+                            nameInputs.forEach(input => {
+                                input.addEventListener('input', enforceNameFormat);
+                            });
+                        });
+                    </script>
+
                     <div class="row height0 width100 gap10 colF1">
                         <div class="field gap5">
                             <label for="">Address*</label>
@@ -373,6 +388,17 @@
                             </div>
                             <input type="text" id="sn" name="studentNo" placeholder="e.g. 01-1920-032235">
                         </div>
+                        <script>
+                            function enforceStudentNumberFormat(event) {
+                                // Allow only digits and dash
+                                event.target.value = event.target.value.replace(/[^0-9-]/g, '');
+                            }
+
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const snInput = document.querySelector('#sn');
+                                snInput.addEventListener('input', enforceStudentNumberFormat);
+                            });
+                        </script>
                         <script>
                         const roleSelect = document.getElementById('role');
                         const snInput = document.getElementById('sn');
@@ -655,17 +681,31 @@
 </script>
 
 <script>
-    function enforceNumericInput(event) {
+    function enforcePhoneInput(event) {
         event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, 11);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         const phoneInputs = document.querySelectorAll('.number');
         phoneInputs.forEach(input => {
-            input.addEventListener('input', enforceNumericInput);
+            input.addEventListener('input', enforcePhoneInput);
         });
     });
 </script>
+
+<script>
+    function enforceCopyInput(event) {
+        event.target.value = event.target.value.replace(/[^1-9]/g, '').slice(0, 1);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const copyInputs = document.querySelectorAll('.cpy');
+        copyInputs.forEach(input => {
+            input.addEventListener('input', enforceCopyInput);
+        });
+    });
+</script>
+
 <script>
 let documentPrices = {};
 

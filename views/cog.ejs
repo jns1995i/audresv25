@@ -46,8 +46,31 @@
             <button type="submit" class="nav pnav width100">Update</button>
         </div>
     </form>
-    <div class="width65 abstractBG1 corner15 padding30 relative h300">
-        <img src="<%= seedUser.photo ? seedUser.photo : '/images/annPhoto2.jpg' %>" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" alt="logo" class="absolute right30 bottom10 h120 w120 scale3 opacity05">
+
+    <div class="width65 bgWhite corner15 padding20 relative h300 col justifyStart alignStart">
+        <img src="<%= seedUser.photo ? seedUser.photo : '/images/annPhoto2.jpg' %>" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" alt="logo" class="hidden absolute right30 bottom10 h120 w120 scale3 opacity05">
+        <p class="rem24 str400">Forms</p>
+        <hr>
+        <div class="section gap30 corner15 padding20">
+            <form action="" class="gap10 glass width40">
+                <div class="field colorPrimary">
+                    <label for="">Dismissal Form</label>
+                    <input type="file" name="" id="">
+                </div>
+                <div class="field">
+                    <button type="submit" class="nav width100">Upload</button>
+                </div>
+            </form>
+            <form action="" class="gap10 glass width40">
+                <div class="field colorPrimary">
+                    <label for="">Dismissal Form</label>
+                    <input type="file" name="" id="">
+                </div>
+                <div class="field">
+                    <button type="submit" class="nav width100">Upload</button>
+                </div>
+            </form>
+        </div>
     </div>
 </section>
 

@@ -13,7 +13,7 @@
 </style>
 
  <section class="gap20 alignStart padding5" id="">
-        <section class="col width40">
+        <section class="col width60">
             <section class="justifyBetween padding0">
                 <% const routes = { srv: "/srv",prc: "/prc",rel: "/rel",apr: "/apr",vrf: "/vrf", dsb: "/dsb", srvAll: "/srvAll"};
                 const href = routes[back] || "/srv"; %>
@@ -22,14 +22,39 @@
             </section>
             
             <section class="col alignStart info corner16 padding5 bgWhite marginTop5 shadow1">
-                <section class="col padding15 corner16 alignStart relative">
-                    <img src="<%= request.requestBy.photo ? request.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 shadow1 absolute right10 top10">
+                <section class="col corner16 alignStart relative">
+                    <img src="<%= request.requestBy.photo ? request.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h30 w30 corner500 shadow1 absolute right10 top10">
                     <p class="size20 str500">
                         <%= request.requestBy ? request.requestBy.fName : '' %>
                         <%= request.requestBy ? request.requestBy.mName : '' %>
                         <%= request.requestBy ? request.requestBy.lName : '' %>
                         <%= request.requestBy ? request.requestBy.xName : '' %>
+                        &nbsp; <a href="javascript:void(0)" id="showBtn"><i class="fas fa-chevron-down"></i></a>
                     </p>
+                </section>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.querySelector('#showBtn');
+    const card = document.querySelector('#showCard');
+    const icon = btn.querySelector('i');
+
+    btn.addEventListener('click', () => {
+        card.classList.toggle('hidden');
+        icon.classList.toggle('rotate-icon'); // rotate on toggle
+    });
+});
+</script>
+<style>
+    #showBtn i {
+    transition: transform 0.6s ease; /* smooth rotation */
+}
+
+.rotate-icon {
+    transform: rotate(180deg); /* flip down/up */
+}
+
+</style>
+                <section class="paddingInline10 col alignStart bgSoft corner15 hidden" id="showCard">
                     <section class="width0 gap20 padding0">
                         <p class="rem12">
                             <i class="bi bi-patch-check-fill"></i>
@@ -40,8 +65,6 @@
                             <%= request.requestBy ? request.requestBy.campus : '' %>
                         </p>
                     </section>
-                </section>
-                <section class="paddingInline10 col alignStart bgSoft corner15">
                     <p class="rem12">
                         <i class="fas fa-address-card"></i>
                         <%= request.requestBy?.schoolId || "--" %>
@@ -72,73 +95,54 @@
                     <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= request.requestBy?.address || "--" %></p>
                 </section>
             </section>
-            
-            <section class="col alignStart gap5 marginTop10">
-                <% if ( request.processBy) { %>
-                <section class="corner10 gap5 justifyStart width0 padding0">
-                    <img src="<%= request.processBy ? request.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h20 w20 wMin20 borderPrimary corner500">
-                    <p class="rem12 str500"> <%= request.processBy?.fName || "" %> <%= request.processBy?.lName || "" %></p>
+            <section class="padding5 gap10 alignStart marginTop10">
+                <section class="padding15 col corner15 alignStart">
+                    <p class="rem12"><i class="fas fa-calendar"></i> Date Requested</p>
+                    <%
+                    const options = { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: 'numeric', 
+                        minute: '2-digit', 
+                        hour12: true 
+                    }; 
+                    const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); 
+                    %>
+                    <p class="rem14 str400"><%= formattedDate %></p>
+                    
+                    <br>
+                        <p class="rem12"> <i class="fas fa-receipt"></i> Transaction Number</p>
+                        <p class="rem14 str400"><%= request.tr %></p>
+                        <a href="" class="nav cnav disabled absolute right5 bottom5 scale2 opacity05 hidden"><i class="fas fa-receipt"></i></a>
                 </section>
-                <p class="rem1 str400 marginLeft5">Assigned at <%= request.assignAtFormatted %></p>
-                <% } else { %>
-                    <p class="red bgRed100"><i class="fas fa-exclamation-circle"></i> Unassigned</p>
-                <% } %>
-            </section>
-
-            <%- include('partials/status') %>
-        </section>
-        <section class="col alignStart width30 padding5 justifyStart corner15 gap10">
-            <section class="padding15 col abstractBG1 corner15 alignStart">
-                    <p class="rem12">Transaction Number</p>
-                    <p class="rem14 str400"><%= request.tr %></p>
-                    <a href="" class="nav cnav disabled absolute right5 bottom5 scale2 opacity05"><i class="fas fa-receipt"></i></a>
-            </section>
-            <section class="col alignStart paddingBlock0">
-                <p class="rem12"><i class="fas fa-receipt"></i> Date Requested</p>
-                <%
-                const options = { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric', 
-                    hour: 'numeric', 
-                    minute: '2-digit', 
-                    hour12: true 
-                }; 
-                const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); 
-                %>
-                <p class="rem14 str400"><%= formattedDate %></p>
-            </section>
-            
-
-            
-            <section class="bgWhite shadow1 corner15 col gap10">
-                <section class="bgBlue100 corner15 justifyBetween padding10" style="align-self: center;">
-                    <p class="size16"><i class="fas fa-info-circle"></i> Total Payables</p>
-                    <p class="size16 str500">&#8369;<%= totalAmount || "0" %>.00</p>
-                </section>
-                <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
-                    <section class="col bgWhite corner10 <% if (["For Payment", "For Verification"].includes(request.status) && request.payPhoto) { %> shadow1 <% } %>">
-                        <section class="bgWhite gap5 padding0 alignStart relative">
-                            <section class="alignStart corner14 col">
-                                <p class="rem18">Payment Details</p>
-                                <p class="size12">Method: <%= request.payMode || 'Gcash' %></p>
-                                <% if (["Verified","Claimed","For Release"].includes(request.status) && request.payPhoto) { %>
-                                    <p class="size12 green"><i class="fas fa-check-circle"></i> Payment Verified</p>
-                                <% } else { %>
-                                    <p class="size12 yellow"><i class="fas fa-clock"></i> Payment Unverified</p>
-                                <% } %>
-                            </section>
-                            <img src="<%= request.payPhoto ? request.payPhoto : '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary widthMax100 hMax150 corner10">
-                            <a href="<%= request.payPhoto %>" target="_blank" class="nav cnav absolute bottom5 right5 glass"><i class="fas fa-search-plus"></i></a>
-                        </section>
+                <section class="bgWhite shadow1 corner15 col">
+                    <section class="bgBlue100 corner15 justifyBetween padding10" style="align-self: center;">
+                        <p class="size16"><i class="fas fa-info-circle"></i> Total Payables</p>
+                        <p class="size16 str500">&#8369;<%= totalAmount || "0" %>.00</p>
                     </section>
-                <% } %>
+                    <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
+                        <section class="col bgWhite corner10 padding0 <% if (["For Payment", "For Verification"].includes(request.status) && request.payPhoto) { %> shadow1 <% } %>">
+                            <section class="bgWhite gap5 padding0 alignStart relative">
+                                <section class="alignStart corner14 col">
+                                    <p class="rem18 hidden">Payment Details</p>
+                                    <p class="size12">Method: <%= request.payMode || 'Gcash' %></p>
+                                    <% if (["Verified","Claimed","For Release"].includes(request.status) && request.payPhoto) { %>
+                                        <p class="size12 green"><i class="fas fa-check-circle"></i> Payment Verified</p>
+                                    <% } else { %>
+                                        <p class="size12 yellow"><i class="fas fa-clock"></i> Payment Unverified</p>
+                                    <% } %>
+                                <a href="<%= request.payPhoto %>" target="_blank" class="absolute right5 top5 navy">View Payment <i class="fas fa-chevron-right"></i></a>
+                                </section>
+                                <img src="<%= request.payPhoto ? request.payPhoto : '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary widthMax100 hMax100 corner10 hidden">
+                                <a href="<%= request.payPhoto %>" target="_blank" class="nav cnav absolute bottom5 right5 glass hidden"><i class="fas fa-search-plus"></i></a>
+                            </section>
+                        </section>
+                    <% } %>
+                </section>
             </section>
             
-            <%- include('partials/notes') %>
-        </section>
-        <section class="col alignStart width35 bgWhite shadow1 justifyStart corner15 gap10">
-            <section class="col padding15 corner15 bgSoft gap10">
+            <section class="col padding15 corner15 bgWhite shadow1 gap10">
                 <% if (request.items && request.items.length > 0) { %>
                     <% request.items.forEach(item => { %>
                         <section class="gap10 alignStart justifyStart
@@ -162,8 +166,7 @@
                                 <% } else if ( item.status === "Approved") { %>
                                     <a href="" class="disabled nav cnavLG absolute translateY right10 bgGreen100"><i class="fas fa-check-circle"></i></a>
                                 <% } else { %>
-                                    <br>
-                                    <section class="padding5 gap5 width0 corner10">
+                                    <section class="padding5 gap5 width0 corner10 absolute right10 top10">
                                         <form action="/decItem" method="POST" class="form2">
                                             <input type="hidden" name="requestId" value="<%= request._id %>">
                                             <input type="hidden" name="itemId" value="<%= item._id %>">
@@ -187,57 +190,27 @@
                 <% } else { %>
                     <p>No items found for this request.</p>
                 <% } %>
-                
-            
-                <% const hasPending = request.items && request.items.some(it => it.status === "Pending"); %>
-                <% if (hasPending) { %>
-                    <section class="gap10 justifyBetween corner15 shadow1 bgWhite">
-                        <p class="rem14 str500">Quick Action <i class="fas fa-arrow-right"></i></p>
-                        <form action="/appAllItem" method="POST" class="form2">
-                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                            <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav corner10 pnav"><i class="fas fa-check-double"></i> Approve All</button>
-                        </form>
-                    </section>
-                <% } %>
             </section>
+        </section>
+        <section class="col alignStart width35 bgWhite shadow1 justifyStart corner15 gap10 hidden">
 
-            
-            <% if ( request.status === "Verified") { %>
-            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20">
-                <%- include('icons/success') %>
-                <p class="rem12 str500 textCenter green">Confirm that the document is fully prepared and ready for release.</p>
-                <form action="/fRel" method="POST" class="form2">
-                    <input type="hidden" name="requestId" value="<%= request._id %>">
-                    <input type="hidden" name="back" value="<%= back %>">
-                    <button type="submit" class="nav corner10 gnav"><i class="fas fa-dolly"></i>Ready For Release</button>
-                </form>
-            </section>
-            <% } %>
+        </section>
 
-            <style>
-                .claimX #successIcon {
-                    border: 0.5px solid blue !important;
-                    i.fa-thumbs-up {
-                        color: rgb(8, 8, 92);
-                    }
-                }
-            </style>
-                        
-            <% if ( request.status === "For Release") { %>
-            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20 claimX">
-                <%- include('icons/success') %>
-                <p class="rem12 str500 textCenter colorPrimary">Has the document been claimed?</p>
-                <form action="/claim3" method="POST" class="form2 width100">
-                    <input type="hidden" name="requestId" value="<%= request._id %>">
-                    <input type="hidden" name="back" value="<%= back %>">
-                    <div class="field">
-                        <input type="text" name="claimedBy" placeholder="Enter Claimant's Name">
-                    </div>
-                    <br>
-                    <button type="submit" class="nav corner10 pnav width100"><i class="fas fa-dolly"></i>Mark as Claimed</button>
-                </form>
-            </section>
+        
+        
+        <section class="col alignStart width30 padding5 justifyStart corner15 gap10">
+            <%- include('partials/status') %>     
+            <%- include('partials/notes') %>
+            <% const hasPending = request.items && request.items.some(it => it.status === "Pending"); %>
+            <% if (hasPending) { %>
+                <section class="gap10 justifyBetween corner15 shadow1 bgWhite">
+                    <p class="rem14 str500">Quick Action <i class="fas fa-arrow-right"></i></p>
+                    <form action="/appAllItem" method="POST" class="form2">
+                        <input type="hidden" name="requestId" value="<%= request._id %>">
+                        <input type="hidden" name="back" value="<%= back %>">
+                        <button type="submit" class="nav corner10 pnav"><i class="fas fa-check-double"></i> Approve All</button>
+                    </form>
+                </section>
             <% } %>
 
             <% if (hasPending) { %>
@@ -292,7 +265,57 @@
                     </section>
                 </section>
             <% } %>
+            
+            <% if ( request.status === "Verified") { %>
+            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20">
+                <%- include('icons/success') %>
+                <p class="rem12 str500 textCenter green">Confirm that the document is fully prepared and ready for release.</p>
+                <form action="/fRel" method="POST" class="form2">
+                    <input type="hidden" name="requestId" value="<%= request._id %>">
+                    <input type="hidden" name="back" value="<%= back %>">
+                    <button type="submit" class="nav corner10 gnav"><i class="fas fa-dolly"></i>Ready For Release</button>
+                </form>
+            </section>
+            <% } %>
 
+            <style>
+                .claimX #successIcon {
+                    border: 0.5px solid blue !important;
+                    i.fa-thumbs-up {
+                        color: rgb(8, 8, 92);
+                    }
+                }
+            </style>
+                        
+            <% if ( request.status === "For Release") { %>
+            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20 claimX">
+                <%- include('icons/success') %>
+                <p class="rem12 str500 textCenter colorPrimary">Has the document been claimed?</p>
+                <form action="/claim3" method="POST" class="form2 width100">
+                    <input type="hidden" name="requestId" value="<%= request._id %>">
+                    <input type="hidden" name="back" value="<%= back %>">
+                    <div class="field">
+                        <input type="text" name="claimedBy" placeholder="Enter Claimant's Name">
+                    </div>
+                    <br>
+                    <button type="submit" class="nav corner10 pnav width100"><i class="fas fa-dolly"></i>Mark as Claimed</button>
+                </form>
+            </section>
+            <% } %>
+
+
+
+            <section class="col alignStart gap5">
+                <% if ( request.processBy) { %>
+                <section class="corner10 gap5 justifyStart width0 padding0">
+                    <img src="<%= request.processBy ? request.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h20 w20 wMin20 borderPrimary corner500">
+                    <p class="rem12 str500"> <%= request.processBy?.fName || "" %> <%= request.processBy?.lName || "" %></p>
+                </section>
+                <p class="rem1 str400 marginLeft5">Assigned at <%= request.assignAtFormatted %></p>
+                <% } else { %>
+                    <p class="red bgRed100"><i class="fas fa-exclamation-circle"></i> Unassigned</p>
+                <% } %>
+            </section>
         </section>
     </section>
 

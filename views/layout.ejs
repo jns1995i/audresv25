@@ -184,5 +184,42 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     </script>
+    
+                    <script>
+                        function enforceNameFormat(event) {
+                            // Allow only letters and dash
+                            event.target.value = event.target.value.replace(/[^A-Za-z-.\s]/g, '');
+                        }
+
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const nameInputs = document.querySelectorAll('.sname');
+                            nameInputs.forEach(input => {
+                                input.addEventListener('input', enforceNameFormat);
+                            });
+                        });
+                    </script>
+                <script>
+                    function enforceStudentNumberFormat(event) {
+                        // Allow only digits and dash
+                        event.target.value = event.target.value.replace(/[^0-9-]/g, '');
+                    }
+
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const snInput = document.querySelector('#sn');
+                        snInput.addEventListener('input', enforceStudentNumberFormat);
+                    });
+                </script>
+                
+                <script>
+                    function enforceStudentIDFormat(event) {
+                        // Allow only digits and dash
+                        event.target.value = event.target.value.replace(/[^0-9-]/g, '');
+                    }
+
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const snInput = document.querySelector('#s');
+                        snInput.addEventListener('input', enforceStudentIDFormat);
+                    });
+                </script>
 
     <script src="https://kit.fontawesome.com/70353c979a.js" crossorigin="anonymous"></script>

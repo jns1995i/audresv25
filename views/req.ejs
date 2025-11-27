@@ -185,7 +185,7 @@
                                     </div>
                                     <div class="field">
                                         <label>No. Copies</label>
-                                        <input name="qty[]" type="number" required>
+                                        <input name="qty[]" type="number" class="number" required>
                                     </div>
                                 </div>
                                 <div class="row gap10 marginTop5">
@@ -235,6 +235,7 @@
                             </fieldset>
                         </div>
                         <p class="height0 bgBlue100 hidden textCenter" id="warning1"><i class="fas fa-exclamation-circle"></i> Please fill out all the required fields before adding a new one!</p>
+                        <div class="height0 bgSoft darkGray corner10 padding10 textCenter str500 width100 justifyCenter alignCenter"><i class="fas fa-info-circle marginRight5"></i> Dismissal Form is Available. &nbsp; <a href="" class="underline colorPrimary str500 width0 padding0 margin0 size12">Download Here</a></div>
                         <div class="height0 justifyBetween padding5">
                             <p class=" str500">Need Another Document?</p>
                             <a href="javascript:void(0)" class="nav pnav" id="addDoc"><i class="fas fa-plus"></i> Additional</a>
@@ -325,7 +326,7 @@
 
 <script>
     function enforceNumericInput(event) {
-        event.target.value = event.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+        event.target.value = event.target.value.replace(/[^1-9]/g, '').slice(0, 1);
     }
 
     document.addEventListener('DOMContentLoaded', () => {

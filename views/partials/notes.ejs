@@ -1,5 +1,5 @@
  <% if ( request.holdAt ) { %>
-                <section class=" padding0 relative">
+                <section class=" padding0 relative marginTop15">
                     <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         Your request has been hold! Due to
@@ -12,7 +12,7 @@
                     </section>
                 </section>
                 <% } else if ( request.declineAt ) { %>
-                <section class=" padding0 relative col">
+                <section class=" padding0 relative col marginTop15">
                     <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         Request has been declined due to
@@ -23,10 +23,9 @@
                         <% } else { %>
                             <%= request.remarks %>
                         <% } %>
-                    </section>
                 </section>
                 <% } else { %>
-                <section class="padding0 relative">
+                <section class="padding0 relative marginTop15 hidden">
                     <section class="bgYellow textCenter darkGray corner14 padding20" style="min-height: 40px;">
                         <p class="size14 str500"><i class="fas fa-info-circle"></i>
                         <% if (request.status === "Pending") { %>
