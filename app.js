@@ -761,7 +761,6 @@ app.get('/check-email2', async (req, res) => {
 app.get('/req', isLogin, (req, res) => {
   res.render('req', { title: 'Request Form' });
 });
-
 app.post('/reqDoc', cpUpload, async (req, res) => {
   try {
     if (!req.session?.user?._id) {
@@ -771,52 +770,62 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       });
     }
 
-    // Normalize all form fields into arrays
+    const userId = req.session.user._id;
+
+    // 1️⃣ Normalize form arrays
     const typesArr = [].concat(req.body.type || []);
     const purposesArr = [].concat(req.body.purpose || []);
     const qtyArr = [].concat(req.body.qty || []);
     const schoolYearsArr = [].concat(req.body.schoolYear || []);
     const semestersArr = [].concat(req.body.semester || []);
 
-    // Filter uploaded files
+    // 2️⃣ Upload proof photos
     const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
 
-    // Upload each photo to Cloudinary
     const reqPhotoUrls = await Promise.all(
-      reqPhotos.map(async (file) => {
-        const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
+      reqPhotos.map(async file => {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: 'request_photos'
+        });
         return result.secure_url;
       })
     );
 
-    const requestDocs = [];
+    // 3️⃣ Generate one TR for the full request
+    const lastTwo = userId.toString().slice(-2);
+    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0');
+    const tr = `AU25-${monthNum}${lastTwo}001`; // one TR for entire request
 
-    for (let i = 0; i < typesArr.length; i++) {
-      const userIdStr = req.session.user._id.toString();
-      const lastTwo = userIdStr.slice(-2);
-      const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // e.g., 01-12
-      const seq = String(i + 1).padStart(3, '0'); // 001, 002, ...
+    // 4️⃣ Create Request Header
+    const newRequest = new requests({
+      requestBy: userId,
+      archive: true,
+      verify: true,
+      status: "Pending",
+      tr
+    });
 
-      // Generate TR per document
-      const tr = `AU25-${monthNum}${lastTwo}${seq}`;
+    const savedRequest = await newRequest.save();
 
-      requestDocs.push({
-        requestBy: req.session.user._id,
-        type: typesArr[i],
-        purpose: purposesArr[i],
-        qty: qtyArr[i],
-        schoolYear: schoolYearsArr[i] || "",
-        semester: semestersArr[i] || "",
-        proof: reqPhotoUrls[i] || null,
-        archive: false,
-        verify: false,
-        status: "Pending",
-        tr // unique per document
-      });
-    }
+    // 5️⃣ Create Request Items
+    const itemDocs = typesArr.map((t, i) => ({
+      requestId: savedRequest._id,
+      tr,  // same TR for all items
+      type: t || '',
+      purpose: purposesArr[i] || '',
+      qty: qtyArr[i] || 1,
+      schoolYear: schoolYearsArr[i] || '',
+      semester: semestersArr[i] || '',
+      proof: reqPhotoUrls[i] || null,
+      archive: false,
+      verify: false,
+      status: "Pending"
+    }));
 
-    await requests.insertMany(requestDocs);
+    // 6️⃣ Insert all items
+    await items.insertMany(itemDocs);
 
+    // 7️⃣ Redirect success
     res.redirect('/reqSuccess');
 
   } catch (err) {
@@ -827,6 +836,7 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     });
   }
 });
+
 
 
 
@@ -1058,7 +1068,7 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
     const rqItems = await items.find({ tr: rq.tr });
 
     let totalAmount = 0;
-    const approvedItems = rqItems.filter(it => it.status === "Approved");
+    const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
     const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } });
 
     approvedItems.forEach(it => {
