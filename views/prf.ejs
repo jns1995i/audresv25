@@ -58,7 +58,7 @@
             <hr class="width70"><br>
             <div class="bgBlue100 col alignStart">
                 <p class="rem1">Photo Upload Guidelines:</p>
-                <p class="rem1">&bull; Maximum file size: 5MB</p>
+                <p class="rem1">&bull; Maximum file size: 500MB</p>
                 <p class="rem1">&bull; Allowed formats: JPG, JPEG, PNG</p>
                 <p class="rem1">&bull; Recommended dimensions: 400x400px (square)</p>
                 <p class="rem1">&bull; Clear and recognizable photo of yourself</p>
@@ -70,6 +70,28 @@
                     <label for="photo">Upload Photo Here</label>
                     <input type="file" name="photo" id="photo" accept="image/*">
                 </div>
+                <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>
+                <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                const input = document.querySelector('input[name="photo"]');
+                const warning = document.querySelector('.limitPhoto');
+
+                input.addEventListener('change', function () {
+                    warning.classList.add("hidden");
+
+                    if (this.files.length > 0) {
+                    const file = this.files[0];
+                    const maxSize = 500 * 1024 * 1024; // 500MB
+
+                    if (file.size > maxSize) {
+                        warning.textContent = "Photo must not be larger than 500MB.";
+                        warning.classList.remove("hidden");
+                        this.value = ""; // clear file input
+                    }
+                    }
+                });
+                });
+                </script>
                 <br>
                 <div class="field alignEnd">
                     <button type="submit" class="nav pnav w100">

@@ -183,7 +183,16 @@ const storage = new CloudinaryStorage({
 });
 
 // Create multer middleware
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 524288000 }, // 500MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"));
+    }
+    cb(null, true);
+  }
+});
 
 const cpUpload = upload.any();
 
@@ -197,7 +206,16 @@ const photoStorage = new CloudinaryStorage({
 });
 
 // Multer middleware for single file upload
-const uploadPhoto = multer({ storage: photoStorage });
+const uploadPhoto = multer({
+  storage: photoStorage,
+  limits: { fileSize: 524288000 }, // 500MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files allowed!"));
+    }
+    cb(null, true);
+  }
+});
 
 function generatePassword() {
   const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -224,6 +242,16 @@ function generatePassword() {
   // Shuffle for randomness
   return password.sort(() => Math.random() - 0.5).join("");
 }
+
+app.use((err, req, res, next) => {
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.render('req', { 
+      error: 'Photo must not exceed 500MB!',
+      title: "AUDRESv25"
+    });
+  }
+  next(err);
+});
 
 // ================== ROUTES ==================
 
@@ -762,6 +790,7 @@ app.get('/check-email2', async (req, res) => {
 app.get('/req', isLogin, (req, res) => {
   res.render('req', { title: 'Request Form' });
 });
+
 app.post('/reqDoc', cpUpload, async (req, res) => {
   try {
     if (!req.session?.user?._id) {

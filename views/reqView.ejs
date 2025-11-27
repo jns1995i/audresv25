@@ -465,6 +465,28 @@
                                     <label for="">Upload your Proof of Payment here</label>
                                     <input name="payPhoto" type="file" required>
                                 </div>
+                                <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>
+                                <script>
+                                document.addEventListener("DOMContentLoaded", () => {
+                                const input = document.querySelector('input[name="payPhoto"]');
+                                const warning = document.querySelector('.limitPhoto');
+
+                                input.addEventListener('change', function () {
+                                    warning.classList.add("hidden");
+
+                                    if (this.files.length > 0) {
+                                    const file = this.files[0];
+                                    const maxSize = 500 * 1024 * 1024; // 500MB
+
+                                    if (file.size > maxSize) {
+                                        warning.textContent = "Photo must not be larger than 500MB.";
+                                        warning.classList.remove("hidden");
+                                        this.value = ""; // clear file input
+                                    }
+                                    }
+                                });
+                                });
+                                </script>
                                 <div class="field alignEnd">
                                     <button class="nav pnav w120">Upload</button>
                                 </div>
