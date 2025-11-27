@@ -11,12 +11,6 @@
         max-height: 39px;
         transition: 1s ease;
     }
-    .searchBar:hover {
-        border: 2px solid white;
-    }
-    .searchBar:hover i {
-        color: white;
-    }
     .searchBar input[type=search] {
         border-radius: 0.5em;
         border: none;
@@ -87,7 +81,7 @@
         display: none;
     }
     #hCard {
-        flex-direction: column-reverse !important;
+        width: 100%;
     }
     .rqCrd {
         height: auto !important;
@@ -97,48 +91,42 @@
 </style>
 
 
-<div class="height0 padding5 alignStart" id="homePg">
-  <div class="height0 padding20 col mainCard width40 hidden" id="helpCard">
-  </div>
-  <div class="block height0 padding10 col mainCard width60 justifyStart gap5 overflow-y1">
+<div class="height0 padding5 justifyStart col" id="homePg">
 
-    <div class="section gap10 padding0" id="hCard">
-        <section class="col padding0">
-            <section class="glass padding10 corner10 marginBottom5 col gap5 alignStart relative">
-                <a href="javascript:void(0)" class="nav cnav absolute right10 top10 liquid" style="transform: scale(2.3); opacity: 0.15;"><i class="fas fa-list"></i></a>
-                <p class="rem16">Request History</p>
-                <section class="justifyBetween bgYellow colorPrimary corner14 padding5 relative">
-                    <section class="col alignStart relative width0">
-                        <% if (requests && requests.length > 0) { %>
-                            <p class="rem14 str500"><%= requests.length %> Total Requests</p>
-                        <% } else { %>
-                            <p class="rem14">You have no request yet!</p>
-                        <% } %>
-                    </section>
-                    <div class="height0 width0 liquid"><a href="/req" class="nav"><i class="fas fa-plus"></i> Request</a></div>
-                </section>
-            </section>
-            <section class="paddingInline5 paddingBlock10 justifyBetween corner10">
-                <a href="/hom" class="nav glass"><i class="fas fa-chevron-left"></i>Back</a>
-                <div class="searchBar glass" style="width: 78% !important;">
-                    <i class="fas fa-search"></i>
-                    <input type="search" id="univ" class="transparent">
-                </div>
-            </section>
-            <br>
-        </section>
-        <div class="height0 col padding20" id="headF">
-            <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
-                <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
-            </div>
-            <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-            <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
+<div class="section gap10 padding0 width60 col" id="hCard">
+    <div class="height0 col padding20" id="headF">
+        <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
+            <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
         </div>
+        <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+        <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
     </div>
+</div>
+
+  <div class="block height0 padding10 col mainCard width60 justifyStart gap5 overflow-y1 bgSoft corner10 index50">
+
+    <section class="col padding0 gap10 colorPrimary corner15">
+        <section class="padding0 justifyBetween corner15">
+            <a href="/hom" class="nav"><i class="fas fa-chevron-left"></i>Go Back</a>
+            <p class="rem18 marginLeft5">All Transactions</p>
+        </section>
+        <% if (requests && requests.length > 0) { %>
+            <section class="padding10 justifyBetween corner15 bgWhite">
+                <div class="searchBar" style="width: 70% !important;">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="univ" class="transparent" placeholder="Search here">
+                </div>
+                <a href="/req" class="nav pnav"><i class="fas fa-plus"></i> Request</a>
+            </section>
+        <% } else { %>
+            <p class="rem14">You have no request yet!</p>
+        <% } %>
+    </section>
+    <br>
 
     <div class="height0 col block overflow-y1 gap5 rqCrd">
         <% if (requests && requests.length > 0) { %>
-        <div class="height0 bgSoft cornerRem1 colorPrimary padding20 gap10 col">
+        <div class="height0 bgWhite corner15 colorPrimary padding10 gap10 col">
             <div class="col gap5" id="noRecords" style="display: none;">
                 <%- include('icons/notFound') %>
                 <p class="size14 str500">No Records Found</p>
@@ -152,11 +140,14 @@
                 <div class="height0 justifyStart width25">
                     <p class="size12 str400"><%= req.createdAtFormatted %></p>
                 </div>
-                <div class="height0 justifyStart width25">
-                    <p class="size12 str500"><%= req.type %></p>
-                </div>
-                <div class="height0 width10">
-                    <p class="size12 str400"><%= req.qty %></p>
+                <div class="height0 alignStart width35 col green">
+                     <% if (req.items && req.items.length > 0) { %>
+                      <% req.items.forEach(item => { %>
+                        <p class="size12 str400"><%= item.qty %> <%= item.type %></p>
+                      <% }) %>
+                    <% } else { %>
+                      <p class="text-muted">No items found for this request.</p>
+                    <% } %>
                 </div>
                 <div class="height0 width25 justifyEnd">
                     <% if ( req.holdAt ) { %>
@@ -201,15 +192,15 @@
         </div>
         <% } %>
     </div>
-    <div class="sub height0 row flex marginTop10 bgSoft colorPrimary corner10 padding10">
+    <div class="sub height0 row flex marginTop10 bgWhite shadow1 colorPrimary corner10 padding10">
         <div class="ctrl height0 gap10 justifyBetween">
             <div class="height0 gap5 width0" id="subGrand">
                 <div class="size14 gap5">
                 <span id="totalRecords" class="totalRecords"></span>
                     | Display: &nbsp;
                 </div>
-                <div class="selectBar" style="width: 70px;"> 
-                    <select id="rowsPerPage" onchange="updateRowsPerPage()" style="width: 100px">
+                <div class="selectBar" style="width: 100px;"> 
+                    <select id="rowsPerPage" onchange="updateRowsPerPage()" style="">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="50">50</option>

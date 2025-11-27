@@ -93,7 +93,7 @@
                 <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
             </div>
             <section class="justifyBetween">
-                <% if ( back === "Home") { %>
+                <% if ( back === "hom") { %>
                 <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
                 <% } else { %>
                 <a href="/reqAll" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
@@ -440,7 +440,7 @@
                         <% } else if (rq.status === "Reviewed") { %>
                             <p class="">Good news! Your request has been reviewed and has now been forwarded to the Accounting Department for assessment.</p>
                         <% } else if (rq.status === "Assessed") { %>
-                            <p class="">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt and upload it below.</p>
+                            <p class="">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt or take photo of the receipt the cashier and upload it below.</p>
                             <br>
                             <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
                                 <input type="hidden" name="id" value="<%= rq.id %>">
