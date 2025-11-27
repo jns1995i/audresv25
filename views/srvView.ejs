@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="size16 str500">&#8369;<%= totalAmount || "0" %>.00</p>
                     </section>
                     <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
-                        <section class="col bgWhite corner10 padding0 <% if (["For Payment", "For Verification"].includes(request.status) && request.payPhoto) { %> shadow1 <% } %>">
+                        <section class="col bgWhite corner10 padding0 <% if (["For Payment", "For Verification"].includes(request.status) && request.payPhoto) { %> <% } %>">
                             <section class="bgWhite gap5 padding0 alignStart relative">
                                 <section class="alignStart corner14 col">
                                     <p class="rem18 hidden">Payment Details</p>

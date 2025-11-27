@@ -33,6 +33,7 @@ const { isWeakMap } = require('util/types');
 
 const app = express();
 const PORT = process.env.PORT;
+process.env.TZ = "Asia/Manila";
 
 // Database Connection to!
 mongoose.connect(process.env.MONGO_URI)
