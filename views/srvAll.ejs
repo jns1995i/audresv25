@@ -77,8 +77,10 @@
   </div>
 <% } %>
 
+<% let loopRequests = (['Admin', 'Head', 'Dev'].includes(user.role)) ? requests : userRequests; %>
+
 <section class="col">
-  <% if (requests.length === 0) { %>
+  <% if (loopRequests.length === 0) { %>
     <div class="h500 borderGray borderDotted corner16">
     </div>
   <% } else { %>
@@ -86,8 +88,10 @@
       <%- include('icons/notFound') %>
       <p class="size18 str400">Sorry, No Record Found!</p>
     </section>
-    <% requests.forEach((rq, i) => { %>
+    <% loopRequests.forEach((rq, i) => { %>
       <div class="height0 padding8 rqCard">
+
+        <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
         <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderGray borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
             <% if ( rq.status === "Pending") { %>
               <% if (rq.processBy) { %>
@@ -141,22 +145,35 @@
         </div>
 
         <div class="height0 width0 gap0 padding0"><% for(let i = 0; i < 6; i++) { %>&bull;<% } %></div>
-        
-        <% if ( title === 'Transactions') { %>
-          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
-        <% } else if ( title === 'For Release') { %>
-          <a href="/relView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
-        <% } else if ( title === 'Processing') { %>
-          <a href="/prcView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
-        <% } else if ( title === 'Approved') { %>
-          <a href="/aprView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
-        <% } else if ( title === 'To Verify') { %>
-          <a href="/vrfView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
-        <% } else if ( title === 'All Transactions') { %>
-          <a href="/srvAllView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+
         <% } else { %>
-          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+
         <% } %>
+
+        
+        <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
+          <style>
+            .rqPlt {
+              width: 100% !important;
+            }
+          </style>
+        <% } %>
+        
+          <%
+            const routeMap = {
+              'Transactions': '/srvView/',
+              'For Release': '/relView/',
+              'Processing': '/prcView/',
+              'Approved': '/aprView/',
+              'To Verify': '/vrfView/',
+              'All Transactions': '/srvAllView/'
+            };
+
+            const href = routeMap[title] || '/srvView/';
+          %>
+
+          <a href="<%= href + rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+
           <p class="absolute top20 right20"><%= rq.createdAtFormatted %></p>
 
           <% if ( rq.holdAt) { %>

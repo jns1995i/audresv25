@@ -347,9 +347,30 @@ app.post('/login', async (req, res) => {
     req.session.user = user;
 
     if (user.access === 1) {
-      return res.redirect('/dsb');
-    } else {
+  
+      const adminRoles = ["Admin", "Head", "Dev", "Seed"];
+
+      if (adminRoles.includes(user.role)) {
+        return res.redirect('/dsb');
+
+      } else if (user.role === "Registrar") {
+        return res.redirect('/dsb');
+
+      } else if (user.role === "Accounting") {
+        return res.redirect('/ovr');
+
+      } else {
+        return res.redirect('/');  // If access=1 but role does not match any
+      }
+
+    } else if (user.access === 0) {
+
       return res.redirect('/hom');
+
+    } else {
+
+      return res.redirect('/'); // Invalid access value
+
     }
 
   } catch (err) {
@@ -1052,6 +1073,59 @@ app.post('/rst', async (req, res) => {
   }
 });
 
+app.post('/rstFG', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/resetPage');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/resetPage');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/resetPage');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/resetPage');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    currentUser.reset = null;
+    await currentUser.save();
+
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    return res.redirect('/prf');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/resetPage');
+  }
+});
+
 app.post('/edt', async (req, res) => {
   try {
     if (!req.session.user?._id) {
@@ -1358,20 +1432,38 @@ app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
   const filteredRequests = req.requests.filter(
     rq => rq.status === 'Pending' && !rq.declineAt
   );
+
+  const privilegedRoles = ["Admin", "Head", "Dev"];
+
+  // Align totalCount with filtered requests
+  const totalCount = privilegedRoles.includes(req.user.role)
+    ? filteredRequests.length
+    : req.user.role === "Registrar"
+      ? req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length
+      : req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length;
+
   res.render('srv', { 
     title: 'Transactions', 
     active: 'srv', 
     requests: filteredRequests,
-    totalCount: filteredRequests.length
+    userRequests: filteredRequests,
+    totalCount
   });
 });
 
 app.get('/srvAll', isLogin, isRequest, isStaff, (req, res) => {
+  const privilegedRoles = ["Admin", "Head", "Dev"];
+
+  // Here, no filter applied (show all)
+  const totalCount = privilegedRoles.includes(req.user.role)
+    ? req.requests.length
+    : req.userRequests.length;
+
   res.render('srvAll', { 
     title: 'All Transactions', 
     active: 'srv', 
     requests: req.requests,
-    totalCount: req.requests.length
+    totalCount
   });
 });
 
@@ -1379,32 +1471,47 @@ app.get('/srvAll', isLogin, isRequest, isStaff, (req, res) => {
 app.get('/vrf', isLogin, isVerify, isStaff, (req, res) => {
   // To Verify
   const filteredRequests = req.requests.filter(
-    rq => rq.status === 'Pending' && !rq.declineAt
+    rq => rq.status === '' && !rq.declineAt
   );
+    const privilegedRoles = ["Admin", "Head", "Dev"];
+      // Align totalCount with filtered requests
+  const totalCount = privilegedRoles.includes(req.user.role)
+    ? filteredRequests.length
+    : req.user.role === "Registrar"
+      ? req.userRequests.filter(rq => rq.status === '' && !rq.declineAt).length
+      : req.userRequests.filter(rq => rq.status === '' && !rq.declineAt).length;
+
   res.render('srv', { 
     title: 'To Verify', 
     active: 'srv', 
     requests: filteredRequests,
-    totalCount: filteredRequests.length
+    userRequests: filteredRequests,
+    totalCount
   });
 });
 
+const privilegedRoles = ["Admin", "Head", "Dev"];
+
 app.get('/prc', isLogin, isRequest, isStaff, (req, res) => {
   // Processing statuses
-  const processingStatuses = [
-    'Reviewed',
-    'Assessed',
-    'For Verification',
-    'For Payment'
-  ];
+  const processingStatuses = ['Reviewed', 'Assessed', 'For Verification', 'For Payment'];
   const filteredRequests = req.requests.filter(
     rq => processingStatuses.includes(rq.status) && !rq.declineAt
   );
+
+  // Align totalCount with filtered requests
+  const totalCount = privilegedRoles.includes(req.user.role)
+    ? filteredRequests.length
+    : req.user.role === "Registrar"
+      ? req.userRequests.filter(rq => processingStatuses.includes(rq.status) && !rq.declineAt).length
+      : req.userRequests.filter(rq => processingStatuses.includes(rq.status) && !rq.declineAt).length;
+
   res.render('srv', { 
     title: 'Processing', 
     active: 'srv', 
     requests: filteredRequests,
-    totalCount: filteredRequests.length
+    userRequests: filteredRequests,
+    totalCount
   });
 });
 
@@ -1413,11 +1520,20 @@ app.get('/apr', isLogin, isRequest, isStaff, (req, res) => {
   const filteredRequests = req.requests.filter(
     rq => rq.status === 'Verified' && !rq.declineAt
   );
+
+  // Align totalCount with filtered requests
+  const totalCount = privilegedRoles.includes(req.user.role)
+    ? filteredRequests.length
+    : req.user.role === "Registrar"
+      ? req.userRequests.filter(rq => rq.status === 'Verified' && !rq.declineAt).length
+      : req.userRequests.filter(rq => rq.status === 'Verified' && !rq.declineAt).length;
+
   res.render('srv', { 
     title: 'Approved', 
     active: 'srv', 
     requests: filteredRequests,
-    totalCount: filteredRequests.length
+    userRequests: filteredRequests,
+    totalCount
   });
 });
 
@@ -1426,11 +1542,20 @@ app.get('/rel', isLogin, isRequest, isStaff, (req, res) => {
   const filteredRequests = req.requests.filter(
     rq => rq.status === 'For Release' && !rq.declineAt
   );
+
+  // Align totalCount with filtered requests
+  const totalCount = privilegedRoles.includes(req.user.role)
+    ? filteredRequests.length
+    : req.user.role === "Registrar"
+      ? req.userRequests.filter(rq => rq.status === 'For Release' && !rq.declineAt).length
+      : req.userRequests.filter(rq => rq.status === 'For Release' && !rq.declineAt).length;
+
   res.render('srv', { 
     title: 'For Release', 
     active: 'srv', 
     requests: filteredRequests,
-    totalCount: filteredRequests.length
+    userRequests: filteredRequests,
+    totalCount
   });
 });
 
@@ -2396,6 +2521,170 @@ app.post('/rst2', async (req, res) => {
   }
 });
 
+
+app.post('/rst2FG', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    currentUser.reset = null;
+    await currentUser.save();
+    /*
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    */
+    return res.redirect('/acc');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/resetPage2');
+  }
+});
+
+
+app.post('/rst3FG', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/resetPage3');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/resetPage3');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/resetPage3');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/resetPage3');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    currentUser.reset = null;
+    await currentUser.save();
+    /*
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    */
+    return res.redirect('/acc2');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/resetPage3');
+  }
+});
+
+app.post('/rst4FG', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    currentUser.reset = null;
+    await currentUser.save();
+    /*
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    */
+    return res.redirect('/acc3');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/resetPage4');
+  }
+});
+
 app.post('/edt2', async (req, res) => {
   try {
     if (!req.session.user?._id) {
@@ -2778,6 +3067,7 @@ app.post('/rst3', async (req, res) => {
     return res.redirect(req.body.redirectUrl || '/stu');
   }
 });
+
 
 app.get('/autoPass3', async (req, res) => {
   try {
@@ -3185,13 +3475,21 @@ app.post('/update-documents', isLogin, async (req, res) => {
 
 app.get('/dsb', isLogin, (req, res) => {
   if (req.user.reset === true) {
-    return res.redirect('/resetPage');
+    return res.redirect('/resetPage2');
   }
   res.render('dsb', { title: 'Dashboard', active: 'dsb' });
 });
 
-app.get('/test', isLogin, (req, res) => {
-  res.render('test', { title: 'Dashboard', active: 'dsb' });
+app.get('/ovr', isLogin, (req, res) => {
+  if (req.user.reset === true) {
+    return res.redirect('/resetPage4');
+  }
+  res.render('ovr', { title: 'Dashboard', active: 'ovr' });
+});
+
+
+app.get('/resetPage2', isLogin, myRequest, (req, res) => {
+  res.render('resetPage2', { title: 'New Password' });
 });
 
 

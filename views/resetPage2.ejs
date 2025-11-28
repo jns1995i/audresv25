@@ -1,5 +1,16 @@
-<% layout('template') %>
+<% layout('layout') %>
 <style>
+    .sidef {
+        display: none !important;
+    }
+    .mainf {
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    body {
+        padding: 0 !important;
+        gap: 0;
+    }
       @media (max-width: 900px) {
         .fcrdX {
             width: 95% !important;
@@ -7,7 +18,7 @@
       }
 </style>
 
-<div class="">
+<div class="abstractBG">
     <section class="padding0 corner20 width30 col bgWhite shadow1 fcrdX">
         <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="">
             <p class="rem18 str500">Create New Password</p>
@@ -20,7 +31,7 @@
                     <p class="rem1">&bull; Minimum of 8 characters</p>
             </div>
             <br>
-            <form action="/rstFG" method="POST" class="padding0 corner0 gap5">
+            <form action="/rst2FG" method="POST" class="padding0 corner0 gap5">
                 <div class="field password width100">
                     <label for="">Temporary Password</label>
                     <input type="password" name="currentPass" id="currentPass" required>

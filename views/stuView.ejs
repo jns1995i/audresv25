@@ -35,7 +35,10 @@
                     <% } else { %>
                     <a href="javascript:vod(0)" class="nav cnav liquid" id="editBtn"><i class="fas fa-pen"></i></a>
                     <a href="javascript:vod(0)" class="nav cnav liquid" id="resetBtn"><i class="fas fa-key"></i></a>
+                    
+                    <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
                     <a href="javascript:vod(0)" class="nav liquid corner30" id="archiveBtn"><i class="fas fa-archive"></i>Archive</a>
+                    <% } %>
                     <% } %>
                 </div>
             </div>

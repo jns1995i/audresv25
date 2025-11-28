@@ -153,14 +153,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         <% } %>
                          corner15 padding15 relative">
                             <section class="padding0 alignStart col">
-                                <p class="rem14 str500"><%= item.qty %> <%= item.type %></p>
-                                <p class="rem12 green">
-                                    <%= item.purpose %>
+                                <p class="rem14 str500 flex alignCenter">
+                                    <%= item.qty %> <%= item.type %>
                                     <% if ( item.proof ) { %>
-                                        &nbsp; <a href="<%= item.proof %>"  target="_blank" class="navy inline"><i class="fas fa-exclamation-circle w15"></i> View Requirements</a>
+                                        &nbsp; <a href="<%= item.proof %>"  target="_blank" class="navy"><i class="fas fa-exclamation-circle w15"></i> View Requirements</a>
                                     <% } %>
                                 </p>
-                                <p class="rem12"><%= item.semester + ` Semester` %> <%= `• ` + item.schoolYear %></p>
+                                <p class="rem12 green">
+                                    <span class="colorPrimary rem12">
+                                        <%= item.semester + ` Semester` %> <%= `• ` + item.schoolYear %> <i class="fas fa-angles-right"></i>
+                                    </span> &nbsp; 
+                                    For <%= item.purpose %>
+                                </p>
+                                <p class="rem12"></p>
                                 <% if ( item.status === "Declined") { %>
                                     <a href="" class="disabled nav cnavLG absolute translateY right10 bgRed100"><i class="fas fa-xmark-circle"></i></a>
                                 <% } else if ( item.status === "Approved") { %>
@@ -234,36 +239,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 </section>
             <% } %>
 
-            <% if ( request.declineAt) { %>
-                <section class="gap10 justifyBetween corner15 bgWhite padding20 shadow1">
-                    <section class="col gap0 padding0 width70 alignStart">
-                        <p class="size12 str500 textCenter">Something went wrong with</p>
-                        <p class="size12 str500 textCenter">the last action?</p>
+            <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
+                <% if ( request.declineAt) { %>
+                    <section class="gap10 justifyBetween corner15 bgWhite padding20 shadow1">
+                        <section class="col gap0 padding0 width70 alignStart">
+                            <p class="size12 str500 textCenter">Something went wrong with</p>
+                            <p class="size12 str500 textCenter">the last action?</p>
+                        </section>
+                        <section class="padding0 gap10 width30">
+                            <form action="/restore3" method="POST" class="form2 width100">
+                                <input type="hidden" name="requestId" value="<%= request._id %>">
+                                <input type="hidden" name="back" value="<%= back %>">
+                                <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-rotate"></i> Reset</button>
+                            </form>
+                        </section>
                     </section>
-                    <section class="padding0 gap10 width30">
-                        <form action="/restore3" method="POST" class="form2 width100">
-                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                            <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-rotate"></i> Reset</button>
-                        </form>
-                    </section>
-                </section>
-            <% } %>
+                <% } %>
 
-            <% if ( request.status === "Reviewed") { %>
-                <section class="gap10 justifyBetween corner15 bgWhite padding20 shadow1">
-                    <section class="col gap0 padding0 width70 alignStart">
-                        <p class="size12 str500 textCenter">Something went wrong with</p>
-                        <p class="size12 str500 textCenter">the last action?</p>
+                
+                <% if ( request.status === "Reviewed") { %>
+                    <section class="gap10 justifyBetween corner15 bgWhite padding20 shadow1">
+                        <section class="col gap0 padding0 width70 alignStart">
+                            <p class="size12 str500 textCenter">Something went wrong with</p>
+                            <p class="size12 str500 textCenter">the last action?</p>
+                        </section>
+                        <section class="padding0 gap10 width30">
+                            <form action="/restore3" method="POST" class="form2 width100">
+                                <input type="hidden" name="requestId" value="<%= request._id %>">
+                                <input type="hidden" name="back" value="<%= back %>">
+                                <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-rotate"></i> Reset</button>
+                            </form>
+                        </section>
                     </section>
-                    <section class="padding0 gap10 width30">
-                        <form action="/restore3" method="POST" class="form2 width100">
-                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                            <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-rotate"></i> Reset</button>
-                        </form>
-                    </section>
-                </section>
+                <% } %>
             <% } %>
             
             <% if ( request.status === "Verified") { %>
@@ -305,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+            <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
             <section class="col alignStart gap5">
                 <% if ( request.processBy) { %>
                 <section class="corner10 gap5 justifyStart width0 padding0">
@@ -316,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="red bgRed100"><i class="fas fa-exclamation-circle"></i> Unassigned</p>
                 <% } %>
             </section>
+            <% } %>
         </section>
     </section>
 
