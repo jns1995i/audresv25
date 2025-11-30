@@ -1406,28 +1406,28 @@ app.post("/update-status/:id", async (req, res) => {
     }
 });
 
-app.post('/paymentUpload', isLogin, uploadPhoto.single('payPhoto'), async (req, res) => {
+app.post('/paymentUpload', isLogin, uploadPhoto.array('payPhoto', 10), async (req, res) => {
   try {
     const requestId = req.body.id;
 
-    if (!req.file) {
-      // No photo uploaded → redirect back with query message
+    if (!req.files || req.files.length === 0) {
       return res.redirect(`/reqView/${requestId}?msg=noPhoto`);
     }
 
     const payMode = req.body.payMode;
-    const payPhoto = req.file.path;
+
+    // Save all file paths as an array
+    const payPhotoArray = req.files.map(file => file.path);
+
     const payAt = new Date();
 
-    // Update request
     await requests.findByIdAndUpdate(requestId, {
       payMode,
-      payPhoto,
+      payPhoto: payPhotoArray,  // store array in MongoDB
       status: 'For Verification',
       payAt
     });
 
-    // ✅ Redirect to GET route after POST
     res.redirect(`/reqView/${requestId}?msg=success`);
 
   } catch (err) {
@@ -1436,7 +1436,6 @@ app.post('/paymentUpload', isLogin, uploadPhoto.single('payPhoto'), async (req, 
     res.redirect(`/reqView/${requestId}?msg=error`);
   }
 });
-
 
 
 app.get('/reqAll', isLogin, myRequest, (req, res) => {

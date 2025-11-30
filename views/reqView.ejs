@@ -160,204 +160,8 @@
                 <p class="rem2 str400">Status Tracker</p>
             </section>
             <section class="padding10 corner20 col bgWhite">
-                <% if ( rq.status === "Pending") { %>
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase str500">Registrar</p>
-                    </div>
-                    <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Review</a>
-                </section>
 
-                <% } else if ( rq.status === "Reviewed") { %>
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase str500">Registrar</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
-                </section>
-
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase str500">Accounting</p>
-                    </div>
-                    <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Assessment</a>
-                </section>
-
-                <% } else if ( rq.status === "Assessed") { %>
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase str500">Registrar</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase str500">Accounting</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase str500">Payment</p>
-                    </div>
-                    <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Payment</a>
-                </section>
-
-                <% } else if ( rq.status === "For Verification") { %>
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase  str500">Registrar</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase  str500">Accounting</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
-                </section>
-                
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase  str500">Payment</p>
-                    </div>
-                    <a href="" class="nav disabled"><i class="fas fa-hourglass"></i> For Verification</a>
-                </section>
-
-                <% } else if ( rq.status === "Verified") { %>
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase  str500">Registrar</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase  str500">Accounting</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase  str500">Payment</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Verified</a>
-                </section>
-
-                <% } else if ( rq.status === "For Release") { %>
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase  str500">Registrar</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase  str500">Accounting</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase  str500">Payment</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Verified</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-check-circle green"></i></a>
-                        <p class="upperCase  str500 green">Releasing</p>
-                    </div>
-                    <a href="" class="nav disabled gnav"><i class="fas fa-box-open w15"></i> For Release</a>
-                </section>
-
-                <% } else if ( rq.status === "Claimed") { %>
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
-                        <p class="upperCase  str500">Registrar</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
-                        <p class="upperCase  str500">Accounting</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Assessed</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
-                        <p class="upperCase  str500">Payment</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="bi bi-patch-check-fill"></i> Verified</a>
-                </section>
-
-                <div class="height0 paddingLeft30 justifyBetween"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgSoft corner20">
-                    <div class="height0 width0 gap5">
-                        <a href="" class="nav cnav disabled"><i class="fas fa-check-circle"></i></a>
-                        <p class="upperCase  str500">Releasing</p>
-                    </div>
-                    <a href="" class="nav disabled pnav"><i class="fas fa-flag w15"></i> Claimed</a>
-                </section>
-
-                <% } else { %>
-
-                    No action was made
-                <% } %>
+                <%- include('partials/status') %>
 
                 <% if (rq.holdAt) { %>
 
@@ -442,8 +246,9 @@
                         <% } else if (rq.status === "Assessed") { %>
                             <p class="">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt or take photo of the receipt the cashier and upload it below.</p>
                             <br>
-                            <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
+                           <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
                                 <input type="hidden" name="id" value="<%= rq.id %>">
+
                                 <div class="field">
                                     <label for="">Payment Method</label>
                                     <div class="selectBar">
@@ -461,36 +266,42 @@
                                         </select>                            
                                     </div>
                                 </div>
+
                                 <div class="field">
                                     <label for="">Upload your Proof of Payment here</label>
-                                    <input name="payPhoto" type="file" required>
+                                    <input name="payPhoto" type="file" multiple required>
                                 </div>
+
                                 <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>
-                                <script>
-                                document.addEventListener("DOMContentLoaded", () => {
-                                const input = document.querySelector('input[name="payPhoto"]');
-                                const warning = document.querySelector('.limitPhoto');
 
-                                input.addEventListener('change', function () {
-                                    warning.classList.add("hidden");
-
-                                    if (this.files.length > 0) {
-                                    const file = this.files[0];
-                                    const maxSize = 500 * 1024 * 1024; // 500MB
-
-                                    if (file.size > maxSize) {
-                                        warning.textContent = "Photo must not be larger than 500MB.";
-                                        warning.classList.remove("hidden");
-                                        this.value = ""; // clear file input
-                                    }
-                                    }
-                                });
-                                });
-                                </script>
                                 <div class="field alignEnd">
                                     <button class="nav pnav w120">Upload</button>
                                 </div>
+                                <script>
+                                document.addEventListener("DOMContentLoaded", () => {
+                                    const input = document.querySelector('input[name="payPhoto"]');
+                                    const warning = document.querySelector('.limitPhoto');
+
+                                    input.addEventListener('change', function () {
+                                        warning.classList.add("hidden");
+
+                                        if (this.files.length > 0) {
+                                            const maxSize = 500 * 1024 * 1024; // 500MB
+                                            for (let i = 0; i < this.files.length; i++) {
+                                                const file = this.files[i];
+                                                if (file.size > maxSize) {
+                                                    warning.textContent = `Photo "${file.name}" exceeds 500MB.`;
+                                                    warning.classList.remove("hidden");
+                                                    this.value = ""; // clear all files
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    });
+                                });
+                                </script>
                             </form>
+
                         <% } else if (rq.status === "For Verification") { %>
                             <p class="">Please give us 24 hours to verify your payment. Thank you.</p>
                         <% } else if (rq.status === "Verified") { %>
@@ -598,7 +409,21 @@
                     <section class="justifyStart"><p class="rem18">Payment Details</p></section>
                     <section class="corner20 col bgWhite gap5">
                         <section class="justifyStart bgYellow corner14"><p class="size12">Method: <%= rq.payMode || 'Gcash' %></p></section>
-                        <img src="<%= rq.payPhoto ? rq.payPhoto : '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary width100 corner20">
+                        <section class="payment-photos col">
+                            <% if (rq.payPhoto && rq.payPhoto.length > 0) { %>
+                                <% rq.payPhoto.forEach(photo => { %>
+                                    <img src="<%= photo %>" 
+                                        alt="Payment Proof" 
+                                        onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" 
+                                        class="borderPrimary width100 corner14 marginBottom5">
+                                <% }) %>
+                            <% } else { %>
+                                <img src="/images/annPhoto2.jpg" 
+                                    alt="Profile" 
+                                    class="borderPrimary width100 corner14">
+                            <% } %>
+                            </section>
+
                     </section>
                 </section>
             <% } %>

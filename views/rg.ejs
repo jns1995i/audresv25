@@ -207,17 +207,21 @@
                                         <input name="qty[]" type="number" id="number" class="cpy" required>
                                     </div>
                                 </div>
-                                <div class="row gap10">
+                                <div class="row gap10 marginTop10">
                                     <div class="field additional-options">
                                         <label>Purpose</label>
                                         <div class="selectBar">
                                             <select class="document-options" name="purpose[]" onchange="handleOptionChange(this)" required>
                                                 <option value="">Select</option>
+                                                <option value="Board Exam">Board Exam</option>
+                                                <option value="Reference">Reference</option>
+                                                <option value="Requirement for Other School">Requirement for Other School</option>
+                                                <option value="Scholarship">Scholarship</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="field upload hidden">
+                                <div class="field upload hidden marginTop10">
                                     <label class="str500">Please upload photo of School Request</label>
                                     <input type="file" name="reqPhoto[]" class="bgYellow">
                                 </div>
@@ -778,44 +782,26 @@ function handleDocumentTypeChange(select) {
     const uploadDiv = fieldset.querySelector(".upload");
     const fileInput = uploadDiv.querySelector("input[type='file']");
 
-    // Reset purpose dropdown & upload
-    optionsSelect.innerHTML = "";
-    uploadDiv.classList.add("hidden");
-    fileInput.removeAttribute("required");
-
-    if (select.value === "Transcript of Record") {
-        optionsSelect.innerHTML += `<option value="Board Exam">For Board Exam</option>`;
-        optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
-        optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
-    } else if (select.value === "Form 137") {
-        optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
-        optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
-    } else if (select.value === "No Objection") {
-        optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
-        optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
-    } else if (select.value === "NSTP Serial Number") {
-        optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
-        optionsSelect.innerHTML += `<option value="School Copy">For School Copy</option>`;
-    } else {
-        optionsSelect.innerHTML += `<option value="Reference" selected>For Reference</option>`;
-    }
-
-    // File upload for "School Copy"
-    optionsSelect.addEventListener('change', function () {
-        if (optionsSelect.value === "School Copy") {
+    // File upload for School Copy
+    optionsSelect.onchange = () => {
+        if (optionsSelect.value === "Requirement for Other School") {
             uploadDiv.classList.remove("hidden");
             fileInput.setAttribute("required", true);
         } else {
             uploadDiv.classList.add("hidden");
             fileInput.removeAttribute("required");
         }
-    });
+    };
 
-    // Attach quantity/type listeners for total calculation
+    // Trigger the change once to set upload visibility
+    optionsSelect.dispatchEvent(new Event("change"));
+
+    // Update total
     const qtyInput = fieldset.querySelector("input[name='qty[]']");
     qtyInput.addEventListener("input", () => updateTotalAmount(fieldset));
     updateTotalAmount(fieldset);
 }
+
 
 // Calculate total for a specific fieldset
 function updateTotalAmount(fieldset) {

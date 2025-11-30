@@ -23,7 +23,7 @@ const requestSchema = new mongoose.Schema({
 
   proof: { type: String, trim: true },  // path or filename of proof
   status: { type: String, trim: true },
-  payPhoto: { type: String, trim: true },
+  payPhoto: [{ type: String, trim: true }],
   payMode: { type: String, trim: true },
 
   assignAt: { type: Date },

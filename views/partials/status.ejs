@@ -1,9 +1,11 @@
-
+<% 
+    const req = (user.access === 1) ? request : rq; 
+%>
             <section class="justifyStart padding5 paddingInline10 hidden">
                 <p class="size20 str400">Status Tracker</p>
             </section>
             <section class="padding10 corner20 col bgWhite shadow1">
-                <% if ( request.status === "Pending") { %>
+                <% if ( req.status === "Pending") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
@@ -12,7 +14,7 @@
                     <a href="" class="nav disabled"><i class="fas fa-hourglass-half"></i> For Review</a>
                 </section>
 
-                <% } else if ( request.status === "Reviewed") { %>
+                <% } else if ( req.status === "Reviewed") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
@@ -32,7 +34,7 @@
                     <a href="" class="nav disabled"><i class="fas fa-hourglass-half"></i> For Assessment</a>
                 </section>
 
-                <% } else if ( request.status === "Assessed") { %>
+                <% } else if ( req.status === "Assessed") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
@@ -61,7 +63,7 @@
                     <a href="" class="nav disabled"><i class="fas fa-hourglass-half"></i> For Payment</a>
                 </section>
 
-                <% } else if ( request.status === "For Verification") { %>
+                <% } else if ( req.status === "For Verification") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
@@ -90,7 +92,7 @@
                     <a href="" class="nav disabled"><i class="fas fa-hourglass-half"></i> For Verification</a>
                 </section>
 
-                <% } else if ( request.status === "Verified") { %>
+                <% } else if ( req.status === "Verified") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
@@ -119,7 +121,7 @@
                     <a href="" class="nav disabled border0"><i class="bi bi-patch-check-fill"></i> Verified</a>
                 </section>
 
-                <% } else if ( request.status === "For Release") { %>
+                <% } else if ( req.status === "For Release") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
@@ -158,13 +160,13 @@
                     <a href="" class="nav disabled"><i class="fas fa-dolly w15"></i> For Release</a>
                 </section>
 
-                <% } else if ( request.status === "Claimed") { %>
+                <% } else if ( req.status === "Claimed") { %>
                 <section class="height0 justifyBetween bgSoft corner20">
                     <div class="height0 width0 gap5">
                         <a href="" class="nav cnav disabled"><i class="fas fa-scroll"></i></a>
                         <section class="padding0 col alignStart width0">
                             <p class="upperCase  str500">Registrar</p>
-                            <p class="size10 darkGray str500"><%= request.reviewAtFormatted || "Processing" %></p>
+                            <p class="size10 darkGray str500"><%= req.reviewAtFormatted || "Processing" %></p>
                         </section>
                     </div>
                     <a href="" class="nav disabled border0"><i class="bi bi-patch-check-fill"></i> Reviewed</a>
@@ -177,7 +179,7 @@
                         <a href="" class="nav cnav disabled"><i class="fas fa-coins"></i></a>
                         <section class="padding0 col alignStart width0">
                             <p class="upperCase  str500">Accounting</p>
-                            <p class="size10 darkGray str500"><%= request.assessAtFormatted || "Processing" %></p>
+                            <p class="size10 darkGray str500"><%= req.assessAtFormatted || "Processing" %></p>
                         </section>
                     </div>
                     <a href="" class="nav disabled border0"><i class="bi bi-patch-check-fill"></i> Assessed</a>
@@ -190,7 +192,7 @@
                         <a href="" class="nav cnav disabled"><i class="fas fa-credit-card"></i></a>
                         <section class="padding0 col alignStart width0">
                             <p class="upperCase  str500">Payment</p>
-                            <p class="size10 darkGray str500"><%= request.approveAtFormatted || "Processing" %></p>
+                            <p class="size10 darkGray str500"><%= req.approveAtFormatted || "Processing" %></p>
                         </section>
                     </div>
                     <a href="" class="nav disabled border0"><i class="bi bi-patch-check-fill"></i> Verified</a>
@@ -203,7 +205,7 @@
                         <a href="" class="nav cnav disabled green borderGreen"><i class="fas fa-check-circle"></i></a>
                         <section class="padding0 col alignStart width0">
                             <p class="upperCase  str500 green">Releasing</p>
-                            <p class="size10 darkGray str500"><%= request.claimedAtFormatted || "Processing" %></p>
+                            <p class="size10 darkGray str500"><%= req.claimedAtFormatted || "Processing" %></p>
                         </section>
                     </div>
                     <a href="" class="nav disabled borderGreen green"><i class="fas fa-flag w15"></i> Claimed</a>
@@ -214,7 +216,7 @@
                     No action was made
                 <% } %>
 
-                <% if (request.holdAt) { %>
+                <% if (req.holdAt) { %>
 
                 <div class="height0 paddingLeft30 justifyBetween red"><i class="fas fa-ellipsis-vertical"></i></div>
 
@@ -229,7 +231,7 @@
                             minute: '2-digit', 
                             hour12: true 
                         }; 
-                        const formattedDate2 = new Date(request.holdAt).toLocaleString('en-US', options); 
+                        const formattedDate2 = new Date(req.holdAt).toLocaleString('en-US', options); 
                         %>
                         <p class=" str500"><%= formattedDate2 %></p>
                     </div>
@@ -238,7 +240,7 @@
 
                 <% } %>
 
-                <% if (request.declineAt) { %>
+                <% if (req.declineAt) { %>
 
                 <div class="height0 paddingLeft30 justifyBetween black"><i class="fas fa-ellipsis-vertical"></i></div>
 
@@ -253,7 +255,7 @@
                             minute: '2-digit', 
                             hour12: true 
                         }; 
-                        const formattedDate3 = new Date(request.declineAt).toLocaleString('en-US', options); 
+                        const formattedDate3 = new Date(req.declineAt).toLocaleString('en-US', options); 
                         %>
                         <p class=" str500"><%= formattedDate3 %></p>
                     </div>

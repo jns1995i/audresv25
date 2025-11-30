@@ -87,33 +87,22 @@
         </section>
     </section>
 
+<% if (["For Verification", "Verified", "Claimed", "For Release"].includes(request.status)) { %>
+    <% if (request.payPhoto && request.payPhoto.length > 0) { %>
+    <section class="corner15 gap20 padding5 bgSoft justifyBetween">
+        <section class="size16 str400 width0">View Payment Here <i class="fas fa-arrow-right marginLeft5"></i> </section>
 
-    <section class="bgSoft corner15 col gap5 alignStart padding5 hidden">
-        <section class="corner15 justifyBetween width0" style="align-self: left;">
-            <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
-                <a href="" class="nav cnav disabled corner500 h30 w30 marginRight5"><i class="fas fa-check-circle"></i></a>
-            <% } %>
-            <p class="size20 str500">Total Payables: &#8369;<%= totalAmount || "0" %>.00</p>
+        <section class="gap20 bgWhite corner15 width0">
+                <% request.payPhoto.forEach((photo, index) => { %>
+                    <a href="<%= photo %>" target="_blank" class="nav">
+                        <i class="fas fa-eye"></i> Payment <%= index + 1 %>
+                    </a>
+                <% }) %>
         </section>
-        <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
-            <section class="col bgWhite corner10 padding0 <% if (["For Payment", "For Verification"].includes(request.status) && request.payPhoto) { %> <% } %>">
-                <section class="bgWhite gap5 padding0 alignStart relative">
-                    <section class="alignStart corner14 col">
-                        <p class="rem18 hidden">Payment Details</p>
-                        <p class="size12">Method: <%= request.payMode || 'Gcash' %></p>
-                        <% if (["Verified","Claimed","For Release"].includes(request.status) && request.payPhoto) { %>
-                            <p class="size12 green"><i class="fas fa-check-circle"></i> Payment Verified</p>
-                        <% } else { %>
-                            <p class="size12 yellow"><i class="fas fa-clock"></i> Payment Unverified</p>
-                        <% } %>
-                    <a href="<%= request.payPhoto %>" target="_blank" class="absolute right5 top5 navy">View Payment <i class="fas fa-chevron-right"></i></a>
-                    </section>
-                    <img src="<%= request.payPhoto?.photo || '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary widthMax100 hMax100 corner10 hidden">
-                    <a href="<%= request.payPhoto %>" target="_blank" class="nav cnav absolute bottom5 right5 glass hidden"><i class="fas fa-search-plus"></i></a>
-                </section>
-            </section>
-        <% } %>
     </section>
+    <% } else { %>
+    <% } %>
+  <% } %>
                 <script>
                 document.addEventListener('DOMContentLoaded', () => {
                     const btn = document.querySelector('#showBtn');
