@@ -1,0 +1,138 @@
+
+            
+
+
+    <section class="col alignStart info corner16 padding5 bgSoft">
+        <section class="corner16 justifyBetween relative">
+            <p class="size20 str500">
+                <img src="<%= request.requestBy?.photo || '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h30 w30 corner500 marginRight5">
+                <%= request.requestBy ? request.requestBy.fName : '' %>
+                <%= request.requestBy ? request.requestBy.mName : '' %>
+                <%= request.requestBy ? request.requestBy.lName : '' %>
+                <%= request.requestBy ? request.requestBy.xName : '' %>
+            </p>
+            <a href="javascript:void(0)" id="showBtn" class="size16"><i class="fas fa-chevron-down"></i></a>
+        </section>
+        <section class="paddingInline10 col alignStart bgWhite corner15 hidden" id="showCard">
+            <section class="width0 gap20 padding0">
+                <p class="rem12">
+                    <i class="bi bi-patch-check-fill"></i>
+                    <%= request.requestBy ? request.requestBy.role : '' %>
+                </p>
+                <p class="rem12">
+                    <i class="bi bi-buildings-fill"></i>
+                    <%= request.requestBy ? request.requestBy.campus : '' %>
+                </p>
+            </section>
+            <p class="rem12">
+                <i class="fas fa-address-card"></i>
+                <%= request.requestBy?.schoolId || "--" %>
+            </p>
+            <p class="rem12 str500"><i class="fas fa-layer-group w15 wMin15"></i> <%= request.requestBy?.course || "--" %></p>
+
+            <% if (request.requestBy?.role === 'Alumni') { %>
+                <p class="rem12 str500">
+                    <i class="fas fa-graduation-cap w15"></i>
+                    Graduated in <%= request.requestBy.yearGraduated || "--" %>
+                </p>
+
+            <% } else if (request.requestBy?.role === 'Former') { %>
+                <p class="rem12 str500">
+                    <i class="fas fa-stream w15"></i>
+                    <%= request.requestBy?.yearLevel || "--" %> last <%= request.requestBy?.yearAttended || "--" %>
+                </p>
+
+            <% } else { %>
+                <p class="rem12 str500">
+                    <i class="fas fa-stream w15"></i>
+                    <%= request.requestBy?.yearLevel || "--" %>
+                </p>
+            <% } %>
+
+            <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= request.requestBy?.email || "--" %></p>
+            <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= request.requestBy?.phone || "--" %></p>
+            <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= request.requestBy?.address || "--" %></p>
+        </section>
+    </section>
+
+    <section class="padding10 corner15 justifyBetween bgSoft">
+        <% const options = { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true }; 
+        const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); %>
+        <section class="padding0 col alignStart width0 marginLeft10">
+            <p class="rem11"> <i class="fas fa-receipt"></i> Transaction No</p>
+            <p class="rem14 str400"><%= request.tr %></p>
+        </section>
+        <section class="padding0 col alignStart width0">
+            <p class="rem11"><i class="fas fa-calendar"></i> Requested Date</p>
+            <p class="rem14 str400"><%= formattedDate %></p>
+        </section>
+        <section class="corner12 col alignStart bgWhite width0 relative padding15">
+            <p class="rem11"> <i class="fas fa-coins"></i> Total Payables</p>
+            <p class="rem16 str400 flex gap10 justifyCenter alignCenter">
+                &#8369;<%= totalAmount || "0" %>.00 
+                <% if ( request.status === "For Verification") { %>
+                <span class="bgBlue100 border0 width0">Pending</span>
+                <% } else if (  request.status === "Verified" ) { %>
+                <span class="bgGreen100 border0 width0"> <i class="fas fa-check-circle"></i> Paid </span>
+                <a href="<%= request.payPhoto %>" target="_blank" class=" width0"><i class="fas fa-eye"></i> View</a>
+                <% } else { %>
+                <% } %>
+            </p>
+        </section>
+    </section>
+
+
+    <section class="bgSoft corner15 col gap5 alignStart padding5 hidden">
+        <section class="corner15 justifyBetween width0" style="align-self: left;">
+            <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
+                <a href="" class="nav cnav disabled corner500 h30 w30 marginRight5"><i class="fas fa-check-circle"></i></a>
+            <% } %>
+            <p class="size20 str500">Total Payables: &#8369;<%= totalAmount || "0" %>.00</p>
+        </section>
+        <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
+            <section class="col bgWhite corner10 padding0 <% if (["For Payment", "For Verification"].includes(request.status) && request.payPhoto) { %> <% } %>">
+                <section class="bgWhite gap5 padding0 alignStart relative">
+                    <section class="alignStart corner14 col">
+                        <p class="rem18 hidden">Payment Details</p>
+                        <p class="size12">Method: <%= request.payMode || 'Gcash' %></p>
+                        <% if (["Verified","Claimed","For Release"].includes(request.status) && request.payPhoto) { %>
+                            <p class="size12 green"><i class="fas fa-check-circle"></i> Payment Verified</p>
+                        <% } else { %>
+                            <p class="size12 yellow"><i class="fas fa-clock"></i> Payment Unverified</p>
+                        <% } %>
+                    <a href="<%= request.payPhoto %>" target="_blank" class="absolute right5 top5 navy">View Payment <i class="fas fa-chevron-right"></i></a>
+                    </section>
+                    <img src="<%= request.payPhoto?.photo || '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary widthMax100 hMax100 corner10 hidden">
+                    <a href="<%= request.payPhoto %>" target="_blank" class="nav cnav absolute bottom5 right5 glass hidden"><i class="fas fa-search-plus"></i></a>
+                </section>
+            </section>
+        <% } %>
+    </section>
+                <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const btn = document.querySelector('#showBtn');
+                    const card = document.querySelector('#showCard');
+                    const icon = btn.querySelector('i');
+
+                    btn.addEventListener('click', () => {
+                        card.classList.toggle('hidden');
+                        icon.classList.toggle('rotate-icon'); // rotate on toggle
+                    });
+                });
+                </script>
+                <style>
+                    #showBtn i {
+                    transition: transform 0.6s ease; /* smooth rotation */
+                }
+
+                .rotate-icon {
+                    transform: rotate(180deg); /* flip down/up */
+                }
+
+                </style>

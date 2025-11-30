@@ -1,0 +1,74 @@
+<div class="height0 padding0 corner12 gap5">
+  <section class="width0 padding15 gap10">
+    <a href="trs" class="nav tnav <% if ( title === 'For Assessment' && active === 'trs') { %> active <% } %>"><i class="fas fa-hourglass-half"></i> For Assessment</a>
+    <a href="toPay" class="nav tnav <% if ( title === 'For Payment' && active === 'trs') { %> active <% } %>"><i class="fas fa-credit-card"></i> For Payment</a>
+    <a href="ver" class="nav tnav <% if ( title === 'Verified' && active === 'trs') { %> active <% } %>"><i class="fas fa-check-circle"></i> Verified</a>
+    <a href="trsAll" class="nav tnav <% if ( title === 'All Transactions' && active === 'trs') { %> active <% } %>"><i class="fas fa-list wMin20"></i> All Transactions</a>
+  </section>
+</div>
+
+<hr class="">
+
+<% let loopRequests = (['Accounting'].includes(user.role)) ? requests : userRequests; %>
+
+<% if (loopRequests.length === 0) { %>
+  <div class="height0 marginTop5 corner12 gap5">
+    <div class="width90 justifyBetween gap5">
+      <p class="rem28 str400">
+        No Transaction
+    </p>
+      <div class="width50 gap5 justifyEnd opacity0">
+        <div class="searchBar colorPrimary">
+          <i class="fas fa-search"></i>
+          <input type="search" name="" id="univ" class="width0 widthMin30 widthMax0">
+        </div>
+        <div class="selectBar hidden">
+          <i class="fas fa-filter colorPrimary"></i>
+          <select name="" id="">
+            <option value="Today">Today</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } else if (loopRequests.length === 1) { %>
+  <div class="height0 marginTop5 corner12 gap5">
+    <div class="width90 justifyBetween gap5">
+      <p class="rem28 str400">
+       1 Transaction
+      </p>
+      <div class="width50 gap5 justifyEnd">
+        <div class="searchBar colorPrimary hidden">
+          <i class="fas fa-search"></i>
+          <input type="search" name="" id="univ" class="width0 widthMin30 widthMax0">
+        </div>
+        <div class="selectBar hidden">
+          <i class="fas fa-filter colorPrimary"></i>
+          <select name="" id="">
+            <option value="Today">Today</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } else { %>
+  <div class="height0 marginTop5 corner12 gap5">
+    <div class="width90 justifyBetween gap5">
+      <p class="rem28 str400">
+       <%= loopRequests.length %> Transactions
+      </p>
+      <div class="width50 gap5 justifyEnd">
+        <div class="searchBar colorPrimary">
+          <i class="fas fa-search"></i>
+          <input type="search" name="" id="univ" class="width0 widthMin30 widthMax0">
+        </div>
+        <div class="selectBar hidden">
+          <i class="fas fa-filter colorPrimary"></i>
+          <select name="" id="">
+            <option value="Today">Today</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } %>

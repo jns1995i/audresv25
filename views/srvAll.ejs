@@ -15,69 +15,11 @@
   }
 </style>
 
-<div class="height0 abstractBG padding10 corner12 gap5">
-  <section class="width0 padding0 gap5">
-    <a href="vrf" class="nav tnav <% if ( title === 'To Verify' && active === 'srv') { %> active <% } %>"><i class="fas fa-user-check"></i> To Verify</a>
-    <a href="srv" class="nav tnav <% if ( title === 'Transactions' && active === 'srv') { %> active <% } %>"><i class="fas fa-hourglass-half"></i> Pending</a>
-    <a href="prc" class="nav tnav <% if ( title === 'Processing' && active === 'srv') { %> active <% } %>"><i class="fas fa-clock"></i> Processing</a>
-    <a href="apr" class="nav tnav <% if ( title === 'Approved' && active === 'srv') { %> active <% } %>"><i class="fas fa-check-circle"></i> Approved</a>
-    <a href="rel" class="nav tnav <% if ( title === 'For Release' && active === 'srv') { %> active <% } %>"><i class="fas fa-dolly wMin20"></i> For Release</a>
-    <a href="srvAll" class="nav tnav <% if ( title === 'All Transactions' && active === 'srv') { %> active <% } %>"><i class="fas fa-list wMin20"></i> All Transactions</a>
-  </section>
-</div>
-
-
-<% if (totalCount === 0) { %>
-  <div class="height0 marginTop5 corner12 gap5">
-    <div class="width90 gap5">
-      <p class="rem28 str400">
-        No Transaction
-    </p>
-    </div>
-  </div>
-<% } else if (totalCount === 1) { %>
-  <div class="height0 marginTop5 corner12 gap5">
-    <div class="width90 justifyBetween gap5">
-      <p class="rem28 str400">
-       1 Transaction
-      </p>
-      <div class="width50 gap5 justifyEnd">
-        <div class="searchBar colorPrimary hidden">
-          <i class="fas fa-search"></i>
-          <input type="search" name="" id="univ" class="width0 widthMin30 widthMax0">
-        </div>
-        <div class="selectBar hidden">
-          <i class="fas fa-filter colorPrimary"></i>
-          <select name="" id="">
-            <option value="Today">Today</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-<% } else { %>
-  <div class="height0 marginTop5 corner12 gap5">
-    <div class="width90 justifyBetween gap5">
-      <p class="rem28 str400">
-       <%= totalCount %> Transactions
-      </p>
-      <div class="width50 gap5 justifyEnd">
-        <div class="searchBar colorPrimary">
-          <i class="fas fa-search"></i>
-          <input type="search" name="" id="univ" class="width0 widthMin30 widthMax0">
-        </div>
-        <div class="selectBar hidden">
-          <i class="fas fa-filter colorPrimary"></i>
-          <select name="" id="">
-            <option value="Today">Today</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-<% } %>
-
 <% let loopRequests = (['Admin', 'Head', 'Dev'].includes(user.role)) ? requests : userRequests; %>
+
+
+<%- include('partials/header') %>
+
 
 <section class="col">
   <% if (loopRequests.length === 0) { %>
@@ -95,9 +37,9 @@
         <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderGray borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
             <% if ( rq.status === "Pending") { %>
               <% if (rq.processBy) { %>
-              <div class="width18 justifyStart"><img src="<%= rq.processBy ? rq.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
+              <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
               <div class="width82 col alignStart gap5">
-                <p class="str400"> Assigned To </p>
+                <p class="str400"> Assign To </p>
                 <div class="selectBar widthMin100">
                   <select name="processBy" class="processByDropdown" data-request-id="<%= rq._id %>">
                     <option value="" selected>-- Select Staff --</option>
@@ -127,10 +69,9 @@
               </div>
               <% } %>
             <% } else { %>
-                <div class="width18 justifyStart"><img src="<%= rq.processBy ? rq.processBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
+                <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500 primaryProfile"></div>
                 <div class="width82 col alignStart gap5">
-                  <p class="str400"> Assigned At <%= rq.assignAtFormatted %></p>
-                  <p class="str500 bgSoft corner5 padding2"><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
+                  <p class="size12 str500 bgSoft corner5 padding5"><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
                   <% if (rq.status === 'For Release') { %>
                   <p class="str400 green"><i class="fas fa-check-circle"></i> Processed</p>
                   <% } else if (rq.status === 'Claimed') { %>
@@ -140,6 +81,7 @@
                   <% } else { %>
                   <p class="str400 yellow"><i class="fas fa-clock"></i> Already Processing .. </p>
                   <% } %>
+                  <p class="str400"> Assigned at <%= rq.assignAtFormatted %></p>
                 </div>
             <% } %>
         </div>
@@ -148,15 +90,6 @@
 
         <% } else { %>
 
-        <% } %>
-
-        
-        <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
-          <style>
-            .rqPlt {
-              width: 100% !important;
-            }
-          </style>
         <% } %>
         
           <%
@@ -181,10 +114,27 @@
           <% } else if ( rq.declineAt) { %>
             <p class="str400 absolute bottom20 right20 bgRed100"> Declined</p>
           <% } else { %>
-            <p class="str400 absolute bottom20 right20 bgBlue100"> <%= rq.status ? rq.status : '' %></p>
+            <p class="str400 absolute bottom20 right20
+              <% if ( rq.status === "Pending" ) { %>
+                  bgBlue100
+              <% } else if ( rq.status === "Reviewed" ) { %>
+                  bgViolet100
+              <% } else if ( rq.status === "Assessed" ) { %>
+                  bgYellow100
+              <% } else if ( rq.status === "Verified" ) { %>
+                  bgGreen100
+              <% } else if ( rq.status === "For Release" ) { %>
+                  bgGreen100
+              <% } else if ( rq.status === "Claimed" ) { %>
+                  bgGray100
+              <% } else { %>
+                  bgBlue100
+              <% } %>
+                border0"> <%= rq.status ? rq.status : '' %>
+              </p>
           <% } %>
 
-          <div class="width10 justifyStart"><img src="<%= rq.requestBy ? rq.requestBy.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
+          <div class="width10 justifyStart"><img src="<%= rq.requestBy?.photo || '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 wMin40 borderPrimary corner500"></div>
           <div class="width90 col alignStart">
             <p class="size14 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
             <p class="str400"><span class="green"><%= rq.requestBy ? rq.requestBy.role : '' %> &bull; </span> <%= rq.requestBy?.course || '--' %></p>
@@ -195,7 +145,10 @@
                 <i class="fas fa-address-card"></i> <%= rq.requestBy?.schoolId || 'No Student Number' %>
               </p>
             <% } else { %>
-              <p class="str400 marginBottom5 blue"> <i class="fas fa-receipt"></i> <%= rq.tr ? rq.tr : '' %> &bull; <i class="fas fa-file-lines"></i> <%= rq.type ? rq.type : '' %></p>
+              <p class="str400 marginBottom5 blue textWrap" style="width: 85%;" title="<%= rq.items?.map(item => item.type || '').join(', ') || '' %>">
+                 <i class="fas fa-receipt"></i> <%= rq.tr ? rq.tr : '' %> &bull; <i class="fas fa-file-lines"></i> 
+                <%= rq.items?.map(item => item.type || '').join(', ') || '' %>
+              </p>
             <% } %>
           </div>
         </a>

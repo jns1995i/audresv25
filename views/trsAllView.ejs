@@ -1,0 +1,402 @@
+<% layout('scale') %>
+<style>
+    .info p i {
+        width: 20px !important;
+        display: inline;
+        margin-right: 5px;
+    }
+    .info p {
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+ <section class="gap20 alignStart padding5" id="">
+        <section class="col width60">
+            <section class="justifyBetween padding0">
+                <% const routes = { trs: "/trs", toPay: "/toPay", ver: "/ver", dsb: "/dsb", trsAll: "/trsAll"};
+                const href = routes[back] || "/trs"; %>
+                <a href="<%= href %>" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
+                <p class="size20 str400">Request Details</p>
+            </section>
+            
+            <section class="col alignStart info corner16 padding5 bgWhite marginTop5 shadow1">
+                <section class="col corner16 alignStart relative">
+                    <img src="<%= request.requestBy?.photo || '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h30 w30 corner500 shadow1 absolute right10 top10">
+                    <p class="size20 str500">
+                        <%= request.requestBy ? request.requestBy.fName : '' %>
+                        <%= request.requestBy ? request.requestBy.mName : '' %>
+                        <%= request.requestBy ? request.requestBy.lName : '' %>
+                        <%= request.requestBy ? request.requestBy.xName : '' %>
+                        &nbsp; <a href="javascript:void(0)" id="showBtn"><i class="fas fa-chevron-down"></i></a>
+                    </p>
+                </section>
+                <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const btn = document.querySelector('#showBtn');
+                    const card = document.querySelector('#showCard');
+                    const icon = btn.querySelector('i');
+
+                    btn.addEventListener('click', () => {
+                        card.classList.toggle('hidden');
+                        icon.classList.toggle('rotate-icon'); // rotate on toggle
+                    });
+                });
+                </script>
+                <style>
+                    #showBtn i {
+                    transition: transform 0.6s ease; /* smooth rotation */
+                }
+
+                .rotate-icon {
+                    transform: rotate(180deg); /* flip down/up */
+                }
+
+                </style>
+                <section class="paddingInline10 col alignStart bgSoft corner15 hidden" id="showCard">
+                    <section class="width0 gap20 padding0">
+                        <p class="rem12">
+                            <i class="bi bi-patch-check-fill"></i>
+                            <%= request.requestBy ? request.requestBy.role : '' %>
+                        </p>
+                        <p class="rem12">
+                            <i class="bi bi-buildings-fill"></i>
+                            <%= request.requestBy ? request.requestBy.campus : '' %>
+                        </p>
+                    </section>
+                    <p class="rem12">
+                        <i class="fas fa-address-card"></i>
+                        <%= request.requestBy?.schoolId || "--" %>
+                    </p>
+                    <p class="rem12 str500"><i class="fas fa-layer-group w15 wMin15"></i> <%= request.requestBy?.course || "--" %></p>
+
+                    <% if (request.requestBy?.role === 'Alumni') { %>
+                        <p class="rem12 str500">
+                            <i class="fas fa-graduation-cap w15"></i>
+                            Graduated in <%= request.requestBy.yearGraduated || "--" %>
+                        </p>
+
+                    <% } else if (request.requestBy?.role === 'Former') { %>
+                        <p class="rem12 str500">
+                            <i class="fas fa-stream w15"></i>
+                            <%= request.requestBy?.yearLevel || "--" %> last <%= request.requestBy?.yearAttended || "--" %>
+                        </p>
+
+                    <% } else { %>
+                        <p class="rem12 str500">
+                            <i class="fas fa-stream w15"></i>
+                            <%= request.requestBy?.yearLevel || "--" %>
+                        </p>
+                    <% } %>
+
+                    <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= request.requestBy?.email || "--" %></p>
+                    <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= request.requestBy?.phone || "--" %></p>
+                    <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= request.requestBy?.address || "--" %></p>
+                </section>
+            </section>
+            <section class="padding5 gap10 alignStart marginTop10">
+                <section class="padding15 col corner15 alignStart">
+                    <p class="rem12"><i class="fas fa-calendar"></i> Date Requested</p>
+                    <%
+                    const options = { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: 'numeric', 
+                        minute: '2-digit', 
+                        hour12: true 
+                    }; 
+                    const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); 
+                    %>
+                    <p class="rem14 str400"><%= formattedDate %></p>
+                    
+                    <br>
+                        <p class="rem12"> <i class="fas fa-receipt"></i> Transaction Number</p>
+                        <p class="rem14 str400"><%= request.tr %></p>
+                        <a href="" class="nav cnav disabled absolute right5 bottom5 scale2 opacity05 hidden"><i class="fas fa-receipt"></i></a>
+                </section>
+                <section class="bgWhite shadow1 corner15 col">
+                    <section class="bgBlue100 corner15 justifyBetween padding10" style="align-self: center;">
+                        <p class="size16"><i class="fas fa-info-circle"></i> Total Payables</p>
+                        <p class="size16 str500">&#8369;<%= totalAmount || "0" %>.00</p>
+                    </section>
+                    <% if (["For Payment", "For Verification","Verified","Claimed", "For Release"].includes(request.status) && request.payPhoto) { %>
+                        <section class="col bgWhite corner10 padding0 <% if (["For Payment", "For Verification"].includes(request.status) && request.payPhoto) { %> <% } %>">
+                            <section class="bgWhite gap5 padding0 alignStart relative">
+                                <section class="alignStart corner14 col">
+                                    <p class="rem18 hidden">Payment Details</p>
+                                    <p class="size12">Method: <%= request.payMode || 'Gcash' %></p>
+                                    <% if (["Verified","Claimed","For Release"].includes(request.status) && request.payPhoto) { %>
+                                        <p class="size12 green"><i class="fas fa-check-circle"></i> Payment Verified</p>
+                                    <% } else { %>
+                                        <p class="size12 yellow"><i class="fas fa-clock"></i> Payment Unverified</p>
+                                    <% } %>
+                                <a href="<%= request.payPhoto %>" target="_blank" class="absolute right5 top5 navy">View Payment <i class="fas fa-chevron-right"></i></a>
+                                </section>
+                                <img src="<%= request.payPhoto?.photo || '/images/annPhoto2.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/annPhoto2.jpg';" class="borderPrimary widthMax100 hMax100 corner10 hidden">
+                                <a href="<%= request.payPhoto %>" target="_blank" class="nav cnav absolute bottom5 right5 glass hidden"><i class="fas fa-search-plus"></i></a>
+                            </section>
+                        </section>
+                    <% } %>
+                </section>
+            </section>
+            
+            <section class="col padding15 corner15 bgWhite shadow1 gap10">
+                <% if (request.items && request.items.length > 0) { %>
+                    <% request.items.forEach(item => { %>
+                        <section class="gap10 alignStart justifyStart
+                        <% if ( item.status === "Approved") { %>
+                         bgWhite shadow1
+                        <% } else { %>
+                         porcelain 
+                        <% } %>
+                         corner15 padding15 relative">
+                            <section class="padding0 alignStart col">
+                                <p class="rem14 str500 flex alignCenter">
+                                    <%= item.qty %> <%= item.type %>
+                                    <% if ( item.proof ) { %>
+                                    <% } %>
+                                </p>
+                                <p class="rem12 colorPrimary">
+                                    <span class="colorPrimary rem12">
+                                        <%= item.semester + ` Semester` %> <%= `• ` + item.schoolYear %> <i class="fas fa-angles-right"></i>
+                                    </span> &nbsp; 
+                                    For <%= item.purpose %>
+                                </p>
+                                <p class="rem12"></p>
+                                <% if ( item.status === "Declined") { %>
+                                    <a href="" class="disabled nav cnavLG absolute translateY right10 bgRed100"><i class="fas fa-xmark-circle"></i></a>
+                                <% } else if ( item.status === "Approved") { %>
+                                    <a href="" class="disabled nav cnavLG absolute translateY right10 bgBlue100"><i class="fas fa-check-circle"></i></a>
+                                <% } else { %>
+                                <% } %>
+                            </section>
+                            <section class="padding5 gap5 width0 corner10 absolute top0 right0">
+                               
+                            </section>
+                        </section>
+                    <% }); %>
+                <% } else { %>
+                    <p>No items found for this request.</p>
+                <% } %>
+            </section>
+        </section>
+        <section class="col alignStart width35 bgWhite shadow1 justifyStart corner15 gap10 hidden">
+
+        </section>
+
+        
+        
+        <section class="col alignStart width30 padding5 justifyStart corner15 gap10">
+            <%- include('partials/status') %>     
+            <%- include('partials/notes') %>
+
+            <% if ( request.status === "Reviewed") { %>
+                <section class="gap10 justifyBetween corner15 col bgWhite padding20 shadow1">
+                    <p class="rem14 str500 darkGray">Action Panel</p>
+                    <section class="padding0 gap10">
+                        <% if ( !request.holdAt) { %>
+                        <form action="/hold4" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav corner10 width100"><i class="fas fa-clock"></i> Hold Request</button>
+                        </form>
+                        <% } else { %>
+                        <% } %>
+                        <form action="/approve4" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav pnav corner10 width100"><i class="fas fa-check-circle"></i> Approve Request</button>
+                        </form>
+                    </section>
+                </section>
+            <% } %>
+
+            <% if ( request.status === "For Verification") { %>
+                <section class="gap10 justifyBetween corner15 col bgWhite padding20 shadow1">
+                    <p class="rem14 str500 darkGray">Action Panel</p>
+                    <section class="padding0 gap10">
+                        <% if ( !request.holdAt) { %>
+                        <form action="/hold5" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav corner10 width100"><i class="fas fa-rotate"></i> Reupload Proof</button>
+                        </form>
+                        <% } else { %>
+                        <% } %>
+                        <form action="/verify4" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav pnav corner10 width100"><i class="fas fa-check-circle"></i> Verify Payment</button>
+                        </form>
+                    </section>
+                </section>
+            <% } %>
+            
+            <% if ( request.status === "Assessed") { %>
+            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20">
+                <%- include('icons/success') %>
+                <p class="rem12 str500 textCenter green">Confirm that the document is fully prepared and ready for release.</p>
+                <form action="/fRel" method="POST" class="form2">
+                    <input type="hidden" name="requestId" value="<%= request._id %>">
+                    <input type="hidden" name="back" value="<%= back %>">
+                    <button type="submit" class="nav corner10 gnav"><i class="fas fa-dolly"></i>Ready For Release</button>
+                </form>
+            </section>
+            <% } %>
+
+            <style>
+                .claimX #successIcon {
+                    border: 0.5px solid blue !important;
+                    i.fa-thumbs-up {
+                        color: rgb(8, 8, 92);
+                    }
+                }
+            </style>
+
+            <% if (['Accounting'].includes(user.role)) { %>
+            <section class="col alignStart gap5">
+                <% if ( request.processBy) { %>
+                <section class="corner10 gap5 justifyStart width0 padding0">
+                    <img src="<%= request.processBy?.photo || '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h20 w20 wMin20 borderPrimary corner500">
+                    <p class="rem12 str500"> <%= request.processBy?.fName || "" %> <%= request.processBy?.lName || "" %></p>
+                </section>
+                <p class="rem1 str400 marginLeft5">Assigned at <%= request.assignAtFormatted %></p>
+                <% } else { %>
+                    <p class="red bgRed100"><i class="fas fa-exclamation-circle"></i> Unassigned</p>
+                <% } %>
+            </section>
+            <% } %>
+        </section>
+    </section>
+
+    
+<div class="bgSoft absolute top0 left0 hidden" id="noticeCard">
+    <section class="width35 padding30 corner20 bgWhite shadow1 col">
+        <%- include('icons/warning') %>
+            <p class="size30 str500">WARNING!</p>
+            <section class="col textCenter">
+                <p class="rem1" id="noticeMsg">Message here</p>
+            </section>
+            <div class="selectBar width100 widthMax100 marginBottom15" id="SelectDiv" style="display: none;">
+                <select name="" id="selectFlex">
+                    <option value="" selected disabled>Select Reason</option>
+                </select>
+            </div>
+            <section class="bgBlue100 col padding15 textCenter">
+                <p class="rem12">This action cannot be undone!</p>
+            </section>
+            <br>
+            <div class="section gap10">
+                <a href="javascript:vod(0)" class="nav width100"  id="closeNoticeCard"> Go Back</a>
+                <a href="javascript:vod(0)" class="nav pnav width100" id="proceedBtn"> Proceed</a>
+            </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const noticeCard = document.getElementById("noticeCard");
+    const noticeMsg = document.getElementById("noticeMsg");
+    const proceedBtn = document.getElementById("proceedBtn");
+    const closeNoticeCard = document.getElementById("closeNoticeCard");
+    const selectDiv = document.getElementById("SelectDiv");
+    const selectFlex = document.getElementById("selectFlex");
+
+    let currentForm = null; // form to submit
+    let currentAction = null; // store action type: 'item', 'decline3', 'hold3'
+
+    const reasonOptions = {
+        hold: ["Balance", "Payment", "Unclear Proof"],
+        decline: ["Payment", "Balance", "Illegible", "Unidentified"]
+    };
+
+    const actions = [
+        { selector: 'form[action="/hold4"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", type: "transaction" },
+        { selector: 'form[action="/approve4"] button', message: "Are you sure this request passed the assessment? It will be marked as For Payment", type: "transaction" },
+
+        { selector: 'form[action="/hold5"] button', message: "Are you sure you want to proceed? This will hold the request and delete all the uploaded proof of payment. Please select your reason below", reason: "hold", type: "transaction" },
+        { selector: 'form[action="/verify4"] button', message: "Are you sure you want to proceed? This request and payment will be marked as Verified", type: "transaction" },
+    ];
+
+    function populateSelect(reasonType) {
+        selectFlex.innerHTML = "";
+        const defaultOption = new Option("Select Reason", "");
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        selectFlex.appendChild(defaultOption);
+
+        reasonOptions[reasonType].forEach(opt => {
+            selectFlex.appendChild(new Option(opt, opt));
+        });
+
+        selectFlex.required = true;
+        selectDiv.style.display = "flex";
+    }
+
+    actions.forEach(action => {
+        document.querySelectorAll(action.selector).forEach(btn => {
+            btn.addEventListener("click", e => {
+                e.preventDefault();
+                currentForm = btn.closest("form");
+                currentAction = action; // store the action type
+                noticeMsg.textContent = action.message;
+
+                if (action.reason && reasonOptions[action.reason]) {
+                    populateSelect(action.reason);
+                } else {
+                    selectDiv.style.display = "none";
+                    selectFlex.required = false;
+                }
+
+                noticeCard.classList.remove("hidden");
+            });
+        });
+    });
+
+    closeNoticeCard.addEventListener("click", () => {
+        noticeCard.classList.add("hidden");
+        currentForm = null;
+        currentAction = null;
+        selectDiv.style.display = "none";
+        selectFlex.required = false;
+        selectFlex.value = "";
+    });
+
+    proceedBtn.addEventListener("click", () => {
+        if (!currentForm) return;
+
+        // If select is visible, ensure a value is selected
+        if (selectDiv.style.display !== "none" && !selectFlex.checkValidity()) {
+            selectFlex.reportValidity();
+            return;
+        }
+
+        // Inject the reason into a hidden input before submitting
+        let reasonValue = selectFlex.value;
+        if (reasonValue) {
+            let inputName = "";
+
+            if (currentAction.type === "item") {
+                inputName = "itemRemarks"; // send as item.remarks in backend
+            } else if (currentAction.type === "transaction") {
+                inputName = "requestRemarks"; // send as request.remarks in backend
+            }
+
+            // Remove existing hidden input if any
+            let existingInput = currentForm.querySelector(`input[name="${inputName}"]`);
+            if (existingInput) existingInput.remove();
+
+            // Append new hidden input
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = inputName;
+            hiddenInput.value = reasonValue;
+            currentForm.appendChild(hiddenInput);
+        }
+
+        currentForm.submit();
+    });
+});
+</script>

@@ -1,41 +1,45 @@
 const User = require('../model/user');
 const Request = require('../model/request');
+const Item = require('../model/item'); // import item model
 
 module.exports = async (req, res, next) => {
   try {
-  if (!req.session || !req.session.user) {
-    console.log('⚠️ .... Unauthorized access attempt — Please login first!');
-    req.session.error = 'Please login first!';
-    return res.redirect('/');
-  }
+    if (!req.session || !req.session.user) {
+      console.log('⚠️ Unauthorized access attempt — Please login first!');
+      req.session.error = 'Please login first!';
+      return res.redirect('/');
+    }
 
-    // ✅ Fetch full user data from DB (not just session copy)
     const user = await User.findById(req.session.user._id);
     if (!user) {
       req.session.destroy();
       return res.redirect('/');
     }
 
-    // ✅ Attach user data to req & res.locals for global EJS access
     req.user = user;
     res.locals.user = user;
 
-    // ✅ Fetch all requests where user is requestBy or processBy (or releaseBy if desired)
+    // Fetch all requests where user is requestBy, processBy, or releaseBy
     const userRequests = await Request.find({
       $or: [
         { requestBy: user._id },
         { processBy: user._id },
-        { releaseBy: user._id } // optional but helpful
+        { releaseBy: user._id }
       ]
     })
-      .populate('requestBy')
-      .populate('processBy')
-      .populate('releaseBy')
-      .sort({ createdAt: -1 });
+    .populate('requestBy')
+    .populate('processBy')
+    .populate('releaseBy')
+    .sort({ createdAt: -1 });
 
-    // ✅ Make requests available globally (EJS or backend)
-    req.userRequests = userRequests;
-    res.locals.userRequests = userRequests;
+    // For each request, fetch matching items by tr
+    const requestsWithItems = await Promise.all(userRequests.map(async rq => {
+      const items = await Item.find({ tr: rq.tr }); // match by request.tr
+      return { ...rq.toObject(), items }; // attach items array
+    }));
+
+    req.userRequests = requestsWithItems;
+    res.locals.userRequests = requestsWithItems;
 
     console.log(`✅ Logged in as ${user.fName} ${user.lName}`);
     console.log(`📦 Found ${userRequests.length} related requests`);

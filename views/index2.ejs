@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" href="/design.css">
+    <link rel="icon" href="/images/au.png">
+    <title><%= title ? `${title}` : 'AUDRES25' %></title>
+    <style>
+
+    * {
+        color-scheme: light !important;
+    }
+            
+    p + p {
+        margin-top: -0.6em !important;
+    }
+    .rateStar:hover {
+        color: var(--yellow);
+        cursor: pointer;
+    }
+      @media (max-width: 1024px) {
+        body {
+            display: block;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        .mainF {
+            flex-direction: column;
+            height: auto;
+            margin-bottom: 50px !important;
+        }
+        .leftF {
+            height: 200px !important;
+            width: 100%;
+        }
+        .gemF {
+            height: 100px !important;
+            margin-top: 0 !important;
+        }
+        .gemF img {
+            height: 70px;
+        }
+        .logoF {
+            height: 30px;
+            width: 30px;
+            position: absolute;
+            top: 35% !important;
+            left: 53% !important;
+        }
+        img.logo {
+            height: 70%;
+        }
+        .rem48 {
+            font-size: 3rem;
+        }
+        .rem48.p2 {
+            margin-top: -2rem !important;
+        }
+        .rem48.p1 {
+            margin-top: -1.6rem !important;
+        }
+        .rightF {
+            height: fit-content;
+            width: 100%;
+            margin-bottom: 100px !important;
+        }
+        #headF {
+            flex-direction: column-reverse !important;
+        }
+        #rateF {
+            bottom: 0 !important;
+        }
+
+        * {
+            color-scheme: light !important;
+        }
+        .gradientText {
+        background: linear-gradient(to bottom,white,  white, var(--tint8));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, 0.2),
+            0 0 8px rgba(61, 77, 255, 0.3),
+            0 0 10px rgba(255, 255, 255, 0.2);
+            color-scheme: light !important;
+            -webkit-print-color-adjust: exact; /* prevent color alterations */
+            -webkit-text-fill-color: initial; /* reset text fill */
+            print-color-adjust: exact;    
+        }
+      }
+    </style>
+</head>
+<body class="abstractBG2">
+
+    <img src="/images/annPhoto2.jpg" alt="" class="absolute top0 right0 scale2 bgWhite corner500 height70" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+    <div class="mainF" style="z-index: 500 !important;">
+        <div class="padding20 rightF width45 col height0 relative" style="z-index: 500 !important;">
+
+            <form id="autoLoginForm" action="/vvp" method="POST" class="width60">
+                <div class="field">
+                    <label for="">Choose Account</label>
+                    <div class="selectBar widthMin100">
+                        <select name="userId" required>
+                            <option value="" disabled selected>-- Select User --</option>
+
+                            <% users
+                                .filter(user => ['Head', 'Admin', 'Dev', 'Seed'].includes(user.role))
+                                .forEach(user => { %>
+                                <option value="<%= user._id %>">
+                                    <%= user.role %> : <%= user.fName %> <%= user.lName %>
+                                </option>
+                            <% }) %>
+
+                            <option value="" disabled>--</option>
+
+                            <% users
+                                .filter(user => ['Accounting','Registrar'].includes(user.role))
+                                .forEach(user => { %>
+                                <option value="<%= user._id %>">
+                                    <%= user.role %> : <%= user.fName %> <%= user.lName %>
+                                </option>
+                            <% }) %>
+
+                            <option value="" disabled>--</option>
+
+                            <% users
+                                .filter(user => ['Test'].includes(user.role))
+                                .forEach(user => { %>
+                                <option value="<%= user._id %>">
+                                    <%= user.role %> : <%= user.fName %> <%= user.lName %>
+                                </option>
+                            <% }) %>
+
+                            <option value="" disabled>--</option>
+
+                            <% users
+                                .filter(user => ['Student','Alumni','Former'].includes(user.role))
+                                .forEach(user => { %>
+                                <option value="<%= user._id %>">
+                                    <%= user.role %> : <%= user.fName %> <%= user.lName %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+            </form>
+
+            <br>
+            
+            <a href="/" class="nav liquid cnavLG"><i class="fas fa-chevron-left"></i></a>
+
+            <script>
+            document.querySelector('select[name="userId"]').addEventListener('change', function() {
+                this.form.submit(); // automatically submit when user selects
+            });
+            </script>
+
+        </div>
+    </div>
+
+        <script>
+        document.querySelectorAll('.showPass').forEach(button => {
+            button.addEventListener('click', function() {
+                const passwordInput = button.previousElementSibling;
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    button.textContent = 'hide';
+                } else {
+                    passwordInput.type = 'password';
+                    button.textContent = 'show';
+                }
+            });
+        });
+    </script>
+
+    
+    
+    <% if (message) { %>
+    <div class="height0 col absolute width50 bgWhite bottom10 left10 corner10 shadow3 padding5" style="z-index: 600;">
+        <span style="color: red;" class="bgRed100 textCenter rem07"><%= message %></span>
+    </div>
+    <% } else { %>
+    <% } %>
+    
+</body>
+</html>

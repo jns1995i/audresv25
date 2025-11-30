@@ -1,4 +1,4 @@
-<% layout('layout') %>
+<% layout('scale') %>
 <style>
     .info p i {
         width: 20px !important;
@@ -13,8 +13,8 @@
 </style>
 
  <section class="gap10 alignStart padding5" id="">
-    <% const routes = { srv: "/srv",prc: "/prc",rel: "/rel",apr: "/apr",vrf: "/vrf", dsb: "/dsb", srvAll: "/srvAll"};
-    const href = routes[back] || "/srv"; %>
+                <% const routes = { trs: "/trs", toPay: "/toPay", ver: "/ver", dsb: "/dsb", trsAll: "/trsAll"};
+                const href = routes[back] || "/trs"; %>
     <a href="<%= href %>" class="nav cnav marginTop5 porcelain"><i class="fas fa-chevron-left"></i></a>
 
         <section class="col width60 padding5">
@@ -24,8 +24,9 @@
             </section>
             
             <section class="corner15 bgWhite col gap10 shadow1">
+            
                 <%- include('partials/srvCard') %>
-                
+            
                 <section class="col padding15 corner15 bgSoft gap10">
                     <% if (request.items && request.items.length > 0) { %>
                         <% request.items.forEach(item => { %>
@@ -40,10 +41,9 @@
                                     <p class="rem14 str500 flex alignCenter">
                                         <%= item.qty %> <%= item.type %>
                                         <% if ( item.proof ) { %>
-                                            &nbsp; <a href="<%= item.proof %>"  target="_blank" class="navy"><i class="fas fa-exclamation-circle w15"></i> View Requirements</a>
                                         <% } %>
                                     </p>
-                                    <p class="rem12 green">
+                                    <p class="rem12 colorPrimary">
                                         <span class="colorPrimary rem12">
                                             <%= item.semester + ` Semester` %> <%= `• ` + item.schoolYear %> <i class="fas fa-angles-right"></i>
                                         </span> &nbsp; 
@@ -53,22 +53,8 @@
                                     <% if ( item.status === "Declined") { %>
                                         <a href="" class="disabled nav cnavLG absolute translateY right10 bgRed100"><i class="fas fa-xmark-circle"></i></a>
                                     <% } else if ( item.status === "Approved") { %>
-                                        <a href="" class="disabled nav cnavLG absolute translateY right10 bgGreen100"><i class="fas fa-check-circle"></i></a>
+                                        <a href="" class="disabled nav cnavLG absolute translateY right10 bgBlue100"><i class="fas fa-check-circle"></i></a>
                                     <% } else { %>
-                                        <section class="padding5 gap5 width0 corner10 absolute right10 top10">
-                                            <form action="/decItem" method="POST" class="form2">
-                                                <input type="hidden" name="requestId" value="<%= request._id %>">
-                                                <input type="hidden" name="itemId" value="<%= item._id %>">
-                                                <input type="hidden" name="back" value="<%= back %>">
-                                                <button type="submit" class="nav corner10 borderPrimary"><i class="fas fa-xmark-circle"></i> Decline</button>
-                                            </form>
-                                            <form action="/appItem" method="POST" class="form2">
-                                                <input type="hidden" name="requestId" value="<%= request._id %>">
-                                                <input type="hidden" name="itemId" value="<%= item._id %>">
-                                                <input type="hidden" name="back" value="<%= back %>">
-                                                <button type="submit" class="nav corner10 pnav"><i class="fas fa-check-circle"></i> Approve</button>
-                                            </form>
-                                        </section>
                                     <% } %>
                                 </section>
                                 <section class="padding5 gap5 width0 corner10 absolute top0 right0">
@@ -82,79 +68,54 @@
                 </section>
             </section>
         </section>
-        
+
         <section class="col alignStart width35 padding5 justifyStart corner15 gap10">
             <%- include('partials/status') %>     
             <%- include('partials/notes') %>
-            <% const hasPending = request.items && request.items.some(it => it.status === "Pending"); %>
-            <% if (hasPending) { %>
-                <section class="gap10 justifyBetween corner15 shadow1 bgWhite">
-                    <p class="rem14 str500">Quick Action <i class="fas fa-arrow-right"></i></p>
-                    <form action="/appAllItem" method="POST" class="form2">
-                        <input type="hidden" name="requestId" value="<%= request._id %>">
-                        <input type="hidden" name="back" value="<%= back %>">
-                        <button type="submit" class="nav corner10 pnav"><i class="fas fa-check-double"></i> Approve All</button>
-                    </form>
-                </section>
-            <% } %>
 
-            <% if (hasPending) { %>
+            <% if ( request.status === "Reviewed") { %>
                 <section class="gap10 justifyBetween corner15 col bgWhite padding20 shadow1">
-                    <p class="rem14 str500 darkGray">Special Action</p>
+                    <p class="rem14 str500 darkGray">Action Panel</p>
                     <section class="padding0 gap10">
-                        <form action="/decline3" method="POST" class="form2 width100">
-                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                            <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav dnav-fill corner10 width100"><i class="fas fa-xmark-circle"></i> Decline Request</button>
-                        </form>
                         <% if ( !request.holdAt) { %>
-                        <form action="/hold3" method="POST" class="form2 width100">
+                        <form action="/hold4" method="POST" class="form2 width100">
                             <input type="hidden" name="requestId" value="<%= request._id %>">
                             <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav dnav-fill corner10 width100"><i class="fas fa-clock"></i> Hold Request</button>
+                            <button type="submit" class="nav corner10 width100"><i class="fas fa-clock"></i> Hold Request</button>
                         </form>
                         <% } else { %>
                         <% } %>
+                        <form action="/approve4" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav pnav corner10 width100"><i class="fas fa-check-circle"></i> Approve Request</button>
+                        </form>
                     </section>
                 </section>
             <% } %>
 
-            <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
-                <% if ( request.declineAt) { %>
-                    <section class="gap10 justifyBetween corner15 bgWhite padding20 shadow1">
-                        <section class="col gap0 padding0 width70 alignStart">
-                            <p class="size12 str500 textCenter">Something went wrong with</p>
-                            <p class="size12 str500 textCenter">the last action?</p>
-                        </section>
-                        <section class="padding0 gap10 width30">
-                            <form action="/restore3" method="POST" class="form2 width100">
-                                <input type="hidden" name="requestId" value="<%= request._id %>">
-                                <input type="hidden" name="back" value="<%= back %>">
-                                <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-rotate"></i> Reset</button>
-                            </form>
-                        </section>
+            <% if ( request.status === "For Verification") { %>
+                <section class="gap10 justifyBetween corner15 col bgWhite padding20 shadow1">
+                    <p class="rem14 str500 darkGray">Action Panel</p>
+                    <section class="padding0 gap10">
+                        <% if ( !request.holdAt) { %>
+                        <form action="/hold5" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav corner10 width100"><i class="fas fa-rotate"></i> Reupload Proof</button>
+                        </form>
+                        <% } else { %>
+                        <% } %>
+                        <form action="/verify4" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav pnav corner10 width100"><i class="fas fa-check-circle"></i> Verify Payment</button>
+                        </form>
                     </section>
-                <% } %>
-
-                
-                <% if ( request.status === "Reviewed") { %>
-                    <section class="gap10 justifyBetween corner15 bgWhite padding20 shadow1">
-                        <section class="col gap0 padding0 width70 alignStart">
-                            <p class="size12 str500 textCenter">Something went wrong with</p>
-                            <p class="size12 str500 textCenter">the last action?</p>
-                        </section>
-                        <section class="padding0 gap10 width30">
-                            <form action="/restore3" method="POST" class="form2 width100">
-                                <input type="hidden" name="requestId" value="<%= request._id %>">
-                                <input type="hidden" name="back" value="<%= back %>">
-                                <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-rotate"></i> Reset</button>
-                            </form>
-                        </section>
-                    </section>
-                <% } %>
+                </section>
             <% } %>
             
-            <% if ( request.status === "Verified") { %>
+            <% if ( request.status === "Assessed") { %>
             <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20">
                 <%- include('icons/success') %>
                 <p class="rem12 str500 textCenter green">Confirm that the document is fully prepared and ready for release.</p>
@@ -174,26 +135,8 @@
                     }
                 }
             </style>
-                        
-            <% if ( request.status === "For Release") { %>
-            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20 claimX">
-                <%- include('icons/success') %>
-                <p class="rem12 str500 textCenter colorPrimary">Has the document been claimed?</p>
-                <form action="/claim3" method="POST" class="form2 width100">
-                    <input type="hidden" name="requestId" value="<%= request._id %>">
-                    <input type="hidden" name="back" value="<%= back %>">
-                    <div class="field">
-                        <input type="text" name="claimedBy" placeholder="Enter Claimant's Name">
-                    </div>
-                    <br>
-                    <button type="submit" class="nav corner10 pnav width100"><i class="fas fa-dolly"></i>Mark as Claimed</button>
-                </form>
-            </section>
-            <% } %>
 
-
-
-            <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
+            <% if (['Accounting'].includes(user.role)) { %>
             <section class="col alignStart gap5">
                 <% if ( request.processBy) { %>
                 <section class="corner10 gap5 justifyStart width0 padding0">
@@ -246,19 +189,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentAction = null; // store action type: 'item', 'decline3', 'hold3'
 
     const reasonOptions = {
-        hold: ["Incomplete", "Payment", "Illegible"],
+        hold: ["Balance", "Payment", "Unclear Proof"],
         decline: ["Payment", "Balance", "Illegible", "Unidentified"]
     };
 
     const actions = [
-        { selector: 'form[action="/decItem"] button', message: "Are you sure you want to decline this requested document? Select your reason below", reason: "decline", type: "item" },
-        { selector: 'form[action="/appItem"] button', message: "You are about to approve this requested document", type: "item" },
-        { selector: 'form[action="/decline3"] button', message: "Are you sure you want to decline this whole transaction? Select your reason below", reason: "decline", type: "transaction" },
-        { selector: 'form[action="/hold3"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", type: "transaction" },
-        { selector: 'form[action="/appAllItem"] button', message: "Are you sure you want to approve all the requested documents? It will be marked as Reviewed and will proceed to Accounting for Assessment", type: "transaction" },
-        { selector: 'form[action="/fRel"] button', message: "Are you sure you want to mark this request as Ready for Release?", type: "transaction" },
-        { selector: 'form[action="/restore3"] button', message: "Are you sure you want to proceed? This will reset all the status of the whole transaction", type: "transaction" },
-        { selector: 'form[action="/claim3"] button', message: "Are you sure you want to proceed? This will mark the transaction as claimed", type: "transaction" },
+        { selector: 'form[action="/hold4"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", type: "transaction" },
+        { selector: 'form[action="/approve4"] button', message: "Are you sure this request passed the assessment? It will be marked as For Payment", type: "transaction" },
+
+        { selector: 'form[action="/hold5"] button', message: "Are you sure you want to proceed? This will hold the request and delete all the uploaded proof of payment. Please select your reason below", reason: "hold", type: "transaction" },
+        { selector: 'form[action="/verify4"] button', message: "Are you sure you want to proceed? This request and payment will be marked as Verified", type: "transaction" },
     ];
 
     function populateSelect(reasonType) {

@@ -45,7 +45,7 @@
 </head>
 
 <% if ( user.access === 1) { %>
-<body class="bgSoft gap0 <% if (active === 'acc') { %> gap10 <% } %> ">
+<body class="bgSoft gap0 <% if (active === 'acc2') { %> gap10 <% } %> ">
   <div class="absolute translateCenter bgModal8 index5 hidden" id="lgCard">
   <div class="bgWhite cornerRem2 height0 width25 col padding20">
     <%- include('icons/lg') %>
@@ -63,26 +63,16 @@
     </div>
     <div class="height80 menu relative">
       <br>
-      <a href="/dsb" class="nav mnav <% if ( active === 'dsb') { %> active <% } %>"> <i class="bi bi-grid-fill"></i> Dashboard</a>
-      <a href="/srv" class="nav mnav <% if ( active === 'srv') { %> active <% } %>"> <i class="fas fa-receipt"></i> Transactions</a>
-      <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
-      <a href="/emp" class="nav mnav <% if ( active === 'emp') { %> active <% } %>"> <i class="fas fa-user-tie"></i> Employees</a>
-      <% } %>
-      <a href="/stu" class="nav mnav <% if ( active === 'stu') { %> active <% } %>"> <i class="fas fa-user-friends"></i> Students</a>
-      <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
-      <a href="/cog" class="nav mnav <% if ( active === 'cog') { %> active <% } %>"> <i class="fas fa-cog"></i> Settings</a>
-      <% } %>
-      <div class="h100 absolute bottom5 translateX liquid">
-        hello
-      </div>
-      <div class="height0 absolute bottom5 translateX opacity0">
-        <a href="/logout" class="nav glass width100 corner12 <% if ( active === '') { %> active <% } %>"> <i class="fas fa-share-square"></i> Log Out</a>
+      <a href="/ovr" class="nav mnav <% if ( active === 'ovr') { %> active <% } %>"> <i class="bi bi-grid-fill"></i> Overview</a>
+      <a href="/trs" class="nav mnav <% if ( active === 'trs') { %> active <% } %>"> <i class="fas fa-receipt"></i> Transactions</a>
+      <div class="height0 absolute bottom5 translateX">
+        <a href="/logout" class="nav glass width100 <% if ( active === '') { %> active <% } %>" style="opacity: 0;"> <i class="fas fa-share-square"></i> Log Out</a>
       </div>
 
     </div>
-    <div class="height10 justifyStart liquid shadow2 padding10 corner12" style="border: 0.2px rgba(255, 255, 255, 0.3) solid;">
+    <div class="height10 justifyStart glass padding10">
       <% if (active === 'acc') { %>
-        <a href="/acc" class="liquid corner500 h50 w50" style="min-width: 50px;">
+        <a href="/acc2" class="liquid corner500 h50 w50" style="min-width: 50px;">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 borderWhite">
         </a>
         <section class="width0 col alignStart">
@@ -90,17 +80,17 @@
           <p class="rem11 str400 textWrap">Management</p>
         </section>
       <% } else { %>
-        <a href="/acc" class="liquid corner500 h50 w50" style="min-width: 50px;">
+        <a href="/acc2" class="liquid corner500 h50 w50" style="min-width: 50px;">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 borderWhite">
         </a>
         <section class="width0 col alignStart">
-          <p class="rem11 str400 textWrap">Hello <%= user.fName %></p>
-          <p class="rem09 str400 textWrap"><%= user.role %></p>
+          <p class="rem11 str400 textWrap"><%= user.fName %> <%= user.lName %></p>
+          <p class="rem09 str400 textWrap">Welcome <%= user.role %></p>
         </section>
       <% } %>
     </div>
   </div>
-  <div class="mainf padding5 <% if (active === 'acc') { %> abstractBG1 corner15 <% } %> ">
+  <div class="mainf padding5 <% if (active === 'acc2') { %> abstractBG1 corner15 <% } %> ">
       <%- body %>
   </div>
 
@@ -127,7 +117,6 @@
   </div>
 <% } else { %>
 <% } %>
-
 
     <script src="https://kit.fontawesome.com/70353c979a.js" crossorigin="anonymous"></script>
     <script src="/js/profile.js" defer></script>

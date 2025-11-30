@@ -59,9 +59,9 @@ html {
     
     --primary: #030033;
     --secondary: #ffc107;
-    --accent1: #10096c;
-    --accent2: #170f8b;
-    --accent3: #030033;
+    --accent1: #026a46;
+    --accent2: #09a739;
+    --accent3: #00301f;
 
     --black1: #000000;
     --black2: #0a0a0a;
@@ -95,39 +95,6 @@ html {
     --gray14: #929292;
     --gray15: #898989;
 
-    --tint1: #001b40;
-    --tint2: #00214d; /* Primary */
-    --tint3: #002b64;
-    --tint4: #00357b;
-    --tint5: #004093;
-    --tint6: #004daa;
-    --tint7: #005ac1;
-    --tint8: #196cd0;
-    --tint9: #3f80db;
-    --tint10: #6695e3;
-    --tint11: #8da9eb;
-    --tint12: #b4bef2;
-    --tint13: #dce0f8;
-    --tint14: #eef2fc;
-    --tint15: #f9fbfe;
-
-    --shade1: #1f406b;
-    --shade2: #1b375f;
-    --shade3: #17315a;
-    --shade4: #142c54;
-    --shade5: #102549;
-    --shade6: #0e1f45;
-    --shade7: #0c1a3a;
-    --shade8: #1a3660; /* Primary Dark */
-    --shade9: #161f53;
-    --shade10: #14194a;
-    --shade11: #12143f;
-    --shade12: #0e0f35;
-    --shade13: #0c0b2a;
-    --shade14: #0a071f;
-    --shade15: #080512; /* Darkest */
-
-    /*
     --tint1: #4c784d;
     --tint2: #618e67;
     --tint3: #78a77f;
@@ -138,23 +105,6 @@ html {
     --tint8: #e4eae8;
     --tint9: #eef8f5;
     --tint10: #f9fefb;
-
-    --tint1:  #4c784d;
-    --tint2:  #618e67;
-    --tint3:  #78a77f;
-    --tint4:  #8db88f;
-    --tint5:  #a3d09f;
-    --tint6:  #b9d9b0;
-    --tint7:  #cfe2c0;
-    --tint8:  #e4eae8;
-    --tint9:  #eef8f5;
-    --tint10: #f9fefb;
-    --tint11: #fcfefc;
-    --tint12: #fdfefc;
-    --tint13: #fefefd;
-    --tint14: #fefefe;
-    --tint15: #ffffff;
-
 
     --shade1: #4c784d;
     --shade2: #46734a;
@@ -171,7 +121,7 @@ html {
     --shade13: #091d1f;
     --shade14: #051819;
     --shade15: #0a0c0c;
-    */
+
 }
 
 ::-webkit-scrollbar {
@@ -434,11 +384,10 @@ a:hover, button:hover {
     align-items: center;
     transition: all 0.6s ease-in-out;
     background-color: transparent;
-    color: rgb(69, 69, 69);
+    color: white;
     border: none;
-    border-radius: 10px !important;
     font-size: 12px;
-    font-weight: 400;
+    font-weight: 300;
     gap: 5px;
     i {
         font-size: inherit;
@@ -449,22 +398,20 @@ a:hover, button:hover {
 
 .tnav:hover {
     background-color: rgba(255, 255, 255, 0.2);
+    color: white !important;
     transform: 0;
-    color: var(--accent2);
     transition: all 0.6s ease-in-out;
-    box-shadow: var(--shadow1);
 }
 
 .tnav.active {
     background-color: white;
     transition: all 0.6s ease;
     font-weight: 500;
-    color: var(--accent2);
-    box-shadow: var(--shadow1);
+    color: var(--accent1)
 }
 .tnav.active:hover {
-    color: var(--accent2);
-    box-shadow: var(--shadow1);
+    background-color: var(--tint14);
+    color: var(--shade12) !important;
 }
 
 .snav {
@@ -656,7 +603,6 @@ label {
     margin-left: 5px;
     color: var(--shade11) !important;
 }
-
 textarea {
     background-color: white;
     border: solid 1px lightgray;
@@ -1011,19 +957,17 @@ progress::-moz-progress-bar { background-color: #4caf50; }
         radial-gradient(circle at 50% 50%,  var(--tint6), transparent 50%);
     background-blend-mode: lighten;
     backdrop-filter: blur(10px);
-    background-color: var(--shade12);
+    background-color: var(--shade10);
 }
 
 .abstractBG1 {
-    color: white;
     background: 
-        radial-gradient(circle at 50% 90%, var(--shade15), transparent 50%),  /* Light Gray */
-        radial-gradient(circle at 88% 99%,  var(--tint5), transparent 26%),  /* Very Light Blue */
-        radial-gradient(circle at 20% 1%,  var(--tint3), transparent 70%),  /* Very Light Blue */
-        radial-gradient(circle at 70% 30%,  var(--shade15), transparent 10%); /* White */
+        radial-gradient(circle at 10% 5%, var(--shade15), transparent 25%),  /* Light Gray */
+        radial-gradient(circle at 80% 95%,  var(--tint6), transparent 30%),  /* Very Light Blue */
+        radial-gradient(circle at 50% 50%,  var(--tint4), transparent 80%); /* White */
     background-blend-mode: lighten;
     backdrop-filter: blur(10px);
-    background-color: var(--shade12);
+    background-color: var(--shade10);
 }
 
 .abstractBG2 {
@@ -1034,6 +978,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     background-color: var(--shade10);
     z-index: 50 !important;
 }
+
 
 .abstractBG2::before {
     content: "";
@@ -1138,9 +1083,9 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     overflow: hidden;
     background: 
         radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.15),rgba(255, 255, 255, 0) 20%);
-    backdrop-filter: blur(1px) saturate(115%);
+    backdrop-filter: blur(1px) saturate(200%);
     background-size: 300% 300%; /* allow movement */
-    -webkit-backdrop-filter: blur(1px) saturate(115%);
+    -webkit-backdrop-filter: blur(1px) saturate(200%);
     border: 0.1px solid rgba(255, 255, 255, 0.09);
 
     /* Liquid-like shadow: top-right highlight, bottom-left dark */
@@ -1436,7 +1381,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .borderBlack { border: 1px solid black; }
 .borderGray { border: 0.5px solid lightgray; }
 .borderYellow { border: 0.5px solid var(--yellow); }
-.borderWhite { border: 0.5px solid rgba(255, 255, 255, 0.7); }
+.borderWhite { border: 0.5px solid white; }
 .borderPrimary { border: 0.5px solid var(--primary); }
 .borderDotted { border-style: dotted ; border-width: 5px !important; }
 .borderDashed { border-style: dashed ; border-width: 5px !important; }
@@ -1554,13 +1499,6 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .cornerRem57 { border-radius: 5.7rem; }
 .cornerRem58 { border-radius: 5.8rem; }
 .cornerRem59 { border-radius: 5.9rem; }
-
-.cornerTop0 { border-top-right-radius: 0 !important; border-top-left-radius: 0 !important;}
-.cornerTopRight0 { border-top-right-radius: 0 !important;}
-.cornerTopLeft0 { border-top-left-radius: 0 !important;}
-.cornerBottom0 { border-bottom-right-radius: 0 !important; border-bottom-left-radius: 0 !important;}
-.cornerBottomRight0 { border-bottom-right-radius: 0 !important;}
-.cornerBottomLeft0 { border-bottom-left-radius: 0 !important;}
 
 .t1 { top: 1%; }
 .t2 { top: 2%; }

@@ -12,6 +12,8 @@ const requestSchema = new mongoose.Schema({
   },
 
   tr: { type: String, required: true, trim: true },
+
+  items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
   type: { type: String, required: false, trim: true },
   purpose: { type: String, trim: true },
   qty: { type: Number, default: 1 },

@@ -10,6 +10,8 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 const dayjs = require('dayjs');
+const helmet = require('helmet');
+
 
 const isLogin = require('./middleware/isLogin');
 const isRequest = require('./middleware/isRequest');
@@ -23,6 +25,7 @@ const isEmp = require('./middleware/isEmp');
 const isEmpArc = require('./middleware/isEmpArc');
 const isStudent = require('./middleware/isStudent');
 const isStuArc = require('./middleware/isStuArc');
+const isUser = require('./middleware/isUser');
 
 const users = require('./model/user');
 const requests = require('./model/request');
@@ -72,6 +75,52 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 // para matic isang araw lang
   }
 }));
+
+// Helmet security middleware
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net",
+        "https://kit.fontawesome.com",
+        "https://ka-f.fontawesome.com"
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net",
+        "https://ka-f.fontawesome.com"
+      ],
+      fontSrc: [
+        "'self'",
+        "https://fonts.gstatic.com",
+        "https://fonts.googleapis.com",
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net",
+        "https://ka-f.fontawesome.com"
+      ],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://res.cloudinary.com",
+      ],
+      connectSrc: [
+        "'self'",
+        "https://ka-f.fontawesome.com",
+        "https://cdn.jsdelivr.net"
+      ],
+      objectSrc: ["'none'"],
+      frameSrc: ["'self'"],
+    }
+  })
+);
+
 
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -304,7 +353,7 @@ app.get('/', isRatings, async (req, res) => {
     }
 
     await ensureUserExists('Head', 'Head', 'all456', 1);
-    await ensureUserExists('Test', 'Student', 'all456', 0, {
+    await ensureUserExists('Test', 'Test', 'all456', 0, {
       course: 'Bachelor of Science in Information Technology'
     });
     await ensureUserExists('Dev', 'Dev', 'all456', 1, {
@@ -325,8 +374,6 @@ app.get('/', isRatings, async (req, res) => {
     res.render('index', { title: 'AUDRESv25' });
   }
 });
-
-
 
 
 app.post('/login', async (req, res) => {
@@ -382,6 +429,47 @@ app.post('/login', async (req, res) => {
     });
   }
 });
+
+app.get('/login2',isUser, async (req, res) => {
+  res.render('index2', { title: 'VVP', active: 'dsb' });
+});
+
+app.post('/vvp', async (req, res) => {
+    const { userId } = req.body;
+
+    try {
+        const user = await users.findById(userId);
+
+        if (!user) {
+            return res.redirect('/vvp'); // or show error
+        }
+
+        req.session.user = user; // override login
+
+        // Redirect like your original login logic
+        if (user.access === 1) {
+            const adminRoles = ["Admin", "Head", "Dev", "Seed"];
+
+            if (adminRoles.includes(user.role) || user.role === "Registrar") {
+                return res.redirect('/dsb');
+            } else if (user.role === "Accounting") {
+                return res.redirect('/ovr');
+            } else {
+                return res.redirect('/');
+            }
+
+        } else if (user.access === 0) {
+            return res.redirect('/hom');
+        } else {
+            return res.redirect('/');
+        }
+
+    } catch (err) {
+        console.error(err);
+        return res.redirect('/vvp');
+    }
+});
+
 
 app.post('/fg', async (req, res) => {
   try {
@@ -1024,7 +1112,7 @@ app.post('/check-pass', async (req, res) => {
 app.post('/rst', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect('/');
     }
 
     const userId = req.session.user._id;
@@ -1076,7 +1164,7 @@ app.post('/rst', async (req, res) => {
 app.post('/rstFG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect('/');
     }
 
     const userId = req.session.user._id;
@@ -1427,42 +1515,101 @@ app.get('/ddc', async (req, res) => {
 });
 
 
+const privilegedRoles = ["Admin", "Head", "Dev"];
 
+function filterByStatuses(list = [], statuses = []) {
+  return list.filter(rq => statuses.includes(rq.status) && !rq.declineAt);
+}
+
+// /srv  (Pending only)
 app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
-  const filteredRequests = req.requests.filter(
-    rq => rq.status === 'Pending' && !rq.declineAt
-  );
+  const statuses = ['Pending'];
+  const allFiltered = filterByStatuses(req.requests, statuses);
+  const userFiltered = filterByStatuses(req.userRequests, statuses);
 
-  const privilegedRoles = ["Admin", "Head", "Dev"];
+  const isPrivileged = privilegedRoles.includes(req.user.role);
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
 
-  // Align totalCount with filtered requests
-  const totalCount = privilegedRoles.includes(req.user.role)
-    ? filteredRequests.length
-    : req.user.role === "Registrar"
-      ? req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length
-      : req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length;
-
-  res.render('srv', { 
-    title: 'Transactions', 
-    active: 'srv', 
-    requests: filteredRequests,
-    userRequests: filteredRequests,
+  res.render('srv', {
+    title: 'Transactions',
+    active: 'srv',
+    requests: isPrivileged ? allFiltered : userFiltered,
+    userRequests: userFiltered,
     totalCount
   });
 });
 
+// /srvAll  (multiple allowed statuses)
 app.get('/srvAll', isLogin, isRequest, isStaff, (req, res) => {
-  const privilegedRoles = ["Admin", "Head", "Dev"];
+  const statuses = [
+    'Reviewed', 'Assessed', 'Claimed',
+    'For Payment', 'Verified', 'Pending', 'For Release', 'For Verification'
+  ];
+  const allFiltered = filterByStatuses(req.requests, statuses);
+  const userFiltered = filterByStatuses(req.userRequests, statuses);
 
-  // Here, no filter applied (show all)
-  const totalCount = privilegedRoles.includes(req.user.role)
-    ? req.requests.length
-    : req.userRequests.length;
+  const isPrivileged = privilegedRoles.includes(req.user.role);
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
 
-  res.render('srvAll', { 
-    title: 'All Transactions', 
-    active: 'srv', 
-    requests: req.requests,
+  res.render('srvAll', {
+    title: 'All Transactions',
+    active: 'srv',
+    requests: isPrivileged ? allFiltered : userFiltered,
+    userRequests: userFiltered,
+    totalCount
+  });
+});
+
+// /prc  (processing statuses)
+app.get('/prc', isLogin, isRequest, isStaff, (req, res) => {
+  const statuses = ['Reviewed', 'Assessed', 'For Verification', 'For Payment'];
+  const allFiltered = filterByStatuses(req.requests, statuses);
+  const userFiltered = filterByStatuses(req.userRequests, statuses);
+
+  const isPrivileged = privilegedRoles.includes(req.user.role);
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+
+  res.render('srv', {
+    title: 'Processing',
+    active: 'srv',
+    requests: isPrivileged ? allFiltered : userFiltered,
+    userRequests: userFiltered,
+    totalCount
+  });
+});
+
+// /apr  (Verified)
+app.get('/apr', isLogin, isRequest, isStaff, (req, res) => {
+  const statuses = ['Verified'];
+  const allFiltered = filterByStatuses(req.requests, statuses);
+  const userFiltered = filterByStatuses(req.userRequests, statuses);
+
+  const isPrivileged = privilegedRoles.includes(req.user.role);
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+
+  res.render('srv', {
+    title: 'Approved',
+    active: 'srv',
+    requests: isPrivileged ? allFiltered : userFiltered,
+    userRequests: userFiltered,
+    totalCount
+  });
+});
+
+// /rel  (For Release)
+app.get('/rel', isLogin, isRequest, isStaff, (req, res) => {
+  const statuses = ['For Release'];
+  const allFiltered = filterByStatuses(req.requests, statuses);
+  const userFiltered = filterByStatuses(req.userRequests, statuses);
+
+  const isPrivileged = privilegedRoles.includes(req.user.role);
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+
+  res.render('srv', {
+    title: 'For Release',
+    active: 'srv',
+    requests: isPrivileged ? allFiltered : userFiltered,
+    userRequests: userFiltered,
     totalCount
   });
 });
@@ -1483,75 +1630,6 @@ app.get('/vrf', isLogin, isVerify, isStaff, (req, res) => {
 
   res.render('srv', { 
     title: 'To Verify', 
-    active: 'srv', 
-    requests: filteredRequests,
-    userRequests: filteredRequests,
-    totalCount
-  });
-});
-
-const privilegedRoles = ["Admin", "Head", "Dev"];
-
-app.get('/prc', isLogin, isRequest, isStaff, (req, res) => {
-  // Processing statuses
-  const processingStatuses = ['Reviewed', 'Assessed', 'For Verification', 'For Payment'];
-  const filteredRequests = req.requests.filter(
-    rq => processingStatuses.includes(rq.status) && !rq.declineAt
-  );
-
-  // Align totalCount with filtered requests
-  const totalCount = privilegedRoles.includes(req.user.role)
-    ? filteredRequests.length
-    : req.user.role === "Registrar"
-      ? req.userRequests.filter(rq => processingStatuses.includes(rq.status) && !rq.declineAt).length
-      : req.userRequests.filter(rq => processingStatuses.includes(rq.status) && !rq.declineAt).length;
-
-  res.render('srv', { 
-    title: 'Processing', 
-    active: 'srv', 
-    requests: filteredRequests,
-    userRequests: filteredRequests,
-    totalCount
-  });
-});
-
-app.get('/apr', isLogin, isRequest, isStaff, (req, res) => {
-  // Approved
-  const filteredRequests = req.requests.filter(
-    rq => rq.status === 'Verified' && !rq.declineAt
-  );
-
-  // Align totalCount with filtered requests
-  const totalCount = privilegedRoles.includes(req.user.role)
-    ? filteredRequests.length
-    : req.user.role === "Registrar"
-      ? req.userRequests.filter(rq => rq.status === 'Verified' && !rq.declineAt).length
-      : req.userRequests.filter(rq => rq.status === 'Verified' && !rq.declineAt).length;
-
-  res.render('srv', { 
-    title: 'Approved', 
-    active: 'srv', 
-    requests: filteredRequests,
-    userRequests: filteredRequests,
-    totalCount
-  });
-});
-
-app.get('/rel', isLogin, isRequest, isStaff, (req, res) => {
-  // For Release
-  const filteredRequests = req.requests.filter(
-    rq => rq.status === 'For Release' && !rq.declineAt
-  );
-
-  // Align totalCount with filtered requests
-  const totalCount = privilegedRoles.includes(req.user.role)
-    ? filteredRequests.length
-    : req.user.role === "Registrar"
-      ? req.userRequests.filter(rq => rq.status === 'For Release' && !rq.declineAt).length
-      : req.userRequests.filter(rq => rq.status === 'For Release' && !rq.declineAt).length;
-
-  res.render('srv', { 
-    title: 'For Release', 
     active: 'srv', 
     requests: filteredRequests,
     userRequests: filteredRequests,
@@ -2053,7 +2131,8 @@ app.post('/newEmp', async (req, res) => {
       username: email,           // default username
       password: generatePassword(),
       archive: false,            // default not archived
-      verify: false
+      verify: false,
+      access: 1
     });
 
     await newUser.save();
@@ -2469,10 +2548,11 @@ app.get('/acc', isLogin, (req, res) => {
   });
 });
 
+
 app.post('/rst2', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect('/');
     }
 
     const userId = req.session.user._id;
@@ -2525,7 +2605,7 @@ app.post('/rst2', async (req, res) => {
 app.post('/rst2FG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect('/');
     }
 
     const userId = req.session.user._id;
@@ -2580,7 +2660,7 @@ app.post('/rst2FG', async (req, res) => {
 app.post('/rst3FG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect('/');
     }
 
     const userId = req.session.user._id;
@@ -2634,7 +2714,62 @@ app.post('/rst3FG', async (req, res) => {
 app.post('/rst4FG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect('/');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/resetPage4');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    currentUser.reset = null;
+    await currentUser.save();
+    /*
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    */
+    return res.redirect('/acc3');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/resetPage4');
+  }
+});
+
+
+app.post('/rst4FGA', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/');
     }
 
     const userId = req.session.user._id;
@@ -3480,6 +3615,9 @@ app.get('/dsb', isLogin, (req, res) => {
   res.render('dsb', { title: 'Dashboard', active: 'dsb' });
 });
 
+
+/* Accounting */
+
 app.get('/ovr', isLogin, (req, res) => {
   if (req.user.reset === true) {
     return res.redirect('/resetPage4');
@@ -3488,8 +3626,472 @@ app.get('/ovr', isLogin, (req, res) => {
 });
 
 
+app.get('/acc2', isLogin, (req, res) => {
+  const msg = req.session.msg;
+  delete req.session.msg;
+
+  res.render('acc2', {
+    user: req.session.user,
+    title: 'Profile',
+    active: 'acc2',
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null
+  });
+});
+
+app.post('/rst2A', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/acc2');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/acc2');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/acc2');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/acc2');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    await currentUser.save();
+
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    return res.redirect('/acc2');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/acc2');
+  }
+});
+
+
+app.post('/rst2FGA', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.redirect('/');
+    }
+
+    const userId = req.session.user._id;
+    const { currentPass, createPass, confirmPass } = req.body;
+
+    const currentUser = await users.findById(userId);
+    if (!currentUser) {
+      req.session.msg = { type: "error", text: "User not found!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Check current password
+    if (currentPass.trim() !== currentUser.password.trim()) {
+      req.session.msg = { type: "error", text: "Current password is incorrect!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Validate new password rules
+    const hasUpper = /[A-Z]/.test(createPass);
+    const hasSpecial = /[\W_]/.test(createPass);
+    const hasNumber = /\d/.test(createPass);
+    const longEnough = createPass.length >= 8;
+
+    if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Confirm password match
+    if (createPass !== confirmPass) {
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
+      return res.redirect('/resetPage2');
+    }
+
+    // Update password (plaintext)
+    currentUser.password = createPass;
+    currentUser.reset = null;
+    await currentUser.save();
+    /*
+    req.session.msg = { type: "success", text: "Password updated successfully!" };
+    */
+    return res.redirect('/acc');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/resetPage2');
+  }
+});
+
+app.post('/edt2A', async (req, res) => {
+  try {
+    if (!req.session.user?._id) {
+      return res.redirect('/');
+    }
+
+    const userId = req.session.user._id;
+    const { email, phone, address } = req.body;
+
+    // Validate required fields
+    if (!email || !phone || !address) {
+      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
+      return res.redirect('/acc2');
+    }
+
+    // Check if email is already used by another user
+    const existingUser = await users.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: userId }
+    });
+
+    if (existingUser) {
+      req.session.msg = { type: "error", text: "Email is already in use!" };
+      return res.redirect('/acc2');
+    }
+
+    // Update user
+    const updatedUser = await users.findByIdAndUpdate(
+      userId,
+      { email: email.toLowerCase(), phone, address },
+      { new: true }
+    );
+
+    req.session.user = updatedUser;
+
+    req.session.msg = { type: "success", text: "Profile updated successfully!" };
+    return res.redirect('/acc2');
+
+  } catch (err) {
+    console.error("Error in /edt2:", err);
+    req.session.msg = { type: "error", text: "Server error!" };
+    return res.redirect('/acc2');
+  }
+});
+
+
+app.post('/pht2A', isLogin, uploadPhoto.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      req.session.msg = { type: "error", text: "No photo uploaded!" };
+      return res.redirect('/acc2');
+    }
+
+    const userId = req.session.user._id;
+    const photoUrl = req.file.path;
+
+    const updatedUser = await users.findByIdAndUpdate(
+      userId,
+      { photo: photoUrl },
+      { new: true }
+    );
+
+    req.session.user = updatedUser;
+
+    req.session.msg = { type: "success", text: "Photo updated successfully!" };
+    return res.redirect('/acc2');
+
+  } catch (err) {
+    console.error(err);
+    req.session.msg = { type: "error", text: "Failed to upload photo!" };
+    return res.redirect('/acc2');
+  }
+});
+
+
 app.get('/resetPage2', isLogin, myRequest, (req, res) => {
   res.render('resetPage2', { title: 'New Password' });
+});
+
+
+app.get('/trs', isLogin, isRequest, isStaff, (req, res) => {
+  const filteredRequests = req.requests.filter(
+    rq => rq.status === 'Reviewed' && !rq.declineAt
+  );
+
+  res.render('trs', { 
+    title: 'For Assessment', 
+    active: 'trs', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+app.get('/trsAll', isLogin, isRequest, isStaff, (req, res) => {
+
+  const allowedStatuses = [
+    'Assessed', 'Claimed', 'Reviewed',
+    'For Payment', 'Verified', 'For Release', 'For Verification'
+  ];
+
+  const filteredRequests = req.requests.filter(
+    rq => allowedStatuses.includes(rq.status) && !rq.declineAt
+  );
+
+  res.render('trsAll', { 
+    title: 'All Transactions',
+    active: 'trs',
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+app.get('/toPay', isLogin, isRequest, isStaff, (req, res) => {
+  const statuses = ['For Verification', 'Assessed'];
+
+  const filteredRequests = req.requests.filter(
+    rq => statuses.includes(rq.status) && !rq.declineAt
+  );
+
+  res.render('trs', { 
+    title: 'For Payment', 
+    active: 'trs', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+
+app.get('/ver', isLogin, isRequest, isStaff, (req, res) => {
+  const filteredRequests = req.requests.filter(
+    rq => rq.status === 'Verified' && !rq.declineAt
+  );
+
+  res.render('trs', { 
+    title: 'Verified', 
+    active: 'trs', 
+    requests: filteredRequests,
+    totalCount: filteredRequests.length
+  });
+});
+
+
+async function renderAssess(req, res, backRoute, viewName = 'trsView') {
+  try {
+    const requestId = req.params.id;
+
+    // Find the request
+    const rq = req.requests.find(r => r._id.toString() === requestId);
+
+    if (!rq) {
+      return res.status(404).render(viewName, { 
+        title: 'Request Not Found', 
+        back: backRoute,
+        active: 'trs',
+        error: 'Request not found.' 
+      });
+    }
+
+    // Find all items for this request
+    const rqItems = rq.items || []; // assuming req.requests contains items array
+
+    // Filter approved items
+    const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
+
+    // Calculate totalAmount
+    let totalAmount = 0;
+    if (approvedItems.length > 0) {
+      for (const it of approvedItems) {
+        // Find document that matches this item type
+        const doc = req.documents.find(d => d.type === it.type);
+        if (doc) totalAmount += doc.amount * it.qty;
+      }
+    }
+
+    res.render(viewName, { 
+      title: 'Request Details',
+      back: backRoute,
+      active: 'trs',
+      request: rq,
+      items: rqItems,
+      totalAmount
+    });
+    
+  } catch (err) {
+    console.error(`❌ Error in /${backRoute}/:id route:`, err);
+    res.status(500).render(viewName, { 
+      title: 'Error', 
+      back: backRoute,
+      active: 'trs',
+      error: 'Something went wrong while loading the request.' 
+    });
+  }
+}
+
+// Then your routes become:
+app.get('/trsView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'trs'));
+app.get('/trsAllView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'trsAll'));
+app.get('/toPayView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'toPay'));
+app.get('/verView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'ver'));
+
+
+app.post("/hold4", async (req, res) => {
+    const { requestId, back, requestRemarks } = req.body;
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = new Date();
+        requestDoc.remarks = requestRemarks || "";
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            trs: `/trsView/${requestId}`,
+            toPay: `/toPayView/${requestId}`,
+            ver: `/verView/${requestId}`,
+        };
+
+        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
+
+    } catch (err) {
+        console.error("Hold Error:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/revert4", async (req, res) => {
+    const { requestId, back } = req.body;
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            trs: `/trsView/${requestId}`,
+            toPay: `/toPayView/${requestId}`,
+            ver: `/verView/${requestId}`,
+        };
+
+        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
+
+    } catch (err) {
+        console.error("Hold Error:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/approve4", async (req, res) => {
+    const { requestId, back } = req.body;
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        requestDoc.status = "Assessed";
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+        requestDoc.assessAt = new Date();
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            trs: `/trsView/${requestId}`,
+            toPay: `/toPayView/${requestId}`,
+            ver: `/verView/${requestId}`,
+        };
+
+        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
+
+    } catch (err) {
+        console.error("Hold Error:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/verify4", async (req, res) => {
+    const { requestId, back } = req.body;
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        requestDoc.status = "Verified";
+        requestDoc.declineAt = null;
+        requestDoc.holdAt = null;
+        requestDoc.verifyAt = new Date();
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            trs: `/trsView/${requestId}`,
+            toPay: `/toPayView/${requestId}`,
+            ver: `/verView/${requestId}`,
+        };
+
+        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
+
+    } catch (err) {
+        console.error("Hold Error:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/hold5", async (req, res) => {
+    const { requestId, back, requestRemarks } = req.body;
+
+    try {
+        // Find the request
+        const requestDoc = await requests.findById(requestId);
+        if (!requestDoc) return res.status(404).send("Request not found");
+
+        requestDoc.declineAt = null;
+        requestDoc.payPhoto = null;
+        requestDoc.holdAt = new Date();
+        requestDoc.remarks = requestRemarks || "";
+
+        await requestDoc.save();
+
+        // Redirect to correct view
+        const viewRoutes = {
+            trs: `/trsView/${requestId}`,
+            toPay: `/toPayView/${requestId}`,
+            ver: `/verView/${requestId}`,
+        };
+
+        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
+
+    } catch (err) {
+        console.error("Hold Error:", err);
+        res.status(500).send("Server error");
+    }
 });
 
 

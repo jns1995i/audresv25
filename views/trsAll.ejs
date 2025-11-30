@@ -1,4 +1,4 @@
-<% layout('layout') %>
+<% layout('scale') %>
 <style>
   a:hover {
     transform: scale(1.02);
@@ -15,8 +15,12 @@
   }
 </style>
 
-<% let loopRequests = (['Admin', 'Head', 'Dev'].includes(user.role)) ? requests : userRequests; %>
-<%- include('partials/header') %>
+<% let loopRequests = (['Accounting'].includes(user.role)) ? requests : userRequests; %>
+
+<%- include('partials/header2') %>
+
+
+
 <section class="col">
   <% if (loopRequests.length === 0) { %>
     <div class="h500 borderGray borderDotted corner16">
@@ -27,15 +31,15 @@
       <p class="size18 str400">Sorry, No Record Found!</p>
     </section>
     <% loopRequests.forEach((rq, i) => { %>
-      <% if (!rq.declineAt) { %>
       <div class="height0 padding8 rqCard">
-         <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
+
+        <% if (['Accounting'].includes(user.role)) { %>
         <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderGray borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
             <% if ( rq.status === "Pending") { %>
               <% if (rq.processBy) { %>
-              <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile"  class="h40 w40 wMin40 borderPrimary corner500 primaryProfile"></div>
+              <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>
               <div class="width82 col alignStart gap5">
-                <p class="str400"> Assign To </p>
+                <p class="str400"> Assigned To </p>
                 <div class="selectBar widthMin100">
                   <select name="processBy" class="processByDropdown" data-request-id="<%= rq._id %>">
                     <option value="" selected>-- Select Staff --</option>
@@ -65,9 +69,10 @@
               </div>
               <% } %>
             <% } else { %>
-                <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500 primaryProfile"></div>
+                <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>
                 <div class="width82 col alignStart gap5">
-                  <p class="size12 str500 bgSoft corner5 padding5"><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
+                  <p class="str400"> Assigned At <%= rq.assignAtFormatted %></p>
+                  <p class="str500 bgSoft corner5 padding2"><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
                   <% if (rq.status === 'For Release') { %>
                   <p class="str400 green"><i class="fas fa-check-circle"></i> Processed</p>
                   <% } else if (rq.status === 'Claimed') { %>
@@ -77,7 +82,6 @@
                   <% } else { %>
                   <p class="str400 yellow"><i class="fas fa-clock"></i> Already Processing .. </p>
                   <% } %>
-                  <p class="str400"> Assigned at <%= rq.assignAtFormatted %></p>
                 </div>
             <% } %>
         </div>
@@ -89,21 +93,19 @@
         <% } %>
 
         
+          <%
+            const routeMap = {
+              'Transactions': '/trsView/',
+              'For Payment': '/toPayView/',
+              'Verified': '/verView/',
+              'All Transactions': '/trsAllView/',
+            };
 
-        
-        <% if ( title === 'Transactions') { %>
-          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'For Release') { %>
-          <a href="/relView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'Processing') { %>
-          <a href="/prcView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'Approved') { %>
-          <a href="/aprView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'To Verify') { %>
-          <a href="/vrfView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else { %>
-          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } %>
+            const href = routeMap[title] || '/srvView/';
+          %>
+
+          <a href="<%= href + rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+
           <p class="absolute top20 right20"><%= rq.createdAtFormatted %></p>
 
           <% if ( rq.holdAt) { %>
@@ -130,7 +132,6 @@
                 border0"> <%= rq.status ? rq.status : '' %>
               </p>
           <% } %>
-
           <div class="width10 justifyStart"><img src="<%= rq.requestBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>
           <div class="width90 col alignStart">
             <p class="size14 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
@@ -150,10 +151,10 @@
           </div>
         </a>
       </div>
-      <% } %>
     <% }) %>
   <% } %>
 </section>
+
 <div id="processMessageModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999; opacity: 0;" class="hidden">
   <div style="background:#fff; padding:20px; border-radius:8px; min-width:250px; text-align:center;">
     <p id="processMessageText" style="font-weight:500;"></p>

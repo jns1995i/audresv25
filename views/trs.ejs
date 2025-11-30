@@ -1,4 +1,4 @@
-<% layout('layout') %>
+<% layout('scale') %>
 <style>
   a:hover {
     transform: scale(1.02);
@@ -15,8 +15,11 @@
   }
 </style>
 
-<% let loopRequests = (['Admin', 'Head', 'Dev'].includes(user.role)) ? requests : userRequests; %>
-<%- include('partials/header') %>
+<% let loopRequests = (['Accounting'].includes(user.role)) ? requests : userRequests; %>
+
+<%- include('partials/header2') %>
+
+
 <section class="col">
   <% if (loopRequests.length === 0) { %>
     <div class="h500 borderGray borderDotted corner16">
@@ -29,13 +32,13 @@
     <% loopRequests.forEach((rq, i) => { %>
       <% if (!rq.declineAt) { %>
       <div class="height0 padding8 rqCard">
-         <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
+         <% if (['Accounting'].includes(user.role)) { %>
         <div class="width25 <% if (rq.processBy) { %> bgWhite shadow1 <% } else { %> bgSoft borderGray borderDotted <% } %> padding15 gap0 corner12 alignStart relative">
             <% if ( rq.status === "Pending") { %>
               <% if (rq.processBy) { %>
               <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile"  class="h40 w40 wMin40 borderPrimary corner500 primaryProfile"></div>
               <div class="width82 col alignStart gap5">
-                <p class="str400"> Assign To </p>
+                <p class="str400"> Assigned To </p>
                 <div class="selectBar widthMin100">
                   <select name="processBy" class="processByDropdown" data-request-id="<%= rq._id %>">
                     <option value="" selected>-- Select Staff --</option>
@@ -67,7 +70,8 @@
             <% } else { %>
                 <div class="width18 justifyStart"><img src="<%= rq.processBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500 primaryProfile"></div>
                 <div class="width82 col alignStart gap5">
-                  <p class="size12 str500 bgSoft corner5 padding5"><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
+                  <p class="str400"> Assigned At <%= rq.assignAtFormatted %></p>
+                  <p class="str500 bgSoft corner5 padding2"><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
                   <% if (rq.status === 'For Release') { %>
                   <p class="str400 green"><i class="fas fa-check-circle"></i> Processed</p>
                   <% } else if (rq.status === 'Claimed') { %>
@@ -77,7 +81,6 @@
                   <% } else { %>
                   <p class="str400 yellow"><i class="fas fa-clock"></i> Already Processing .. </p>
                   <% } %>
-                  <p class="str400"> Assigned at <%= rq.assignAtFormatted %></p>
                 </div>
             <% } %>
         </div>
@@ -88,21 +91,16 @@
 
         <% } %>
 
-        
-
-        
-        <% if ( title === 'Transactions') { %>
-          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'For Release') { %>
-          <a href="/relView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'Processing') { %>
-          <a href="/prcView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'Approved') { %>
-          <a href="/aprView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
-        <% } else if ( title === 'To Verify') { %>
-          <a href="/vrfView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+        <% if ( title === 'For Assessment') { %>
+          <a href="/trsView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === 'For Payment') { %>
+          <a href="/toPayView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === 'Verified') { %>
+          <a href="/verView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
+        <% } else if ( title === '') { %>
+          <a href="/trsAllView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } else { %>
-          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+          <a href="/srvView/<%= rq._id %>" class="width65 bgWhite shadow1 padding20 gap0 corner12 alignStart relative">
         <% } %>
           <p class="absolute top20 right20"><%= rq.createdAtFormatted %></p>
 
@@ -130,7 +128,6 @@
                 border0"> <%= rq.status ? rq.status : '' %>
               </p>
           <% } %>
-
           <div class="width10 justifyStart"><img src="<%= rq.requestBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>
           <div class="width90 col alignStart">
             <p class="size14 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
@@ -222,8 +219,8 @@ document.querySelectorAll('.processByDropdown').forEach(dropdown => {
         messageModal.style.display = 'flex';
 
         setTimeout(() => {
-          console.log('🔁 Redirecting to /srv');
-          window.location.href = '/srv';
+          console.log('🔁 Redirecting to /trs');
+          window.location.href = '/trs';
         }, 0);
       } else {
         messageText.textContent = data.error || 'Update failed.';
