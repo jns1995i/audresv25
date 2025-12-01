@@ -29,29 +29,27 @@
     left: initial !important;
     transform: none !important;
   }
-  .gemF {
-      height: 200px !important;
-      img {
-          height: 150px;
-      }
-  }
-  .rem48 {
-      font-size: 3rem;
-  }
-  .rem48.p2 {
-      margin-top: -2rem !important;
-      font-size: 3rem;
-  }
-  .rem48.p1 {
-      font-size: 3rem;
-  }
-  .logoF {
-      height: 60px;
-      width: 60px;
-      position: absolute;
-      top: 30% !important;
-      left: 53% !important;
-  }
+    .gemF {
+        height: 100px !important;
+        margin-top: 0 !important;
+    }
+    .iconix {
+        height: 100px;
+        width: 100px;
+        padding: 10px;
+        img {
+            height: 100% !important;
+        }
+    }
+    .rem48 {
+        font-size: 3rem;
+    }
+    .rem48.p2 {
+        margin-top: -2rem !important;
+    }
+    .rem48.p1 {
+        margin-top: 0 !important;
+    }
   img.logo {
       height: 70%;
   }
@@ -60,6 +58,7 @@
             display: block;
             overflow-y: auto;
             height: 100vh;
+            padding: 0;
         }
         .mainF {
             flex-direction: column;
@@ -69,6 +68,7 @@
         .leftF {
           height: auto !important;
             width: 100%;
+            padding: 0 !important;
         }
         .gemF {
           height: auto !important;
@@ -99,11 +99,11 @@
         .rightF {
             height: fit-content;
             width: 100%;
-            padding-block: 0 !important;
+            padding: 0 !important;
             margin-bottom: 100px !important;
         }
         #headF {
-            flex-direction: column-reverse !important;
+            flex-direction: column !important;
         }
         .crd {
           display: none !important;
@@ -128,33 +128,40 @@
             -webkit-text-fill-color: initial; /* reset text fill */
             print-color-adjust: exact;    
         }
+        #watermark {
+            transform: scale(1);
+        }
+        .ehem {
+            border-radius: 0 !important;
+        }
       }
     </style>
 </head>
-<body class="abstractBG">
+<body class="bgSoft">
   
 
-    <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+
 
     <div class="mainF alignStart" style="z-index: 500 !important;">
         <div class="height0 padding20 col justifyStart relative leftF width40 gap15">
-            <div class="height0 col" id="headF">
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
-                <div class="h400 padding10 gemF relative" style="margin-top: -3rem;">
-                    <img src="/images/gold.png" alt="" class="height100 glowImg" style="transform: rotate(-10deg);">
-                    
-                    <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
-                        <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+            <section class="col padding0 abstractBG">
+                <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+                <div class="height0 col absolute translateCenter" id="headF">
+                    <div class="padding10 gemF relative">
+                        <div class="corner500 liquid w300 h300 iconix padding30">
+                            <img src="/images/au.png" alt="" class="corner500 h200 bgWhite">
+                        </div>
                     </div>
+                    <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+                    <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
                 </div>
-            </div>
-            
-            <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
+                
+                <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
+            </section>
 
-            <video autoplay muted loop playsinline controls class="width98 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
+            <video autoplay muted loop playsinline controls class="width98 cornerRem1 porcelain" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
 
-            <div class="liquid index50 col justifyStart height0 colorPrimary cornerRem1" id="">
+            <div class="bgWhite index50 col justifyStart height0 colorPrimary cornerRem1 ehem shadow1" id="">
                 <div class="height0 col justifyCenter alignStart padding20 relative">
                     <p class="rem2 str400 marginBottom10">WHAT TO?</p>
                     <p class="rem11 str400 textJustify">
@@ -163,17 +170,18 @@
                 </div>
             </div>
         </div>
+        <br>
 
         <div class="padding20 rightF width55 col height0 relative justifyStart gap15" style="z-index: 100 !important;">
 
-            <div class="height0 padding20 cornerRem1 bgWhite colorPrimary col alignStart">
+            <div class="height0 padding20 cornerRem1 bgWhite colorPrimary col alignStart ehem shadow1">
                     <p class="rem2 str400 marginBottom10">HOW TO?</p>
                 <p class="rem11 str400 textJustify">
                     Lorem ipsum, dolor sit amet consectetur adipisicing elit. Recusandae vitae iusto beatae rerum, repellendus, numquam inventore officiis placeat cupiditate eum cum consequuntur dolores error maiores iure, pariatur natus nihil quasi.
                 </p>
             </div>
                             
-            <div id="" class=" height0 index50 height0 colorPrimary alignEnd relative cornerRem1 padding20 liquid">
+            <div id="" class=" height0 index50 height0 colorPrimary alignEnd relative cornerRem1 padding20 bgWhite ehem shadow1">
                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fuga distinctio repudiandae aliquid maxime ullam sequi hic tempore, tenetur, ad aperiam veniam sit eos debitis nulla architecto quasi, sapiente ea consequatur.
             </div>
 

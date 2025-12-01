@@ -61,12 +61,17 @@
         .sub .ctrl {
           flex-direction: column-reverse !important;
         }
+        #watermark {
+          transform: scale(1.2);
+          right: -50px;
+          top: -50px;
+        }
   }
     </style>
 </head>
 <% if ( user.access === 0) { %>
 <body class="col padding0 relative abstractBG">
-    <img src="/images/au.png" alt="" class="absolute top0 right0 scale2 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+    <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
 <div class="mainF overflow-y1 block">
 
   <%- body %>

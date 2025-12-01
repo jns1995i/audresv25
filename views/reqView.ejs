@@ -44,7 +44,7 @@
 </head>
 <body class="abstractBG block overflow-y1">
     
-    <section class="absolute top10 right10 width0 opacity1">
+    <section class="absolute top10 right10 width0 opacity05">
         <div class="selectBar">
             <select name="status" id="status">
                 <option value="Pending" <%= rq.status === "Pending" ? "selected" : "" %>>Pending</option>
@@ -101,9 +101,9 @@
                 <p class="rem2 str400">Request Details</p>
             </section>
             <section class="bgWhite padding15 col shadow1 corner20 col colorPrimary">
-                <section class="corner20 abstractBG1 dtlCard justifyBetween">
-                    <section class="col alignStart dtl width0">
-                        <p class="rem1"><i class="fas fa-receipt"></i> Date Requested</p>
+                <section class="corner20 dtlCard justifyBetween gap10 padding0">
+                    <section class="col alignStart dtl bgSoft corner15 padding15">
+                        <p class="size12"><i class="fas fa-receipt"></i> Date Requested</p>
                         <%
                         const options = { 
                             year: 'numeric', 
@@ -115,40 +115,42 @@
                         }; 
                         const formattedDate = new Date(rq.createdAt).toLocaleString('en-US', options); 
                         %>
-                        <p class="rem18"><%= formattedDate %></p>
+                        <p class="size12"><%= formattedDate %></p>
                     </section>
-                    <section class="col alignEnd dtl width0">
-                        <p class="rem1"><i class="fas fa-receipt"></i> Transaction Number</p>
-                        <p class="rem18"><%= rq.tr %></p>
+                    <section class="col alignEnd dtl bgSoft corner15 padding15">
+                        <p class="size12"><i class="fas fa-receipt"></i> Transaction Number</p>
+                        <p class="size12"><%= rq.tr %></p>
                     </section>
                 </section>
-                <% if (items.length === 0) { %>
-                    <p class="str400 rem14">No items found for this request.</p>
-                <% } else { %>
-                    <% items.forEach((it, index) => { %>
-                        <section class="bgSoft corner15 padding15 relative marginTop15">
-                            <section class="padding0 alignStart justifyCenter col">
-                                <p class="rem16 str500"><%= it.qty %> <%= it.type %></p>
-                                <p class="size12">for <%= it.purpose %> Purpose</p>
-                                <p class="size12"><%= it.semester %> Semester &bull; <%= it.schoolYear %></p>
-                                <% if (it.remarks) { %>
-                                    <p class="size10 str400 bgYellow100 padding5" style="margin-top: 5px !important;">
-                                        <i class="fas fa-info-circle"></i> Note: <%= it.remarks %>
-                                    </p>
-                                <% } %>
+                <section class="bgSoft col padding10 corner15 marginTop10">
+                    <% if (items.length === 0) { %>
+                        <p class="str400 rem14">No items found for this request.</p>
+                    <% } else { %>
+                        <% items.forEach((it, index) => { %>
+                            <section class="bgWhite shadow1 corner12 padding15 relative">
+                                <section class="padding0 alignStart justifyCenter col">
+                                    <p class="size12 str500"><%= it.qty %> <%= it.type %></p>
+                                    <p class="size12">for <%= it.purpose %> Purpose</p>
+                                    <p class="size12"><%= it.semester %> Semester &bull; <%= it.schoolYear %></p>
+                                    <% if (it.remarks) { %>
+                                        <p class="size10 str400 bgYellow100 padding5" style="margin-top: 5px !important;">
+                                            <i class="fas fa-info-circle"></i> Note: <%= it.remarks %>
+                                        </p>
+                                    <% } %>
+                                </section>
+                                <section class="padding0 justifyEnd absolute right20 translateY">
+                                    <% if (it.status === "Declined") { %>
+                                        <a href="" class="nav cnav disabled bgRed100"><i class="fas fa-xmark-circle"></i></a>
+                                    <% } else if ( it.status === "Approved") { %>
+                                        <a href="" class="nav cnav disabled bgGreen100"><i class="fas fa-check-circle"></i></a>
+                                    <% } else { %>
+                                        <a href="" class="nav cnav disabled bgBlue100"><i class="fas fa-hourglass-half"></i></a>
+                                    <% } %>
+                                </section>
                             </section>
-                            <section class="padding0 justifyEnd absolute right20 translateY">
-                                <% if (it.status === "Declined") { %>
-                                    <a href="" class="nav cnav disabled bgRed100"><i class="fas fa-xmark-circle"></i></a>
-                                <% } else if ( it.status === "Approved") { %>
-                                    <a href="" class="nav cnav disabled bgGreen100"><i class="fas fa-check-circle"></i></a>
-                                <% } else { %>
-                                    <a href="" class="nav cnav disabled bgBlue100"><i class="fas fa-hourglass-half"></i></a>
-                                <% } %>
-                            </section>
-                        </section>
-                    <% }) %>
-                <% } %>
+                        <% }) %>
+                    <% } %>
+                </section>
                 <section class="bgBlue100 corner15 justifyBetween padding10 marginTop15" style="align-self: center;">
                     <p class="size16"><i class="fas fa-info-circle"></i> Total Payables</p>
                     <p class="size16 str500">&#8369;<%= totalAmount || "0" %>.00</p>
@@ -408,7 +410,6 @@
                 <section class="col width20">
                     <section class="justifyStart"><p class="rem18">Payment Details</p></section>
                     <section class="corner20 col bgWhite gap5">
-                        <section class="justifyStart bgYellow corner14"><p class="size12">Method: <%= rq.payMode || 'Gcash' %></p></section>
                         <section class="payment-photos col">
                             <% if (rq.payPhoto && rq.payPhoto.length > 0) { %>
                                 <% rq.payPhoto.forEach(photo => { %>

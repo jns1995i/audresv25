@@ -42,18 +42,13 @@
             height: 100px !important;
             margin-top: 0 !important;
         }
-        .gemF img {
-            height: 70px;
-        }
-        .logoF {
-            height: 30px;
-            width: 30px;
-            position: absolute;
-            top: 35% !important;
-            left: 53% !important;
-        }
-        img.logo {
-            height: 70%;
+        .iconix {
+            height: 100px;
+            width: 100px;
+            padding: 10px;
+            img {
+                height: 100% !important;
+            }
         }
         .rem48 {
             font-size: 3rem;
@@ -62,7 +57,7 @@
             margin-top: -2rem !important;
         }
         .rem48.p1 {
-            margin-top: -1.6rem !important;
+            margin-top: 0 !important;
         }
         .rightF {
             height: fit-content;
@@ -70,7 +65,7 @@
             margin-bottom: 100px !important;
         }
         #headF {
-            flex-direction: column-reverse !important;
+            flex-direction: column !important;
         }
         #rateF {
             bottom: 0 !important;
@@ -102,15 +97,13 @@
     <div class="mainF" style="z-index: 500 !important;">
         <div class="h700 padding20 col justifyStart relative leftF width55">
             <div class="height0 col absolute translateCenter" id="headF">
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
-                <div class="h400 padding10 gemF relative" style="margin-top: -3rem;">
-                    <img src="/images/gold.png" alt="" class="height100 glowImg" style="transform: rotate(-10deg);">
-                    
-                    <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
-                        <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+                <div class="padding10 gemF relative">
+                    <div class="corner500 liquid w300 h300 iconix padding30">
+                        <img src="/images/au.png" alt="" class="corner500 h200 bgWhite">
                     </div>
                 </div>
+                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
             </div>
             <div class="height0 absolute left0 bottom20 col" id="rateF">
                 <div class="height0 width0 hidden">

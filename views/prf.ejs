@@ -41,6 +41,9 @@
         width: 95% !important;
         border-radius: 18px;
     }
+    #controls {
+        width: fit-content !important;
+    }
   }
 </style>
 
@@ -49,6 +52,7 @@
 <div class="height0 width100" id="prfMain">
 
     <div class="height0 width30 col padding10 prfCard">
+        <br>
         <div class="height0 width0 relative corner15">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
             <a href="javascript:void(0)" class="nav cnav glass2 absolute bottom1 right1" id="photoBtn"><i class="fas fa-camera"></i></a>
@@ -105,16 +109,9 @@
         <p class="rem2 str400"><%= user.fName %> <%= user.mName %> <%= user.lName %> <%= user.xName %></p>
         <p class="rem16 str400"><%= user.role %> <i class="bi bi-patch-check-fill"></i></p>
         <br>
-        <div class="height0 gap20 padding5 justifyBetween" id="controls">
-            <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 20px;">
-                <a href="/hom" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
-            </div>
-            <div class="height0 glass shadow2 width0 padding10 gap5" style="border-radius: 30px;">
-                <a href="javascript:vod(0)" class="nav cnav liquid" id="editBtn"><i class="fas fa-pen"></i></a>
-                <a href="javascript:vod(0)" class="nav cnav liquid" id="resetBtn"><i class="fas fa-key"></i></a>
-                |
-                <a href="javascript:void(0)" class="nav cnav liquid" id="lgOpen"><i class="fas fa-share-square"></i></a>
-            </div>
+        <div class="height0 glass corner20 width0 gap10 padding10" id="controls">
+            <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back</a>
+            <a href="javascript:void(0)" class="nav liquid" id="lgOpen"><i class="fas fa-share-square"></i> Log Out</a>
         </div>
         <br>
         <div class="bgWhite col padding30 justifyStart alignStart colorPrimary relative fcrd" id="info">
@@ -141,6 +138,13 @@
             <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= user.email || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= user.phone || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= user.address || "--" %></p>
+        </div>
+        <br>
+        <div class="height0 gap20 padding5" id="controls">
+            <div class="height0 glass shadow2 width0 padding10 gap10 corner20">
+                <a href="javascript:vod(0)" class="nav liquid" id="editBtn"><i class="fas fa-pen"></i> Update Info</a>
+                <a href="javascript:vod(0)" class="nav liquid" id="resetBtn"><i class="fas fa-key"></i> Reset Password</a>
+            </div>
         </div>
     </div>
     

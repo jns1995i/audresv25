@@ -43,6 +43,9 @@
       gap: 2px;
       position: relative;
     }
+    .mainF {
+        padding: 0 !important;
+    }
     .reqPlate > div {
       width: 100%;
       justify-content: start;
@@ -59,11 +62,13 @@
     }
     .mainCard {
       width: 100%;
+      border-radius: 0 !important;
     }
     #homePg {
       flex-direction: column;
       margin-bottom: 100px;
       height: auto;
+        padding: 0 !important;
     }
     .mainF {
         overflow-y: auto !important;
@@ -93,25 +98,27 @@
 
 <div class="height0 padding5 justifyStart col" id="homePg">
 
-<div class="section gap10 padding0 width60 col" id="hCard">
-    <div class="height0 col padding20" id="headF">
-        <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
-            <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+    <div class="section gap10 padding0 width60 col" id="hCard">
+        <div class="height0 col padding20" id="headF">
+            <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
+                <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+            </div>
+            <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+            <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
         </div>
-        <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-        <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
     </div>
-</div>
+
+    <section class="padding0 justifyStart gap10 corner15 width60">
+        <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
+        <p class="rem2 marginLeft5">All Transactions</p>
+    </section>
+
+    <br>
 
   <div class="block height0 padding10 col mainCard width60 justifyStart gap5 overflow-y1 bgSoft corner10 index50">
 
-    <section class="col padding0 gap10 colorPrimary corner15">
-        <section class="padding0 justifyBetween corner15">
-            <a href="/hom" class="nav"><i class="fas fa-chevron-left"></i>Go Back</a>
-            <p class="rem18 marginLeft5">All Transactions</p>
-        </section>
         <% if (requests && requests.length > 0) { %>
-            <section class="padding10 justifyBetween corner15 bgWhite">
+            <section class="padding0 justifyBetween corner15">
                 <div class="searchBar" style="width: 70% !important;">
                     <i class="fas fa-search"></i>
                     <input type="search" id="univ" class="transparent" placeholder="Search here">
@@ -121,8 +128,8 @@
         <% } else { %>
             <p class="rem14">You have no request yet!</p>
         <% } %>
-    </section>
-    <br>
+        <br>
+      
 
     <div class="height0 col block overflow-y1 gap5 rqCrd">
         <% if (requests && requests.length > 0) { %>
@@ -192,7 +199,7 @@
         </div>
         <% } %>
     </div>
-    <div class="sub height0 row flex marginTop10 bgWhite shadow1 colorPrimary corner10 padding10">
+    <div class="sub height0 row flex marginTop10 bgWhite colorPrimary corner10 padding10">
         <div class="ctrl height0 gap10 justifyBetween">
             <div class="height0 gap5 width0" id="subGrand">
                 <div class="size14 gap5">

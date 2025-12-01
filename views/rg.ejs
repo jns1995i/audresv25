@@ -29,22 +29,27 @@
     left: initial !important;
     transform: none !important;
   }
-  .gemF {
-      height: 200px !important;
-      img {
-          height: 150px;
-      }
-  }
-  .rem48 {
-      font-size: 3rem;
-  }
-  .rem48.p2 {
-      margin-top: -2rem !important;
-      font-size: 3rem;
-  }
-  .rem48.p1 {
-      font-size: 3rem;
-  }
+    .gemF {
+        height: 100px !important;
+        margin-top: 0 !important;
+    }
+    .iconix {
+        height: 100px;
+        width: 100px;
+        padding: 10px;
+        img {
+            height: 100% !important;
+        }
+    }
+    .rem48 {
+        font-size: 3rem;
+    }
+    .rem48.p2 {
+        margin-top: -2rem !important;
+    }
+    .rem48.p1 {
+        margin-top: 0 !important;
+    }
   .logoF {
       height: 60px;
       width: 60px;
@@ -61,16 +66,19 @@
             display: block;
             overflow-y: auto;
             height: 100vh;
+            padding: 0 !important;
         }
         body::-webkit-scrollbar { display: none; }
         .mainF {
             flex-direction: column;
             height: auto;
             margin-bottom: 50px !important;
+            padding: 0 !important;
         }
         .leftF {
           height: auto !important;
             width: 100%;
+            padding: 0 !important;
         }
         .gemF {
           height: auto !important;
@@ -101,11 +109,14 @@
         .rightF {
             height: fit-content;
             width: 100%;
-            padding-block: 0 !important;
+            padding: 0 !important;
             margin-bottom: 100px !important;
         }
+        .ehem {
+            border-radius: 0 !important;
+        }
         #headF {
-            flex-direction: column-reverse !important;
+            flex-direction: column !important;
         }
         .crd {
           display: none !important;
@@ -120,6 +131,9 @@
             width: 100%;
             text-align: center;
             justify-content: center;
+         }
+         #watermark {
+            transform: scale(1) !important;
          }
          
         .gradientText {
@@ -139,35 +153,35 @@
       }
     </style>
 </head>
-<body class="abstractBG">
+<body class="bgSoft padding0">
   
-
-    <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
 
     <div class="mainF" style="z-index: 500 !important;">
         <div class="height0 padding20 col justifyStart relative leftF width40">
-            
-            <div class="height0 col" id="headF">
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
-                <div class="h400 padding10 gemF relative" style="margin-top: -3rem;">
-                    <img src="/images/gold.png" alt="" class="height100 glowImg" style="transform: rotate(-10deg);">
-                    
-                    <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
-                        <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+
+            <section class="col padding0 abstractBG corner10 ehem">
+                <img src="/images/au.png" alt="" class="absolute top0 right0 scale2 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+                <div class="height0 col absolute translateCenter" id="headF">
+                    <div class="padding10 gemF relative">
+                        <div class="corner500 liquid w300 h300 iconix padding30">
+                            <img src="/images/au.png" alt="" class="corner500 h200 bgWhite">
+                        </div>
+                    </div>
+                    <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+                    <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
+                </div>
+                <div class="height0 gap10 marginBottom20" id="rateF">
+                    <div class="height0 width0">
+                        <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
                     </div>
                 </div>
-            </div>
             
+            <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
+            </section>
 
-            
-            <div class="height0 gap10 marginBottom20" id="rateF">
-                <div class="height0 width0">
-                    <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
-                </div>
-            </div>
+            <br>
 
-            <div class="bgWhite index50 col justifyStart height0 colorPrimary cornerRem1" id="">
+            <div class="bgWhite index50 col justifyStart height0 colorPrimary cornerRem1 shadow1 ehem" id="">
                 <div class="height0 col justifyCenter alignStart padding20 relative">
                     <p class="rem2 str500 marginBottom10">Data Privacy Notice</p>
                     <p class="rem11 str400 textJustify">
@@ -176,13 +190,12 @@
                 </div>
             </div>
 
+            <br>
         </div>
         
         <div class="padding20 rightF width45 col height0 relative" style="z-index: 100 !important;">
-            
-            <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
 
-            <form action="/reqDirect" method="POST" enctype="multipart/form-data" class="padding30 card alignCenter relative colorPrimary" style="z-index: 100;">
+            <form action="/reqDirect" method="POST" enctype="multipart/form-data" class="shadow1 padding30 card alignCenter relative colorPrimary ehem" style="z-index: 100;">
                 <div class="col justifyStart alignStart gap10 relative">
                     <p class="size28 str500 colorPrimary">REQUEST FORM</p>
                 </div>
