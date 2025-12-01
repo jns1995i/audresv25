@@ -26,6 +26,18 @@
     }
     
   @media (max-width: 900px) {
+    body {
+        color: white;
+        background: 
+            radial-gradient(circle at 10% 5%, var(--shade15), transparent 25%),
+            radial-gradient(circle at 95% 10%,  var(--tint4), transparent 30%),
+            radial-gradient(circle at 95% 90%,  var(--tint6), transparent 24%),
+            radial-gradient(circle at 10% 60%,  var(--tint4), transparent 30%),
+            radial-gradient(circle at 50% 50%,  var(--tint6), transparent 50%);
+        background-blend-mode: lighten;
+        backdrop-filter: blur(10px);
+        background-color: var(--shade12);
+    }
     .prfCard {
         width: 100% !important;
     }
