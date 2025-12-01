@@ -1,172 +1,95 @@
 <% layout('template') %>
+
 <style>
-    .rqCard {
-        height: 400px;
-    }
-    .searchBar {
-        padding: 8px 8px;
-        flex-direction: row;
-        border-radius: 12px;
-        width: 50%;
-        max-height: 39px;
-        transition: 1s ease;
-    }
-    .searchBar input[type=search] {
-        border-radius: 0.5em;
-        border: none;
-        padding: none;
-        i {
-            width: 24px;
-            opacity: 0.6;
-            color: inherit;
+        .rqMainCard {
+            max-height: 82%;
+            display: block;
+        }
+    @media (max-width: 900px) {
+        .rqMainCard {
+            max-height: 400px;
+            display: block;
+        }
+        #card1 {
+            height: auto;
         }
     }
-    .searchBar input[type=search]:focus {
-        outline-color: none !important;
-        background-color: transparent;
-        border: none !important;
-        color: inherit;
-        i {
-            width: 24px;
-            opacity: 0.6;
-            color: inherit;
-        }
-    }
-    .searchBar input[type=search]:hover {
-        outline-color: none !important;
-        background-color: transparent;
-        border: none !important;
-    }
-  @media (max-width: 900px) {
-    .reqPlate {
-      flex-direction: column !important;
-      gap: 2px;
-      position: relative;
-    }
-    .mainF {
-        padding: 0 !important;
-    }
-    .reqPlate > div {
-      width: 100%;
-      justify-content: start;
-      height: auto;
-    }
-    .statIcon {
-      position: absolute;
-      height: auto;
-      top: 10px;
-      right: 10px;
-    }
-    #helpCard {
-      flex-direction: column;
-    }
-    .mainCard {
-      width: 100%;
-      border-radius: 0 !important;
-    }
-    #homePg {
-      flex-direction: column;
-      margin-bottom: 100px;
-      height: auto;
-        padding: 0 !important;
-    }
-    .mainF {
-        overflow-y: auto !important;
-    }
-    .mainF::-webkit-scrollbar {
-        display: none;
-    }
-    .sub, .sub .ctrl.right {
-        flex-direction: column;
-        width: 100%;
-        gap: 5px;
-        align-items: end;
-    }
-    ::-webkit-scrollbar {
-        display: none;
-    }
-    #hCard {
-        width: 100%;
-    }
-    .rqCrd {
-        height: auto !important;
-        max-height: 650px !important;
-    }
-  }
 </style>
 
+    
+    <%
+        function formatCustomDate(dateString) {
+        const d = new Date(dateString);
+        const now = new Date();
 
-<div class="height0 padding5 justifyStart col" id="homePg">
+        const oneDay = 24 * 60 * 60 * 1000;
+        const diffDays = Math.floor((now - d) / oneDay);
 
-    <div class="section gap10 padding0 width60 col" id="hCard">
-        <div class="height0 col padding20" id="headF">
-            <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
-                <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
-            </div>
-            <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-            <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
-        </div>
-    </div>
+        // Today
+        if (diffDays === 0) return "Today";
 
-    <section class="padding0 justifyStart gap10 corner15 width60">
-        <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
-        <p class="rem2 marginLeft5">All Transactions</p>
+        // Yesterday
+        if (diffDays === 1) return "Yesterday";
+
+        // Format month + day
+        const options = { month: "short", day: "numeric" };
+        let formatted = d.toLocaleDateString("en-US", options);
+
+        // Add year if not current year
+        if (d.getFullYear() !== now.getFullYear()) {
+            formatted += ", " + d.getFullYear();
+        }
+
+        return formatted;
+        }
+    %>
+    <br>
+<section class="col padding0 width30 bgSoft corner15 padding15" id="card2">
+
+    <section class="padding0 justifyBetween gap10 corner15 alignCenter marginBottom10">
+        <a href="/hom" class="nav"><i class="fas fa-chevron-left"></i>Go Back to Home Page</a>
     </section>
 
-    <br>
-
-  <div class="block height0 padding10 col mainCard width60 justifyStart gap5 overflow-y1 bgSoft corner10 index50">
-
-        <% if (requests && requests.length > 0) { %>
-            <section class="padding0 justifyBetween corner15">
-                <div class="searchBar" style="width: 70% !important;">
-                    <i class="fas fa-search"></i>
-                    <input type="search" id="univ" class="transparent" placeholder="Search here">
-                </div>
-                <a href="/req" class="nav pnav"><i class="fas fa-plus"></i> Request</a>
-            </section>
-        <% } else { %>
-            <p class="rem14">You have no request yet!</p>
-        <% } %>
+    <section class="abstractBG1 corner15 col alignStart relative padding20">
+        <p class="size16 str400 width70">Requesting Document</p>
+        <p class="size16 str400 width70">Made Easy For you!</p>
         <br>
-      
+        <a href="/reqPre" class="nav glass liquid glowImg2"><i class="fas fa-plus"></i> Request Now</a>
+    </section>
+</section>
 
-    <div class="height0 col block overflow-y1 gap5 rqCrd">
-        <% if (requests && requests.length > 0) { %>
-        <div class="height0 bgWhite corner15 colorPrimary padding10 gap10 col">
-            <div class="col gap5" id="noRecords" style="display: none;">
-                <%- include('icons/notFound') %>
-                <p class="size14 str500">No Records Found</p>
-            </div>
+<section class="col padding0 width50 bgSoft corner15 padding15 block" id="card1">
+
+    <div class="searchBar colorPrimary marginBottom10" style="width: 100% !important;">
+        <i class="fas fa-search"></i>
+        <input type="search" id="univ" class="" placeholder="Search here">
+    </div>
+
+<% if (requests && requests.length > 0) { %>
+        <section class="bgWhite col gap5 corner15 rqMainCard overflow-y1 block">
             <% requests.forEach(req => { %>
-            <a href="/reqView2/<%= req._id %>" class="width100 shadow1 cornerRem1" id="reqCards1">
-                <div class="height0 padding15 bgWhite reqPlate">
-                <div class="height0 justifyStart width20">
-                    <p class="size12 str600">TR# <%= req.tr %></p>
+                <div class="col gap5 padding10" id="noRecords" style="display: none;">
+                    <%- include('icons/notFound') %>
+                    <p class="size14 str500">No Records Found</p>
                 </div>
-                <div class="height0 justifyStart width25">
-                    <p class="size12 str400"><%= req.createdAtFormatted %></p>
-                </div>
-                <div class="height0 alignStart width35 col green">
-                     <% if (req.items && req.items.length > 0) { %>
-                      <% req.items.forEach(item => { %>
-                        <p class="size12 str400"><%= item.qty %> <%= item.type %></p>
-                      <% }) %>
+                <a href="/reqView2/<%= req._id %>" class="width100 col alignStart padding10 shadow1 corner10 relative" id="reqCards1">
+                    <% if (req.items && req.items.length > 0) { %>
+                        <% req.items.forEach(item => { %>
+                        <p class="size12 str500"><%= item.qty %> <%= item.type %></p>
+                        <% }) %>
                     <% } else { %>
-                      <p class="text-muted">No items found for this request.</p>
+                        <p class="size12 str500">No items found for this request.</p>
                     <% } %>
-                </div>
-                <div class="height0 width25 justifyEnd">
                     <% if ( req.holdAt ) { %>
-                        <div class="size12 str400 padding5 cornerRem1 str500 width0 statIcon bgRed100">
+                        <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon bgRed100"  style="background-color: transparent;">
                             On Hold
                         </div>
                     <% } else if ( req.declineAt ) { %>
-                        <div class="size12 str400 padding5 cornerRem1 str500 width0 statIcon bgRed100">
+                        <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon bgRed100 border0"  style="background-color: transparent;">
                             Declined
                         </div>
                     <% } else { %>
-                        <div class="size12 str400 padding5 cornerRem1 str500 width0 statIcon
+                        <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon
                         <% if ( req.status === "Pending" ) { %>
                             bgBlue100
                         <% } else if ( req.status === "Reviewed" ) { %>
@@ -181,50 +104,52 @@
                             bgGray100
                         <% } else { %>
                             bgBlue100
-                        <% } %>
-                        ">
+                        <% } %> border0
+                        " style="background-color: transparent;">
                             <i class="fas fa-hourglass inline rem1 w15 h15 hidden"></i>
                             <%= req.status %>
                         </div>
                     <% } %>
-                </div>
-                </div>
-            </a>
+                    <p class="size12 darkGray absolute right10 top10"><%= formatCustomDate(req.createdAt) %></p>
+                </a>
             <% }) %>
-        </div>
-        <% } else { %>
-        <br>
-        <div class="height0">
-            <p class="rem16">You have no requests yet!</p>
-        </div>
-        <% } %>
-    </div>
-    <div class="sub height0 row flex marginTop10 bgWhite colorPrimary corner10 padding10">
-        <div class="ctrl height0 gap10 justifyBetween">
-            <div class="height0 gap5 width0" id="subGrand">
-                <div class="size14 gap5">
-                <span id="totalRecords" class="totalRecords"></span>
-                    | Display: &nbsp;
+        </section>
+        
+        <div class="sub height0 row flex marginTop10 porcelain colorPrimary corner10 padding10">
+            <div class="ctrl height0 gap10 justifyBetween">
+                <div class="height0 gap5 width0" id="subGrand">
+                    <div class="size14 gap5">
+                    <span id="totalRecords" class="totalRecords"></span>
+                        | Display: &nbsp;
+                    </div>
+                    <div class="selectBar" style="width: 120px;"> 
+                        <select id="rowsPerPage" onchange="updateRowsPerPage()">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000000000000">All</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="selectBar" style="width: 100px;"> 
-                    <select id="rowsPerPage" onchange="updateRowsPerPage()">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="1000000000000">All</option>
-                    </select>
-                </div>
+                <div class="pagination colorPrimary width0" id="pagination"></div>
             </div>
-            <div class="pagination colorPrimary" id="pagination"></div>
         </div>
-    </div>
-  </div>
-</div>
 
+    <% } else { %>
+        <div class="col gap5 marginBlock15 padding10">
+            <%- include('icons/notFound') %>
+            <p class="size14 str500">You have no requests yet!</p>
+        </div>
+    <% } %>
+
+</section>
+
+
+    
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const cardsContainer = document.querySelector(".height0.col.block.overflow-y1.gap5");
+    const cardsContainer = document.querySelector(".rqMainCard");
     const cards = Array.from(cardsContainer.querySelectorAll("#reqCards1"));
     const paginationContainer = document.getElementById("pagination");
     const rowsPerPageSelect = document.getElementById("rowsPerPage");

@@ -14,11 +14,25 @@
         body::-webkit-scrollbar {
             display: block;
         }
+        body {
+            color: white;
+            background: 
+                radial-gradient(circle at 10% 5%, var(--shade15), transparent 25%),
+                radial-gradient(circle at 95% 10%,  var(--tint4), transparent 30%),
+                radial-gradient(circle at 95% 90%,  var(--tint6), transparent 24%),
+                radial-gradient(circle at 10% 60%,  var(--tint4), transparent 30%),
+                radial-gradient(circle at 50% 50%,  var(--tint6), transparent 50%);
+            background-blend-mode: lighten;
+            backdrop-filter: blur(10px);
+            background-color: var(--shade12);
+        }
       @media (max-width: 1024px) {
         body {
             display: block;
             overflow-y: auto;
             height: 100vh;
+            background: rgb(237, 237, 237);
+            color: var(--shade12);
         }
         body::-webkit-scrollbar {
             display: none;
@@ -42,7 +56,7 @@
       }
     </style>
 </head>
-<body class="abstractBG block overflow-y1">
+<body class="block overflow-y1">
     
     <section class="absolute top10 right10 width0 opacity05">
         <div class="selectBar">
@@ -83,20 +97,14 @@
         </script>
     </section>
 
-    <section class="gap20 alignStart" id="mainF">
+    <section class="gap20 alignStart padding0" id="mainF">
         <section class="col alignStart width35">
-            <div class="height0 col padding20" id="headF">
-                <div class="corner500 h60 w60 liquid borderWhite logoF glowImg3">
-                    <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
-                </div>
-                <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-                <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
-            </div>
-            <section class="justifyBetween">
+            <br>
+            <section class="justifyBetween padding5">
                 <% if ( back === "hom") { %>
-                <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
+                <a href="/hom" class="nav"><i class="fas fa-chevron-left"></i>Go Back</a>
                 <% } else { %>
-                <a href="/reqAll" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
+                <a href="/reqAll" class="nav"><i class="fas fa-chevron-left"></i>Go Back</a>
                 <% } %>
                 <p class="rem2 str400">Request Details</p>
             </section>
@@ -213,195 +221,7 @@
                 
                 <% } %>
 
-                <% if ( rq.holdAt ) { %>
-                <section class=" bgWhite padding0 marginTop10 relative">
-                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
-                    <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
-                        Your request has been hold! Due to
-                        <% if ( rq.remarks === "Incomplete") { %>
-                            Incomplete Grades.
-                        <% } else if ( rq.remarks === "Balance") { %>
-                            Remaining Balance on Account.
-                        <% } else { %>
-                        <% } %> For further assistance, please visit the Registrar’s Office on your campus, or contact us through our official hotline at <%= seedUser.phone %> or via email at <%= seedUser.email %>
-                    </section>
-                </section>
-                <% } else if ( rq.declineAt ) { %>
-                <section class=" bgWhite padding0 marginTop10 relative col">
-                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
-                    <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
-                        We regret to inform you that your request has been declined. For further assistance, please visit the Registrar’s Office on your campus, or contact us through our official hotline at <%= seedUser.phone %> or via email at <%= seedUser.email %>
-                        <% if ( rq.remarks === "Incomplete") { %>
-                        <% } else if ( rq.remarks === "Balance") { %>
-                        <% } else { %>
-                        <% } %>
-                    </section>
-                </section>
-                <% } else { %>
-                <section class=" bgWhite padding0 marginTop10 relative">
-                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
-                    <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
-                        <% if (rq.status === "Pending") { %>
-                        <p class="">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed. Thank you for your patience!</p>
-                        <% } else if (rq.status === "Reviewed") { %>
-                            <p class="">Good news! Your request has been reviewed and has now been forwarded to the Accounting Department for assessment.</p>
-                        <% } else if (rq.status === "Assessed") { %>
-                            <p class="">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt or take photo of the receipt the cashier and upload it below.</p>
-                            <br>
-                           <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
-                                <input type="hidden" name="id" value="<%= rq.id %>">
-
-                                <div class="field">
-                                    <label for="">Payment Method</label>
-                                    <div class="selectBar">
-                                        <select name="payMode" id="payMode" required>
-                                            <option value="">Select Method</option>
-                                            <option value="Cash">Cash</option>
-                                            <option value="GCash">GCash</option>
-                                            <option value="Maya">Maya</option>
-                                            <option value="Bank Deposit">Bank Deposit</option>
-                                            <option value="Bank Transfer">Bank Transfer</option>
-                                            <option value="Credit Card">Credit Card</option>
-                                            <option value="Debit Card">Debit Card</option>
-                                            <option value="Bayad Center">Bayad Center</option>
-                                            <option value="7-Eleven">7-Eleven (Cliqq/Bills Payment)</option>
-                                        </select>                            
-                                    </div>
-                                </div>
-
-                                <div class="field">
-                                    <label for="">Upload your Proof of Payment here</label>
-                                    <input name="payPhoto" type="file" multiple required>
-                                </div>
-
-                                <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>
-
-                                <div class="field alignEnd">
-                                    <button class="nav pnav w120">Upload</button>
-                                </div>
-                                <script>
-                                document.addEventListener("DOMContentLoaded", () => {
-                                    const input = document.querySelector('input[name="payPhoto"]');
-                                    const warning = document.querySelector('.limitPhoto');
-
-                                    input.addEventListener('change', function () {
-                                        warning.classList.add("hidden");
-
-                                        if (this.files.length > 0) {
-                                            const maxSize = 500 * 1024 * 1024; // 500MB
-                                            for (let i = 0; i < this.files.length; i++) {
-                                                const file = this.files[i];
-                                                if (file.size > maxSize) {
-                                                    warning.textContent = `Photo "${file.name}" exceeds 500MB.`;
-                                                    warning.classList.remove("hidden");
-                                                    this.value = ""; // clear all files
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    });
-                                });
-                                </script>
-                            </form>
-
-                        <% } else if (rq.status === "For Verification") { %>
-                            <p class="">Please give us 24 hours to verify your payment. Thank you.</p>
-                        <% } else if (rq.status === "Verified") { %>
-                            <p class="">Your payment has been verified. We will notify you via the email you provided once your document is ready for release.</p>
-                        <% } else if (rq.status === "For Release") { %>
-                            <div class="height0 col bgSoft padding20 corner15">
-                                <p><i class="fas fa-check-circle blue corner500" style="font-size: 12px; outline: 1px solid rgb(3, 18, 106, 0.2);"></i>
-                                Great News! you can now claim your document anytime.
-                                <% if (rq.purpose === 'Board Exam') { %>
-                                    Please proceed to the Registrar’s Office to claim your document. Kindly bring two (2) photocopies of your 2x2 ID picture.
-                                <% } %>
-                                Upon claiming, please present the QR code below to verify your transaction details. If someone will be claiming the document on your behalf, they must present a signed authorization letter along with a valid ID and 1 photocopy of picture. 
-                                <br><br>
-                                    
-                                <div class="bgWhite height0 gap5 justifyCenter alignCenter width0 padding5 corner10 darkShadow relative">
-                                    <div class="height0 col hidden">
-                                        <p class="size14">
-                                            <%= user.fName %> <%= user.mName %> <%= user.lName %> <%= user.xName %>
-                                        </p>
-                                        <p class="size14"><%= user.role %></p>
-                                        <p class="size14"><%= user.course %></p>
-                                        <p class="size14"><%= rq.tr %></p>
-                                        <p class="size14"><%= rq.requestAt %></p>
-                                    </div>
-                                    <canvas id="qrcodeCanvas" width="100" height="100" class="hMax150 wMax150"></canvas>
-                                    <a href="javascript:void(0)" class="nav cnav qrBtn absolute bottom5 right5 glass"><i class="fas fa-download"></i></a>
-                                </div>
-                            </div>
-                            <script>
-                                document.addEventListener('DOMContentLoaded', () => {
-                                    const downloadBtn = document.querySelector('.qrBtn');
-                                    const canvasEl = document.getElementById('qrcodeCanvas');
-
-                                    if (!downloadBtn || !canvasEl) return;
-
-                                    downloadBtn.addEventListener('click', () => {
-                                        // Convert canvas to data URL first
-                                        const dataURL = canvasEl.toDataURL('image/png');
-
-                                        // Detect iPhone/iPad
-                                        const isIOS = /iP(hone|od|ad)/i.test(navigator.userAgent);
-
-                                        if (isIOS) {
-                                            // iOS does NOT support download attribute for data URLs
-                                            // Solution: open the image in a new tab
-                                            const tab = window.open();
-                                            tab.document.write(
-                                                `<img src="${dataURL}" style="width:100%;height:auto;" />`
-                                            );
-                                            return;
-                                        }
-
-                                        // Desktop + Android: force download
-                                        const link = document.createElement('a');
-                                        link.href = dataURL;
-                                        link.download = 'qrcode.png';
-
-                                        // Must be added to DOM for some mobile browsers
-                                        document.body.appendChild(link);
-
-                                        link.click();
-
-                                        document.body.removeChild(link);
-                                    });
-                                });
-                            </script>
-                            <script>
-                                // Format the data into a readable string indicating transaction verification
-                                const requestDataFormatted = `Transaction Verified! 
-                                Name: ${"<%= user.fName %>"} ${"<%= user.mName %>"} ${"<%= user.lName %>"} ${"<%= user.xName %>"},
-                                Role: ${"<%= user.role %>"},
-                                Course: ${"<%= user.course %>"},
-                                TR: ${"<%= rq.tr %>"}`;
-                            
-                                // Generate the QR code with formatted data
-                                const canvas = document.getElementById('qrcodeCanvas');
-                                QRCode.toCanvas(canvas, requestDataFormatted, function (error) {
-                                    if (error) {
-                                        console.error(error);
-                                    } else {
-                                        console.log('QR code generated successfully');
-                                    }
-                                });
-                            </script>
-                            <br>
-                            <div class="height0">
-                                <a href="javascript:void(0)" class="nav pnav disabled" download onclick="setTimeout(() => location.reload(), 1000);">
-                                    Download Authorization Form
-                                </a>
-                            </div>
-                        <% } else if (rq.status === "Claimed") { %>
-                            <p class="">Your document has been claimed!</p>
-                        <% } else { %>
-                        <p class="">No Remarks</p>
-                        <% } %>
-                    </section>
-                </section>
-                <% } %>
+               <%- include('partials/notes3') %>
 
             </section>
         </section>

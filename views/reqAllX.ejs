@@ -1,0 +1,331 @@
+<% layout('template') %>
+<style>
+    .rqCard {
+        height: 400px;
+    }
+  @media (max-width: 900px) {
+    .reqPlate {
+      flex-direction: column !important;
+      gap: 2px;
+      position: relative;
+    }
+    .mainF {
+        padding: 0 !important;
+    }
+    #helpCard {
+      flex-direction: column;
+    }
+    .mainCard {
+      width: 100%;
+      border-radius: 0 !important;
+    }
+    #homePg {
+      flex-direction: column;
+      margin-bottom: 100px;
+      height: auto;
+        padding: 0 !important;
+    }
+    .mainF {
+        overflow-y: auto !important;
+    }
+    .mainF::-webkit-scrollbar {
+        display: none;
+    }
+    .sub, .sub .ctrl.right {
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+        align-items: end;
+    }
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    #hCard {
+        width: 100%;
+    }
+    .rqCrd {
+        height: auto !important;
+        max-height: 650px !important;
+    }
+  }
+</style>
+
+
+<div class="height0 padding5 justifyStart col" id="homePg">
+
+    <div class="section gap10 padding0 width50 col" id="hCard">
+        <div class="height0 col padding20" id="headF">
+            <div class="corner500 h80 w80 liquid borderWhite logoF glowImg3">
+                <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+            </div>
+            <p class="rem22 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
+            <p class="rem22 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -1.6rem !important;">Request System</p>
+        </div>
+    </div>
+
+    <section class="padding0 justifyStart gap10 corner15 width60">
+        <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
+        <p class="rem2 marginLeft5">All Transactions</p>
+    </section>
+
+    <br>
+
+  <div class="block height0 padding10 col mainCard width50 justifyStart gap5 overflow-y1 bgSoft corner10 index50">
+
+        <% if (requests && requests.length > 0) { %>
+            <section class="padding0 justifyBetween">
+                <div class="searchBar colorPrimary" style="width: 70% !important;">
+                    <i class="fas fa-search"></i>
+                    <input type="search" id="univ" class="" placeholder="Search here">
+                </div>
+                <a href="/req" class="nav pnav"><i class="fas fa-plus"></i> Request</a>
+            </section>
+        <% } else { %>
+            <p class="rem14">You have no request yet!</p>
+        <% } %>
+        <br>
+      
+
+    <div class="height0 col block overflow-y1 gap5 rqmainCard">
+        <% if (requests && requests.length > 0) { %>
+        <div class="height0 bgWhite corner10 colorPrimary padding0 gap5 col">
+            <div class="col gap5 marginBlock15 padding10" id="noRecords" style="display: none;">
+                <%- include('icons/notFound') %>
+                <p class="size14 str500">No Records Found</p>
+            </div>
+            <% requests.forEach(req => { %>
+                <a href="/reqView2/<%= req._id %>" class="width100 shadow1" id="reqCards1">
+                    <div class="height0 padding15 bgWhite reqPlate relative">
+                        <div class="height0 justifyStart trP">
+                            <p class="size12 str600">TR# <%= req.tr %></p>
+                        </div>
+                        <div class="height0 alignStart col green">
+                            <% if (req.items && req.items.length > 0) { %>
+                            <% req.items.forEach(item => { %>
+                                <p class="size12 str400"><%= item.qty %> <%= item.type %></p>
+                            <% }) %>
+                            <% } else { %>
+                            <p class="text-muted">No items found for this request.</p>
+                            <% } %>
+                        </div>
+                        <span class="height0 width0 absolute right15 top15">
+                            <%
+                            function formatCustomDate(dateString) {
+                                const d = new Date(dateString);
+                                const now = new Date();
+
+                                const oneDay = 24 * 60 * 60 * 1000;
+                                const diffDays = Math.floor((now - d) / oneDay);
+
+                                // Today
+                                if (diffDays === 0) return "Today";
+
+                                // Yesterday
+                                if (diffDays === 1) return "Yesterday";
+
+                                // Format month + day
+                                const options = { month: "short", day: "numeric" };
+                                let formatted = d.toLocaleDateString("en-US", options);
+
+                                // Add year if not current year
+                                if (d.getFullYear() !== now.getFullYear()) {
+                                formatted += ", " + d.getFullYear();
+                                }
+
+                                return formatted;
+                            }
+                            %>
+                            <%= formatCustomDate(req.createdAt) %>
+                        </span>
+                        <div class="height0 justifyStart">
+                            <% if ( req.holdAt ) { %>
+                                <div class="size12 str400 padding0 cornerRem1 str500 width0 bgRed100"  style="background-color: transparent;">
+                                    On Hold
+                                </div>
+                            <% } else if ( req.declineAt ) { %>
+                                <div class="size12 str400 padding0 cornerRem1 str500 width0 bgRed100 border0"  style="background-color: transparent;">
+                                    Declined
+                                </div>
+                            <% } else { %>
+                                <div class="size12 str400 padding0 cornerRem1 str500 width0
+                                <% if ( req.status === "Pending" ) { %>
+                                    bgBlue100
+                                <% } else if ( req.status === "Reviewed" ) { %>
+                                    bgViolet100
+                                <% } else if ( req.status === "Assessed" ) { %>
+                                    bgYellow100
+                                <% } else if ( req.status === "Verified" ) { %>
+                                    bgGreen100
+                                <% } else if ( req.status === "For Release" ) { %>
+                                    bgGreen100
+                                <% } else if ( req.status === "Claimed" ) { %>
+                                    bgGray100
+                                <% } else { %>
+                                    bgBlue100
+                                <% } %> border0
+                                " style="background-color: transparent;">
+                                    <i class="fas fa-hourglass inline rem1 w15 h15 hidden"></i>
+                                    <%= req.status %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+        <% } else { %>
+        <br>
+        <div class="height0">
+            <p class="rem16">You have no requests yet!</p>
+        </div>
+        <% } %>
+    </div>
+    <div class="sub height0 row flex marginTop10 porcelain colorPrimary corner10 padding10">
+        <div class="ctrl height0 gap10 justifyBetween">
+            <div class="height0 gap5 width0" id="subGrand">
+                <div class="size14 gap5">
+                <span id="totalRecords" class="totalRecords"></span>
+                    | Display: &nbsp;
+                </div>
+                <div class="selectBar" style="width: 100px;"> 
+                    <select id="rowsPerPage" onchange="updateRowsPerPage()">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="1000000000000">All</option>
+                    </select>
+                </div>
+            </div>
+            <div class="pagination colorPrimary" id="pagination"></div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cardsContainer = document.querySelector(".rqmainCard");
+    const cards = Array.from(cardsContainer.querySelectorAll("#reqCards1"));
+    const paginationContainer = document.getElementById("pagination");
+    const rowsPerPageSelect = document.getElementById("rowsPerPage");
+    const totalRecordsLabel = document.getElementById("totalRecords");
+    const searchInput = document.getElementById("univ");
+    const noRecordsMessage = document.getElementById("noRecords");
+    const subDiv = document.querySelector(".sub");
+
+    let currentPage = 1;
+    let rowsPerPage = parseInt(rowsPerPageSelect.value);
+    let filteredCards = [...cards];
+
+    function renderCards() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        // Hide all cards first
+        cards.forEach(card => card.style.display = "none");
+
+        if (filteredCards.length === 0) {
+            noRecordsMessage.style.display = "flex"; // show "No Records"
+            paginationContainer.style.display = "none"; // hide pagination
+            return;
+        } else {
+            noRecordsMessage.style.display = "none";
+        }
+
+        // Show only the cards for current page (for pagination)
+        filteredCards.slice(start, end).forEach(card => card.style.display = "flex");
+
+        // Update total records
+        totalRecordsLabel.innerText = `Showing ${filteredCards.length} Records`;
+
+        // Show/hide pagination only when search is empty
+        if (searchInput.value.trim() === "") {
+            paginationContainer.style.display = filteredCards.length <= rowsPerPage ? "none" : "flex";
+        } else {
+            paginationContainer.style.display = "none"; // hide pagination during search
+        }
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        paginationContainer.innerHTML = "";
+        if (searchInput.value.trim()) return;
+
+        const totalPages = Math.ceil(filteredCards.length / rowsPerPage);
+        if (totalPages <= 1) return;
+
+        const createPageButton = (text, page = null, isEllipsis = false) => {
+            const btn = document.createElement("button");
+            btn.innerHTML = text;
+            btn.disabled = isEllipsis || (page !== null && (page < 1 || page > totalPages));
+            if (page !== null && !isEllipsis) {
+                btn.className = page === currentPage ? "active" : "";
+                btn.onclick = () => {
+                    currentPage = page;
+                    renderCards();
+                };
+            }
+            return btn;
+        };
+
+        // Previous button
+        paginationContainer.appendChild(createPageButton("« Previous", currentPage - 1));
+
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) {
+                paginationContainer.appendChild(createPageButton(i, i));
+            }
+        } else {
+            const startPages = [1, 2, 3];
+            const endPages = [totalPages - 2, totalPages - 1, totalPages];
+            const middlePages = [currentPage - 1, currentPage, currentPage + 1];
+
+            // First pages
+            startPages.forEach(p => {
+                if (p <= totalPages) paginationContainer.appendChild(createPageButton(p, p));
+            });
+
+            // Ellipsis after start pages
+            if (currentPage > 4) paginationContainer.appendChild(createPageButton("...", null, true));
+
+            // Middle pages
+            middlePages.forEach(p => {
+                if (p > 3 && p < totalPages - 2) paginationContainer.appendChild(createPageButton(p, p));
+            });
+
+            // Ellipsis before end pages
+            if (currentPage < totalPages - 3) paginationContainer.appendChild(createPageButton("...", null, true));
+
+            // Last pages
+            endPages.forEach(p => {
+                if (p > 3) paginationContainer.appendChild(createPageButton(p, p));
+            });
+        }
+
+        // Next button
+        paginationContainer.appendChild(createPageButton("Next »", currentPage + 1));
+    }
+
+    function updateRowsPerPage() {
+        rowsPerPage = parseInt(rowsPerPageSelect.value);
+        currentPage = 1;
+        renderCards();
+    }
+
+    function searchCards() {
+        const query = searchInput.value.toLowerCase().trim();
+        filteredCards = cards.filter(card =>
+            card.textContent.toLowerCase().includes(query)
+        );
+        currentPage = 1;
+        renderCards();
+    }
+
+    rowsPerPageSelect.addEventListener("change", updateRowsPerPage);
+    searchInput.addEventListener("input", searchCards);
+
+    renderCards();
+});
+</script>

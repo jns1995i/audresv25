@@ -940,6 +940,9 @@ app.get('/check-email2', async (req, res) => {
   }
 });
 
+app.get('/reqPre', isLogin, (req, res) => {
+  res.render('reqPre', { title: 'Request Form' });
+});
 
 app.get('/req', isLogin, (req, res) => {
   res.render('req', { title: 'Request Form' });
