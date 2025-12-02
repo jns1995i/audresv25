@@ -1027,6 +1027,168 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     background-color: var(--shade12);
 }
 
+.gradient {
+    color: white;
+    background: 
+        radial-gradient(circle at 50% 90%, var(--shade15), transparent 50%),  /* Light Gray */
+        radial-gradient(circle at 88% 99%,  var(--tint5), transparent 26%),  /* Very Light Blue */
+        radial-gradient(circle at 20% 1%,  var(--tint3), transparent 70%),  /* Very Light Blue */
+        radial-gradient(circle at 70% 30%,  var(--shade15), transparent 10%); /* White */
+    background-blend-mode: lighten;
+    backdrop-filter: blur(10px);
+    background-color: var(--shade12);
+}
+
+.geo {
+    position: relative;
+    color: white;
+    background-blend-mode: lighten;
+    backdrop-filter: blur(10px);
+    background-color: var(--shade10);
+    z-index: 50 !important;
+}
+
+.geo::before {
+    content: "";
+    height: 150%;
+    width: 75%;
+    border-radius: 50%;
+    transform: rotate(90deg);
+    position: absolute;
+    right: -20%;
+    top: -50%;
+    color: white !important;
+    overflow: hidden;
+    background: 
+    radial-gradient(circle at 80% 30%,
+    var(--tint4),
+    rgba(255, 255, 255, 0.02) 40%),
+    rgba(47, 0, 255, 0);
+    backdrop-filter: blur(2px) saturate(100%);
+    -webkit-backdrop-filter: blur(25px) saturate(100%);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: inset 0 1px 6px rgba(255,255,255,0.3), 0 8px 32px rgba(0,0,0,0.3);
+    animation: liquidFlow 6s ease-in-out infinite alternate;
+    z-index: -1;
+}
+
+.geo::after {
+    content: "";
+    height: 110%;
+    width: 65%;
+    border-radius: 30px;
+    transform: rotate(-45deg);
+    position: absolute;
+    left: 0;
+    bottom: -25%;
+    color: white !important;
+    overflow: hidden;
+    background: 
+    radial-gradient(circle at 80% 30%,
+    var(--tint4),
+    rgba(255, 255, 255, 0.02) 40%),
+    rgba(47, 0, 255, 0);
+    backdrop-filter: blur(1px) saturate(100%);
+    -webkit-backdrop-filter: blur(25px) saturate(100%);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: inset 0 1px 6px rgba(255,255,255,0.3), 0 8px 32px rgba(0,0,0,0.3);
+    animation: liquidFlow 6s ease-in-out infinite alternate;
+    z-index: -1;
+}
+
+.glass {
+    background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(231, 231, 231, 0.08)
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 15px;
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    color: #fff;
+}
+
+.liquid {
+    border-radius: 15px;
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+    background: 
+        radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.15),rgba(255, 255, 255, 0) 20%);
+    backdrop-filter: blur(1px) saturate(115%);
+    background-size: 300% 300%;
+    -webkit-backdrop-filter: blur(1px) saturate(115%);
+    border: none;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.09);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.09);
+
+    box-shadow: 
+        inset -4px -4px 8px rgba(163, 163, 163, 0.07),
+        4px 4px 12px rgba(0, 0, 0, 0);
+    animation: shine 5s ease-in-out infinite;
+}
+
+.liquidX {
+    border-radius: 15px;
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+    background: 
+        radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.15),rgba(255, 255, 255, 0) 20%);
+    backdrop-filter: blur(1px) saturate(115%);
+    background-size: 300% 300%;
+    -webkit-backdrop-filter: blur(1px) saturate(115%);
+    border: none;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.09);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.09);
+
+    box-shadow: 
+        inset -4px -4px 8px rgba(163, 163, 163, 0.07),
+        4px 4px 12px rgba(0, 0, 0, 0);
+}
+
+.porcelain {
+    border-radius: 15px;
+    padding: 10px;
+    color: var(--bs-dark);
+    position: relative;
+    overflow: hidden;
+    background: 
+    radial-gradient(circle at 90% 10%,
+    rgb(255, 255, 255),
+    rgba(99, 99, 99, 0.1) 50%),
+    rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(1px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    border: 2px solid rgba(255, 255, 255, 0.642);
+    box-shadow: inset 0 1px 30px rgba(255, 255, 255, 0.5), 0 2px 8px rgba(188, 188, 188, 0.8);
+    animation: liquidFlow 6s ease-in-out infinite alternate;
+}
+.porcelain .glass {
+    background-color: white;
+    color: var(--bs-dark) !important;
+    box-shadow: inset 0 1px 4px rgba(219, 219, 219, 0.5), 0 2px 8px rgba(188, 188, 188, 0.8);
+}
+.aluminum {
+    border-radius: 15px;
+    padding: 10px;
+    color: var(--bs-dark);
+    position: relative;
+    overflow: hidden;
+    background: 
+    radial-gradient(circle at 90% 10%,
+    rgb(255, 255, 255),
+    rgb(179, 179, 179) 50%),
+    rgba(255, 255, 255, 0.132);
+    backdrop-filter: blur(1px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    border: 2px solid rgba(255, 255, 255, 0.642);
+}
+
+/* xtra */
 .abstractBG1 {
     color: white;
     background: 
@@ -1095,20 +1257,8 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     animation: liquidFlow 6s ease-in-out infinite alternate;
     z-index: -1;
 }
-.glass {
-    background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(231, 231, 231, 0.08)
-    );
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 15px;
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-    overflow: hidden;
-    color: #fff;
-}
+
+
 
 .glass2 {
     background: linear-gradient(
@@ -1142,50 +1292,8 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     box-shadow: inset 0 1px 6px rgba(255,255,255,0.3), 0 8px 32px rgba(0,0,0,0.5);
     animation: liquidFlow 6s ease-in-out infinite alternate;
 }
-    */
-
-.liquid {
-    border-radius: 15px;
-    color: white !important;
-    position: relative;
-    overflow: hidden;
-    background: 
-        radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.15),rgba(255, 255, 255, 0) 20%);
-    backdrop-filter: blur(1px) saturate(115%);
-    background-size: 300% 300%; /* allow movement */
-    -webkit-backdrop-filter: blur(1px) saturate(115%);
-    border: 0.1px solid rgba(255, 255, 255, 0.09);
-
-    /* Liquid-like shadow: top-right highlight, bottom-left dark */
-    box-shadow: 
-        inset -4px -4px 8px rgba(163, 163, 163, 0.07),  /* top-right inner light */
-        4px 4px 12px rgba(0, 0, 0, 0);               /* bottom-left outer dark */
-    animation: shine 5s ease-in-out infinite;
-}
-
-
-.porcelain {
-    border-radius: 15px;
-    padding: 10px;
-    color: var(--bs-dark);
-    position: relative;
-    overflow: hidden;
-    background: 
-    radial-gradient(circle at 90% 10%,
-    rgb(255, 255, 255),
-    rgba(99, 99, 99, 0.1) 50%),
-    rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(1px) saturate(200%);
-    -webkit-backdrop-filter: blur(25px) saturate(200%);
-    border: 2px solid rgba(255, 255, 255, 0.642);
-    box-shadow: inset 0 1px 30px rgba(255, 255, 255, 0.5), 0 2px 8px rgba(188, 188, 188, 0.8);
-    animation: liquidFlow 6s ease-in-out infinite alternate;
-}
-.porcelain .glass {
-    background-color: white;
-    color: var(--bs-dark) !important;
-    box-shadow: inset 0 1px 4px rgba(219, 219, 219, 0.5), 0 2px 8px rgba(188, 188, 188, 0.8);
-}
+    
+*/
 
 .glass2 {
     border-radius: 15px;

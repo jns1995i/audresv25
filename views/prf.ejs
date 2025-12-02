@@ -1,4 +1,4 @@
-<% layout('template') %>
+<% layout('scheme') %>
 <style>
     .floatF {
         display: none !important;
@@ -23,6 +23,9 @@
         padding: 20px !important;
         width: 95% !important;
         border-radius: 25px;
+    }
+    .navF {
+        display: none;
     }
     
   @media (max-width: 900px) {
@@ -121,7 +124,7 @@
         <p class="rem2 str400"><%= user.fName %> <%= user.mName %> <%= user.lName %> <%= user.xName %></p>
         <p class="rem16 str400"><%= user.role %> <i class="bi bi-patch-check-fill"></i></p>
         <br>
-        <div class="height0 glass corner20 width0 gap10 padding10" id="controls">
+        <div class="height0 corner20 width0 gap10 padding10" id="controls">
             <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back</a>
             <a href="javascript:void(0)" class="nav liquid" id="lgOpen"><i class="fas fa-share-square"></i> Log Out</a>
         </div>
@@ -153,7 +156,7 @@
         </div>
         <br>
         <div class="height0 gap20 padding5" id="controls">
-            <div class="height0 glass shadow2 width0 padding10 gap10 corner20">
+            <div class="height0 liquidX width0 padding10 gap10 corner25">
                 <a href="javascript:vod(0)" class="nav liquid" id="editBtn"><i class="fas fa-pen"></i> Update Info</a>
                 <a href="javascript:vod(0)" class="nav liquid" id="resetBtn"><i class="fas fa-key"></i> Reset Password</a>
             </div>

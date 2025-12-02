@@ -11,28 +11,22 @@
     <link rel="icon" href="/images/au.png">
     <title><%= title ? `${title} | AUDRES25` : 'AUDRES25' %></title>
     <style>
-      body {
-        color: white;
-        background: 
-            radial-gradient(circle at 10% 5%, var(--shade15), transparent 25%),
-            radial-gradient(circle at 95% 10%,  var(--tint4), transparent 30%),
-            radial-gradient(circle at 95% 90%,  var(--tint6), transparent 24%),
-            radial-gradient(circle at 10% 60%,  var(--tint4), transparent 30%),
-            radial-gradient(circle at 50% 50%,  var(--tint6), transparent 50%);
-        background-blend-mode: lighten;
-        backdrop-filter: blur(10px);
-        background-color: var(--shade12);
-      }
-      #card1 {
-        height: 100%;
-        display: block;
-      }
+        body {
+            padding: 0 !important;
+        }
       @media (max-width: 900px) {
           body {
             display: block;
             overflow-y: auto;
             background: rgb(237, 237, 237);
             color: var(--shade12);
+            padding: 10px !important;
+          }
+          .navF {
+            width: 100%;
+            justify-content: space-between;
+            border-radius: 40px;
+            padding: 0;
           }
           #lgCard > div {
             width: 80% !important;
@@ -42,17 +36,12 @@
               width: 100% !important;
               display: block;
               gap: 0;
+              height: auto;
+              z-index: 10 !important;
+              margin-top: 10px;
           }
           .mainF::-webkit-scrollbar {
               display: none;
-          }
-          #card2, #card1 {
-            position: initial;
-            width: 100%;
-          }
-          #card1 {
-            height: auto !important;
-            display: block;
           }
           .sub .ctrl {
             flex-direction: column;
@@ -60,23 +49,38 @@
           .sub .ctrl div {
             width: 100%;
           }
+          .card1, .card2 {
+            width: 100%;
+          }
       }
     </style>
 </head>
 <% if ( user.access === 0) { %>
-<body class="col padding0 relative">
-  <div class="mainF overflow-y1 flex shadow1 gap20 padding10 alignStart">
-  <%- body %>
-  </div>
+<body class="col relative gradient gap10">
+    
+    <div class="height10 liquidX navF padding10 shadow1">
+        <div class="height0 padding10 gap10 cleft justifyStart">
+                <img src="<%= seedUser.photo ? seedUser.photo : '/images/au.png' %>" alt="Profile" class="h60 w60 corner500 liquid shadow1">
+            </div>
+        <div class="height0 padding10 gap5 cright justifyEnd">
+            <a href="/prf" class=" h60 w60 corner500 liquid padding0">
+                <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="height90 width90 borderPrimary">
+            </a>
+        </div>
+    </div>
+    <div class="mainF overflow-y1 alignStart gap10 padding5 marginTop0">
+        <%- body %>
+    </div>
 
 
-<div class="absolute translateCenter bgModal8 hidden" id="lgCard">
-  <div class="liquid cornerRem2 height0 width25 col padding20">
+<div class="absolute translateCenter gradient hidden padding0" id="lgCard">
+  <div class="bgWhite corner20 height0 width25 col padding20">
     <%- include('icons/lg') %>
-    <p class="rem14 textCenter">Are you sure you want to log out?</p>
+    <br>
+    <p class="size18 textCenter str500 width100" style="text-wrap: balanced;">Are you sure you want <br> to log out?</p>
     <div class="height0 marginTop10 gap10">
-      <a href="javascript:void(0)" class="nav w100" id="lgClose"> Cancel</a>
-      <a href="/logout" class="nav pnav w100"> Log Out</a>
+      <a href="javascript:void(0)" class="nav width100" id="lgClose"> Cancel</a>
+      <a href="/logout" class="nav pnav width100"> Log Out</a>
     </div>
   </div>
 </div>
