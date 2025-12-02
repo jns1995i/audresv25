@@ -15,6 +15,9 @@
     display: block !important;
     padding: 5px;
   }
+  body::-webkit-scrollbar {
+    display: flex;
+  }
   .mainF {
     height: auto !important;
   }
@@ -61,6 +64,9 @@
             overflow-y: auto;
             height: 100vh;
         }
+  body::-webkit-scrollbar {
+    display: none;
+  }
         .mainF {
             flex-direction: column;
             height: auto;
@@ -122,43 +128,29 @@
       }
     </style>
 </head>
-<body class="abstractBG">
-  
-
-    <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+<body class="gradient">
 
     <div class="mainF" style="z-index: 500 !important;">
-        <div class="height0 padding20 col justifyStart relative leftF width40">
+        <div class="height0 padding20 col alignStart gap10 relative leftF width30">
             
-            <div class="height0 col" id="headF">
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
-                <div class="h400 padding10 gemF relative" style="margin-top: -3rem;">
-                    <img src="/images/gold.png" alt="" class="height100 glowImg" style="transform: rotate(-10deg);">
-                    
-                    <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
-                        <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
-                    </div>
-                </div>
-            </div>
-            
+            <br>
 
+             <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a>
             
-            <div class="height0 gap10 marginBottom20" id="rateF">
-                <div class="height0 width0">
-                    <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
-                </div>
-            </div>
+            <section class="bgWhite col padding5 corner20 relative">
+                <section class="justifyStart"><p class="size30">Hi, <%= user.fName %></p></section>
+                <section class="aluminum corner15 padding20 col alignStart relative">
+                    <p class="size16 str400 width70">Need Help</p>
+                    <p class="size16 str400 width70">Requesting Document?</p>
+                    <br>
+                    <a href="/ins2" class="nav porcelain">Learn more here <i class="fas fa-chevron-right"></i></a>
+                </section>
+                <img src="/images/student.png" alt="" class="absolute h240 top0" style="right: -60px;">
+            </section>
             
-            
-            <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/hom" class="nav liquid bgShade6"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
-            <div class="bgWhite index50 col justifyStart height0 colorPrimary cornerRem1" id="">
-                <div class="height0 col justifyCenter alignStart padding20 relative">
-                    <p class="rem2 str400 marginBottom10">Data Privacy Notice</p>
-                    <p class="rem11 str400 textJustify">
-                        By submitting this form, you agree to provide your personal details and valid ID for identity verification purposes only. All information collected will be treated as confidential and will be used solely for processing your document request. In compliance with the Data Privacy Act of 2012, your data will be securely stored and accessed only by authorized personnel from the Registrar’s Office. Your information will not be shared with third parties and will be retained only as necessary.
-                    </p>
-                </div>
+            <div class="height0 padding10 borderRadius10 justifyBetween width100 gap10 relative corner15 liquidX hidden">
+                <p class="size16 gap10 alignCenter">Need Help?</p>
+                <a href="/ins2" class="nav liquid">Learn more here <i class="fas fa-chevron-right"></i></a>
             </div>
 
         </div>
@@ -167,8 +159,9 @@
 
             <form action="/reqDoc" method="POST" enctype="multipart/form-data" class="padding30 card alignCenter relative colorPrimary" style="z-index: 100;">
                 <div class="col justifyStart alignStart gap10 relative">
-                    <p class="size28 str500 colorPrimary">REQUEST FORM</p>
+                    <p class="size28 str400 colorPrimary">Request Form</p>
                 </div>
+                <br>
                 <div class="col height0 alignStart gap5" id="editCard">
                         <div class="fieldsetsContainer col height0 padding0 width100" id="fieldsetsContainer">
                             <fieldset class="marginBottom10">

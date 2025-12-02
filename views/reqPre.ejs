@@ -1,12 +1,33 @@
-<% layout('template') %>
-<br>
-<a href="/hom" class="nav">Go Back</a>
-<br>
-<section class="col gap10 padding0">
-    <section class=" corner10 borderGray textCenter">
-        <p><i class="fas fa-info-circle marginRight5"></i> Service Hours: Monday–Friday, 8:00 AM–5:00 PM. Requests sent after hours are queued for the next working day.</p>
+<% layout('scheme') %>
+<style>
+    .navF {
+        display: none !important;
+    }
+        .mainF {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+</style>
+<section class="col gap10 padding10 width40 card2">
+    
+    <section class="gap10 padding10 justifyBetween width0 gap20 card1">
+        <a href="/hom" class="nav liquid"> <i class="fas fa-chevron-left"></i> Go Back</a>
+        <a href="/req" class="nav liquid">Proceed <i class="fas fa-chevron-right"></i></a>
     </section>
-</section>
-<br>
+    
+    <div class="height0 col justifyCenter alignStart padding20 relative bgWhite corner20">
+        <p class="size16 str400 marginBottom10">Data Privacy Notice</p>
+        <p class="size14 str400 textJustify">
+            By submitting this form, you agree to provide your personal details and valid ID for identity verification purposes only. All information collected will be treated as confidential and will be used solely for processing your document request. In compliance with the Data Privacy Act of 2012, your data will be securely stored and accessed only by authorized personnel from the Registrar’s Office. Your information will not be shared with third parties and will be retained only as necessary.
+        </p>
+    </div>
+    
+    
+    <div class="height0 col justifyCenter alignStart padding20 relative bgWhite corner20 hidden">
+        <p class="size14 str400"><i class="fas fa-info-circle marginRight5"></i> Service Hours: Monday–Friday, 8:00 AM–5:00 PM. Requests sent after hours are queued for the next working day.</p>
+    </div>
 
-<a href="/req" class="nav">Proceed</a>
+</section>
+
