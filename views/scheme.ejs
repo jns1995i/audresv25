@@ -23,8 +23,9 @@
             background: rgb(237, 237, 237);
             color: var(--shade12);
             padding: 10px !important;
+            margin-bottom: 50px !important;
           }
-          body::-webkit-scrollbar { display: none; }
+          body::-webkit-scrollbar { display: hidden; }
           .navF {
             width: 100%;
             justify-content: space-between;
@@ -44,9 +45,6 @@
               margin-top: 10px;
               margin-bottom: 50px !important;
           }
-          .mainF::-webkit-scrollbar {
-              display: none;
-          }
           .sub .ctrl {
             flex-direction: column;
           }
@@ -55,6 +53,9 @@
           }
           .card1, .card2 {
             width: 100%;
+          }
+          .card2 {
+            margin-bottom: 50px;
           }
       }
     </style>
