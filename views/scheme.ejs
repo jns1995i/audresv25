@@ -14,6 +14,8 @@
         body {
             padding: 0 !important;
         }
+        
+        body::-webkit-scrollbar { display: flex; }
       @media (max-width: 900px) {
           body {
             display: block;
@@ -22,6 +24,7 @@
             color: var(--shade12);
             padding: 10px !important;
           }
+          body::-webkit-scrollbar { display: none; }
           .navF {
             width: 100%;
             justify-content: space-between;
@@ -39,6 +42,7 @@
               height: auto;
               z-index: 10 !important;
               margin-top: 10px;
+              margin-bottom: 50px !important;
           }
           .mainF::-webkit-scrollbar {
               display: none;
