@@ -1122,8 +1122,8 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     background-size: 300% 300%;
     -webkit-backdrop-filter: blur(1px) saturate(115%);
     border: none;
-    border-top: 0.5px solid rgba(255, 255, 255, 0.09);
-    border-bottom: 0.5px solid rgba(255, 255, 255, 0.09);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 
     box-shadow: 
         inset -4px -4px 8px rgba(163, 163, 163, 0.07),
@@ -1142,8 +1142,8 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     background-size: 300% 300%;
     -webkit-backdrop-filter: blur(1px) saturate(115%);
     border: none;
-    border-top: 0.5px solid rgba(255, 255, 255, 0.09);
-    border-bottom: 0.5px solid rgba(255, 255, 255, 0.09);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 
     box-shadow: 
         inset -4px -4px 8px rgba(163, 163, 163, 0.07),
