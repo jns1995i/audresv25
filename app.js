@@ -26,6 +26,7 @@ const isEmpArc = require('./middleware/isEmpArc');
 const isStudent = require('./middleware/isStudent');
 const isStuArc = require('./middleware/isStuArc');
 const isUser = require('./middleware/isUser');
+const analyticsMiddleware = require('./middleware/isAnalytics');
 
 const users = require('./model/user');
 const requests = require('./model/request');
@@ -65,6 +66,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '0',
   etag: true
 }));
+
+app.use(analyticsMiddleware);
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'ferry2025',
@@ -3609,12 +3612,19 @@ app.post('/update-documents', isLogin, async (req, res) => {
   }
 });
 
+app.get('/dsb', isLogin, analyticsMiddleware, (req, res) => {
+  if (req.user.reset === true) return res.redirect('/resetPage2');
 
-app.get('/dsb', isLogin, (req, res) => {
-  if (req.user.reset === true) {
-    return res.redirect('/resetPage2');
-  }
-  res.render('dsb', { title: 'Dashboard', active: 'dsb' });
+  const analytics = res.locals.analytics || {};
+  res.render('dsb', {
+    title: 'Dashboard',
+    active: 'dsb',
+    analytics
+  });
+});
+
+app.get('/api/analytics', analyticsMiddleware, (req, res) => {
+  res.json(res.locals.analytics);
 });
 
 

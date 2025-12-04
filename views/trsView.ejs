@@ -116,7 +116,7 @@
             <% } %>
             
             <% if ( request.status === "Assessed") { %>
-            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20">
+            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20 hidden">
                 <%- include('icons/success') %>
                 <p class="rem12 str500 textCenter green">Confirm that the document is fully prepared and ready for release.</p>
                 <form action="/fRel" method="POST" class="form2">

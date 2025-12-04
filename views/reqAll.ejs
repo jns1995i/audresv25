@@ -99,7 +99,7 @@
                         <% } %> border0
                         " style="background-color: transparent;">
                             <i class="fas fa-hourglass inline rem1 w15 h15 hidden"></i>
-                            <%= req.status %>
+                            <%= req.status === "Assessed" ? "For Payment" : req.status === "Reviewed" ? "For Assessment" : req.status || "" %>
                         </div>
                     <% } %>
                     <p class="size12 darkGray absolute right10 top10"><%= formatCustomDate(req.createdAt) %></p>

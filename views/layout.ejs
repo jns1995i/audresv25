@@ -72,15 +72,9 @@
       <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
       <a href="/cog" class="nav mnav <% if ( active === 'cog') { %> active <% } %>"> <i class="fas fa-cog"></i> Settings</a>
       <% } %>
-      <div class="h100 absolute bottom5 translateX liquid">
-        hello
-      </div>
-      <div class="height0 absolute bottom5 translateX opacity0">
-        <a href="/logout" class="nav glass width100 corner12 <% if ( active === '') { %> active <% } %>"> <i class="fas fa-share-square"></i> Log Out</a>
-      </div>
-
     </div>
-    <div class="height10 justifyStart liquid shadow2 padding10 corner12" style="border: 0.2px rgba(255, 255, 255, 0.3) solid;">
+    <div class="height10 justifyStart liquid shadow2 padding10 corner12 relative" style="border: 0.2px rgba(255, 255, 255, 0.3) solid;">
+      <a href="/logout" class="nav cnav liquid absolute right5 bottom5"><i class="fas fa-share-square opacity2"></i></a>
       <% if (active === 'acc') { %>
         <a href="/acc" class="liquid corner500 h50 w50" style="min-width: 50px;">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 borderWhite">

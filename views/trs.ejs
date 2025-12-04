@@ -125,7 +125,7 @@
               <% } else { %>
                   bgBlue100
               <% } %>
-                border0"> <%= rq.status ? rq.status : '' %>
+                border0"> <%= rq.status === "Assessed" ? "For Payment" : rq.status === "Reviewed" ? "For Assessment" : rq.status || "" %>
               </p>
           <% } %>
           <div class="width10 justifyStart"><img src="<%= rq.requestBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>

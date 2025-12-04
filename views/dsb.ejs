@@ -5,24 +5,391 @@
     }
 </style>
 
-<section class="gap20 padding0">
-    <div class="bgWhite h100 corner15"></div>
-    <div class="bgWhite h100 corner15"></div>
-    <div class="bgWhite h100 corner15"></div>
-    <div class="bgWhite h100 corner15"></div>
-</section>
+<%
+  const statColor = {
+    Quick: "bgViolet100",
+    Fast: "bgGreen100",
+    Moderate: "bgBlue100",
+    Standard: "bgBlue100",
+    Slow: "bgOrange100",
+    Warning: "bgRed100",
+    Critical: "bgRed200"
+  };
+%>
 <br>
-<section class="h150 bgWhite corner15 relative">
-    <div class="width60"></div>
+
+<section class="gap20 padding0">
+    <div class="bgWhite h120 corner15 col alignStart padding15">
+        <p class="size28 str500" id="declined"></p>
+        <p class="size16 str400">Declined</p>
+        <p class="size12 str500 border0" id="">100%</p>
+    </div>
+    <div class="bgWhite h120 corner15 col alignStart padding15">
+        <p class="size28 str500" id="onHold"></p>
+        <p class="size16 str400">On Hold</p>
+        <p class="size12 str500 border0" id="">100%</p>
+    </div>
+</section>
+
+
+<section class="gap20">
+    <div class="h100"><h3>Approved</h3><p id="approved">0</p></div>
+    <div class="h100"><h3>Active Users</h3><p id="activeUserCount">0</p></div>
+</section>
+<section class="h150 bgWhite corner15 relative justifyBetween">
+    <div class="width55 col alignStart justifyStart gap5 padding5">
+        <section class="gap5 padding0 width0">
+            <p class="size32 str400" id="totalRequests"></p>
+            <p class="size32 str400"> Total Requests</p>
+        </section>
+        <div class="height0 width0 gap5"><p id="pending"> 0</p> Pending</div>
+        <section class="width100 gap10 padding0 justifyStart">
+            <div class="selectBar">
+                <i class="fas fa-filter"></i>
+                <select id="filterSelect">
+                <option value="" disabled>--Filter</option>
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="thisWeek">This Week</option>
+                <option value="lastWeek">Last Week</option>
+                <option value="thisMonth">This Month</option>
+                <option value="lastMonth">Last Month</option>
+                <option value="thisYear" selected>This Year</option>
+                <option value="specific">Specific Date</option>
+                <option value="custom">Custom Range</option>
+                <option value="lastYear">Last Year</option>
+                <option value="overall">Overall</option>
+                </select>
+            </div>
+            <input type="date" id="specificDate" style="display:none;" class="" />
+            <input type="date" id="customStart" style="display:none;" class="" />
+            <input type="date" id="customEnd" style="display:none;" class="" />
+        </section>
+        <label class="size12" id="filterInfo" class="marginBlock10"></label>
+    </div>
     <div class="width40 bgTint14 corner15"></div>
     <img src="/images/student.png" alt="" class="h180 absolute" style="right: 32%; top: 0;">
 </section>
+<script>
+    const filterSelect = document.getElementById("filterSelect");
+const specificDate = document.getElementById("specificDate");
+const customStart = document.getElementById("customStart");
+const customEnd = document.getElementById("customEnd");
+
+filterSelect.addEventListener("change", () => {
+    const value = filterSelect.value;
+
+    // Hide everything by default
+    specificDate.style.display = "none";
+    customStart.style.display = "none";
+    customEnd.style.display = "none";
+
+    if (value === "specific") {
+        specificDate.style.display = "inline-block";
+    } else if (value === "custom") {
+        customStart.style.display = "inline-block";
+        customEnd.style.display = "inline-block";
+    }
+});
+
+</script>
 <br>
-<section class="h300 corner15 bgWhite"></section>
+<section class="h300 corner15 bgWhite">
+    <canvas id="trendChart"></canvas>
+</section>
 <br>
+<section class="gap20 padding0">
+    <div class="bgWhite h120 corner15 col alignStart padding15">
+        <p class="size28 str500" id="avgApprovalTime"><%= analytics.avgApprovalTime %></p>
+        <p class="size16 str400">Ave. Processing Time</p>
+        <p class="size12 str500 border0 <%= statColor[analytics.avgApprovalTimeStat] %>" id="avgApprovalTimeStat"></p>
+    </div>
+    <div class="bgWhite h120 corner15 col alignStart padding15">
+        <p class="size28 str500" id="avgReviewTime"><%= analytics.avgReviewTime %></p>
+        <p class="size16 str400">Ave. Review Time</p>
+        <p class="size12 str500 border0 <%= statColor[analytics.avgReviewTimeStat] %>" id="avgReviewTimeStat"></p>
+    </div>
+</section>
+<br>
+    <div class="h300"><h3>Requests by Role</h3><canvas id="roleChart"></canvas></div>
+    <div class="h300"><h3>Requests by Course</h3><canvas id="courseChart"></canvas></div>
+    <div class="h300"><h3>Requests by Year Level</h3><canvas id="yearLevelChart"></canvas></div>
+    <div class="h300"><h3>Top Document Types</h3><canvas id="documentChart"></canvas></div>
+    <div class="h300"><h3>Document Purposes</h3><canvas id="purposeChart"></canvas></div>
+<br>
+<section class="col alignStart">
+     <h2>Top Users</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>User</th><th>Role</th><th>Total Requests</th></tr>
+      </thead>
+      <tbody id="topUsersTable"></tbody>
+    </table>
+  </div>
+
+  <h2>Request Status Breakdown</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Status</th><th>Count</th></tr>
+      </thead>
+      <tbody id="statusTable"></tbody>
+    </table>
+  </div>
+
+  <h2>Document Status per Type</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Document Type</th><th>Status</th><th>Count</th></tr>
+      </thead>
+      <tbody id="docStatusTable"></tbody>
+    </table>
+  </div>
+
+  <h2>Requests by Role</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Role</th><th>Count</th></tr>
+      </thead>
+      <tbody id="roleTable"></tbody>
+    </table>
+  </div>
+
+  <h2>Requests by Course</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Course</th><th>Count</th></tr>
+      </thead>
+      <tbody id="courseTable"></tbody>
+    </table>
+  </div>
+
+  <h2>Requests by Year Level</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Year Level</th><th>Count</th></tr>
+      </thead>
+      <tbody id="yearLevelTable"></tbody>
+    </table>
+  </div>
+
+  <h2>Top Document Types</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Document Type</th><th>Total Quantity</th><th>Total Requests</th></tr>
+      </thead>
+      <tbody id="topDocumentsTable"></tbody>
+    </table>
+  </div>
+
+  <h2>Document Purposes</h2>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Purpose</th><th>Count</th></tr>
+      </thead>
+      <tbody id="purposeTable"></tbody>
+    </table>
+  </div>
+</section>
 <section class="gap20 padding0">
     <div class="bgWhite h100 corner15"></div>
     <div class="bgWhite h100 corner15"></div>
     <div class="bgWhite h100 corner15"></div>
     <div class="bgWhite h100 corner15"></div>
 </section>
+
+<script>
+let chartInstances = {}; // Keep chart instances to destroy before redraw
+
+// Create or update chart
+function createChart(ctxId, labels, data, type='bar', label='') {
+  if(chartInstances[ctxId]) chartInstances[ctxId].destroy();
+  const ctx = document.getElementById(ctxId).getContext('2d');
+  chartInstances[ctxId] = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data,
+        backgroundColor:'#142c54',
+        borderColor:'gray',
+        borderWidth: 0.5,
+        borderRadius: 16
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio: false,
+      plugins:{ legend:{ display:true } },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { display: false },
+                grid: { display: false }
+            },
+            x: {
+                grid: { display: true }
+            }
+        }
+    }
+  });
+}
+
+// Populate tables and charts
+function populateDashboard(analytics) {
+  // Update top counts
+
+
+let rangeText = "";
+// Only show rangeText for certain filters
+const filtersWithRange = ["thisWeek","lastWeek","specific","custom"];
+
+if (filtersWithRange.includes(analytics.filterUsed)) {
+    rangeText = `${analytics.rangeStart || "-"} to ${analytics.rangeEnd || "-"}`;
+} else if (analytics.filterUsed === "overall") {
+    rangeText = "All time";
+}
+
+// Human-readable filter labels
+const filterLabels = {
+  today: "Today",
+  yesterday: "Yesterday",
+  thisWeek: "This Week",
+  lastWeek: "Last Week",
+  thisMonth: "This Month",
+  lastMonth: "Last Month",
+  thisYear: "This Year",
+  lastYear: "Last Year",
+  specific: "Specific Date",
+  custom: "Custom Range",
+  overall: "Overall"
+};
+
+// Get the label
+const filterName = filterLabels[analytics.filterUsed] || analytics.filterUsed;
+
+// Set the display text
+document.getElementById("filterInfo").innerText = 
+    filtersWithRange.includes(analytics.filterUsed) || analytics.filterUsed === "overall"
+        ? `${rangeText}`
+        : "";
+  
+  document.getElementById("totalRequests").innerText = analytics.totalRequests || 0;
+  document.getElementById("approved").innerText = analytics.approved || 0;
+  document.getElementById("declined").innerText = analytics.declined || 0;
+  document.getElementById("pending").innerText = analytics.pending || 0;
+  document.getElementById("onHold").innerText = analytics.onHold || 0;
+  document.getElementById("activeUserCount").innerText = analytics.activeUserCount || 0;
+  document.getElementById("avgApprovalTime").innerText = analytics.avgApprovalTime || 0;
+  document.getElementById("avgApprovalTimeStat").innerText = analytics.avgApprovalTimeStat || 0;
+  document.getElementById("avgReviewTime").innerText = analytics.avgReviewTime || 0;
+  document.getElementById("avgReviewTimeStat").innerText = analytics.avgReviewTimeStat || 0;
+
+  // Clear tables
+  ["topUsersTable","statusTable","docStatusTable","roleTable","courseTable","yearLevelTable","topDocumentsTable","purposeTable"].forEach(id => 
+    document.getElementById(id).innerHTML = ""
+  );
+
+  // Helper to populate table
+  function populateTable(tableId, data, renderRow) {
+    if(!data) return;
+    data.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = renderRow(item);
+      document.getElementById(tableId).appendChild(tr);
+    });
+  }
+
+  // Tables
+  populateTable("topUsersTable", analytics.topUsers, u => `<td>${u.userInfo.fName} ${u.userInfo.lName}</td><td>${u.userInfo.role}</td><td>${u.totalRequests}</td>`);
+  populateTable("statusTable", analytics.requestStatusStats, s => `<td>${s._id}</td><td>${s.count}</td>`);
+  populateTable("docStatusTable", analytics.docStatusStats, d => `<td>${d._id.type}</td><td>${d._id.status}</td><td>${d.count}</td>`);
+  populateTable("roleTable", analytics.roleStats, d => `<td>${d._id}</td><td>${d.count}</td>`);
+  populateTable("courseTable", analytics.courseStats, d => `<td>${d._id}</td><td>${d.count}</td>`);
+  populateTable("yearLevelTable", analytics.yearLevelStats, d => `<td>${d._id}</td><td>${d.count}</td>`);
+  populateTable("topDocumentsTable", analytics.topDocuments, d => `<td>${d._id}</td><td>${d.totalQty}</td><td>${d.totalRequests}</td>`);
+  populateTable("purposeTable", analytics.purposeStats, d => `<td>${d._id}</td><td>${d.total}</td>`);
+
+  // Charts
+  if (analytics.trend && analytics.trend.length) {
+    // Filter out zero-count entries
+    const filteredTrend = analytics.trend.filter(d => d.count > 0);
+    const labels = filteredTrend.map(d => d.label);  // only months/days/hours with data
+    const data = filteredTrend.map(d => d.count);
+    createChart('trendChart', labels, data, 'line', 'Requests');
+  } else {
+    createChart('trendChart', [], [], 'line', 'Requests');
+  }
+
+  if(analytics.roleStats && analytics.roleStats.length) 
+    createChart('roleChart', analytics.roleStats.map(d=>d._id), analytics.roleStats.map(d=>d.count), 'bar', 'Requests by Role');
+  if(analytics.courseStats && analytics.courseStats.length) 
+    createChart('courseChart', analytics.courseStats.map(d=>d._id), analytics.courseStats.map(d=>d.count), 'bar', 'Requests by Course');
+  if(analytics.yearLevelStats && analytics.yearLevelStats.length) 
+    createChart('yearLevelChart', analytics.yearLevelStats.map(d=>d._id), analytics.yearLevelStats.map(d=>d.count), 'bar', 'Requests by Year Level');
+  if(analytics.topDocuments && analytics.topDocuments.length) 
+    createChart('documentChart', analytics.topDocuments.map(d=>d._id), analytics.topDocuments.map(d=>d.totalQty), 'bar', 'Top Documents');
+  if(analytics.purposeStats && analytics.purposeStats.length) 
+    createChart('purposeChart', analytics.purposeStats.map(d=>d._id), analytics.purposeStats.map(d=>d.total), 'bar', 'Document Purposes');
+}
+
+// Fetch analytics from API
+async function fetchAnalytics(range="thisYear") {
+    let url = `/api/analytics?range=${range}`;
+
+    if(range === "specific") {
+        const date = document.getElementById("specificDate").value;
+        if(date) url += `&date=${date}`;
+    } else if(range === "custom") {
+        const start = document.getElementById("customStart").value;
+        const end = document.getElementById("customEnd").value;
+        if(start && end) url += `&start=${start}&end=${end}`;
+    }
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        populateDashboard(data);
+    } catch(err) {
+        console.error("Error fetching analytics:", err);
+    }
+}
+
+
+// Filter change event
+document.getElementById("filterSelect").addEventListener("change", e => {
+  fetchAnalytics(e.target.value);
+});
+
+
+// Load default analytics
+fetchAnalytics(document.getElementById("filterSelect").value);
+
+// ----------------------------
+// Date input listeners (add these at the bottom)
+// ----------------------------
+specificDate.addEventListener("change", () => {
+    fetchAnalytics("specific");
+});
+
+customStart.addEventListener("change", () => {
+    const end = customEnd.value;
+    if(end) fetchAnalytics("custom");
+});
+
+customEnd.addEventListener("change", () => {
+    const start = customStart.value;
+    if(start) fetchAnalytics("custom");
+});
+
+// Load default analytics
+fetchAnalytics(document.getElementById("filterSelect").value);
+</script>
