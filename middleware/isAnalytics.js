@@ -216,13 +216,13 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       }
 
         function getTimeStat2(hoursDecimal) {
-          if (hoursDecimal < 1/60) return "Quick";      // Less than a minute
-          if (hoursDecimal < 0.5) return "Fast";       // Less than 30 mins
-          if (hoursDecimal < 1) return "Moderate";     // Less than 1 hour
-          if (hoursDecimal < 3) return "Standard";     // Less than 3 hours
-          if (hoursDecimal < 24) return "Slow";        // Less than 1 day
-          if (hoursDecimal < 72) return "Warning";     // Less than 3 days
-          return "Critical";                            // 3 days or more
+          if (hoursDecimal < 1/60) return "Quick";
+          if (hoursDecimal < 0.5) return "Fast";
+          if (hoursDecimal < 1) return "Moderate";
+          if (hoursDecimal < 3) return "Standard";
+          if (hoursDecimal < 24) return "Slow";
+          if (hoursDecimal < 72) return "Warning";
+          return "Critical";                         
       }
 
 
