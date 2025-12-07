@@ -3,6 +3,23 @@
     .mainf {
         padding: 5px 15px;
     }
+    .keyMetrics {
+      border-radius: 20px;
+      flex-direction: column;
+      align-items: start;
+      position: relative;
+      padding: 15px;
+      padding-left: 75px;
+    }
+    .keyIcon {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      transform: scale(2);
+      opacity: 0.5;
+      filter: grayscale(0.5);
+    }
+
 </style>
 
 <%
@@ -19,30 +36,54 @@
 <br>
 
 <section class="gap20 padding0">
-    <div class="bgWhite h120 corner15 col alignStart padding15">
-        <p class="size28 str500" id="declined"></p>
-        <p class="size16 str400">Declined</p>
-        <p class="size12 str500 border0" id="">100%</p>
-    </div>
-    <div class="bgWhite h120 corner15 col alignStart padding15">
-        <p class="size28 str500" id="onHold"></p>
+    <section class="bgWhite keyMetrics">
+        <a href="" class="nav cnavLG disabled gradient bgShade1 white absolute translateY left15"><i class="fas fa-check-circle size20"></i></a>
+        <p class="size16 str400">Success</p>
+        <section class="width0 gap10 padding0">
+          <p class="size20 str500" id="approved"></p>
+          <p class="size12 str500 bgSoft padding3 corner10" id="approvedPercent"></p>
+        </section>
+    </section>
+    <section class="bgWhite keyMetrics">
+        <a href="" class="nav cnavLG disabled gradient bgShade1 white absolute translateY left15"><i class="fas fa-hourglass-half size14"></i></a>
+        <p class="size16 str400">On Process</p>
+        <section class="width0 gap10 padding0">
+          <p class="size20 str500" id="onProcess"></p>
+          <p class="size12 str500 bgSoft padding3 corner10" id="onProcessPercent"></p>
+        </section>
+    </section>
+    <section class="bgWhite keyMetrics">
+        <a href="" class="nav cnavLG disabled gradient bgShade1 white absolute translateY left15"><i class="fas fa-clock size14"></i></a>
         <p class="size16 str400">On Hold</p>
-        <p class="size12 str500 border0" id="">100%</p>
-    </div>
+        <section class="width0 gap10 padding0">
+          <p class="size20 str500" id="onHold"></p>
+          <p class="size12 str500 bgSoft padding3 corner10" id="onHoldPercent"></p>
+        </section>
+    </section>
+    <section class="bgWhite keyMetrics">
+        <a href="" class="nav cnavLG disabled gradient bgShade1 white absolute translateY left15"><i class="fas fa-xmark-circle size14"></i></a>
+        <p class="size16 str400">Declined</p>
+        <section class="width0 gap10 padding0">
+          <p class="size20 str500" id="declined"></p>
+          <p class="size12 str500 bgSoft padding3 corner10" id="declinedPercent"></p>
+        </section>
+    </section>
+    <section class="bgWhite keyMetrics">
+        <a href="" class="nav cnavLG disabled gradient bgShade1 white absolute translateY left15"><i class="fas fa-check size14"></i></a>
+        <p class="size16 str400">Declined</p>
+        <section class="width0 gap10 padding0">
+          <p class="size20 str500" id="declined"></p>
+          <p class="size12 str500 bgSoft padding3 corner10" id="declinedPercent"></p>
+        </section>
+    </section>
 </section>
 
+<br>
 
-<section class="gap20">
-    <div class="h100"><h3>Approved</h3><p id="approved">0</p></div>
-    <div class="h100"><h3>Active Users</h3><p id="activeUserCount">0</p></div>
-</section>
 <section class="h150 bgWhite corner15 relative justifyBetween">
     <div class="width55 col alignStart justifyStart gap5 padding5">
-        <section class="gap5 padding0 width0">
-            <p class="size32 str400" id="totalRequests"></p>
-            <p class="size32 str400"> Total Requests</p>
-        </section>
-        <div class="height0 width0 gap5"><p id="pending"> 0</p> Pending</div>
+        <p class="size32 str400" id="totalRequests"></p>
+        <div class="height0 width0 gap5"><p id="pending"> 0</p> Pending <p id="pendingPercent"> 0</p></div>
         <section class="width100 gap10 padding0 justifyStart">
             <div class="selectBar">
                 <i class="fas fa-filter"></i>
@@ -67,7 +108,10 @@
         </section>
         <label class="size12" id="filterInfo" class="marginBlock10"></label>
     </div>
-    <div class="width40 bgTint14 corner15"></div>
+    <div class="width40 bgTint14 corner15 col alignEnd padding20">
+      <p class="size30" id="activeUserCount"></p>
+      <p class="size18" id=""><%= analytics.totalUsers %> Total Users</p>
+    </div>
     <img src="/images/student.png" alt="" class="h180 absolute" style="right: 32%; top: 0;">
 </section>
 <script>
@@ -98,45 +142,125 @@ filterSelect.addEventListener("change", () => {
     <canvas id="trendChart"></canvas>
 </section>
 <br>
+<section class="justifyStart">
+  <p class="size30"><i class="fas fa-chart-line size26"></i> Average Approval Rate</p>
+</section>
 <section class="gap20 padding0">
     <div class="bgWhite h120 corner15 col alignStart padding15">
-        <p class="size28 str500" id="avgApprovalTime"><%= analytics.avgApprovalTime %></p>
-        <p class="size16 str400">Ave. Processing Time</p>
+        <p class="size16 str400">Processing Time</p>
+        <p class="size20 str500" id="avgApprovalTime"><%= analytics.avgApprovalTime %></p>
         <p class="size12 str500 border0 <%= statColor[analytics.avgApprovalTimeStat] %>" id="avgApprovalTimeStat"></p>
     </div>
     <div class="bgWhite h120 corner15 col alignStart padding15">
-        <p class="size28 str500" id="avgReviewTime"><%= analytics.avgReviewTime %></p>
-        <p class="size16 str400">Ave. Review Time</p>
+        <p class="size16 str400">Review Time</p>
+        <p class="size20 str500" id="avgReviewTime"><%= analytics.avgReviewTime %></p>
         <p class="size12 str500 border0 <%= statColor[analytics.avgReviewTimeStat] %>" id="avgReviewTimeStat"></p>
     </div>
+    <div class="bgWhite h120 corner15 col alignStart padding15">
+        <p class="size16 str400">Assess Time</p>
+        <p class="size20 str500" id="avgAssessTime"><%= analytics.avgAssessTime %></p>
+        <p class="size12 str500 border0 <%= statColor[analytics.avgAssessTimeStat] %>" id="avgAssessTimeStat"></p>
+    </div>
 </section>
+
+
 <br>
-    <div class="h300"><h3>Requests by Role</h3><canvas id="roleChart"></canvas></div>
-    <div class="h300"><h3>Requests by Course</h3><canvas id="courseChart"></canvas></div>
-    <div class="h300"><h3>Requests by Year Level</h3><canvas id="yearLevelChart"></canvas></div>
-    <div class="h300"><h3>Top Document Types</h3><canvas id="documentChart"></canvas></div>
-    <div class="h300"><h3>Document Purposes</h3><canvas id="purposeChart"></canvas></div>
-<br>
-<section class="col alignStart">
-     <h2>Top Users</h2>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr><th>User</th><th>Role</th><th>Total Requests</th></tr>
-      </thead>
+<section class="padding10 gap0 bgWhite corner15 alignStart">
+  <section class="bgWhite corner15 padding10 col width40">
+    <p class="size30"><i class="fas fa-crown size26"></i> Top Requestor</p>
+    <table class="porcelain">
       <tbody id="topUsersTable"></tbody>
     </table>
-  </div>
+  </section>
+  <section class="padding0 gap20 bgWhite corner15 alignStart width60">
+    <div class="h350 bgWhite corner15 padding10 width70 col">
+      <p class="size30"><i class="fas fa-user-friends size24"></i> Per Student Type</p>
+      <canvas id="roleChart"></canvas>
+    </div>
+    <div class="padding10 width30">
+      <table class="corner10 porcelain">
+        <thead>
+          <tr><th>Type</th><th>Count</th></tr>
+        </thead>
+        <tbody id="roleTable"></tbody>
+      </table>
+    </div>
+  </section>
+</section>
+<br>
 
-  <h2>Request Status Breakdown</h2>
-  <div class="table-wrapper">
-    <table>
+<section class="padding0 gap20">
+  <section class="padding0 gap20 bgWhite corner15 alignStart">
+  <div class="h300 bgWhite corner15 padding20 col width55"><canvas id="requestStatusStats"></canvas></div>
+    <div class="padding10 width45">
+      <table class="corner10 porcelain">
+        <thead>
+          <tr>
+            <th class="width50">Year Level</th>
+            <th class="width25 textCenter">Total</th>
+            <th class="width25">%</th>
+          </tr>
+        </thead>
+        <tbody id="statusTable"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="padding0 gap20 bgWhite corner15 alignStart">
+    <div class="h300 bgWhite corner15 padding20 col width55"><canvas id="yearLevelChart"></canvas></div>
+    <div class="padding10 width45">
+      <table class="corner10 porcelain">
+        <thead>
+          <tr>
+            <th class="width50">Year Level</th>
+            <th class="width25 textCenter">Total</th>
+            <th class="width25">%</th>
+          </tr>
+        </thead>
+        <tbody id="yearLevelTable"></tbody>
+      </table>
+    </div>
+  </section>
+</section>
+<br>
+  
+<section class="padding0 gap20 bgWhite corner15 alignStart">
+  <div class="h300 bgWhite corner15 padding20 width60">
+    <canvas id="documentChart"></canvas>
+  </div>
+  <div class="padding10 width40">
+    <table class="corner10">
       <thead>
-        <tr><th>Status</th><th>Count</th></tr>
+        <tr>
+          <th class="width60">Type</th>
+          <th class="width15">Qty</th>
+          <th class="width25">Requests</th>
+        </tr>
       </thead>
-      <tbody id="statusTable"></tbody>
+      <tbody id="documentStats"></tbody>
     </table>
   </div>
+  <div class="h300 bgWhite corner15 padding20 col hidden"><canvas id="courseChart"></canvas></div>
+</section>
+
+<br>
+
+<section class="padding0 gap20 bgWhite corner15 alignStart">
+  <div class="h300 bgWhite corner15 padding20 width60">
+    <canvas id="topPurpose"></canvas>
+  </div>
+  <div class="padding10 width40">
+    <table class="corner10">
+      <thead>
+        <tr><th>Type</th><th>Count</th></tr>
+      </thead>
+      <tbody id="purposeTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<br>
+
+<section class="col alignStart">
 
   <h2>Document Status per Type</h2>
   <div class="table-wrapper">
@@ -145,16 +269,6 @@ filterSelect.addEventListener("change", () => {
         <tr><th>Document Type</th><th>Status</th><th>Count</th></tr>
       </thead>
       <tbody id="docStatusTable"></tbody>
-    </table>
-  </div>
-
-  <h2>Requests by Role</h2>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr><th>Role</th><th>Count</th></tr>
-      </thead>
-      <tbody id="roleTable"></tbody>
     </table>
   </div>
 
@@ -168,36 +282,8 @@ filterSelect.addEventListener("change", () => {
     </table>
   </div>
 
-  <h2>Requests by Year Level</h2>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr><th>Year Level</th><th>Count</th></tr>
-      </thead>
-      <tbody id="yearLevelTable"></tbody>
-    </table>
-  </div>
-
-  <h2>Top Document Types</h2>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr><th>Document Type</th><th>Total Quantity</th><th>Total Requests</th></tr>
-      </thead>
-      <tbody id="topDocumentsTable"></tbody>
-    </table>
-  </div>
-
-  <h2>Document Purposes</h2>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr><th>Purpose</th><th>Count</th></tr>
-      </thead>
-      <tbody id="purposeTable"></tbody>
-    </table>
-  </div>
 </section>
+
 <section class="gap20 padding0">
     <div class="bgWhite h100 corner15"></div>
     <div class="bgWhite h100 corner15"></div>
@@ -212,35 +298,85 @@ let chartInstances = {}; // Keep chart instances to destroy before redraw
 function createChart(ctxId, labels, data, type='bar', label='') {
   if(chartInstances[ctxId]) chartInstances[ctxId].destroy();
   const ctx = document.getElementById(ctxId).getContext('2d');
-  chartInstances[ctxId] = new Chart(ctx, {
-    type,
-    data: {
-      labels,
-      datasets: [{
-        label,
-        data,
-        backgroundColor:'#142c54',
-        borderColor:'gray',
-        borderWidth: 0.5,
-        borderRadius: 16
-      }]
-    },
-    options: {
-      responsive:true,
-      maintainAspectRatio: false,
-      plugins:{ legend:{ display:true } },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { display: false },
-                grid: { display: false }
-            },
-            x: {
-                grid: { display: true }
-            }
+
+  // Dynamic bar thickness
+  let barThickness = 50;
+  if(type === 'bar') {
+    const chartWidth = document.getElementById(ctxId).offsetWidth;
+    barThickness = 100; // max 150
+  }
+
+  // Colors
+  let backgroundColors, borderColors;
+  if(type === 'doughnut') {
+    const palette = [
+      '#001b40','#002b64','#004093','#005ac1','#3f80db','#6695e3','#8da9eb','#b4bef2','#0c1a3a','#102549'
+    ];
+    backgroundColors = labels.map((_, i) => palette[i % palette.length]);
+    borderColors = labels.map(() => '#fff');
+  } else if(type === 'line') {
+    backgroundColors = 'white'; // fill under line
+    borderColors = '#142c54'; // line color
+  } else { // bar
+    backgroundColors = '#142c54';
+    borderColors = 'white';
+  }
+
+ chartInstances[ctxId] = new Chart(ctx, {
+  type,
+  data: {
+    labels,
+    
+    datasets: [{
+      label,
+      data,
+      backgroundColor: backgroundColors,
+      borderColor: borderColors,
+      borderWidth: type === 'doughnut' ? 2 : 0.5,
+      borderRadius: type === 'bar' ? 16 : 18,
+      barThickness: type === 'bar' ? barThickness : undefined,
+      fill: type === 'line' ? true : undefined,
+      tension: type === 'line' ? 0.2 : undefined, // smooth curve
+      pointRadius: type === 'line' ? 2 : undefined,
+      pointBackgroundColor: type === 'line' ? '#142c54' : undefined,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true },
+      tooltip: { enabled: true },
+      // Add labels on top of bars
+      datalabels: {
+        display: type === 'doughnut',
+        color: 'navy',
+        anchor: 'center',
+        align: 'center',                // distance from slice
+        backgroundColor: 'white', // background color of label
+        borderRadius: 6,            // rounded corners
+        padding: 4, 
+        font: { weight: 'normal', size: 12, family: 'Poppins' },
+        formatter: function(value, context) {
+          const dataArr = context.dataset.data;
+          const total = dataArr.reduce((sum, val) => sum + val, 0);
+          const percent = total ? ((value / total) * 100).toFixed(1) : 0;
+          return percent === "0.0" ? "" : `${percent} %`;
         }
-    }
-  });
+      }
+    },
+    scales: type === 'bar' || type === 'line' ? {
+      y: {
+        beginAtZero: true,
+        ticks: { display: false },
+        grid: { display: false }
+      },
+      x: {
+        grid: { display: true }
+      }
+    } : {}
+  },
+});
 }
 
 // Populate tables and charts
@@ -282,19 +418,29 @@ document.getElementById("filterInfo").innerText =
         ? `${rangeText}`
         : "";
   
-  document.getElementById("totalRequests").innerText = analytics.totalRequests || 0;
+  document.getElementById("totalRequests").innerText = `${analytics.totalRequests || 0} Total Request`;
   document.getElementById("approved").innerText = analytics.approved || 0;
   document.getElementById("declined").innerText = analytics.declined || 0;
   document.getElementById("pending").innerText = analytics.pending || 0;
   document.getElementById("onHold").innerText = analytics.onHold || 0;
-  document.getElementById("activeUserCount").innerText = analytics.activeUserCount || 0;
+  document.getElementById("onProcess").innerText = analytics.onProcess || 0;
+  
+  document.getElementById("approvedPercent").innerText = analytics.approvedPercent || 0;
+  document.getElementById("declinedPercent").innerText = analytics.declinedPercent || 0;
+  document.getElementById("pendingPercent").innerText = analytics.pendingPercent || 0;
+  document.getElementById("onHoldPercent").innerText = analytics.onHoldPercent || 0;
+  document.getElementById("onProcessPercent").innerText = analytics.onProcessPercent || 0;
+
+  document.getElementById("activeUserCount").innerText = `${analytics.activeUserCount || 0} Active`;
   document.getElementById("avgApprovalTime").innerText = analytics.avgApprovalTime || 0;
   document.getElementById("avgApprovalTimeStat").innerText = analytics.avgApprovalTimeStat || 0;
   document.getElementById("avgReviewTime").innerText = analytics.avgReviewTime || 0;
   document.getElementById("avgReviewTimeStat").innerText = analytics.avgReviewTimeStat || 0;
+  document.getElementById("avgAssessTime").innerText = analytics.avgAssessTime || 0;
+  document.getElementById("avgAssessTimeStat").innerText = analytics.avgAssessTimeStat || 0;
 
   // Clear tables
-  ["topUsersTable","statusTable","docStatusTable","roleTable","courseTable","yearLevelTable","topDocumentsTable","purposeTable"].forEach(id => 
+  ["topUsersTable","statusTable","docStatusTable","roleTable","courseTable","yearLevelTable","documentStats","purposeTable"].forEach(id => 
     document.getElementById(id).innerHTML = ""
   );
 
@@ -309,13 +455,35 @@ document.getElementById("filterInfo").innerText =
   }
 
   // Tables
-  populateTable("topUsersTable", analytics.topUsers, u => `<td>${u.userInfo.fName} ${u.userInfo.lName}</td><td>${u.userInfo.role}</td><td>${u.totalRequests}</td>`);
-  populateTable("statusTable", analytics.requestStatusStats, s => `<td>${s._id}</td><td>${s.count}</td>`);
+  populateTable("topUsersTable", analytics.topUsers, u => `
+  <td class="width15">
+    <img src="${u.userInfo.photo ? u.userInfo.photo : '/images/profile.png'}" alt="photo" class="marginRight10 h40 w40">
+  </td>
+  <td class="width85 inline" style="display: inline;">
+    <div class="alignStart width0 col marginLeft10">
+      <p class="size16 str500">${u.userInfo.fName} ${u.userInfo.lName} &bull; <span class="green size16 str500">${u.totalRequests} ${u.totalRequests === 1 ? "request" : "requests"}</span></p>
+      <p class="size12">${u.userInfo.role} &bull; ${u.userInfo.course}</p>
+    </div>
+  </td>
+`);
+
+
+  populateTable("yearLevelTable", analytics.yearLevelStats, d => `
+    <td>${d._id}</td>
+    <td class="textCenter">${d.count}</td>
+    <td>${d.percentage.toFixed(1)}${d.percentage === 0 ? "" : " %"}</td>
+  `);
+
+  populateTable("statusTable", analytics.requestStatusStats, s => `
+    <td>${s._id}</td>
+    <td class="textCenter">${s.count}</td>
+    <td>${s.percentage.toFixed(1)}${s.percentage === 0 ? "" : " %"}</td>
+  `);
+
   populateTable("docStatusTable", analytics.docStatusStats, d => `<td>${d._id.type}</td><td>${d._id.status}</td><td>${d.count}</td>`);
   populateTable("roleTable", analytics.roleStats, d => `<td>${d._id}</td><td>${d.count}</td>`);
   populateTable("courseTable", analytics.courseStats, d => `<td>${d._id}</td><td>${d.count}</td>`);
-  populateTable("yearLevelTable", analytics.yearLevelStats, d => `<td>${d._id}</td><td>${d.count}</td>`);
-  populateTable("topDocumentsTable", analytics.topDocuments, d => `<td>${d._id}</td><td>${d.totalQty}</td><td>${d.totalRequests}</td>`);
+  populateTable("documentStats", analytics.documentStats, d => `<td>${d._id}</td><td>${d.totalQty}</td><td>${d.totalRequests}</td>`);
   populateTable("purposeTable", analytics.purposeStats, d => `<td>${d._id}</td><td>${d.total}</td>`);
 
   // Charts
@@ -330,15 +498,17 @@ document.getElementById("filterInfo").innerText =
   }
 
   if(analytics.roleStats && analytics.roleStats.length) 
-    createChart('roleChart', analytics.roleStats.map(d=>d._id), analytics.roleStats.map(d=>d.count), 'bar', 'Requests by Role');
+    createChart('roleChart', analytics.roleStats.map(d=>d._id), analytics.roleStats.map(d=>d.count), 'bar', '');
   if(analytics.courseStats && analytics.courseStats.length) 
     createChart('courseChart', analytics.courseStats.map(d=>d._id), analytics.courseStats.map(d=>d.count), 'bar', 'Requests by Course');
   if(analytics.yearLevelStats && analytics.yearLevelStats.length) 
-    createChart('yearLevelChart', analytics.yearLevelStats.map(d=>d._id), analytics.yearLevelStats.map(d=>d.count), 'bar', 'Requests by Year Level');
+    createChart('yearLevelChart', analytics.yearLevelStats.map(d=>d._id), analytics.yearLevelStats.map(d=>d.count), 'doughnut', 'Requests by Year Level');
   if(analytics.topDocuments && analytics.topDocuments.length) 
     createChart('documentChart', analytics.topDocuments.map(d=>d._id), analytics.topDocuments.map(d=>d.totalQty), 'bar', 'Top Documents');
-  if(analytics.purposeStats && analytics.purposeStats.length) 
-    createChart('purposeChart', analytics.purposeStats.map(d=>d._id), analytics.purposeStats.map(d=>d.total), 'bar', 'Document Purposes');
+  if(analytics.topPurpose && analytics.topPurpose.length) 
+    createChart('topPurpose', analytics.topPurpose.map(d=>d._id), analytics.topPurpose.map(d=>d.total), 'bar', 'Top Document Purposes');
+  if(analytics.requestStatusStats && analytics.requestStatusStats.length) 
+    createChart('requestStatusStats', analytics.requestStatusStats.map(d=>d._id), analytics.requestStatusStats.map(d=>d.count), 'doughnut', 'Status Breakdown');
 }
 
 // Fetch analytics from API
@@ -368,10 +538,6 @@ async function fetchAnalytics(range="thisYear") {
 document.getElementById("filterSelect").addEventListener("change", e => {
   fetchAnalytics(e.target.value);
 });
-
-
-// Load default analytics
-fetchAnalytics(document.getElementById("filterSelect").value);
 
 // ----------------------------
 // Date input listeners (add these at the bottom)

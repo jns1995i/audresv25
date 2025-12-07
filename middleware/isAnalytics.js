@@ -62,20 +62,41 @@ module.exports = async function analyticsMiddleware(req, res, next) {
     }
 
     const dateFilter = start && end
-      ? { createdAt: { $gte: start.toDate(), $lte: end.toDate() } }
-      : {};
+      ? { 
+          createdAt: { $gte: start.toDate(), $lte: end.toDate() },
+          archive: false,
+          verify: false
+        }
+      : { archive: false, verify: false };
+
 
     // ================================
     // REQUEST COUNTS
     // ================================
     const allRequests = await requests.find(dateFilter);
     const totalRequests = allRequests.length;
-    const approved = allRequests.filter(r => r.status === "Approved").length;
+
+    const approved = allRequests.filter(r => ["Verified", "For Release", "Claimed"].includes(r.status)).length;
+    const onProcess = allRequests.filter(r => ["Reviewed", "Assessed", "For Payment", "For Verification"].includes(r.status)).length;
     const pending = allRequests.filter(r => r.status === "Pending").length;
     const declined = allRequests.filter(r => r.declineAt).length;
     const onHold = allRequests.filter(r => r.holdAt).length;
 
-    const requestStatusStats = await requests.aggregate([
+    const getPercent = (count) => {
+      if (totalRequests === 0) return 0;
+      const value = (count / totalRequests) * 100;
+      return Number.isInteger(value) ? value : Number(value.toFixed(1));
+    };
+
+    const approvedPercent = `${getPercent(approved)}%`;
+    const pendingPercent = `${getPercent(pending)}%`;
+    const declinedPercent = `${getPercent(declined)}%`;
+    const onHoldPercent = `${getPercent(onHold)}%`;
+    const onProcessPercent = `${getPercent(onProcess)}%`;
+
+    console.log(approvedPercent, pendingPercent, declinedPercent, onHoldPercent);
+
+    let requestStatusStats = await requests.aggregate([
       { $match: dateFilter },
       { 
         $group: { 
@@ -86,36 +107,75 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       { $sort: { _id: 1 } } // optional, sort alphabetically
     ]);
 
+    requestStatusStats = requestStatusStats.map(s => ({
+    _id: s._id,
+    count: s.count,
+    percentage: totalRequests === 0 ? 0 : Number(((s.count / totalRequests) * 100).toFixed(1)) // numeric only
+  }));
+
     // ================================
     // ACTIVE USERS
     // ================================
-    const uniqueUsers = [...new Set(allRequests.map(r => r.requestBy.toString()))];
-    const activeUserCount = uniqueUsers.length;
+
+    const requestorIds = allRequests.map(r => r.requestBy.toString());
+    const relevantUsers = await users.find({
+      _id: { $in: requestorIds },
+      role: { $in: ["Student", "Alumni", "Former", "Tst"] }
+    });
+
+    // Count unique active users
+    const activeUserCount = relevantUsers.length;
 
     // ================================
     // TOP USERS
     // ================================
+
     const topUsersAgg = await requests.aggregate([
       { $match: dateFilter },
       { $group: { _id: "$requestBy", totalRequests: { $sum: 1 } } },
       { $sort: { totalRequests: -1 } },
-      { $limit: 5 },
-      { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "userInfo" } },
-      { $unwind: "$userInfo" },
-      { $project: { _id: 1, totalRequests: 1, userInfo: { fName: 1, lName: 1, role: 1 } } }
+      { $limit: 3 },
+      {
+        $lookup: {
+          from: "users",
+          let: { uid: "$_id" },
+          pipeline: [
+            { $match: {
+                $expr: { $eq: ["$_id", "$$uid"] },
+                role: { $in: ["Student", "Alumni", "Former","Test"] }
+            }},
+            { $project: { fName: 1, lName: 1, mName: 1, photo: 1, course: 1, role: 1 } }
+          ],
+          as: "userInfo"
+        }
+      },
+      { $unwind: "$userInfo" }
     ]);
+
 
     // ================================
     // ROLE, COURSE, YEAR LEVEL STATS
     // ================================
-    const [roleStats, courseStats, yearLevelStats] = await Promise.all([
+    const [roleStats, courseStats, yearLevelRaw] = await Promise.all([
+      // roleStats (only Student/Alumni/Former/Test)
       requests.aggregate([
         { $match: dateFilter },
-        { $lookup: { from: "users", localField: "requestBy", foreignField: "_id", as: "userInfo" } },
+        {
+          $lookup: {
+            from: "users",
+            let: { uid: "$requestBy" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$uid"] }, role: { $in: ["Student", "Alumni", "Former","Test"] } } }
+            ],
+            as: "userInfo"
+          }
+        },
         { $unwind: "$userInfo" },
         { $group: { _id: "$userInfo.role", count: { $sum: 1 } } },
         { $sort: { count: -1 } }
       ]),
+
+      // courseStats
       requests.aggregate([
         { $match: dateFilter },
         { $lookup: { from: "users", localField: "requestBy", foreignField: "_id", as: "userInfo" } },
@@ -123,6 +183,8 @@ module.exports = async function analyticsMiddleware(req, res, next) {
         { $group: { _id: "$userInfo.course", count: { $sum: 1 } } },
         { $sort: { count: -1 } }
       ]),
+
+      // yearLevel raw counts (compute percentages in JS)
       requests.aggregate([
         { $match: dateFilter },
         { $lookup: { from: "users", localField: "requestBy", foreignField: "_id", as: "userInfo" } },
@@ -132,16 +194,29 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       ])
     ]);
 
+    // compute percentages using totalRequests (avoid heavy aggregation)
+    const yearLevelStats = yearLevelRaw.map(d => ({
+      _id: d._id,
+      count: d.count,
+      percentage: totalRequests === 0 ? 0 : Number(((d.count / totalRequests) * 100).toFixed(1))
+    }));
+
     // ================================
     // DOCUMENT ANALYTICS
     // ================================
     const requestTRs = allRequests.map(r => r.tr);
-    const [topDocuments, purposeStats, docStatusStats] = await Promise.all([
+    const [topDocuments, topPurpose, purposeStats, docStatusStats, documentStats] = await Promise.all([
       items.aggregate([
         { $match: { tr: { $in: requestTRs } } },
         { $group: { _id: "$type", totalQty: { $sum: "$qty" }, totalRequests: { $sum: 1 } } },
         { $sort: { totalQty: -1 } },
-        { $limit: 10 }
+        { $limit: 3 }
+      ]),
+      items.aggregate([
+        { $match: { tr: { $in: requestTRs } } },
+        { $group: { _id: "$purpose", total: { $sum: 1 } } },
+        { $sort: { total: -1 } },
+        { $limit: 3 }
       ]),
       items.aggregate([
         { $match: { tr: { $in: requestTRs } } },
@@ -152,6 +227,11 @@ module.exports = async function analyticsMiddleware(req, res, next) {
         { $match: { tr: { $in: requestTRs } } },
         { $group: { _id: { type: "$type", status: "$status" }, count: { $sum: 1 } } },
         { $sort: { "_id.type": 1 } }
+      ]),
+      items.aggregate([
+        { $match: { tr: { $in: requestTRs } } },
+        { $group: { _id: "$type", totalQty: { $sum: "$qty" }, totalRequests: { $sum: 1 } } },
+        { $sort: { totalQty: -1 } }
       ])
     ]);
 
@@ -228,6 +308,44 @@ module.exports = async function analyticsMiddleware(req, res, next) {
 
       const avgReviewTime = formatDuration(avgReviewDecimal);
       const avgReviewTimeStat = getTimeStat2(avgReviewDecimal);
+
+            
+    // ================================
+    // AVERAGE ASSESSMENT TIME
+    // ================================
+      const avgAssessAgg = await requests.aggregate([
+        { $match: { status: "Reviewed", assessAt: { $exists: true }, ...dateFilter } },
+        { $project: { durationHours: { $divide: [{ $subtract: ["$assessAt", "$reviewAt"] }, 1000*60*60] } } },
+        { $group: { _id: null, avgAssessTime: { $avg: "$durationHours" } } }
+      ]);
+      const avgAssessDecimal = avgAssessAgg[0]?.avgAssessTime || 0;
+
+      function formatDuration(hoursDecimal) {
+        const totalMinutes = Math.round(hoursDecimal * 60);
+        const days = Math.floor(totalMinutes / (60 * 24));
+        const hrs = Math.floor((totalMinutes % (60 * 24)) / 60);
+        const mins = totalMinutes % 60;
+        let result = "";
+        if (days) result += `${days} day${days > 1 ? 's' : ''} `;
+        if (hrs) result += `${hrs} hr${hrs > 1 ? 's' : ''} `;
+        if (mins) result += `${mins} min${mins > 1 ? 's' : ''}`;
+        if (!days && !hrs && !mins) result = "Less than a minute";
+        return result.trim();
+      }
+
+        function getTimeStat2(hoursDecimal) {
+          if (hoursDecimal < 1/60) return "Quick";
+          if (hoursDecimal < 0.5) return "Fast";
+          if (hoursDecimal < 1) return "Moderate";
+          if (hoursDecimal < 3) return "Standard";
+          if (hoursDecimal < 24) return "Slow";
+          if (hoursDecimal < 72) return "Warning";
+          return "Critical";                         
+      }
+
+
+      const avgAssessTime = formatDuration(avgAssessDecimal);
+      const avgAssessTimeStat = getTimeStat2(avgAssessDecimal);
 
 
 
@@ -409,6 +527,13 @@ module.exports = async function analyticsMiddleware(req, res, next) {
     }
     }
 
+    const totalUsers = await users.countDocuments({
+      role: { $in: ["Student", "Alumni", "Former", "Test"] },
+      archive: false,
+      verify: false
+    });
+
+
     // ================================
     // FINAL OBJECT
     // ================================
@@ -418,23 +543,28 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       rangeEnd: end ? end.format("YYYY-MM-DD") : null,
 
       totalRequests,
-      approved,
-      declined,
-      pending,
-      onHold,
+      approved, approvedPercent,
+      declined, declinedPercent,
+      pending, pendingPercent,
+      onHold, onHoldPercent,
+      onProcess, onProcessPercent,
       avgApprovalTime, avgApprovalTimeStat,
       avgReviewTime, avgReviewTimeStat,
+      avgAssessTime, avgAssessTimeStat,
 
       activeUserCount,
       topUsers: topUsersAgg,
+      totalUsers,
       roleStats,
       courseStats,
       yearLevelStats,
 
       topDocuments,
+      topPurpose,
       purposeStats,
       docStatusStats,
       requestStatusStats,
+      documentStats,
 
       trend: trendAgg
     };

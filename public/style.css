@@ -127,7 +127,7 @@ html {
     --shade14: #0a071f;
     --shade15: #080512; /* Darkest */
 
-    /*
+    /* Green
     --tint1: #4c784d;
     --tint2: #618e67;
     --tint3: #78a77f;
@@ -918,10 +918,12 @@ td:last-child {
     align-items: center;
 }
 
+/*
 td:hover {
     text-overflow: visible !important;
     white-space: wrap;
 }
+*/
 
 td img {
     height: 28px;
@@ -1441,7 +1443,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .bgYellow100{background-color:rgb(255, 249, 235); border:0.5px solid rgba(255, 166, 0, 0.4);color:rgb(218, 147, 32); padding: 5px; border-radius: 0.7rem; text-align: center;}
 .bgBlue100{background-color:rgb(235,245,255); border:0.5px solid rgba(0,102,255,0.4);color:royalblue; padding: 5px; border-radius: 0.7rem; text-align: center;}
 .bgViolet100{background-color:rgb(245,235,255); border:0.5px solid rgba(138,43,226,0.4);color:blueviolet; padding: 5px; border-radius: 0.7rem; text-align: center;}
-.bgGray100 {background-color: rgb(236, 236, 236); border: 1px solid rgba(128, 128, 128, 0.484); color: gray; padding: 5px; border-radius: 0.7rem; text-align: center;}
+.bgGray100 {background-color: rgb(236, 236, 236); border: 1px solid rgba(128, 128, 128, 0.484); color: rgb(48, 48, 48); padding: 5px; border-radius: 0.7rem; text-align: center;}
 .bgBlack100 {background-color: rgb(236, 236, 236); border: 1px solid rgba(0, 0, 0, 0.484); color: rgb(0, 0, 0); padding: 5px; border-radius: 0.7rem; text-align: center;}
 
 

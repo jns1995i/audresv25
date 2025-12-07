@@ -356,9 +356,6 @@ app.get('/', isRatings, async (req, res) => {
     }
 
     await ensureUserExists('Head', 'Head', 'all456', 1);
-    await ensureUserExists('Test', 'Test', 'all456', 0, {
-      course: 'Bachelor of Science in Information Technology'
-    });
     await ensureUserExists('Dev', 'Dev', 'all456', 1, {
       email: 'jnsantiago.au@phinmaed.com',
       phone: '09296199578'
