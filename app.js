@@ -1330,10 +1330,24 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
       case 'success': message = 'Payment uploaded successfully!'; break;
       case 'error': message = 'Failed to upload payment!'; break;
     }
+    const dayjs = require("dayjs");
+
+    // After fetching rq
+    const rqWithFormattedDates = {
+      ...rq.toObject(), // convert Mongoose doc to plain object
+      assignAtFormatted: rq.assignAt ? dayjs(rq.assignAt).format("MMMM D, YYYY h:mm A") : null,
+      reviewAtFormatted: rq.reviewAt ? dayjs(rq.reviewAt).format("MMMM D, YYYY h:mm A") : null,
+      approveAtFormatted: rq.approveAt ? dayjs(rq.approveAt).format("MMMM D, YYYY h:mm A") : null,
+      assessAtFormatted: rq.assessAt ? dayjs(rq.assessAt).format("MMMM D, YYYY h:mm A") : null,
+      payAtFormatted: rq.payAt ? dayjs(rq.payAt).format("MMMM D, YYYY h:mm A") : null,
+      verifyAtFormatted: rq.verifyAt ? dayjs(rq.verifyAt).format("MMMM D, YYYY h:mm A") : null,
+      turnAtFormatted: rq.turnAt ? dayjs(rq.turnAt).format("MMMM D, YYYY h:mm A") : null,
+      claimedAtFormatted: rq.claimedAt ? dayjs(rq.claimedAt).format("MMMM D, YYYY h:mm A") : null,
+    };
 
     res.render('reqView', {
       title: 'View Request',
-      rq,
+      rq: rqWithFormattedDates,
       items: rqItems,
       totalAmount,
       back: 'hom',
@@ -1376,10 +1390,24 @@ app.get('/reqView2/:id', isLogin, async (req, res) => {
       case 'success': message = 'Payment uploaded successfully!'; break;
       case 'error': message = 'Failed to upload payment!'; break;
     }
+        const dayjs = require("dayjs");
+
+    // After fetching rq
+    const rqWithFormattedDates = {
+      ...rq.toObject(), // convert Mongoose doc to plain object
+      assignAtFormatted: rq.assignAt ? dayjs(rq.assignAt).format("MMMM D, YYYY h:mm A") : null,
+      reviewAtFormatted: rq.reviewAt ? dayjs(rq.reviewAt).format("MMMM D, YYYY h:mm A") : null,
+      approveAtFormatted: rq.approveAt ? dayjs(rq.approveAt).format("MMMM D, YYYY h:mm A") : null,
+      assessAtFormatted: rq.assessAt ? dayjs(rq.assessAt).format("MMMM D, YYYY h:mm A") : null,
+      payAtFormatted: rq.payAt ? dayjs(rq.payAt).format("MMMM D, YYYY h:mm A") : null,
+      verifyAtFormatted: rq.verifyAt ? dayjs(rq.verifyAt).format("MMMM D, YYYY h:mm A") : null,
+      turnAtFormatted: rq.turnAt ? dayjs(rq.turnAt).format("MMMM D, YYYY h:mm A") : null,
+      claimedAtFormatted: rq.claimedAt ? dayjs(rq.claimedAt).format("MMMM D, YYYY h:mm A") : null,
+    };
 
     res.render('reqView', {
       title: 'View Request',
-      rq,
+      rq: rqWithFormattedDates,
       items: rqItems,
       totalAmount,
       back: 'reqAll',
@@ -1793,6 +1821,7 @@ app.post("/appItem", async (req, res) => {
         // Remove declineAt & holdAt if approving any item
         requestDoc.declineAt = null;
         requestDoc.holdAt = null;
+        requestDoc.reviewAt = new Date();
 
         // Check if any items are still pending
         const pendingItems = await items.find({ tr: requestDoc.tr, status: "Pending" });
@@ -1800,7 +1829,7 @@ app.post("/appItem", async (req, res) => {
         // If no pending items left → mark request as Reviewed
         if (pendingItems.length === 0) {
             requestDoc.status = "Reviewed";
-            requestDoc.approveAt = new Date();
+            requestDoc.reviewAt = new Date();
         }
 
         await requestDoc.save();
@@ -1852,7 +1881,7 @@ app.post("/appAllItem", async (req, res) => {
         requestDoc.status = "Reviewed";
         requestDoc.declineAt = null;
         requestDoc.holdAt = null;
-        requestDoc.approveAt = new Date();
+        requestDoc.reviewAt = new Date();
         await requestDoc.save();
 
         // Redirect to correct view

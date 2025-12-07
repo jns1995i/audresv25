@@ -1,5 +1,5 @@
  <% if ( rq.holdAt ) { %>
-                <section class=" bgWhite padding0 marginTop10 relative">
+                <section class=" bgWhite padding0 relative">
                     <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         Your request has been hold! Due to
@@ -12,7 +12,7 @@
                     </section>
                 </section>
                 <% } else if ( rq.declineAt ) { %>
-                <section class=" bgWhite padding0 marginTop10 relative col">
+                <section class=" bgWhite padding0 relative col">
                     <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         We regret to inform you that your request has been declined. For further assistance, please visit the Registrar’s Office on your campus, or contact us through our official hotline at <%= seedUser.phone %> or via email at <%= seedUser.email %>
@@ -23,9 +23,9 @@
                     </section>
                 </section>
                 <% } else { %>
-                <section class=" bgWhite padding0 marginTop10 relative">
+                <section class=" bgWhite padding0 relative">
                     <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
-                    <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
+                    <section class="bgSoft textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         <% if (rq.status === "Pending") { %>
                         <p class="">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed. Thank you for your patience!</p>
                         <% } else if (rq.status === "Reviewed") { %>
@@ -94,7 +94,7 @@
                         <% } else if (rq.status === "Verified") { %>
                             <p class="">Your payment has been verified. We will notify you via the email you provided once your document is ready for release.</p>
                         <% } else if (rq.status === "For Release") { %>
-                            <div class="height0 col bgSoft padding20 corner15">
+                            <div class="height0 col bgWhite padding20 corner15">
                                 <p><i class="fas fa-check-circle blue corner500" style="font-size: 12px; outline: 1px solid rgb(3, 18, 106, 0.2);"></i>
                                 Great News! you can now claim your document anytime.
                                 <% if (rq.purpose === 'Board Exam') { %>
