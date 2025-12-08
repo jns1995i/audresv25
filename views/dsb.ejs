@@ -19,6 +19,12 @@
       opacity: 0.5;
       filter: grayscale(0.5);
     }
+    #registrationGrowth {
+      i {
+        font-size: 10px;
+        height: 12px;
+      }
+    }
 
 </style>
 
@@ -33,6 +39,20 @@
     Critical: "bgRed200"
   };
 %>
+<section class="h120 bgWhite corner15 relative justifyBetween alignStart">
+    <div class="width60 col alignStart justifyBetween gap5 padding5">
+        <p class="size32 str400" id="totalRequests"></p>
+        <p id="pendingPercent" class="hidden"> 0</p>
+        <section class="gap10 padding0 width0">
+          <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests <div id="pending" class="marginLeft5 divCenter bgShade1 w18 h18 white corner500 str500"> 0</div></a>
+          <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify <div id="toVerifyUsers" class="marginLeft5 divCenter bgShade1 w18 h18 white corner500 str500"> 0</div></a>
+        </section>
+    </div>
+    <div class="width40 bgTint14 corner15 col alignEnd justifyBetween padding10">
+    </div>
+    <img src="/images/sun2.png" alt="" class="h100 absolute" style="right: 35%;">
+</section>
+
 <br>
 
 <section class="gap20 padding0">
@@ -68,54 +88,52 @@
           <p class="size12 str500 bgSoft padding3 corner10" id="declinedPercent"></p>
         </section>
     </section>
-    <section class="bgWhite keyMetrics">
-        <a href="" class="nav cnavLG disabled gradient bgShade1 white absolute translateY left15"><i class="fas fa-check size14"></i></a>
-        <p class="size16 str400">Declined</p>
+    <section class="bgWhite keyMetrics hidden">
+        <a href="" class="nav cnavLG disabled gradient bgShade1 white absolute translateY left15"><i class="fas fa-user-check size14"></i></a>
+        <p class="size16 str400">To Verify</p>
         <section class="width0 gap10 padding0">
-          <p class="size20 str500" id="declined"></p>
-          <p class="size12 str500 bgSoft padding3 corner10" id="declinedPercent"></p>
+          <p class="size20 str500" id=""></p>
+          <p class="size12 str500 bgSoft padding3 corner10" id=""></p>
         </section>
     </section>
 </section>
 
+
 <br>
 
-<section class="h150 bgWhite corner15 relative justifyBetween">
-    <div class="width55 col alignStart justifyStart gap5 padding5">
-        <p class="size32 str400" id="totalRequests"></p>
-        <div class="height0 width0 gap5"><p id="pending"> 0</p> Pending <p id="pendingPercent"> 0</p></div>
-        <section class="width100 gap10 padding0 justifyStart">
-            <div class="selectBar">
-                <i class="fas fa-filter"></i>
-                <select id="filterSelect">
-                <option value="" disabled>--Filter</option>
-                <option value="today">Today</option>
-                <option value="yesterday">Yesterday</option>
-                <option value="thisWeek">This Week</option>
-                <option value="lastWeek">Last Week</option>
-                <option value="thisMonth">This Month</option>
-                <option value="lastMonth">Last Month</option>
-                <option value="thisYear" selected>This Year</option>
-                <option value="specific">Specific Date</option>
-                <option value="custom">Custom Range</option>
-                <option value="lastYear">Last Year</option>
-                <option value="overall">Overall</option>
-                </select>
-            </div>
-            <input type="date" id="specificDate" style="display:none;" class="" />
-            <input type="date" id="customStart" style="display:none;" class="" />
-            <input type="date" id="customEnd" style="display:none;" class="" />
-        </section>
-        <label class="size12" id="filterInfo" class="marginBlock10"></label>
-    </div>
-    <div class="width40 bgTint14 corner15 col alignEnd padding20">
-      <p class="size30" id="activeUserCount"></p>
-      <p class="size18" id=""><%= analytics.totalUsers %> Total Users</p>
-    </div>
-    <img src="/images/student.png" alt="" class="h180 absolute" style="right: 32%; top: 0;">
+<section class="col corner15 bgWhite padding20">
+  <section class="justifyBetween paddingInline0">
+    <p class="size20 str400"><i class="fas fa-chart-line size26"></i> Request Trend</p>
+    <section class="width0 gap10 padding0">
+      <div class="selectBar w200">
+          <i class="fas fa-filter"></i>
+          <select id="filterSelect">
+          <option value="" disabled>--Filter</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="thisWeek">This Week</option>
+          <option value="lastWeek">Last Week</option>
+          <option value="thisMonth">This Month</option>
+          <option value="lastMonth">Last Month</option>
+          <option value="thisYear" selected>This Year</option>
+          <option value="specific">Specific Date</option>
+          <option value="custom">Custom Range</option>
+          <option value="lastYear">Last Year</option>
+          <option value="overall">Overall</option>
+          </select>
+      </div>
+      <input type="date" id="specificDate" style="display:none;" class="w160" />
+      <input type="date" id="customStart" style="display:none;" class="w160" />
+      <input type="date" id="customEnd" style="display:none;" class="w160" />
+      <p class="size12" id="filterInfo" class="width0 hidden" style="display: none !important;"></p>
+    </section>
+  </section>
+  <section class="h260 corner15 bgWhite">
+      <canvas id="trendChart"></canvas>
+  </section>
 </section>
 <script>
-    const filterSelect = document.getElementById("filterSelect");
+const filterSelect = document.getElementById("filterSelect");
 const specificDate = document.getElementById("specificDate");
 const customStart = document.getElementById("customStart");
 const customEnd = document.getElementById("customEnd");
@@ -138,65 +156,34 @@ filterSelect.addEventListener("change", () => {
 
 </script>
 <br>
-<section class="h300 corner15 bgWhite">
-    <canvas id="trendChart"></canvas>
-</section>
-<br>
-<section class="justifyStart">
-  <p class="size30"><i class="fas fa-chart-line size26"></i> Average Approval Rate</p>
-</section>
-<section class="gap20 padding0">
-    <div class="bgWhite h120 corner15 col alignStart padding15">
-        <p class="size16 str400">Processing Time</p>
-        <p class="size20 str500" id="avgApprovalTime"><%= analytics.avgApprovalTime %></p>
-        <p class="size12 str500 border0 <%= statColor[analytics.avgApprovalTimeStat] %>" id="avgApprovalTimeStat"></p>
-    </div>
-    <div class="bgWhite h120 corner15 col alignStart padding15">
-        <p class="size16 str400">Review Time</p>
-        <p class="size20 str500" id="avgReviewTime"><%= analytics.avgReviewTime %></p>
-        <p class="size12 str500 border0 <%= statColor[analytics.avgReviewTimeStat] %>" id="avgReviewTimeStat"></p>
-    </div>
-    <div class="bgWhite h120 corner15 col alignStart padding15">
-        <p class="size16 str400">Assess Time</p>
-        <p class="size20 str500" id="avgAssessTime"><%= analytics.avgAssessTime %></p>
-        <p class="size12 str500 border0 <%= statColor[analytics.avgAssessTimeStat] %>" id="avgAssessTimeStat"></p>
-    </div>
-</section>
-
-
-<br>
-<section class="padding10 gap0 bgWhite corner15 alignStart">
-  <section class="bgWhite corner15 padding10 col width40">
-    <p class="size30"><i class="fas fa-crown size26"></i> Top Requestor</p>
-    <table class="porcelain">
-      <tbody id="topUsersTable"></tbody>
-    </table>
+<section class="bgWhite corner15 alignStart gap10 padding20">
+  <section class="alignStart col porcelain corner15 padding10 gap10 width40">
+    <p class="size30">Average Approval Rate</p>
+    <section class="gap10 padding0 col">
+        <div class="bgWhite height0 corner15 col alignStart padding15 relative">
+            <p class="size12 str400">Processing Time</p>
+            <p class="size16 str500" id="avgApprovalTime"><%= analytics.avgApprovalTime %></p>
+            <p class="size12 str500 border0 absolute right10 top10 <%= statColor[analytics.avgApprovalTimeStat] %>" id="avgApprovalTimeStat"></p>
+        </div>
+        <div class="bgWhite height0 corner15 col alignStart padding15 relative">
+            <p class="size12 str400">Reviewing Time</p>
+            <p class="size16 str500" id="avgReviewTime"><%= analytics.avgReviewTime %></p>
+            <p class="size12 str500 border0 absolute right10 top10 <%= statColor[analytics.avgReviewTimeStat] %>" id="avgReviewTimeStat"></p>
+        </div>
+        <div class="bgWhite height0 corner15 col alignStart padding15 relative">
+            <p class="size12 str400">Assessment Time</p>
+            <p class="size16 str500" id="avgAssessTime"><%= analytics.avgAssessTime %></p>
+            <p class="size12 str500 border0 absolute right10 top10 <%= statColor[analytics.avgAssessTimeStat] %>" id="avgAssessTimeStat"></p>
+        </div>
+    </section>
   </section>
   <section class="padding0 gap20 bgWhite corner15 alignStart width60">
-    <div class="h350 bgWhite corner15 padding10 width70 col">
-      <p class="size30"><i class="fas fa-user-friends size24"></i> Per Student Type</p>
-      <canvas id="roleChart"></canvas>
-    </div>
-    <div class="padding10 width30">
-      <table class="corner10 porcelain">
-        <thead>
-          <tr><th>Type</th><th>Count</th></tr>
-        </thead>
-        <tbody id="roleTable"></tbody>
-      </table>
-    </div>
-  </section>
-</section>
-<br>
-
-<section class="padding0 gap20">
-  <section class="padding0 gap20 bgWhite corner15 alignStart">
-  <div class="h300 bgWhite corner15 padding20 col width55"><canvas id="requestStatusStats"></canvas></div>
+    <div class="h300 bgWhite corner15 padding20 col width55"><canvas id="requestStatusStats"></canvas></div>
     <div class="padding10 width45">
       <table class="corner10 porcelain">
         <thead>
           <tr>
-            <th class="width50">Year Level</th>
+            <th class="width50">Status</th>
             <th class="width25 textCenter">Total</th>
             <th class="width25">%</th>
           </tr>
@@ -205,9 +192,61 @@ filterSelect.addEventListener("change", () => {
       </table>
     </div>
   </section>
-  <section class="padding0 gap20 bgWhite corner15 alignStart">
+</section>
+
+<br>
+<section class="padding10 gap20 bgWhite corner15 alignStart justifyBetween">
+  <section class="padding0 gap10 bgWhite corner15 col alignStart width40">
+    <p class="size30 marginLeft15">Users Overview</p>
+    <div class="padding10">
+      <table class="corner10 porcelain">
+        <thead>
+          <tr><th>Type</th><th>Requests</th></tr>
+        </thead>
+        <tbody id="roleTable"></tbody>
+      </table>
+    </div>
+    <div class="h260 bgWhite corner15 padding0 col alignStart">
+      <canvas id="roleChart"></canvas>
+    </div>
+  </section>
+  <section class="bgWhite corner15 padding20 col width50 alignStart">
+    <section class="relative bgWhite gap10 justifyStart alignEnd padding0">
+      <p class="size14 flex justifyCenter alignCenter absolute right5 top10" id="registrationGrowth"></p>
+      <div class="width80 col alignStart justifyStart padding5">
+        <p class="size30" id="activeUserCount"></p>
+        <p class="size14" id="totalUsers">Out of <%= analytics.totalUsers %> Total Users</p>
+        <br>
+        <section class="porcelain corner10 gap10 padding5">
+          <section class="corner10 col alignStart">
+            <p class="size12" id="" class="darkGray">Prev Users</p>
+            <p class="size18" id="previousUsersCount"></p>
+          </section>
+          <section class="corner10 bgWhite col alignStart">
+            <p class="size12" id="" class="darkGray">Current Users</p>
+            <p class="size18" id="currentUsersCount"></p>
+          </section>
+        </section>
+      </div>
+      <div class="width20 col padding10">
+        <a href="" class="nav cnavLG hidden"></a>
+        <img src="/images/student.png" alt="" class="h100">
+      </div>
+    </section>
+    <br>
+    <p class="size30">Top Requestor</p>
+    <table class="porcelain">
+      <tbody id="topUsersTable"></tbody>
+    </table>
+  </section>
+</section>
+
+<br>
+
+<section class="gap20 alignStart bgWhite corner15 justifyBetween">
+  <section class="padding0 gap20 bgWhite corner15 col width50">
     <div class="h300 bgWhite corner15 padding20 col width55"><canvas id="yearLevelChart"></canvas></div>
-    <div class="padding10 width45">
+    <div class="padding10">
       <table class="corner10 porcelain">
         <thead>
           <tr>
@@ -220,7 +259,18 @@ filterSelect.addEventListener("change", () => {
       </table>
     </div>
   </section>
+  <section class="width50">
+    <div class="porcelain">
+      <table>
+        <thead>
+          <tr><th class="width70">Course</th><th class="width30">Count</th></tr>
+        </thead>
+        <tbody id="courseTable"></tbody>
+      </table>
+    </div>
+  </section>
 </section>
+
 <br>
   
 <section class="padding0 gap20 bgWhite corner15 alignStart">
@@ -260,9 +310,7 @@ filterSelect.addEventListener("change", () => {
 
 <br>
 
-<section class="col alignStart">
-
-  <h2>Document Status per Type</h2>
+<section class="col alignStart hidden">
   <div class="table-wrapper">
     <table>
       <thead>
@@ -272,25 +320,7 @@ filterSelect.addEventListener("change", () => {
     </table>
   </div>
 
-  <h2>Requests by Course</h2>
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr><th>Course</th><th>Count</th></tr>
-      </thead>
-      <tbody id="courseTable"></tbody>
-    </table>
-  </div>
-
 </section>
-
-<section class="gap20 padding0">
-    <div class="bgWhite h100 corner15"></div>
-    <div class="bgWhite h100 corner15"></div>
-    <div class="bgWhite h100 corner15"></div>
-    <div class="bgWhite h100 corner15"></div>
-</section>
-
 <script>
 let chartInstances = {}; // Keep chart instances to destroy before redraw
 
@@ -303,7 +333,7 @@ function createChart(ctxId, labels, data, type='bar', label='') {
   let barThickness = 50;
   if(type === 'bar') {
     const chartWidth = document.getElementById(ctxId).offsetWidth;
-    barThickness = 100; // max 150
+    barThickness = 75; // max 150
   }
 
   // Colors
@@ -332,20 +362,20 @@ function createChart(ctxId, labels, data, type='bar', label='') {
       data,
       backgroundColor: backgroundColors,
       borderColor: borderColors,
-      borderWidth: type === 'doughnut' ? 2 : 0.5,
+      borderWidth: type === 'line' ? 1.5 : 0.5,
       borderRadius: type === 'bar' ? 16 : 18,
       barThickness: type === 'bar' ? barThickness : undefined,
       fill: type === 'line' ? true : undefined,
       tension: type === 'line' ? 0.2 : undefined, // smooth curve
       pointRadius: type === 'line' ? 2 : undefined,
-      pointBackgroundColor: type === 'line' ? '#142c54' : undefined,
+      pointBackgroundColor: type === 'line' ? 'white' : undefined,
     }]
   },
   options: {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: true },
+      legend: { display: type === 'line' ? false : true , labels: { color: 'black', font: { family: 'Poppins', weight: 'normal', size: '14' } } },
       tooltip: { enabled: true },
       // Add labels on top of bars
       datalabels: {
@@ -372,7 +402,8 @@ function createChart(ctxId, labels, data, type='bar', label='') {
         grid: { display: false }
       },
       x: {
-        grid: { display: true }
+        grid: { display: true },
+        ticks: { font: { family: 'Poppins', size: '14', weight: 'normal' } }
       }
     } : {}
   },
@@ -432,12 +463,52 @@ document.getElementById("filterInfo").innerText =
   document.getElementById("onProcessPercent").innerText = analytics.onProcessPercent || 0;
 
   document.getElementById("activeUserCount").innerText = `${analytics.activeUserCount || 0} Active`;
+  // const countU = analytics.toVerifyUsers || 0;
+  // document.getElementById("toVerifyUsers").innerText =`${countU} User${countU === 1 ? "" : "s"}`;
+  document.getElementById("toVerifyUsers").innerText = analytics.toVerifyUsers || 0;
   document.getElementById("avgApprovalTime").innerText = analytics.avgApprovalTime || 0;
   document.getElementById("avgApprovalTimeStat").innerText = analytics.avgApprovalTimeStat || 0;
   document.getElementById("avgReviewTime").innerText = analytics.avgReviewTime || 0;
   document.getElementById("avgReviewTimeStat").innerText = analytics.avgReviewTimeStat || 0;
   document.getElementById("avgAssessTime").innerText = analytics.avgAssessTime || 0;
   document.getElementById("avgAssessTimeStat").innerText = analytics.avgAssessTimeStat || 0;
+
+  
+  document.getElementById("currentUsersCount").innerText = analytics.currentUsersCount || 0;
+  document.getElementById("previousUsersCount").innerText = analytics.previousUsersCount || 0;
+
+ const growthEl = document.getElementById("registrationGrowth");
+
+// Fallback text
+const growthText = analytics.registrationGrowth || "0";
+
+// Reset classes
+growthEl.classList.remove("bgRed100", "bgGreen100");
+
+// Apply color coding with arrow icons
+if (analytics.previousUsersCount > 0) {
+    const diff = analytics.currentUsersCount - analytics.previousUsersCount;
+    if (diff > 0) {
+        growthEl.classList.add("bgGreen100");
+        growthEl.classList.add("border0");
+        growthEl.innerHTML = `${growthText} <i class="fas fa-arrow-up"></i>`;
+    } else if (diff < 0) {
+        growthEl.classList.add("bgRed100");
+        growthEl.classList.add("border0");
+        growthEl.innerHTML = `${growthText} <i class="fas fa-arrow-down"></i>`;
+    } else {
+        growthEl.innerText = growthText; // no change
+    }
+} else {
+    if (analytics.currentUsersCount > 0) {
+        growthEl.classList.add("bgGreen100");
+        growthEl.classList.add("border0");
+        growthEl.innerHTML = `${growthText} <i class="fas fa-arrow-up"></i>`;
+    } else {
+        growthEl.innerText = growthText; // "No New Users"
+    }
+}
+
 
   // Clear tables
   ["topUsersTable","statusTable","docStatusTable","roleTable","courseTable","yearLevelTable","documentStats","purposeTable"].forEach(id => 
@@ -460,9 +531,11 @@ document.getElementById("filterInfo").innerText =
     <img src="${u.userInfo.photo ? u.userInfo.photo : '/images/profile.png'}" alt="photo" class="marginRight10 h40 w40">
   </td>
   <td class="width85 inline" style="display: inline;">
-    <div class="alignStart width0 col marginLeft10">
-      <p class="size16 str500">${u.userInfo.fName} ${u.userInfo.lName} &bull; <span class="green size16 str500">${u.totalRequests} ${u.totalRequests === 1 ? "request" : "requests"}</span></p>
-      <p class="size12">${u.userInfo.role} &bull; ${u.userInfo.course}</p>
+    <div class="alignStart width0 col marginLeft10 width90">
+      <p class="size16 str500">
+        <a href="/stuViewDsb/${u.userInfo._id}" class="size16 navy str500 inline"> ${u.userInfo.fName} ${u.userInfo.lName} </a>
+        &bull; <span class=" size16 str500">${u.totalRequests} ${u.totalRequests === 1 ? "request" : "requests"}</span></p>
+      <p class="size12 textWrap">${u.userInfo.role} &bull; ${u.userInfo.course}</p>
     </div>
   </td>
 `);
@@ -498,7 +571,7 @@ document.getElementById("filterInfo").innerText =
   }
 
   if(analytics.roleStats && analytics.roleStats.length) 
-    createChart('roleChart', analytics.roleStats.map(d=>d._id), analytics.roleStats.map(d=>d.count), 'bar', '');
+    createChart('roleChart', analytics.roleStats.map(d=>d._id), analytics.roleStats.map(d=>d.count), 'bar', 'Request Per Student Type');
   if(analytics.courseStats && analytics.courseStats.length) 
     createChart('courseChart', analytics.courseStats.map(d=>d._id), analytics.courseStats.map(d=>d.count), 'bar', 'Requests by Course');
   if(analytics.yearLevelStats && analytics.yearLevelStats.length) 

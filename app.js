@@ -747,10 +747,29 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     });
 
     const savedUser = await newUser.save();
+    // 1️⃣ Get all TRs
+    const allRequests = await requests.find({}, { tr: 1 });
 
-    // 6️⃣ Generate TR for the request
-    const lastTwo = savedUser._id.toString().slice(-2);
-    const tr = `AU25-${paddedMonth}${lastTwo}001`; // one TR per entire request
+    // 2️⃣ Find the max sequence
+    let maxSeq = 0;
+    allRequests.forEach(r => {
+      if (r.tr && r.tr.length >= 3) {
+        // Take the last 3 digits as sequence
+        const seq = parseInt(r.tr.slice(-3), 10);
+        if (!isNaN(seq)) maxSeq = Math.max(maxSeq, seq);
+      }
+    });
+
+    // 3️⃣ Increment sequence
+    const nextSeq = maxSeq + 1;
+    const seqStr = String(nextSeq).padStart(3, '0');
+
+    // 4️⃣ Build TR
+    const year = new Date().getFullYear().toString().slice(-2); // "25"
+    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
+    const userLastTwo = userId.toString().slice(-2); // e.g., "35"
+
+    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
 
     // 7️⃣ Create request header
     const newRequest = new requests({
@@ -968,7 +987,6 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
 
     // 2️⃣ Upload proof photos
     const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
-
     const reqPhotoUrls = await Promise.all(
       reqPhotos.map(async file => {
         const result = await cloudinary.uploader.upload(file.path, {
@@ -977,13 +995,33 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
         return result.secure_url;
       })
     );
+        
+    // 1️⃣ Get all TRs
+    const allRequests = await requests.find({}, { tr: 1 });
 
-    // 3️⃣ Generate one TR for the full request
-    const lastTwo = userId.toString().slice(-2);
-    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0');
-    const tr = `AU25-${monthNum}${lastTwo}001`; // one TR for entire request
+    // 2️⃣ Find the max sequence
+    let maxSeq = 0;
+    allRequests.forEach(r => {
+      if (r.tr && r.tr.length >= 3) {
+        // Take the last 3 digits as sequence
+        const seq = parseInt(r.tr.slice(-3), 10);
+        if (!isNaN(seq)) maxSeq = Math.max(maxSeq, seq);
+      }
+    });
 
-    // 4️⃣ Create Request Header
+    // 3️⃣ Increment sequence
+    const nextSeq = maxSeq + 1;
+    const seqStr = String(nextSeq).padStart(3, '0');
+
+    // 4️⃣ Build TR
+    const year = new Date().getFullYear().toString().slice(-2); // "25"
+    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
+    const userLastTwo = userId.toString().slice(-2); // e.g., "35"
+
+    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
+
+
+    // 7️⃣ Create Request Header
     const newRequest = new requests({
       requestBy: userId,
       archive: false,
@@ -991,13 +1029,12 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       status: "Pending",
       tr
     });
-
     const savedRequest = await newRequest.save();
 
-    // 5️⃣ Create Request Items
+    // 8️⃣ Create Request Items
     const itemDocs = typesArr.map((t, i) => ({
       requestId: savedRequest._id,
-      tr,  // same TR for all items
+      tr,
       type: t || '',
       purpose: purposesArr[i] || '',
       qty: qtyArr[i] || 1,
@@ -1008,11 +1045,9 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       verify: false,
       status: "Pending"
     }));
-
-    // 6️⃣ Insert all items
     await items.insertMany(itemDocs);
 
-    // 7️⃣ Redirect success
+    // 9️⃣ Redirect success
     res.redirect('/reqSuccess');
 
   } catch (err) {
@@ -1023,10 +1058,6 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     });
   }
 });
-
-
-
-
 
 app.get('/reqSuccess', (req, res) => {
   res.render('reqSuccess', { title: 'Success' });
@@ -1438,35 +1469,44 @@ app.post("/update-status/:id", async (req, res) => {
 });
 
 app.post('/paymentUpload', isLogin, uploadPhoto.array('payPhoto', 10), async (req, res) => {
-  try {
-    const requestId = req.body.id;
+  // 1️⃣ Get requestId early
+  const requestId = req.body.id;
 
+  // If no ID, redirect safely
+  if (!requestId) return res.redirect('/?msg=invalidRequest');
+
+  try {
+    // 2️⃣ Check if files exist
     if (!req.files || req.files.length === 0) {
       return res.redirect(`/reqView/${requestId}?msg=noPhoto`);
     }
 
-    const payMode = req.body.payMode;
+    const payMode = req.body.payMode || 'Unknown';
 
-    // Save all file paths as an array
+    // 3️⃣ Save all file paths as array
     const payPhotoArray = req.files.map(file => file.path);
 
     const payAt = new Date();
 
+    // 4️⃣ Update the request document
     await requests.findByIdAndUpdate(requestId, {
-      payMode,
-      payPhoto: payPhotoArray,  // store array in MongoDB
+      payPhoto: payPhotoArray,
       status: 'For Verification',
+      payMode,
       payAt
     });
 
+    // 5️⃣ Redirect on success
     res.redirect(`/reqView/${requestId}?msg=success`);
 
   } catch (err) {
     console.error('Payment Upload Error:', err);
-    const requestId = req.body.id;
+
+    // Redirect safely even on error
     res.redirect(`/reqView/${requestId}?msg=error`);
   }
 });
+
 
 
 app.get('/reqAll', isLogin, myRequest, (req, res) => {
@@ -3016,6 +3056,54 @@ app.get('/stuView/:id', isLogin, isStudent, async (req, res) => {
   }
 });
 
+app.get('/stuViewDsb/:id', isLogin, isStudent, async (req, res) => {
+  try {
+  const msg = req.session.msg;
+  delete req.session.msg;
+    const userId = req.params.id;
+
+    const student = req.users.find(u => u._id.toString() === userId);
+
+    if (!student) {
+      return res.status(404).render('stuView', {
+        title: 'Students',
+        back: 'dsb',
+        active: 'stu',
+        student,   // ✅ add
+        error: 'Student not found.',
+        user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      });
+    }
+
+    res.render('stuView', {
+      title: 'Students',
+      back: 'dsb',
+      active: 'stu',
+      student,      // the student being viewed
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    });
+
+  } catch (err) {
+    console.error('❌ Error in /stuView/:id route:', err);
+    res.status(500).render('stuView', {
+      title: 'Students',
+      back: 'dsb',
+      active: 'stu',
+      error: 'Something went wrong while loading the student.',
+      user: req.user,
+    redirectUrl: req.originalUrl,
+    messageSuccess: msg?.type === 'success' ? msg.text : null,
+    messagePass: msg?.type === 'error' ? msg.text : null
+    });
+  }
+});
+
 app.get('/crtView/:id', isLogin, isStudent, async (req, res) => {
   try {
   const msg = req.session.msg;
@@ -3638,6 +3726,10 @@ app.post('/update-documents', isLogin, async (req, res) => {
   }
 });
 
+app.get('/api/analytics', analyticsMiddleware, (req, res) => {
+  res.json(res.locals.analytics);
+});
+
 app.get('/dsb', isLogin, analyticsMiddleware, (req, res) => {
   if (req.user.reset === true) return res.redirect('/resetPage2');
 
@@ -3649,8 +3741,13 @@ app.get('/dsb', isLogin, analyticsMiddleware, (req, res) => {
   });
 });
 
-app.get('/api/analytics', analyticsMiddleware, (req, res) => {
-  res.json(res.locals.analytics);
+app.get('/anl', isLogin, analyticsMiddleware, (req, res) => {
+  const analytics = res.locals.analytics || {};
+  res.render('anl', {
+    title: 'Analytics',
+    active: 'anl',
+    analytics
+  });
 });
 
 

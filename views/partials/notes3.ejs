@@ -34,13 +34,12 @@
                             <p class="">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt or take photo of the receipt the cashier and upload it below.</p>
                             <br>
                            <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
-                                <input type="hidden" name="id" value="<%= rq.id %>">
-
-                                <div class="field">
+                                <input type="hidden" name="id" value="<%= rq ? rq._id : '' %>">
+                                <div class="field hidden">
                                     <label for="">Payment Method</label>
                                     <div class="selectBar">
                                         <select name="payMode" id="payMode" required>
-                                            <option value="">Select Method</option>
+                                            <option value="Online" selected>Select Method</option>
                                             <option value="Cash">Cash</option>
                                             <option value="GCash">GCash</option>
                                             <option value="Maya">Maya</option>
@@ -55,8 +54,9 @@
                                 </div>
 
                                 <div class="field">
-                                    <label for="">Upload your Proof of Payment here</label>
+                                    <label for="">Upload your Proof of Payment here.</label>
                                     <input name="payPhoto" type="file" multiple required>
+                                    <label for=""><i class="fas fa-info-circle inline"></i> Multiple file can be uploaded</label>
                                 </div>
 
                                 <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>

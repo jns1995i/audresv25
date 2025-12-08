@@ -69,7 +69,7 @@
       <a href="/emp" class="nav mnav <% if ( active === 'emp') { %> active <% } %>"> <i class="fas fa-user-tie"></i> Employees</a>
       <% } %>
       <a href="/stu" class="nav mnav <% if ( active === 'stu') { %> active <% } %>"> <i class="fas fa-user-friends"></i> Students</a>
-      <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
+      <% if (['Admin', 'Dev'].includes(user.role)) { %>
       <a href="/cog" class="nav mnav <% if ( active === 'cog') { %> active <% } %>"> <i class="fas fa-cog"></i> Settings</a>
       <% } %>
     </div>

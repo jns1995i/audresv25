@@ -161,6 +161,9 @@
                 <div class="col justifyStart alignStart gap10 relative">
                     <p class="size28 str400 colorPrimary">Request Form</p>
                 </div>
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <p class="bgRed100 marginTop10 width100"><%= error %></p>
+                <% } %>
                 <br>
                 <div class="col height0 alignStart gap5" id="editCard">
                         <div class="fieldsetsContainer col height0 padding0 width100" id="fieldsetsContainer">
@@ -188,6 +191,7 @@
                                         <label>Purpose</label>
                                         <div class="selectBar">
                                             <select class="document-options" name="purpose[]" onchange="handleOptionChange(this)" required>
+                                                <option value="" selected disabled>--Select Purpose</option>
                                                 <option value="Board Exam">Board Exam</option>
                                                 <option value="Reference">Reference</option>
                                                 <option value="Requirement for Other School">Requirement for Other School</option>

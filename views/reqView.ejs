@@ -188,12 +188,12 @@
                         <p class="size12"><%= rq.tr %></p>
                     </section>
                 </section>
-                <section class="bgSoft col padding10 corner15 marginTop10">
+                <section class="bgSoft col padding10 corner15 marginTop10 gap10">
                     <% if (items.length === 0) { %>
                         <p class="str400 rem14">No items found for this request.</p>
                     <% } else { %>
                         <% items.forEach((it, index) => { %>
-                            <section class="bgWhite shadow1 corner12 padding15 relative gap5">
+                            <section class="bgWhite shadow1 corner12 padding15 relative">
                                 <section class="padding0 alignStart justifyCenter col">
                                     <p class="size12 str500"><%= it.qty %> <%= it.type %></p>
                                     <p class="size12">for <%= it.purpose %> Purpose</p>

@@ -81,6 +81,8 @@ module.exports = async function analyticsMiddleware(req, res, next) {
     const pending = allRequests.filter(r => r.status === "Pending").length;
     const declined = allRequests.filter(r => r.declineAt).length;
     const onHold = allRequests.filter(r => r.holdAt).length;
+    const toVerify = allRequests.filter(r => r.verify === true).length;
+
 
     const getPercent = (count) => {
       if (totalRequests === 0) return 0;
@@ -533,6 +535,108 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       verify: false
     });
 
+    const toVerifyUsers = await users.countDocuments({
+      role: { $in: ["Student", "Alumni", "Former", "Test"] },
+      archive: false,
+      verify: true
+    });
+
+// ================================
+// USER REGISTRATION & GROWTH (actual counts)
+// ================================
+let currentUsersCount = 0;
+let previousUsersCount = 0;
+let registrationGrowth = ""; // string to allow "New: X users"
+
+let prevStart = null;
+let prevEnd = null;
+
+if (start && end) {
+  const periodLength = end.diff(start, "day") + 1;
+
+  // determine previous period
+  switch(filter) {
+    case "today":
+    case "yesterday":
+      prevStart = start.subtract(1, "day");
+      prevEnd = end.subtract(1, "day");
+      break;
+    case "thisWeek":
+    case "lastWeek":
+      prevStart = start.subtract(1, "week");
+      prevEnd = end.subtract(1, "week");
+      break;
+    case "thisMonth":
+    case "lastMonth":
+      prevStart = start.subtract(1, "month");
+      prevEnd = end.subtract(1, "month");
+      break;
+    case "thisYear":
+    case "lastYear":
+      prevStart = start.subtract(1, "year");
+      prevEnd = end.subtract(1, "year");
+      break;
+    case "custom":
+      prevStart = start.subtract(periodLength, "day");
+      prevEnd = end.subtract(periodLength, "day");
+      break;
+    case "specific":
+      prevStart = start.subtract(1, "day");
+      prevEnd = end.subtract(1, "day");
+      break;
+    default:
+      break;
+  }
+
+  // current period
+  currentUsersCount = await users.countDocuments({
+    role: { $in: ["Student", "Alumni", "Former", "Test"] },
+    archive: false,
+    verify: false,
+    createdAt: { $gte: start.toDate(), $lte: end.toDate() }
+  });
+
+  // previous period
+  if (prevStart && prevEnd) {
+    previousUsersCount = await users.countDocuments({
+      role: { $in: ["Student", "Alumni", "Former", "Test"] },
+      archive: false,
+      verify: false,
+      createdAt: { $gte: prevStart.toDate(), $lte: prevEnd.toDate() }
+    });
+  }
+
+  // compute growth
+  if (previousUsersCount > 0) {
+    const diff = currentUsersCount - previousUsersCount;
+    if (diff > 0) {
+      registrationGrowth = `${((diff / previousUsersCount) * 100).toFixed(2)}%`;
+    } else if (diff < 0) {
+      registrationGrowth = `${((Math.abs(diff) / previousUsersCount) * 100).toFixed(2)}%`;
+    } else {
+      registrationGrowth = "No Progress";
+    }
+  } else {
+    if (currentUsersCount > 0) {
+      registrationGrowth = `+${currentUsersCount} New User${currentUsersCount > 1 ? "s" : ""}`;
+    } else {
+      registrationGrowth = "No New Users";
+    }
+  }
+
+} else {
+  // overall
+  currentUsersCount = await users.countDocuments({
+    role: { $in: ["Student", "Alumni", "Former", "Test"] },
+    archive: false,
+    verify: false
+  });
+  previousUsersCount = 0;
+  registrationGrowth = currentUsersCount > 0
+    ? `+${currentUsersCount} User${currentUsersCount > 1 ? "s" : ""}`
+    : "No Users";
+}
+
 
     // ================================
     // FINAL OBJECT
@@ -555,6 +659,7 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       activeUserCount,
       topUsers: topUsersAgg,
       totalUsers,
+      toVerify, toVerifyUsers,
       roleStats,
       courseStats,
       yearLevelStats,
@@ -566,7 +671,9 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       requestStatusStats,
       documentStats,
 
-      trend: trendAgg
+      trend: trendAgg,
+
+      currentUsersCount, previousUsersCount, registrationGrowth
     };
 
     next();

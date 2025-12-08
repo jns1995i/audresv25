@@ -1398,7 +1398,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 
 .bgPrimary { background-color: var(--primary);}
 .bgWhite { background-color: white; color: var(--shade4) !important; }
-.bgLight { background-color: rgb(253, 253, 253); }
+.bgLight { background-color: rgb(243, 243, 243); }
 .bgSoft { background-color: rgb(237, 237, 237); }
 .bgGray { background-color: rgb(176, 176, 176); }
 .bgDark { background-color: rgb(120, 120, 120); }
@@ -1537,6 +1537,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .invisible { visibility: hidden;}
 .floatLeft { float: left;}
 .floatRight { float: right;}
+.divCenter { align-content: center;}
 
 
 /* Justify Content */

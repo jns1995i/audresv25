@@ -5,13 +5,23 @@
             max-height: 82%;
             display: block;
         }
+        .card3 {
+            display: flex;
+        }
+        .card1 {
+            display: none;
+        }
     @media (max-width: 900px) {
         .rqMainCard {
             max-height: 400px;
             display: block;
         }
-        #card1 {
+        .card1 {
             height: auto;
+            display: flex;
+        }
+        .card3 {
+            display: none !important;
         }
     }
 </style>
@@ -50,7 +60,13 @@
         <a href="/reqPre" class="nav liquid glowImg2"><i class="fas fa-plus"></i> Request</a>
     </section>
 </section>
-<section class="col padding0 bgSoft corner15 padding15 block card2 width40">
+<section class="col padding0 corner15 card3 width0 absolute left60 top80">
+    <section class="justifyBetween gap10 corner20 alignCenter marginBottom10 liquidX">
+        <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
+        <a href="/reqPre" class="nav liquid glowImg2"><i class="fas fa-plus"></i> Request</a>
+    </section>
+</section>
+<section class="col padding0 bgSoft corner15 padding15 block card2 width60">
 
     <div class="searchBar colorPrimary marginBottom10" style="width: 100% !important;">
         <i class="fas fa-search"></i>
@@ -67,11 +83,12 @@
                 <a href="/reqView2/<%= req._id %>" class="width100 col alignStart padding10 shadow1 corner10 relative" id="reqCards1">
                     <% if (req.items && req.items.length > 0) { %>
                         <% req.items.forEach(item => { %>
-                        <p class="size12 str500"><%= item.qty %> <%= item.type %></p>
+                        <p class="size16 str500"><%= item.qty %> <%= item.type %></p>
                         <% }) %>
                     <% } else { %>
                         <p class="size12 str500">No items found for this request.</p>
                     <% } %>
+                    <p class="size12 str500">TR# <%= req.tr %></p>
                     <% if ( req.holdAt ) { %>
                         <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon bgRed100"  style="background-color: transparent;">
                             On Hold
@@ -81,7 +98,7 @@
                             Declined
                         </div>
                     <% } else { %>
-                        <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon
+                        <div class="size12 str400 padding0 str500 width0 statIcon
                         <% if ( req.status === "Pending" ) { %>
                             bgBlue100
                         <% } else if ( req.status === "Reviewed" ) { %>
@@ -96,7 +113,7 @@
                             bgGray100
                         <% } else { %>
                             bgBlue100
-                        <% } %> border0
+                        <% } %> border0 corner0
                         " style="background-color: transparent;">
                             <i class="fas fa-hourglass inline rem1 w15 h15 hidden"></i>
                             <%= req.status === "Assessed" ? "For Payment" : req.status === "Reviewed" ? "For Assessment" : req.status || "" %>

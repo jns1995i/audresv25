@@ -59,21 +59,22 @@
                 <a href="/reqView/<%= req._id %>" class="width100 col alignStart padding10 shadow1 corner10 relative">
                     <% if (req.items && req.items.length > 0) { %>
                         <% req.items.forEach(item => { %>
-                        <p class="size12 str500"><%= item.qty %> <%= item.type %></p>
+                        <p class="size16 str500"><%= item.qty %> <%= item.type %></p>
                         <% }) %>
                     <% } else { %>
                         <p class="size12 str500">No items found for this request.</p>
                     <% } %>
+                    <p class="size12 str500">TR# <%= req.tr %></p>
                     <% if ( req.holdAt ) { %>
-                        <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon bgRed100"  style="background-color: transparent;">
+                        <div class="size12 str400 padding0 border0 str500 width0 statIcon bgRed100"  style="background-color: transparent;">
                             On Hold
                         </div>
                     <% } else if ( req.declineAt ) { %>
-                        <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon bgRed100 border0"  style="background-color: transparent;">
+                        <div class="size12 str400 padding0 border0 str500 width0 statIcon bgRed100 border0"  style="background-color: transparent;">
                             Declined
                         </div>
                     <% } else { %>
-                        <div class="size12 str400 padding0 cornerRem1 str500 width0 statIcon
+                        <div class="size12 str400 padding0 str500 width0 statIcon corner0
                         <% if ( req.status === "Pending" ) { %>
                             bgBlue100
                         <% } else if ( req.status === "Reviewed" ) { %>
