@@ -281,7 +281,7 @@ main {
     position: relative;
 }
 .sidef {
-    width: 16%;
+    width: 15%;
     color: white;
     padding: 10px;
     border-radius: 1.5rem;
@@ -294,7 +294,7 @@ main {
     background-color: var(--shade11);
 }
 .mainf {
-    width: 84%;
+    width: 85%;
     padding: 20px;
     display: block;
     overflow-y: auto;
@@ -395,7 +395,7 @@ a:hover, button:hover {
     justify-content: start;
     align-items: center;
     transition: all 0.6s ease-in-out;
-    width: 170px;
+    width: 150px;
     background-color: transparent;
     color: white;
     border: none;

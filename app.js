@@ -3730,7 +3730,7 @@ app.get('/api/analytics', analyticsMiddleware, (req, res) => {
   res.json(res.locals.analytics);
 });
 
-app.get('/dsb', isLogin, analyticsMiddleware, (req, res) => {
+app.get('/dsb', isLogin, analyticsMiddleware, isEmp, (req, res) => {
   if (req.user.reset === true) return res.redirect('/resetPage2');
 
   const analytics = res.locals.analytics || {};
@@ -3741,11 +3741,11 @@ app.get('/dsb', isLogin, analyticsMiddleware, (req, res) => {
   });
 });
 
-app.get('/anl', isLogin, analyticsMiddleware, (req, res) => {
+app.get('/perf', isLogin, analyticsMiddleware, (req, res) => {
   const analytics = res.locals.analytics || {};
-  res.render('anl', {
-    title: 'Analytics',
-    active: 'anl',
+  res.render('perf', {
+    title: 'Team Performance',
+    active: 'dsb',
     analytics
   });
 });

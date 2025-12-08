@@ -106,14 +106,14 @@ module.exports = async function analyticsMiddleware(req, res, next) {
           count: { $sum: 1 } 
         } 
       },
-      { $sort: { _id: 1 } } // optional, sort alphabetically
+      { $sort: { count: 1 } } // optional, sort alphabetically
     ]);
 
     requestStatusStats = requestStatusStats.map(s => ({
-    _id: s._id,
-    count: s.count,
-    percentage: totalRequests === 0 ? 0 : Number(((s.count / totalRequests) * 100).toFixed(1)) // numeric only
-  }));
+      _id: s._id,
+      count: s.count,
+      percentage: totalRequests === 0 ? 0 : Number(((s.count / totalRequests) * 100).toFixed(1)) // numeric only
+    }));
 
     // ================================
     // ACTIVE USERS
@@ -637,6 +637,69 @@ if (start && end) {
     : "No Users";
 }
 
+// ========================================
+// PERIOD LABELS (Filter Name + Value)
+// ========================================
+let currentPeriodLabel = "";
+let previousPeriodLabel = "";
+
+switch (filter) {
+  case "today":
+    currentPeriodLabel = `Today – ${start.format("MMM DD, YYYY")}`;
+    previousPeriodLabel = `Yesterday – ${prevStart.format("MMM DD, YYYY")}`;
+    break;
+
+  case "yesterday":
+    currentPeriodLabel = `Yesterday – ${start.format("MMM DD, YYYY")}`;
+    previousPeriodLabel = `2 Days Ago – ${prevStart.format("MMM DD, YYYY")}`;
+    break;
+
+  case "thisWeek":
+    currentPeriodLabel = `This Week – ${start.format("MMM DD")} to ${end.format("MMM DD, YYYY")}`;
+    previousPeriodLabel = `Last Week – ${prevStart.format("MMM DD")} to ${prevEnd.format("MMM DD, YYYY")}`;
+    break;
+
+  case "lastWeek":
+    currentPeriodLabel = `Last Week – ${start.format("MMM DD")} to ${end.format("MMM DD, YYYY")}`;
+    previousPeriodLabel = `Previous Week – ${prevStart.format("MMM DD")} to ${prevEnd.format("MMM DD, YYYY")}`;
+    break;
+
+  case "thisMonth":
+    currentPeriodLabel = `This Month – ${start.format("MMMM YYYY")}`;          // Example: January 2025
+    previousPeriodLabel = `Last Month – ${prevStart.format("MMMM YYYY")}`;     // Example: December 2024
+    break;
+
+  case "lastMonth":
+    currentPeriodLabel = `Last Month – ${start.format("MMMM YYYY")}`;
+    previousPeriodLabel = `Previous Month – ${prevStart.format("MMMM YYYY")}`;
+    break;
+
+  case "thisYear":
+    currentPeriodLabel = `This Year – ${start.format("YYYY")}`;
+    previousPeriodLabel = `Last Year – ${prevStart.format("YYYY")}`;
+    break;
+
+  case "lastYear":
+    currentPeriodLabel = `Last Year – ${start.format("YYYY")}`;
+    previousPeriodLabel = `Previous Year – ${prevStart.format("YYYY")}`;
+    break;
+
+  case "specific":
+    currentPeriodLabel = `Selected Date – ${start.format("MMM DD, YYYY")}`;
+    previousPeriodLabel = `Previous Date – ${prevStart.format("MMM DD, YYYY")}`;
+    break;
+
+  case "custom":
+    currentPeriodLabel = `Custom Range – ${start.format("MMM DD")} to ${end.format("MMM DD, YYYY")}`;
+    previousPeriodLabel = `Previous Range – ${prevStart.format("MMM DD")} to ${prevEnd.format("MMM DD, YYYY")}`;
+    break;
+
+  default:
+    currentPeriodLabel = "Overall – All Time";
+    previousPeriodLabel = "—";
+}
+
+
 
     // ================================
     // FINAL OBJECT
@@ -673,7 +736,9 @@ if (start && end) {
 
       trend: trendAgg,
 
-      currentUsersCount, previousUsersCount, registrationGrowth
+      currentUsersCount, previousUsersCount, registrationGrowth,
+      currentPeriodLabel,
+      previousPeriodLabel
     };
 
     next();
