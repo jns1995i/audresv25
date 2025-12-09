@@ -41,50 +41,25 @@
     Critical: "bgRed200"
   };
 %>
-<section class="gap15 h280 padding0">
-  <section class="height100 col width70 corner15 justifyStart padding0">
-    <section class="gap20 padding10 bgWhite corner15">
-      <section class=" keyMetrics porcelain ">
-          <a href="" class="nav cnav disabled keyIcon"><i class="fas fa-check-circle size20"></i></a>
-            <p class="size20 str500" id="approved"></p>
-          <p class="size16 str400">Success</p>
-          <section class="width0 gap10 padding0">
-            <p class="size12 str400 bgWhite padding2 corner5 hidden" id="approvedPercent"></p>
-          </section>
-      </section>
-      <section class=" keyMetrics porcelain ">
-          <a href="" class="nav cnav disabled keyIcon"><i class="fas fa-hourglass-half size14"></i></a>
-            <p class="size20 str500" id="onProcess"></p>
-          <p class="size16 str400">On Process</p>
-          <section class="width0 gap10 padding0">
-            <p class="size12 str400 bgWhite padding2 corner5 hidden" id="onProcessPercent"></p>
-          </section>
-      </section>
-      <section class=" keyMetrics porcelain ">
-          <a href="" class="nav cnav disabled keyIcon"><i class="fas fa-clock size14"></i></a>
-            <p class="size20 str500" id="onHold"></p>
-          <p class="size16 str400">On Hold</p>
-          <section class="width0 gap10 padding0">
-            <p class="size12 str400 bgWhite padding2 corner5 hidden" id="onHoldPercent"></p>
-          </section>
-      </section>
-      <section class=" keyMetrics porcelain ">
-          <a href="" class="nav cnav disabled keyIcon"><i class="fas fa-xmark-circle size14"></i></a>
-            <p class="size20 str500" id="declined"></p>
-          <p class="size16 str400">Declined</p>
-          <section class="width0 gap10 padding0">
-            <p class="size12 str400 bgWhite padding2 corner5 hidden" id="declinedPercent"></p>
-          </section>
-      </section>
-    </section>
+<section class="gap15 h260 padding0">
+  <section class="height100 col width70 corner15 justifyBetween padding0">
     <section class="relative col alignStart">
-      <p class="size32 str400" id="totalRequests"></p>
+      <p class="size40 str400" id="">Dashboard</p>
       <p id="pendingPercent" class="hidden"> 0</p>
+    </section>
+    <section class="gap20 padding0 corner15" id="metricsContainer">
+      <section id="metric" class="keyMetrics bgWhite">
+          <p class="size16 str400">
+              <i class="icon"></i> <span class="label"></span>
+          </p>
+          <p class="size20 str500 value"></p>
+          <p class="size20 str500 percentage hidden"></p>
+      </section>
     </section>
   </section>
   <section class="height100 col width30 padding10 justifyBetween relative bgWhite corner15">
     <section class="col alignStart padding0">
-      <p class="size24 marginLeft5">Notification</p>
+      <p class="size24 marginLeft5">Quick Access</p>
       <section class="gap5 padding0 width0">
         <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests <div id="pending" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
         <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify <div id="toVerifyUsers" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
@@ -93,7 +68,7 @@
     <section class=" gradient corner15 col alignStart justifyBetween padding15">
       <p class="size20">Need Report?</p>
       <br>
-      <a href="" class="nav liquid"><i class="fas fa-file"></i> Generate Here</a>
+      <a href="/rpt" class="nav liquid"><i class="fas fa-file"></i> Generate Here</a>
     </section>
     <img src="/images/gold.png" alt="" class="h150 absolute bottom10 right10" style="filter:brightness(2); transform: rotate(-15deg);">
   </section>
@@ -102,7 +77,7 @@
 
 <section class="col corner15 bgWhite padding0">
   <section class="justifyBetween paddingInline15">
-    <p class="size30 str400">Request Trend</p>
+    <p class="size30 str400" id="totalRequests"></p>
     <section class="width0 gap10 padding0">
       <div class="selectBar w200">
           <i class="fas fa-filter"></i>
@@ -301,55 +276,53 @@ filterSelect.addEventListener("change", () => {
 </section>
 
 <br>
-  
-<section class="padding0 gap20 bgWhite corner15 alignStart">
-  <div class="h300 bgWhite corner15 padding20 width60">
-    <canvas id="documentChart"></canvas>
-  </div>
-  <div class="padding10 width40">
-    <table class="corner10">
-      <thead>
-        <tr>
-          <th class="width60">Type</th>
-          <th class="width15">Qty</th>
-          <th class="width25">Requests</th>
-        </tr>
-      </thead>
-      <tbody id="documentStats"></tbody>
-    </table>
-  </div>
-  <div class="h300 bgWhite corner15 padding20 col hidden"><canvas id="courseChart"></canvas></div>
+
+<section class="gap20 alignStart padding0">
+  <section class="padding0 gap20 bgWhite corner15 alignStart">
+    <div class="h300 bgWhite corner15 padding20 width60 hidden">
+      <canvas id="documentChart"></canvas>
+    </div>
+    <div class="padding15 gap10 col  alignStart">
+      <p class="size30">Request per Doc Type</p>
+      <table class="corner10 porcelain">
+        <thead>
+          <tr>
+            <th class="width60">Type</th>
+            <th class="width15">Qty</th>
+            <th class="width25">Requests</th>
+          </tr>
+        </thead>
+        <tbody id="documentStats"></tbody>
+      </table>
+    </div>
+    <div class="h300 bgWhite corner15 padding20 col hidden"><canvas id="courseChart"></canvas></div>
+  </section>
+  <section class="padding0 gap20 bgWhite corner15 alignStart">
+    <div class="h300 bgWhite corner15 padding20 hidden">
+      <canvas id="topPurpose"></canvas>
+    </div>
+    <div class="padding15 gap10 col  alignStart">
+      <p class="size30">Request per Doc Purpose</p>
+      <table class="corner10 porcelain">
+        <thead>
+          <tr><th>Type</th><th>Count</th></tr>
+        </thead>
+        <tbody id="purposeTable"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="col alignStart hidden">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Document Type</th><th>Status</th><th>Count</th></tr>
+        </thead>
+        <tbody id="docStatusTable"></tbody>
+      </table>
+    </div>
+  </section>
 </section>
 
-<br>
-
-<section class="padding0 gap20 bgWhite corner15 alignStart">
-  <div class="h300 bgWhite corner15 padding20 width60">
-    <canvas id="topPurpose"></canvas>
-  </div>
-  <div class="padding10 width40">
-    <table class="corner10">
-      <thead>
-        <tr><th>Type</th><th>Count</th></tr>
-      </thead>
-      <tbody id="purposeTable"></tbody>
-    </table>
-  </div>
-</section>
-
-<br>
-
-<section class="col alignStart hidden">
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr><th>Document Type</th><th>Status</th><th>Count</th></tr>
-      </thead>
-      <tbody id="docStatusTable"></tbody>
-    </table>
-  </div>
-
-</section>
 <script>
 let chartInstances = {}; // Keep chart instances to destroy before redraw
 
@@ -490,19 +463,41 @@ document.getElementById("filterInfo").innerText =
     filtersWithRange.includes(analytics.filterUsed) || analytics.filterUsed === "overall"
         ? `${rangeText}`
         : "";
-  
-  document.getElementById("totalRequests").innerText = `${analytics.totalRequests || 0} Total Request`;
-  document.getElementById("approved").innerText = analytics.approved || 0;
-  document.getElementById("declined").innerText = analytics.declined || 0;
-  document.getElementById("pending").innerText = analytics.pending || 0;
-  document.getElementById("onHold").innerText = analytics.onHold || 0;
-  document.getElementById("onProcess").innerText = analytics.onProcess || 0;
-  
-  document.getElementById("approvedPercent").innerText = analytics.approvedPercent || 0;
-  document.getElementById("declinedPercent").innerText = analytics.declinedPercent || 0;
-  document.getElementById("pendingPercent").innerText = analytics.pendingPercent || 0;
-  document.getElementById("onHoldPercent").innerText = analytics.onHoldPercent || 0;
-  document.getElementById("onProcessPercent").innerText = analytics.onProcessPercent || 0;
+
+document.getElementById("totalRequests").innerText = `${analytics.totalRequests || 0} Total Request`;
+document.getElementById("pending").innerText = analytics.pending || 0;
+
+// Loop for status counts and percentages
+const metrics = [
+  { label: "Success", icon: "fa-check-circle", key: "approved", percentKey: "approvedPercent" },
+  { label: "On Process", icon: "fa-hourglass-half", key: "onProcess", percentKey: "onProcessPercent" },
+  { label: "On Hold", icon: "fa-clock", key: "onHold", percentKey: "onHoldPercent" },
+  { label: "Declined", icon: "fa-xmark-circle", key: "declined", percentKey: "declinedPercent" }
+];
+
+const tpl = document.getElementById("metric");       // original HTML block
+const container = document.getElementById("metricsContainer");
+
+// Clear container if needed
+container.innerHTML = "";
+
+metrics.forEach(m => {
+    let box = tpl.cloneNode(true); // copy the block
+
+    box.querySelector(".label").innerText = m.label;
+    box.querySelector(".icon").classList.add("fas", m.icon);
+
+    // Show value and percentage together
+    const value = analytics[m.key] || 0;
+    const percent = analytics[m.percentKey] !== undefined ? analytics[m.percentKey] : 0;
+
+    box.querySelector(".value").innerText = `${value}00`;
+    box.querySelector(".percentage").innerText = `${percent}`;
+
+    container.appendChild(box);
+});
+
+tpl.remove();
 
   document.getElementById("activeUserCount").innerText = `${analytics.activeUserCount || 0} Active`;
   // const countU = analytics.toVerifyUsers || 0;

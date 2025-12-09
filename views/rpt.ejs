@@ -1,0 +1,475 @@
+<% layout('layout') %>
+<style>
+    table p {
+        font-size: 10px;
+        display: block;
+    }
+    td {
+        vertical-align: top !important;
+        gap: 0;
+        padding-inline: 10px;
+    }
+    th {
+        padding-inline: 10px;
+    }
+    #specificDate, #customStart, #customEnd {
+        display: inline-block;
+    }
+</style>
+<div class="gap10 rowReverse alignStart justifyStart">
+    <form class="absolute right30 top5 corner15 bgWhite width20 col gap15 padding20">
+        <div class="field">
+            <p class="size20 str500">Filtering Panel</p>
+            <hr>
+        </div>
+        <div class="field">
+            <label for="">Choose Date</label>
+            <div class="selectBar" id="">
+                <i class="fas fa-filter"></i>
+                <select id="dateFilter">
+                    <option value="" selected>--Filter</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="thisWeek">This Week</option>
+                    <option value="lastWeek">Last Week</option>
+                    <option value="thisMonth">This Month</option>
+                    <option value="lastMonth">Last Month</option>
+                    <option value="thisYear" selected>This Year</option>
+                    <option value="lastYear">Last Year</option>
+                    <option value="specific">Specific Date</option>
+                    <option value="custom">Custom Range</option>
+                    <option value="overall">Overall</option>
+                </select>
+            </div>
+            <input type="date" id="specificDate" style="display:none;" class="" />
+            <input type="date" id="customStart" style="display:none;" class="" />
+            <input type="date" id="customEnd" style="display:none;" class="" />
+        </div>
+        <div class="field">
+            <label for="">By Document Type</label>
+            <div class="selectBar" id="">
+                <i class="fas fa-filter"></i>
+                <select id="itemTypeFilter">
+                    <option value="" selected>--Filter</option>
+                </select>
+            </div>
+        </div>
+        <div class="field">
+            <label for="">By Campus</label>
+            <div class="selectBar" id="">
+                <i class="fas fa-filter"></i>
+                <select id="campusFilter">
+                    <option value="" selected>--Filter</option>
+                </select>
+            </div>
+        </div>
+        <div class="field">
+            <label for="">By Year Level</label>
+            <div class="selectBar" id="">
+                <i class="fas fa-filter"></i>
+                <select id="yearLevelFilter">
+                    <option value="" selected>--Filter</option>
+                </select>
+            </div>
+        </div>
+        <div class="field">
+            <label for="">By Course</label>
+            <div class="selectBar" id="">
+                <i class="fas fa-filter"></i>
+                <select id="courseFilter">
+                    <option value="" selected>--Filter</option>
+                </select>
+            </div>
+        </div>
+        <div class="field">
+            <label for="">Process By</label>
+            <div class="selectBar" id="">
+                <i class="fas fa-filter"></i>
+                <select id="processByFilter">
+                    <option value="" selected>--Filter</option>
+                </select>
+            </div>
+        </div>
+        <div class="field">
+            <label for="">By Status</label>
+            <div class="selectBar" id="">
+                <i class="fas fa-filter"></i>
+                <select id="statusFilter">
+                    <option value="" selected>--Filter</option>
+                </select>
+            </div>
+        </div>
+        <div class="field gap10">
+            <button type="button"  onclick="exportExcel()" class="nav pnav width100"><i class="fas fa-download"></i> Export Excel</button>
+            <button type="button" onclick="resetFilters()" class="nav width100"> <i class="fas fa-rotate"></i> Reset </button>
+        </div>
+    </form>
+    <div class="gap10 alignStart overflow-y1 block">
+        <section class="corner15 bgWhite col width75 height15 marginBottom20 alignStart justifyStart">
+            <a href="/dsb" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
+        </section>
+        <div class="height80 block overflow-x1 overflow-y1 width75 bgWhite corner15 padding20">
+
+            <table class="width0 block" style="width:fit-content;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>TR</th>
+                        <th>Requested Document</th>
+                        <th>Request By</th>
+                        <th>Year & Course</th>
+                        <th>Contact</th>
+                        <th>Process By</th>
+                        <th>Status</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                    <% requests.forEach((rq, i) => { %>
+                    <tr>
+                        <td><%= i+1 %></td>
+                        <td><%= rq.createdAtFormatted %></td>
+                        <td><%= rq.tr %></td>
+                        <td>
+                            <% rq.items.forEach(item => { %>
+                                <p>( <%= item.qty %> ) <%= item.type %>  for  <%= item.purpose %> 
+                                    <% if ( item.status === "Approved") { %>
+                                        <i class="fas fa-check-circle green marginRight10"></i>
+                                    <% } else { %>
+                                        <i class="fas fa-xmark-circle red marginRight10"></i>
+                                    <% } %>
+                                </p>
+                            <% }) %>
+                        </td>
+                        <td>
+                            <p><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
+                            <p><%= rq.requestBy ? rq.requestBy.schoolId : '' %></p>
+                        </td>
+                        <td>
+                            <p><%= rq.requestBy ? rq.requestBy.yearLevel : '' %> &bull; <%= rq.requestBy ? rq.requestBy.campus : '' %></p>
+                            <p><%= rq.requestBy ? rq.requestBy.course : '' %></p>
+                            
+                        </td>
+                        <td>
+                            <p><%= rq.requestBy ? rq.requestBy.email : '' %></p>
+                            <p><%= rq.requestBy ? rq.requestBy.phone : '' %></p>
+                        </td>
+                        <td>
+                            <p><%= rq.processBy ? rq.processBy.fName : '' %> <%= rq.processBy ? rq.processBy.mName : '' %> <%= rq.processBy ? rq.processBy.lName : '' %> <%= rq.processBy ? rq.processBy.xName : '' %></p>
+                            <p><%= rq.processBy ? rq.processBy.campus : '' %></p>
+                        </td>
+                        <td>
+                            <% if ( rq.holdAt) { %>
+                                On Hold
+                            <% } else if ( rq.declineAt) { %>
+                                Declined
+                            <% } else { %>
+                                <%= rq.status %>
+                            <% } %>
+                        </td>
+                        <td>₱ <%= rq.totalAmount.toFixed(2) %></td>
+                        <td class="inline">
+                            <% if (["Claimed", "Verified", "For Release"].includes(rq.status)) { %>
+                                Paid
+                            <% } else { %>
+                                Unpaid
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<script>
+  // ----------------------------
+  // 1️⃣ DOM Elements
+  // ----------------------------
+  const tbody = document.getElementById("reportTableBody");
+
+  const dateFilter = document.getElementById("dateFilter");
+  const itemTypeFilter = document.getElementById("itemTypeFilter");
+  const campusFilter = document.getElementById("campusFilter");
+  const yearLevelFilter = document.getElementById("yearLevelFilter");
+  const courseFilter = document.getElementById("courseFilter");
+  const processByFilter = document.getElementById("processByFilter");
+  const statusFilter = document.getElementById("statusFilter");
+  const specificDateInput = document.getElementById("specificDate");
+  const customStartInput = document.getElementById("customStart");
+  const customEndInput = document.getElementById("customEnd");
+
+  // Requests data from server
+  const allRequests = <%- JSON.stringify(requests) %>;
+  window.filteredRequests = allRequests;
+
+  // ----------------------------
+  // 2️⃣ Format date for CSV
+  // ----------------------------
+  function formatDate(raw) {
+    const d = new Date(raw);
+    const month = (d.getMonth() + 1).toString().padStart(2, "0");
+    const day = d.getDate().toString().padStart(2, "0");
+    return `${d.getFullYear()}-${month}-${day}`;
+  }
+
+  // ----------------------------
+  // 3️⃣ Populate filter dropdowns
+  // ----------------------------
+  function populateFilters() {
+    const types = new Set();
+    const campuses = new Set();
+    const yearLevels = new Set();
+    const courses = new Set();
+    const processors = new Set();
+    const statuses = new Set();
+
+    allRequests.forEach(rq => {
+      rq.items.forEach(i => types.add(i.type));
+      if (rq.requestBy) {
+        campuses.add(rq.requestBy.campus);
+        yearLevels.add(rq.requestBy.yearLevel);
+        courses.add(rq.requestBy.course);
+      }
+      if (rq.processBy) {
+        processors.add(rq.processBy.fName);
+      }
+      statuses.add(rq.status);
+    });
+
+    function fill(select, values) {
+      values.forEach(v => {
+        if (v) select.innerHTML += `<option value="${v}">${v}</option>`;
+      });
+    }
+
+    fill(itemTypeFilter, types);
+    fill(campusFilter, campuses);
+    fill(yearLevelFilter, yearLevels);
+    fill(courseFilter, courses);
+    fill(processByFilter, processors);
+    fill(statusFilter, statuses);
+  }
+
+  populateFilters();
+
+  // ----------------------------
+  // 4️⃣ Reset Filters
+  // ----------------------------
+function resetFilters() {
+    // Reset all dropdowns and date inputs
+    dateFilter.value = "";
+    itemTypeFilter.value = "";
+    campusFilter.value = "";
+    yearLevelFilter.value = "";
+    courseFilter.value = "";
+    processByFilter.value = "";
+    statusFilter.value = "";
+    specificDateInput.value = "";
+    customStartInput.value = "";
+    customEndInput.value = "";
+
+    // Hide date inputs
+    specificDateInput.style.display = "none";
+    customStartInput.style.display = "none";
+    customEndInput.style.display = "none";
+
+    // Render full table
+    renderTable(allRequests);
+
+    // Update filteredRequests correctly
+    window.filteredRequests = [...allRequests];
+}
+
+
+  // ----------------------------
+  // 5️⃣ Export CSV
+  // ----------------------------
+function exportExcel() {
+    const rows = window.filteredRequests.length ? window.filteredRequests : allRequests;
+
+    if (!rows.length) {
+        alert("No data to export.");
+        return;
+    }
+
+    // Prepare data
+    const data = rows.map((rq, i) => ({
+        No: i + 1,
+        Date: rq.createdAtFormatted,
+        TR: rq.tr,
+        "Requested Document": rq.items.map(it => `(${it.qty}) ${it.type} for ${it.purpose} ${it.status==="Approved" ? '✓':'✗'}`).join(" | "),
+        "Request By": `${rq.requestBy?.fName ?? ""} ${rq.requestBy?.mName ?? ""} ${rq.requestBy?.lName ?? ""} ${rq.requestBy?.xName ?? ""}`,
+        "Year & Course": `${rq.requestBy?.yearLevel ?? ""} - ${rq.requestBy?.course ?? ""}`,
+        Contact: `${rq.requestBy?.email ?? ""} / ${rq.requestBy?.phone ?? ""}`,
+        "Process By": `${rq.processBy?.fName ?? ""} ${rq.processBy?.mName ?? ""} ${rq.processBy?.lName ?? ""} ${rq.processBy?.xName ?? ""}`,
+        Status: rq.status,
+        Amount: rq.totalAmount.toFixed(2),
+        Payment: ["Claimed","Verified","For Release"].includes(rq.status) ? "Paid" : "Unpaid"
+    }));
+
+    // Convert to worksheet
+    const ws = XLSX.utils.json_to_sheet(data, { wrapText: true });
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+
+    // Export Excel file
+    XLSX.writeFile(wb, "Report.xlsx");
+}
+
+  // ----------------------------
+  // 6️⃣ Apply Filters
+  // ----------------------------
+  function applyFilters() {
+    let filtered = [...allRequests];
+
+    // Item Type
+    if (itemTypeFilter.value) filtered = filtered.filter(rq => rq.items.some(it => it.type === itemTypeFilter.value));
+    // Campus
+    if (campusFilter.value) filtered = filtered.filter(rq => rq.requestBy && rq.requestBy.campus === campusFilter.value);
+    // Year Level
+    if (yearLevelFilter.value) filtered = filtered.filter(rq => rq.requestBy && rq.requestBy.yearLevel === yearLevelFilter.value);
+    // Course
+    if (courseFilter.value) filtered = filtered.filter(rq => rq.requestBy && rq.requestBy.course === courseFilter.value);
+    // Process By
+    if (processByFilter.value) filtered = filtered.filter(rq => rq.processBy && rq.processBy.fName === processByFilter.value);
+    // Status
+    if (statusFilter.value) filtered = filtered.filter(rq => rq.status === statusFilter.value);
+
+    // Date filter
+    if (dateFilter.value) {
+      const today = new Date();
+      const createdDate = (rq) => new Date(rq.createdAtRaw);
+
+      switch (dateFilter.value) {
+        case "today":
+          filtered = filtered.filter(rq => createdDate(rq).toDateString() === today.toDateString());
+          break;
+        case "yesterday":
+          const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+          filtered = filtered.filter(rq => createdDate(rq).toDateString() === yesterday.toDateString());
+          break;
+        case "thisWeek":
+          const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - today.getDay());
+          const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
+          filtered = filtered.filter(rq => {
+            const d = createdDate(rq); return d >= startOfWeek && d <= endOfWeek;
+          });
+          break;
+        case "lastWeek":
+          const lastWeekEnd = new Date(today); lastWeekEnd.setDate(today.getDate() - today.getDay() - 1);
+          const lastWeekStart = new Date(lastWeekEnd); lastWeekStart.setDate(lastWeekEnd.getDate() - 6);
+          filtered = filtered.filter(rq => {
+            const d = createdDate(rq); return d >= lastWeekStart && d <= lastWeekEnd;
+          });
+          break;
+        case "thisMonth":
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+          filtered = filtered.filter(rq => {
+            const d = createdDate(rq); return d >= startOfMonth && d <= endOfMonth;
+          });
+          break;
+        case "lastMonth":
+          const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+          filtered = filtered.filter(rq => {
+            const d = createdDate(rq); return d >= lastMonth && d <= lastMonthEnd;
+          });
+          break;
+        case "thisYear":
+          const startOfYear = new Date(today.getFullYear(), 0, 1);
+          const endOfYear = new Date(today.getFullYear(), 11, 31);
+          filtered = filtered.filter(rq => {
+            const d = createdDate(rq); return d >= startOfYear && d <= endOfYear;
+          });
+          break;
+        case "lastYear":
+          const lastYearStart = new Date(today.getFullYear() - 1, 0, 1);
+          const lastYearEnd = new Date(today.getFullYear() - 1, 11, 31);
+          filtered = filtered.filter(rq => {
+            const d = createdDate(rq); return d >= lastYearStart && d <= lastYearEnd;
+          });
+          break;
+        case "specific":
+          if (specificDateInput.value) {
+            const specDate = new Date(specificDateInput.value);
+            filtered = filtered.filter(rq => createdDate(rq).toDateString() === specDate.toDateString());
+          }
+          break;
+        case "custom":
+          if (customStartInput.value && customEndInput.value) {
+            const startDate = new Date(customStartInput.value);
+            const endDate = new Date(customEndInput.value);
+            filtered = filtered.filter(rq => {
+              const d = createdDate(rq); return d >= startDate && d <= endDate;
+            });
+          }
+          break;
+      }
+    }
+
+    renderTable(filtered);
+    window.filteredRequests = filtered;
+  }
+
+  // ----------------------------
+  // 7️⃣ Render Table
+  // ----------------------------
+  function renderTable(list) {
+    tbody.innerHTML = "";
+    list.forEach((rq, i) => {
+      let row = `
+        <tr>
+          <td>${i+1}</td>
+          <td>${rq.createdAtRaw}</td>
+          <td>${rq.tr}</td>
+          <td>${rq.items.map(it => `<p>( ${it.qty} ) ${it.type} for ${it.purpose} ${it.status==="Approved"?'<i class="fas fa-check-circle green"></i>':'<i class="fas fa-xmark-circle red"></i>'}</p>`).join("")}</td>
+          <td><p>${rq.requestBy?.fName ?? ""} ${rq.requestBy?.mName ?? ""} ${rq.requestBy?.lName ?? ""}</p><p>${rq.requestBy?.schoolId ?? ""}</p></td>
+          <td><p>${rq.requestBy?.yearLevel ?? ""} • ${rq.requestBy?.campus ?? ""}</p><p>${rq.requestBy?.course ?? ""}</p></td>
+          <td><p>${rq.requestBy?.email ?? ""}</p><p>${rq.requestBy?.phone ?? ""}</p></td>
+          <td><p>${rq.processBy?.fName ?? ""} ${rq.processBy?.lName ?? ""}</p><p>${rq.processBy?.campus ?? ""}</p></td>
+          <td>${rq.status}</td>
+          <td>₱ ${rq.totalAmount.toFixed(2)}</td>
+          <td>${["Claimed","Verified","For Release"].includes(rq.status)?"Paid":"Unpaid"}</td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+  }
+
+  // ----------------------------
+  // 8️⃣ Event Listeners
+  // ----------------------------
+  dateFilter.addEventListener("change", () => {
+    const val = dateFilter.value;
+    if (val === "specific") {
+      specificDateInput.style.display = "inline-block";
+      customStartInput.style.display = "none";
+      customEndInput.style.display = "none";
+    } else if (val === "custom") {
+      specificDateInput.style.display = "none";
+      customStartInput.style.display = "inline-block";
+      customEndInput.style.display = "inline-block";
+    } else {
+      specificDateInput.style.display = "none";
+      customStartInput.style.display = "none";
+      customEndInput.style.display = "none";
+    }
+    applyFilters();
+  });
+
+  [itemTypeFilter, campusFilter, yearLevelFilter, courseFilter, processByFilter, statusFilter].forEach(sel => sel.addEventListener("change", applyFilters));
+  specificDateInput.addEventListener("change", applyFilters);
+  customStartInput.addEventListener("change", applyFilters);
+  customEndInput.addEventListener("change", applyFilters);
+
+  // Initial render
+  renderTable(allRequests);
+</script>

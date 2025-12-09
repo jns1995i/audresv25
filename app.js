@@ -3750,6 +3750,55 @@ app.get('/perf', isLogin, analyticsMiddleware, (req, res) => {
   });
 });
 
+app.get('/rpt', isLogin, isRequest, isStaff, (req, res) => {
+  const statuses = [
+    'Reviewed', 'Assessed', 'Claimed',
+    'For Payment', 'Verified', 'Pending', 'For Release', 'For Verification'
+  ];
+
+  // Filter requests based on status
+  const allFiltered = filterByStatuses(req.requests, statuses);
+  const userFiltered = filterByStatuses(req.userRequests, statuses);
+
+  const isPrivileged = privilegedRoles.includes(req.user.role);
+  const requestsToShow = isPrivileged ? allFiltered : userFiltered;
+
+  // Calculate totalAmount for each request
+const requestsWithTotal = requestsToShow.map(rq => {
+  const rqItems = rq.items || [];
+  const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
+
+  let totalAmount = 0;
+  for (const it of approvedItems) {
+    const doc = req.documents.find(d => d.type === it.type);
+    if (doc) totalAmount += (doc.amount || 0) * (it.qty || 0);
+  }
+
+  const createdAtRaw = rq.createdAt;
+  const createdAtFormatted = createdAtRaw
+    ? new Date(createdAtRaw).toISOString().split("T")[0]  // "YYYY-MM-DD"
+    : "";
+
+  return {
+    ...rq.toObject ? rq.toObject() : rq,
+    totalAmount,
+    createdAtRaw,
+    createdAtFormatted
+  };
+});
+
+
+  const totalCount = requestsWithTotal.length;
+
+  res.render('rpt', {
+    title: 'Dashboard',
+    active: 'dsb',
+    requests: requestsWithTotal,  // pass requests with total
+    userRequests: userFiltered,
+    totalCount
+  });
+});
+
 
 /* Accounting */
 

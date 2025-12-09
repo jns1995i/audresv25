@@ -1243,6 +1243,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .bgMaroon { background-color: maroon; }
 .bgNavy { background-color: rgb(9, 9, 55); }
 .bgOlive { background-color: olive; }
+.bgAntiquewhite { background-color: antiquewhite;}
 .witch { background-color: var(--witch);}
 .aqua { background-color: var(--aqua);}
 .bgRed100{background-color:rgb(255,240,240);border:0.5px solid rgba(255,0,0,0.6);color:red; padding: 5px; border-radius: 0.7rem; text-align: center;}
