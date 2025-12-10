@@ -767,7 +767,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     // 4️⃣ Build TR
     const year = new Date().getFullYear().toString().slice(-2); // "25"
     const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
-    const userLastTwo = userId.toString().slice(-2); // e.g., "35"
+    const userLastTwo = savedUser._id.toString().slice(-2); // e.g., "35"
 
     const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
 
@@ -1591,6 +1591,11 @@ function filterByStatuses(list = [], statuses = []) {
   return list.filter(rq => statuses.includes(rq.status) && !rq.declineAt);
 }
 
+function filterByStatuses2(list = [], statuses = []) {
+  return list.filter(rq => statuses.includes(rq.status) || rq.declineAt);
+}
+
+
 // /srv  (Pending only)
 app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
   const statuses = ['Pending'];
@@ -1615,8 +1620,8 @@ app.get('/srvAll', isLogin, isRequest, isStaff, (req, res) => {
     'Reviewed', 'Assessed', 'Claimed',
     'For Payment', 'Verified', 'Pending', 'For Release', 'For Verification'
   ];
-  const allFiltered = filterByStatuses(req.requests, statuses);
-  const userFiltered = filterByStatuses(req.userRequests, statuses);
+  const allFiltered = filterByStatuses2(req.requests, statuses);
+  const userFiltered = filterByStatuses2(req.userRequests, statuses);
 
   const isPrivileged = privilegedRoles.includes(req.user.role);
   const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
@@ -1688,15 +1693,15 @@ app.get('/rel', isLogin, isRequest, isStaff, (req, res) => {
 app.get('/vrf', isLogin, isVerify, isStaff, (req, res) => {
   // To Verify
   const filteredRequests = req.requests.filter(
-    rq => rq.status === '' && !rq.declineAt
+    rq => rq.status === 'Pending' && !rq.declineAt
   );
     const privilegedRoles = ["Admin", "Head", "Dev"];
       // Align totalCount with filtered requests
   const totalCount = privilegedRoles.includes(req.user.role)
     ? filteredRequests.length
     : req.user.role === "Registrar"
-      ? req.userRequests.filter(rq => rq.status === '' && !rq.declineAt).length
-      : req.userRequests.filter(rq => rq.status === '' && !rq.declineAt).length;
+      ? req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length
+      : req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length;
 
   res.render('srv', { 
     title: 'To Verify', 
@@ -3741,7 +3746,7 @@ app.get('/dsb', isLogin, analyticsMiddleware, isEmp, (req, res) => {
   });
 });
 
-app.get('/perf', isLogin, analyticsMiddleware, (req, res) => {
+app.get('/perf', isLogin, analyticsMiddleware, isEmp, (req, res) => {
   const analytics = res.locals.analytics || {};
   res.render('perf', {
     title: 'Team Performance',

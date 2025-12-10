@@ -20,9 +20,10 @@
       }
     }
     #getStat {
+      margin-top: 10px;
       width: fit-content;
       flex-direction: column;
-      padding: 10px;
+      padding: 15px;
       gap: 10px;
       p {
         text-align: center;
@@ -35,46 +36,73 @@
   }
 </style>
 
-<div class="height0 gap5 bgWhite cornerRem12 login colorPrimary width100 padding10 relative">
-  <a href="/login2" class="nav absolute left0 top0 opacity0">none</a>
-  <div class="height0 col width40">
-    <img src="/images/logo3.png" alt="" class="width80 corner10">
-    <p class="textCenter textWrap rem2 str500">AU REGISTRAR</p>
-    <p class="textCenter textWrap rem1 str500 marginBottom10">PHINMA Araullo University</p>
-  </div>
-  <form action="/login" method="POST" class="colorPrimary gap5 width60" id="loginForm">
-    <div class="height0 col">
-      <% if (error) { %>
-        <p class="rem2 str500 wcT textCenter textWrap">Welcome Users</p>
-        <span style="color: red;" class="bgRed100"><%= error %></span>
-      <% } else { %>
-        <p class="rem24 str500 wcT textCenter textWrap">Welcome Users</p>
-      <% } %>
+<section class="padding0 corner15 bgWhite col">
+  <div class="height0 gap5 bgWhite cornerRem12 login colorPrimary width100 padding10 relative">
+    <a href="/login2" class="nav absolute left0 top0 opacity0">none</a>
+    <div class="height0 col width40">
+      <img src="/images/logo3.png" alt="" class="width80 corner10">
+      <p class="textCenter textWrap rem2 str500">AU REGISTRAR</p>
+      <p class="textCenter textWrap rem1 str500 marginBottom10">PHINMA Araullo University</p>
     </div>
-
-    <div class="field">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required placeholder="Enter your username">
-    </div>
-
-    <div class="field password width100">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required placeholder="Enter your password">
-      <span class="showPass" id="showPass" style="cursor: pointer;">show</span>
-    </div>
-
-    <div class="justifyBetween" id="MathRecaptcha">
-      <input type="text" id="num1" class="width20 textCenter size14" readonly>
-      <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-plus"></i></div>
-      <input type="text" id="num2" class="width20 textCenter size14" readonly>
-      <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-equals"></i></div>
-      <input type="text" id="answer" class="width20 textCenter str500" required>
-      <div class="height0 width20 gap5 justifyEnd" style="width: 20%;">
-        <a href="#" class="nav cnav" id="reset"><i class="fas fa-rotate"></i></a>
+    <form action="/login" method="POST" class="colorPrimary gap5 width60" id="loginForm">
+      <div class="height0 col">
+        <% if (error) { %>
+          <p class="rem2 str500 wcT textCenter textWrap">Welcome Users</p>
+          <span style="color: red;" class="bgRed100"><%= error %></span>
+        <% } else { %>
+          <p class="rem24 str500 wcT textCenter textWrap">Welcome Users</p>
+        <% } %>
       </div>
-    </div>
 
-    <div class="bgRed100 hidden" id="warning20">Please fill the correct value!</div>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required placeholder="Enter your username">
+      </div>
+
+      <div class="field password width100">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required placeholder="Enter your password">
+        <span class="showPass" id="showPass" style="cursor: pointer;">show</span>
+      </div>
+
+      <div class="justifyBetween" id="MathRecaptcha">
+        <input type="text" id="num1" class="width20 textCenter size14" readonly>
+        <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-plus"></i></div>
+        <input type="text" id="num2" class="width20 textCenter size14" readonly>
+        <div class="width10 textCenter str500" style="width: 10%;"><i class="fas fa-equals"></i></div>
+        <input type="text" id="answer" class="width20 textCenter str500" required>
+        <div class="height0 width20 gap5 justifyEnd" style="width: 20%;">
+          <a href="#" class="nav cnav" id="reset"><i class="fas fa-rotate"></i></a>
+        </div>
+      </div>
+
+      <div class="bgRed100 hidden" id="warning20">Please fill the correct value!</div>
+      <div class="field padding5">
+        <button type="submit" class="nav pnav width100">Log In</button>
+      </div>
+
+      <a href="/fg" class="blue size12">Forgot Password</a>
+    </form>
+  </div>
+  <div class="height0 padding15 borderPrimary corner15 justifyBetween width95" id="getStat">
+    <p class="size14">No Account Yet? Make your First Request!</p>
+    <a href="/rg" class="nav shadow2 corner10"><span class="rainbowText">Get Started Here</span></a>
+  </div>
+  <br>
+</section>
+
+<br>
+
+<div class="height0 padding15 gap10 width100 justifyStart liquid">
+    <div class="height0 padding10 border0 borderRadius10 alignStart width50 col gap10 relative">
+        <p class="rem18 gap10 alignCenter">Need Help?</p>
+        <p class="rem11 gap10 alignCenter">Fullscreen the video or click below to access the Tutorial Section</p>
+        <a href="/ins" class="nav liquid">Learn More <i class="fas fa-chevron-right"></i></a>
+        <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
+    </div>
+    <video autoplay muted loop playsinline controls class="width50 cornerRem1" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
+</div>
+
 
   <script>
   function generateRandomNumbers() {
@@ -124,32 +152,6 @@
   generateRandomNumbers();
   </script>
 
-    <div class="field padding5">
-      <button type="submit" class="nav pnav width100">Log In</button>
-    </div>
-
-    <a href="/fg" class="blue size12">Forgot Password</a>
-  </form>
-</div>
-
-<br>
-
-<div class="height0 padding10 justifyBetween width100" id="getStat">
-  <p class="size14">No Account Yet? Make your First Request!</p>
-  <a href="/rg" class="nav shadow2"><span class="rainbowText">Get Started Here</span></a>
-</div>
-
-<br>
-
-<div class="height0 padding15 gap10 width100 justifyStart liquid">
-    <div class="height0 padding10 border0 borderRadius10 alignStart width50 col gap10 relative">
-        <p class="rem18 gap10 alignCenter">Need Help?</p>
-        <p class="rem11 gap10 alignCenter">Fullscreen the video or click below to access the Tutorial Section</p>
-        <a href="/ins" class="nav liquid">Learn More <i class="fas fa-chevron-right"></i></a>
-        <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
-    </div>
-    <video autoplay muted loop playsinline controls class="width50 cornerRem1" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
-</div>
 
 <script>
   const loginForm = document.getElementById('loginForm');

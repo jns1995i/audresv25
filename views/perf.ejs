@@ -1,4 +1,440 @@
 <% layout('layout') %>
-<section>
-    <a href="/dsb" class="nav">Go Back</a>
+<style>
+    .mainf {
+        padding: 5px 15px;
+    }
+    .keyMetrics {
+      border-radius: 15px;
+      flex-direction: column;
+      align-items: start;
+      justify-content: space-between;
+      position: relative;
+      padding: 20px;
+      height: auto;
+    }
+    .keyIcon {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      transform: rotate(-45deg);
+      i {
+        transform: rotate(45deg);
+      }
+    }
+    #registrationGrowth {
+      i {
+        font-size: 10px;
+        height: 12px;
+      }
+    }
+    td {
+        vertical-align: top !important;
+        gap: 0;
+        padding-inline: 10px;
+    }
+    th {
+        padding-inline: 10px;
+    }
+
+</style>
+
+<%
+  const statColor = {
+    Quick: "bgViolet100",
+    Fast: "bgGreen100",
+    Moderate: "bgBlue100",
+    Standard: "bgBlue100",
+    Slow: "bgOrange100",
+    Warning: "bgRed100",
+    Critical: "bgRed200"
+  };
+%>
+
+<section class="justifyBetween">
+    <a href="/dsb" class="nav"><i class="fas fa-chevron-left"></i>Go Back</a>
 </section>
+
+<section class="col porcelain corner15 padding10 gap10">
+    <section class="col corner15 padding0 relative">
+        <section class="justifyBetween paddingInline15">
+            <p class="size30 colorPrimary">Average Approval Rate</p>
+            <section class="width0 gap10 padding0">
+            <div class="selectBar w200">
+                <i class="fas fa-filter"></i>
+                <select id="filterSelect">
+                <option value="" disabled>--Filter</option>
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="thisWeek">This Week</option>
+                <option value="lastWeek">Last Week</option>
+                <option value="thisMonth">This Month</option>
+                <option value="lastMonth">Last Month</option>
+                <option value="thisYear" selected>This Year</option>
+                <option value="lastYear">Last Year</option>
+                <option value="specific">Specific Date</option>
+                <option value="custom">Custom Range</option>
+                <option value="overall">Overall</option>
+                </select>
+            </div>
+            <input type="date" id="specificDate" style="display:none;" class="w160" />
+            <input type="date" id="customStart" style="display:none;" class="w160" />
+            <input type="date" id="customEnd" style="display:none;" class="w160" />
+            </section>
+        </section>
+        <section class="width0 absolute right20 top55 bgBlue100 border0" style="display: none;"><p class="size12" id="filterInfo"></p></section>
+    </section>
+    <section class="gap15 padding15 bgWhite corner15">
+        <div class="porcelain height0 corner15 col alignStart padding15 relative">
+            <p class="size12 str400">Processing Time</p>
+            <p class="size16 str500" id="avgApprovalTime"><%= analytics.avgApprovalTime %></p>
+            <p class="size12 str500 border0 absolute right10 top10 <%= statColor[analytics.avgApprovalTimeStat] %>" id="avgApprovalTimeStat"></p>
+        </div>
+        <div class="porcelain height0 corner15 col alignStart padding15 relative">
+            <p class="size12 str400">Reviewing Time</p>
+            <p class="size16 str500" id="avgReviewTime"><%= analytics.avgReviewTime %></p>
+            <p class="size12 str500 border0 absolute right10 top10 <%= statColor[analytics.avgReviewTimeStat] %>" id="avgReviewTimeStat"></p>
+        </div>
+        <div class="porcelain height0 corner15 col alignStart padding15 relative">
+            <p class="size12 str400">Assessment Time</p>
+            <p class="size16 str500" id="avgAssessTime"><%= analytics.avgAssessTime %></p>
+            <p class="size12 str500 border0 absolute right10 top10 <%= statColor[analytics.avgAssessTimeStat] %>" id="avgAssessTimeStat"></p>
+        </div>
+    </section>
+</section>
+
+<br>
+
+<section class="bgWhite corner15 padding20 col gap0">
+    <p class="size30 colorPrimary">Team Performance Tracker</p>
+    <section class="gap20 alignStart">
+        <div class="h300 bgWhite corner15 padding0">
+            <canvas id="processByChart"></canvas>
+        </div>
+        <table class="corner10 porcelain">
+            <thead>
+                <tr>
+                    <th class="width40">Complete Name</th>
+                    <th class="width20 textCenter">Total Processed</th>
+                    <th class="width20 textCenter">%</th>
+                </tr>
+            </thead>
+            <tbody id="processByTable"></tbody>
+        </table>
+    </section>
+</section>
+
+<br>
+<section class="bgWhite corner15 padding20 col gap0">
+    <p class="size30 colorPrimary">Success Transactions</p>
+    <section class="h300 bgWhite corner15 padding0">
+        <canvas id="processByVerifiedChart"></canvas>
+    </section>
+</section>
+
+<br>
+<section class="bgWhite corner15 padding20 col gap0">
+    <p class="size30 colorPrimary">Declining Rate</p>
+    <section class="h300 bgWhite corner15 padding0">
+        <canvas id="processByDeclineChart"></canvas>
+    </section>
+</section>
+
+
+<script>
+const filterSelect = document.getElementById("filterSelect");
+const specificDate = document.getElementById("specificDate");
+const customStart = document.getElementById("customStart");
+const customEnd = document.getElementById("customEnd");
+
+filterSelect.addEventListener("change", () => {
+    const value = filterSelect.value;
+
+    // Hide everything by default
+    specificDate.style.display = "none";
+    customStart.style.display = "none";
+    customEnd.style.display = "none";
+
+    if (value === "specific") {
+        specificDate.style.display = "inline-block";
+    } else if (value === "custom") {
+        customStart.style.display = "inline-block";
+        customEnd.style.display = "inline-block";
+    }
+});
+
+</script>
+
+
+<script>
+let chartInstances = {}; // Keep chart instances to destroy before redraw
+
+// Create or update chart
+function createChart(ctxId, labels, data, type='bar', label='') {
+  if(chartInstances[ctxId]) chartInstances[ctxId].destroy();
+  const ctx = document.getElementById(ctxId).getContext('2d');
+
+  // Dynamic bar thickness
+  let barThickness = 50;
+  if(type === 'bar') {
+    const chartWidth = document.getElementById(ctxId).offsetWidth;
+    barThickness = 75; // max 150
+  }
+
+  // Colors
+  let backgroundColors, borderColors;
+  if(type === 'doughnut') {
+    const palette = [
+      '#00214d','#002b64','#004093','#005ac1','#3f80db','#6695e3','#8da9eb','#b4bef2','#0c1a3a','#102549'
+    ];
+    backgroundColors = labels.map((_, i) => palette[i % palette.length]);
+    borderColors = labels.map(() => '#fff');
+  } else if(type === 'line') {
+    backgroundColors = 'white'; // fill under line
+    borderColors = '#004093'; // line color
+  } else { // bar
+    backgroundColors = '#142c54';
+    borderColors = 'white';
+  }
+
+  let borderWidths;
+  if(type === 'doughnut') {
+      borderWidths = '5';
+  } else if ( type === 'line') {
+      borderWidths = '1.8';
+  } else {
+      borderWidths =  '0.5';
+  }
+
+ chartInstances[ctxId] = new Chart(ctx, {
+  type,
+  data: {
+    labels,
+    
+    datasets: [{
+      label,
+      data,
+      backgroundColor: backgroundColors,
+      borderColor: borderColors,
+      borderWidth: borderWidths,
+      borderRadius: type === 'bar' ? 16 : 10,
+      barThickness: type === 'bar' ? barThickness : undefined,
+      fill: type === 'line' ? true : undefined,
+      tension: type === 'line' ? 0.2 : undefined, // smooth curve
+      pointRadius: type === 'line' ? 2 : undefined,
+      pointBackgroundColor: type === 'line' ? 'white' : undefined,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: type === 'line' ? false : true , 
+      labels: { 
+          usePointStyle: type === 'doughnut' ? true : true,
+          pointStyle: type === 'doughnut' ? 'circle' : 'rectRounded',
+          color: 'black', font: { family: 'Poppins', weight: 'normal', size: '14' } } },
+      tooltip: { enabled: true },
+      // Add labels on top of bars
+      datalabels: {
+        display: type === 'doughnut',
+        color: 'navy',
+        anchor: 'center',
+        align: 'center',                // distance from slice
+        backgroundColor: 'white', // background color of label
+        borderRadius: 6,            // rounded corners
+        padding: 4, 
+        font: { weight: 'normal', size: 12, family: 'Poppins' },
+        formatter: function(value, context) {
+          const dataArr = context.dataset.data;
+          const total = dataArr.reduce((sum, val) => sum + val, 0);
+          const percent = total ? ((value / total) * 100).toFixed(1) : 0;
+          return percent === "0.0" ? "" : `${percent} %`;
+        }
+      }
+    },
+    scales: type === 'bar' || type === 'line' ? {
+      y: {
+        beginAtZero: true,
+        ticks: { display: false },
+        grid: { display: false }
+      },
+      x: {
+        grid: { display: true },
+        ticks: { font: { family: 'Poppins', size: '14', weight: 'normal' } }
+      }
+    } : {}
+  },
+});
+}
+
+// Populate tables and charts
+function populateDashboard(analytics) {
+  // Update top counts
+
+  // ===========================
+// PROCESS-BY ANALYTICS TABLE
+// ===========================
+populateTable(
+    "processByTable",
+    analytics.processByStats,
+    s => `
+      <td>${s.fullName}</td>
+      <td class="textCenter">${s.totalProcessed}</td>
+      <td class="textCenter">${s.percentage}</td>
+    `,
+    "No Staff Performance Data",
+    4
+);
+
+// ===========================
+// PROCESS-BY CHART
+// ===========================
+if (analytics.processByStats && analytics.processByStats.length) {
+    createChart(
+        "processByChart",
+        analytics.processByStats.map(s => s.displayName), 
+        analytics.processByStats.map(s => s.totalProcessed),
+        "doughnut",
+        "Total Processed"
+    );
+}
+
+// ===========================
+// PROCESS-BY VERIFIED/RELEASED/CLAIMED CHART
+// ===========================
+if (analytics.processByVerifiedStats && analytics.processByVerifiedStats.length) {
+    createChart(
+        "processByVerifiedChart", // new canvas id
+        analytics.processByVerifiedStats.map(s => s.displayName), 
+        analytics.processByVerifiedStats.map(s => s.totalProcessed),
+        "bar",
+        "Per Success Transactions"
+    );
+}
+
+// ===========================
+// PROCESS-BY VERIFIED/RELEASED/CLAIMED CHART
+// ===========================
+if (analytics.processByDeclineStats && analytics.processByDeclineStats.length) {
+    createChart(
+        "processByDeclineChart", // new canvas id
+        analytics.processByDeclineStats.map(s => s.displayName), 
+        analytics.processByDeclineStats.map(s => s.totalDeclined),
+        "bar",
+        "Per Success Transactions"
+    );
+}
+
+let rangeText = "";
+// Only show rangeText for certain filters
+const filtersWithRange = ["thisWeek","lastWeek","specific","custom"];
+
+if (filtersWithRange.includes(analytics.filterUsed)) {
+    rangeText = `${analytics.rangeStart || "-"} to ${analytics.rangeEnd || "-"}`;
+} else if (analytics.filterUsed === "overall") {
+    rangeText = "All Time";
+}
+
+// Human-readable filter labels
+const filterLabels = {
+  today: "Today",
+  yesterday: "Yesterday",
+  thisWeek: "This Week",
+  lastWeek: "Last Week",
+  thisMonth: "This Month",
+  lastMonth: "Last Month",
+  thisYear: "This Year",
+  lastYear: "Last Year",
+  specific: "Specific Date",
+  custom: "Custom Range",
+  overall: "Overall"
+};
+
+// Get the label
+const filterName = filterLabels[analytics.filterUsed] || analytics.filterUsed;
+
+// Set the display text
+document.getElementById("filterInfo").innerText = 
+    filtersWithRange.includes(analytics.filterUsed) || analytics.filterUsed === "overall"
+        ? `${rangeText}`
+        : "";
+
+  document.getElementById("avgApprovalTime").innerText = analytics.avgApprovalTime || 0;
+  document.getElementById("avgApprovalTimeStat").innerText = analytics.avgApprovalTimeStat || 0;
+  document.getElementById("avgReviewTime").innerText = analytics.avgReviewTime || 0;
+  document.getElementById("avgReviewTimeStat").innerText = analytics.avgReviewTimeStat || 0;
+  document.getElementById("avgAssessTime").innerText = analytics.avgAssessTime || 0;
+  document.getElementById("avgAssessTimeStat").innerText = analytics.avgAssessTimeStat || 0;
+
+
+// Helper to populate table
+function populateTable(tableId, data, renderRow, emptyMsg = "No Data", colspan = 5) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    if (!data || data.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="${colspan}" class="size14 gray str500 textCenter">${emptyMsg}</td>
+          </tr>
+        `;
+    } else {
+        data.forEach(item => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = renderRow(item);
+            table.appendChild(tr);
+        });
+    }
+}
+
+
+}
+
+// Fetch analytics from API
+async function fetchAnalytics(range="thisYear") {
+    let url = `/api/analytics?range=${range}`;
+
+    if(range === "specific") {
+        const date = document.getElementById("specificDate").value;
+        if(date) url += `&date=${date}`;
+    } else if(range === "custom") {
+        const start = document.getElementById("customStart").value;
+        const end = document.getElementById("customEnd").value;
+        if(start && end) url += `&start=${start}&end=${end}`;
+    }
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        populateDashboard(data);
+    } catch(err) {
+        console.error("Error fetching analytics:", err);
+    }
+}
+
+
+// Filter change event
+document.getElementById("filterSelect").addEventListener("change", e => {
+  fetchAnalytics(e.target.value);
+});
+
+// ----------------------------
+// Date input listeners (add these at the bottom)
+// ----------------------------
+specificDate.addEventListener("change", () => {
+    fetchAnalytics("specific");
+});
+
+customStart.addEventListener("change", () => {
+    const end = customEnd.value;
+    if(end) fetchAnalytics("custom");
+});
+
+customEnd.addEventListener("change", () => {
+    const start = customStart.value;
+    if(start) fetchAnalytics("custom");
+});
+
+// Load default analytics
+fetchAnalytics(document.getElementById("filterSelect").value);
+</script>

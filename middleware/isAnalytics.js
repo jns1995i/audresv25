@@ -700,6 +700,211 @@ switch (filter) {
 }
 
 
+  // ================================
+  // PROCESS-BY ANALYTICS
+  // ================================
+  const processByAggRaw = await requests.aggregate([
+    { $match: dateFilter },
+
+    // Only requests processed by someone
+    { $match: { processBy: { $exists: true, $ne: null } } },
+
+    {
+      $group: {
+        _id: { staffId: "$processBy", status: "$status" },
+        count: { $sum: 1 }
+      }
+    },
+
+    // Flatten per staff
+    {
+      $group: {
+        _id: "$_id.staffId",
+        statuses: {
+          $push: {
+            status: "$_id.status",
+            count: "$count"
+          }
+        },
+        totalProcessed: { $sum: "$count" }
+      }
+    },
+
+    // Attach staff details
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "staffInfo"
+      }
+    },
+    { $unwind: "$staffInfo" },
+
+    {
+      $project: {
+          _id: 0,
+          staffId: "$_id",
+
+          // FULL NAME (cleaned: no double spaces, middle optional)
+          fullName: {
+            $trim: {
+              input: {
+                $concat: [
+                  "$staffInfo.fName", " ",
+                  { $ifNull: ["$staffInfo.mName", ""] }, " ",
+                  "$staffInfo.lName"
+                ]
+              }
+            }
+          },
+
+          // DISPLAY NAME (First Name + Last Initial)
+          displayName: "$staffInfo.fName",
+
+          totalProcessed: 1,
+          statuses: 1
+        }
+    }
+  ]);
+
+  // GET OVERALL TOTAL OF ALL STAFF
+  const overallTotalProcessed = processByAggRaw.reduce(
+    (sum, s) => sum + s.totalProcessed,
+    0
+  );
+
+  // Add percentage for each staff
+  const processByAgg = processByAggRaw.map((s) => ({
+    ...s,
+    percentage: overallTotalProcessed
+      ? ((s.totalProcessed / overallTotalProcessed) * 100).toFixed(2) + "%"
+      : "0%"
+  }));
+
+  // Sort after adding percentage
+  processByAgg.sort((a, b) => b.totalProcessed - a.totalProcessed);
+
+// ================================
+// PROCESS-BY ANALYTICS (VERIFIED / RELEASED / CLAIMED ONLY)
+// ================================
+const processByVerifiedAggRaw = await requests.aggregate([
+  { $match: dateFilter },
+
+  // Only requests processed by someone
+  { $match: { processBy: { $exists: true, $ne: null } } },
+
+  // Only include requests with specific statuses
+  { $match: { status: { $in: ["Verified", "For Release", "Claimed"] } } },
+
+  {
+    $group: {
+      _id: { staffId: "$processBy", status: "$status" },
+      count: { $sum: 1 }
+    }
+  },
+
+  // Flatten per staff
+  {
+    $group: {
+      _id: "$_id.staffId",
+      statuses: {
+        $push: {
+          status: "$_id.status",
+          count: "$count"
+        }
+      },
+      totalProcessed: { $sum: "$count" }
+    }
+  },
+
+  // Attach staff details
+  {
+    $lookup: {
+      from: "users",
+      localField: "_id",
+      foreignField: "_id",
+      as: "staffInfo"
+    }
+  },
+  { $unwind: "$staffInfo" },
+
+  {
+    $project: {
+      _id: 0,
+      staffId: "$_id",
+      displayName: "$staffInfo.fName", // only first name for chart labels
+      totalProcessed: 1,
+      statuses: 1
+    }
+  }
+]);
+
+// GET OVERALL TOTAL OF VERIFIED/RELEASED/CLAIMED
+const overallVerifiedTotal = processByVerifiedAggRaw.reduce(
+  (sum, s) => sum + s.totalProcessed,
+  0
+);
+
+// Add percentage for each staff
+const processByVerifiedAgg = processByVerifiedAggRaw.map((s) => ({
+  ...s,
+  percentage: overallVerifiedTotal
+    ? ((s.totalProcessed / overallVerifiedTotal) * 100).toFixed(2) + "%"
+    : "0%"
+}));
+
+// Sort
+processByVerifiedAgg.sort((a, b) => b.totalProcessed - a.totalProcessed);
+
+const processByDeclineAggRaw = await requests.aggregate([
+  { $match: dateFilter },
+  { $match: { declineAt: { $exists: true, $ne: null } } },
+
+  {
+    $group: {
+      _id: { $ifNull: ["$processBy", "Unassigned"] }, // handle null processBy
+      totalDeclined: { $sum: 1 }
+    }
+  },
+  {
+    $lookup: {
+      from: "users",
+      localField: "_id",
+      foreignField: "_id",
+      as: "staffInfo"
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      staffId: "$_id",
+      displayName: {
+        $cond: [
+          { $and: [{ $gt: [{ $size: "$staffInfo" }, 0] }, { $ne: ["$_id", "Unassigned"] }] },
+          { $concat: [
+              { $arrayElemAt: ["$staffInfo.fName", 0] }, " ",
+              { $arrayElemAt: ["$staffInfo.lName", 0] }
+          ]},
+          "$_id" // use "Unassigned" if no staffInfo
+        ]
+      },
+      totalDeclined: 1
+    }
+  }
+]);
+
+const overallDeclinedTotal = processByDeclineAggRaw.reduce((sum, s) => sum + s.totalDeclined, 0);
+
+const processByDeclineAgg = processByDeclineAggRaw.map(s => ({
+  ...s,
+  percentage: overallDeclinedTotal
+    ? ((s.totalDeclined / overallDeclinedTotal) * 100).toFixed(2) + "%"
+    : "0%"
+}));
+
+processByDeclineAgg.sort((a, b) => b.totalDeclined - a.totalDeclined);
+
 
     // ================================
     // FINAL OBJECT
@@ -738,7 +943,17 @@ switch (filter) {
 
       currentUsersCount, previousUsersCount, registrationGrowth,
       currentPeriodLabel,
-      previousPeriodLabel
+      previousPeriodLabel,
+
+      processByStats: processByAgg,
+      overallTotalProcessed,
+
+      processByVerifiedStats: processByVerifiedAgg,
+      overallVerifiedTotal,
+
+      processByDeclineStats: processByDeclineAgg,
+      overallDeclinedTotal
+
     };
 
     next();
