@@ -7,26 +7,27 @@
         <%- include('icons/success') %>
         <p class="rem26 upperCase marginBottom10">Awesome</p>
         <p class="rem12 textCenter">Your request has been successfully submitted. The information you provided will be reviewed before processing your requested documents. Account credentials will be issued once your verification is complete. You will be notified via your provided email. Please allow up to 24 hours for verification, excluding weekends</p>
-
-        <br><hr><br>
         
-        <p class="rem12 marginBottom10 textCenter">We’d love your feedback! Take a moment to rate us.</p>
-        <form id="rateForm" class="height0 padding0">
-            <div class="height0 gap10">
-                <i class="fas fa-star gray rateStar rem2" data-value="1"></i>
-                <i class="fas fa-star gray rateStar rem2" data-value="2"></i>
-                <i class="fas fa-star gray rateStar rem2" data-value="3"></i>
-                <i class="fas fa-star gray rateStar rem2" data-value="4"></i>
-                <i class="fas fa-star gray rateStar rem2" data-value="5"></i>
-            </div>
-            <input type="hidden" name="rating" id="ratingValue">
-            <button type="submit" class="hidden">Submit</button>
-        </form>
-        <div id="rateMessage" class="bgGreen100 textCenter marginBlock15 hidden width0"></div>
+        <section class="padding0 col hidden">
+          <br><hr><br>
+          <p class="rem12 marginBottom10 textCenter">We’d love your feedback! Take a moment to rate us.</p>
+          <form id="rateForm" class="height0 padding0">
+              <div class="height0 gap10">
+                  <i class="fas fa-star gray rateStar rem2" data-value="1"></i>
+                  <i class="fas fa-star gray rateStar rem2" data-value="2"></i>
+                  <i class="fas fa-star gray rateStar rem2" data-value="3"></i>
+                  <i class="fas fa-star gray rateStar rem2" data-value="4"></i>
+                  <i class="fas fa-star gray rateStar rem2" data-value="5"></i>
+              </div>
+              <input type="hidden" name="rating" id="ratingValue">
+              <button type="submit" class="hidden">Submit</button>
+          </form>
+          <div id="rateMessage" class="bgGreen100 textCenter marginBlock15 hidden width0"></div>
+        </section>
     </div>
 </div>
 <br>
-<div class="height0 gap10 marginBottom20" id="rateF">
+<div class="height0 gap10 marginBottom20 hidden" id="rateF">
     <div class="height0 width0">
         <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
     </div>

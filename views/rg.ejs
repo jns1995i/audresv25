@@ -889,26 +889,26 @@ document.addEventListener("DOMContentLoaded", () => {
         daySelect.appendChild(option);
     }
 
-    // Populate Month Dropdown (January-December) with values as words
-const monthSelect = document.getElementById("bMonth");
-const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-];
+    // Populate Month Dropdown (January-December)
+    const monthSelect = document.getElementById("bMonth");
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
 
-months.forEach(month => {
-    let option = document.createElement("option");
-    option.value = month; // Store month name as value
-    option.textContent = month;
-    monthSelect.appendChild(option);
-});
+    months.forEach(month => {
+        let option = document.createElement("option");
+        option.value = month;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+    });
 
-
-    // Populate Year Dropdown (Current Year to 1980)
+    // Populate Year Dropdown (Only ages 19+ allowed)
     const yearSelect = document.getElementById("bYear");
     const currentYear = new Date().getFullYear();
+    const maxYearAllowed = currentYear - 19; // Must be 19 or older
 
-    for (let i = currentYear; i >= 1980; i--) {
+    for (let i = maxYearAllowed; i >= 1980; i--) {
         let option = document.createElement("option");
         option.value = i;
         option.textContent = i;

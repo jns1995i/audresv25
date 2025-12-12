@@ -832,6 +832,7 @@ app.post('/verify1', async (req, res) => {
     // Update user
     await users.findByIdAndUpdate(userId, {
       archive: false,
+      reset: true,
       verify: false
     });
 
