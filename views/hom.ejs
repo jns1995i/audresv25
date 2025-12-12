@@ -1,4 +1,14 @@
 <% layout('scheme') %>
+<style>
+    
+    @media (max-width: 900px) {
+        #StudentSticker {
+            top: 30px;
+            height: 230px;
+            transform: scaleX(-1);
+        }
+    }
+</style>
 
     <%
         function formatCustomDate(dateString) {
@@ -36,7 +46,7 @@
             <br>
             <a href="/reqPre" class="nav porcelain colorPrimary"><i class="fas fa-plus"></i> Request Now</a>
         </section>
-        <img src="/images/student.png" alt="" class="absolute h260 top0" style="right: -60px;">
+        <img src="/images/student.png" alt="" id="StudentSticker" class="absolute h260 top10" style="right: -40px;">
     </section>
     <br>
     <div class="height0 padding10 borderRadius10 justifyBetween width100 gap10 relative corner15 liquidX">

@@ -216,7 +216,7 @@
                                         </div>
                                     </div>
                                     <div class="field">
-                                        <label>No. Copies</label>
+                                        <label>No. Copies (Max. 3)</label>
                                         <input name="qty[]" type="number" id="number" class="cpy" required>
                                     </div>
                                 </div>
@@ -226,10 +226,9 @@
                                         <div class="selectBar">
                                             <select class="document-options" name="purpose[]" onchange="handleOptionChange(this)" required>
                                                 <option value="" selected disabled>--Select Purpose</option>
-                                                <option value="Board Exam">Board Exam</option>
                                                 <option value="Reference">Reference</option>
                                                 <option value="Requirement for Other School">Requirement for Other School</option>
-                                                <option value="Scholarship">Scholarship</option>
+                                                <option value="Board Exam">Board Exam</option>
                                             </select>
                                         </div>
                                     </div>
@@ -493,8 +492,8 @@
                                     yearLevelField.classList.remove("hidden");
                                 } else if (role === "Student" || role === "Former") {
                                     const options = [
-                                        "First Year","Second Year","Third Year","Fourth Year",
-                                        "Grade 11","Grade 12","Year 1","Year 2","Year 3"
+                                        "1st Year","2nd Year","3rd Year","4th Year",
+                                        "Grade 11","Grade 12","Year 1 (Grad School)","Year 2 (Grad School)","Year 3 (Grad School)"
                                     ];
 
                                     const defaultOption = document.createElement("option");
@@ -538,15 +537,15 @@
                             <div class="selectBar">
                                 <select name="yearLevel" id="yearLevel">
                                     <option value="" selected disabled>Select</option>
-                                    <option value="First Year">First Year</option>
-                                    <option value="Second Year">Second Year</option>
-                                    <option value="Third Year">Third Year</option>
-                                    <option value="Fourth Year">Fourth Year</option>
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">Fourth Year</option>
                                     <option value="Grade 11">Grade 11</option>
                                     <option value="Grade 12">Grade 12</option>
-                                    <option value="Year 1"> Year 1 (Grad School)</option>
-                                    <option value="Year 2"> Year 2 (Grad School)</option>
-                                    <option value="Year 3"> Year 3 (Grad School)</option>
+                                    <option value="Year 1 (Grad School)"> Year 1 (Grad School)</option>
+                                    <option value="Year 2 (Grad School)"> Year 2 (Grad School)</option>
+                                    <option value="Year 3 (Grad School)"> Year 3 (Grad School)</option>
                                 </select>
                             </div>
                         </div>
@@ -758,7 +757,7 @@
 
 <script>
     function enforceCopyInput(event) {
-        event.target.value = event.target.value.replace(/[^1-9]/g, '').slice(0, 1);
+        event.target.value = event.target.value.replace(/[^1-3]/g, '').slice(0, 1);
     }
 
     document.addEventListener('DOMContentLoaded', () => {

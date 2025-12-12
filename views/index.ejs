@@ -1,9 +1,12 @@
 <% layout('design') %>
 <style>
+  .rightF {
+    width: 35%;
+  }
+  .leftF {
+    width: 65%;
+  }
   @media (max-width: 900px) {
-    .wcT {
-      display: none;
-    }
     .login {
       flex-direction: column;
       div {
@@ -16,41 +19,45 @@
       form {
         width: 100%;
         padding-top: 0;
-        padding: 0;
+        padding: 20px;
       }
     }
     #getStat {
-      margin-top: 10px;
-      width: fit-content;
+      width: 100% !important;
       flex-direction: column;
       padding: 15px;
       gap: 10px;
+      margin-bottom: 10px;
       p {
         text-align: center;
         width: 100%;
       }
-      a {
-        width: 100%;
-      }
+    }
+    .rightF {
+      width: 100%;
+    }
+    .leftF {
+      width: 100%;
     }
   }
 </style>
 
-<section class="padding0 corner15 bgWhite col">
-  <div class="height0 gap5 bgWhite cornerRem12 login colorPrimary width100 padding10 relative">
-    <a href="/login2" class="nav absolute left0 top0 opacity0">none</a>
-    <div class="height0 col width40">
-      <img src="/images/logo3.png" alt="" class="width80 corner10">
-      <p class="textCenter textWrap rem2 str500">AU REGISTRAR</p>
-      <p class="textCenter textWrap rem1 str500 marginBottom10">PHINMA Araullo University</p>
-    </div>
-    <form action="/login" method="POST" class="colorPrimary gap5 width60" id="loginForm">
+<section class="padding0 corner15 col">
+  <div class="height0 gap5 cornerRem12 login colorPrimary width100 padding0 relative justifyEnd">
+    <form action="/login" method="POST" class="colorPrimary gap5 width100 bgWhite padding30" id="loginForm">
+      <div class="height0 col padding5">
+        <div class="height0 padding15 porcelain corner15 justifyBetween col gap10" id="getStat">
+            <p class="size14 textCenter">New user? Make your first request!</p>
+          <a href="/rg" class="nav corner10 gnav width100"><span class="size14 str500">GET STARTED HERE</span></a>
+        </div>
+      </div>
+      <br>
       <div class="height0 col">
         <% if (error) { %>
-          <p class="rem2 str500 wcT textCenter textWrap">Welcome Users</p>
+          <p class="size14 str500 wcT textCenter textWrap">Already has account? Login Here</p>
           <span style="color: red;" class="bgRed100"><%= error %></span>
         <% } else { %>
-          <p class="rem24 str500 wcT textCenter textWrap">Welcome Users</p>
+          <p class="size14 str400 wcT textCenter textWrap">Already have an account? Login Here</p>
         <% } %>
       </div>
 
@@ -83,10 +90,7 @@
 
       <a href="/fg" class="blue size12">Forgot Password</a>
     </form>
-  </div>
-  <div class="height0 padding15 borderPrimary corner15 justifyBetween width95" id="getStat">
-    <p class="size14">No Account Yet? Make your First Request!</p>
-    <a href="/rg" class="nav shadow2 corner10"><span class="rainbowText">Get Started Here</span></a>
+    <a href="/login2" class="nav absolute left0 top0 opacity0">none</a>
   </div>
   <br>
 </section>

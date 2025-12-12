@@ -122,17 +122,23 @@
         </table>
     </section>
 </section>
-
 <br>
 <section class="bgWhite corner15 padding20 col gap0">
+    <p class="size30 colorPrimary">Success Transactions</p>
+    <section class="h300 bgWhite corner15 padding0">
+        <canvas id="processByMergedChart"></canvas>
+    </section>
+</section>
+
+<br>
+<section class="bgWhite corner15 padding20 col gap0 hidden">
     <p class="size30 colorPrimary">Success Transactions</p>
     <section class="h300 bgWhite corner15 padding0">
         <canvas id="processByVerifiedChart"></canvas>
     </section>
 </section>
 
-<br>
-<section class="bgWhite corner15 padding20 col gap0">
+<section class="bgWhite corner15 padding20 col gap0 hidden">
     <p class="size30 colorPrimary">Declining Rate</p>
     <section class="h300 bgWhite corner15 padding0">
         <canvas id="processByDeclineChart"></canvas>
@@ -313,7 +319,7 @@ if (analytics.processByVerifiedStats && analytics.processByVerifiedStats.length)
 }
 
 // ===========================
-// PROCESS-BY VERIFIED/RELEASED/CLAIMED CHART
+// PROCESS-BY DECLINED CHART
 // ===========================
 if (analytics.processByDeclineStats && analytics.processByDeclineStats.length) {
     createChart(
@@ -324,6 +330,141 @@ if (analytics.processByDeclineStats && analytics.processByDeclineStats.length) {
         "Per Success Transactions"
     );
 }
+
+// ===========================
+// MERGED PROCESS-BY CHART
+// ===========================
+if (
+    analytics.processByVerifiedStats?.length &&
+    analytics.processByDeclineStats?.length
+) {
+
+    const labels = analytics.processByVerifiedStats.map(s => s.displayName);
+
+    const processedData = analytics.processByVerifiedStats.map(s => s.totalProcessed);
+    const declinedData = analytics.processByDeclineStats.map(s => s.totalDeclined);
+
+    createMultiSeriesChart(
+        "processByMergedChart",  // new canvas id
+        labels,
+        [
+            {
+                label: "Processed",
+                data: processedData
+            },
+            {
+                label: "Declined",
+                data: declinedData
+            }
+        ],
+        "bar",
+        "Process-by Analytics"
+    );
+}
+
+function createMultiSeriesChart(ctxId, labels, datasets, type = 'bar', titleText = '') {
+
+  if (chartInstances[ctxId]) chartInstances[ctxId].destroy();
+  const ctx = document.getElementById(ctxId).getContext('2d');
+
+  // Dynamic bar thickness
+  let barThickness = 65;
+  if (type === 'bar') {
+    const chartWidth = document.getElementById(ctxId).offsetWidth;
+    barThickness = 65;
+  }
+
+  // Colors per dataset (auto palette)
+  const palette = [
+    '#00214d','gray','#6695e3','#8da9eb',
+    '#0c1a3a','#102549','#005ac1','#003066'
+  ];
+
+  // Build datasets with your style
+  const formattedDatasets = datasets.map((ds, i) => ({
+    label: ds.label,
+    data: ds.data,
+
+    // Colors
+    backgroundColor: type === 'bar' ? palette[i % palette.length] :
+                     type === 'doughnut' ? palette :
+                     'white',
+    borderColor: type === 'line' ? palette[i % palette.length] : 'white',
+
+    borderWidth: type === 'doughnut' ? 5 :
+                 type === 'line' ? 1.8 : 
+                 0.9,
+
+    borderRadius: type === 'bar' ? 16 : 10,
+    barThickness: type === 'bar' ? barThickness : undefined,
+
+    // Line settings
+    fill: type === 'line' ? true : undefined,
+    tension: type === 'line' ? 0.2 : undefined,
+    pointRadius: type === 'line' ? 2 : undefined,
+    pointBackgroundColor: type === 'line' ? 'white' : undefined,
+  }));
+
+  chartInstances[ctxId] = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: formattedDatasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: titleText
+        },
+        legend: {
+          display: true,
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'rectRounded',
+            color: 'black',
+            font: { family: 'Poppins', weight: 'normal', size: 14 }
+          }
+        },
+        tooltip: { enabled: true },
+
+        // Doughnut labels
+        datalabels: {
+          display: type === 'doughnut',
+          color: 'navy',
+          anchor: 'center',
+          align: 'center',
+          backgroundColor: 'white',
+          borderRadius: 6,
+          padding: 4,
+          font: { weight: 'normal', size: 12, family: 'Poppins' },
+          formatter: function(value, ctx) {
+            const arr = ctx.dataset.data;
+            const total = arr.reduce((sum, v) => sum + v, 0);
+            const percent = total ? ((value / total) * 100).toFixed(1) : 0;
+            return percent === "0.0" ? "" : `${percent}%`;
+          }
+        }
+      },
+
+      // Scales for bar & line
+      scales: type === 'bar' || type === 'line' ? {
+        y: {
+          beginAtZero: true,
+          ticks: { display: false },
+          grid: { display: false }
+        },
+        x: {
+          grid: { display: true },
+          ticks: { font: { family: 'Poppins', size: 14, weight: 'normal' } }
+        }
+      } : {}
+    }
+  });
+}
+
 
 let rangeText = "";
 // Only show rangeText for certain filters

@@ -182,7 +182,7 @@
                                         </div>
                                     </div>
                                     <div class="field">
-                                        <label>No. Copies</label>
+                                        <label>No. Copies (Max. 3)</label>
                                         <input name="qty[]" type="number" class="number" required>
                                     </div>
                                 </div>
@@ -192,10 +192,9 @@
                                         <div class="selectBar">
                                             <select class="document-options" name="purpose[]" onchange="handleOptionChange(this)" required>
                                                 <option value="" selected disabled>--Select Purpose</option>
-                                                <option value="Board Exam">Board Exam</option>
                                                 <option value="Reference">Reference</option>
                                                 <option value="Requirement for Other School">Requirement for Other School</option>
-                                                <option value="Scholarship">Scholarship</option>
+                                                <option value="Board Exam">Board Exam</option>
                                             </select>
                                         </div>
                                     </div>
@@ -350,7 +349,7 @@
 
 <script>
     function enforceNumericInput(event) {
-        event.target.value = event.target.value.replace(/[^1-9]/g, '').slice(0, 1);
+        event.target.value = event.target.value.replace(/[^1-3]/g, '').slice(0, 1);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
