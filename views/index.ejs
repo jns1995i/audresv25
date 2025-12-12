@@ -1,25 +1,16 @@
 <% layout('design') %>
 <style>
-  .rightF {
-    width: 35%;
-  }
-  .leftF {
-    width: 65%;
-  }
   @media (max-width: 900px) {
     .login {
       flex-direction: column;
       div {
         padding-bottom: 0;
         width: 100%;
-        img {
-          width: 10%;
-        }
       }
       form {
         width: 100%;
         padding-top: 0;
-        padding: 20px;
+        padding: 15px;
       }
     }
     #getStat {
@@ -42,26 +33,26 @@
   }
 </style>
 
-<section class="padding0 corner15 col">
-  <div class="height0 gap5 cornerRem12 login colorPrimary width100 padding0 relative justifyEnd">
-    <form action="/login" method="POST" class="colorPrimary gap5 width100 bgWhite padding30" id="loginForm">
-      <div class="height0 col padding5">
-        <div class="height0 padding15 porcelain corner15 justifyBetween col gap10" id="getStat">
-            <p class="size14 textCenter">New user? Make your first request!</p>
-          <a href="/rg" class="nav corner10 gnav width100"><span class="size14 str500">GET STARTED HERE</span></a>
-        </div>
+<section class="padding0 corner10 col">
+  <div class="height0 gap15 corner20 login colorPrimary width100 padding10 relative justifyEnd col liquidX">
+    <div class="height0 col padding5 bgWhite colorPrimary corner15">
+      <div class="height0 padding15 corner15 justifyBetween col gap10" id="getStat">
+        <img src="/images/gold.png" alt="" class="h60 hidden" style="filter:brightness(2); transform: rotate(-10deg);">
+        <p class="size14 textCenter textBalance">New here? Request your first document now!</p>
+        <a href="/rg" class="nav corner10 gnav width100"><span class="str500">Get started here</span></a>
       </div>
-      <br>
+    </div>
+    <form action="/login" method="POST" class="colorPrimary gap5 width100 padding20 bgWhite" id="loginForm">
       <div class="height0 col">
         <% if (error) { %>
-          <p class="size14 str500 wcT textCenter textWrap">Already has account? Login Here</p>
+          <p class="size14 str500 wcT textCenter textWrap">Already registered? Sign In here</p>
           <span style="color: red;" class="bgRed100"><%= error %></span>
         <% } else { %>
-          <p class="size14 str400 wcT textCenter textWrap">Already have an account? Login Here</p>
+          <p class="size16 str400 wcT textCenter textWrap">Already registered? Sign In here</p>
         <% } %>
       </div>
 
-      <div class="field">
+      <div class="field marginTop5">
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required placeholder="Enter your username">
       </div>
@@ -85,7 +76,7 @@
 
       <div class="bgRed100 hidden" id="warning20">Please fill the correct value!</div>
       <div class="field padding5">
-        <button type="submit" class="nav pnav width100">Log In</button>
+        <button type="submit" class="nav pnav width100">Sign In</button>
       </div>
 
       <a href="/fg" class="blue size12">Forgot Password</a>
@@ -97,10 +88,10 @@
 
 <br>
 
-<div class="height0 padding15 gap10 width100 justifyStart liquid">
+<div class="height0 padding15 gap10 width100 justifyStart liquidX">
     <div class="height0 padding10 border0 borderRadius10 alignStart width50 col gap10 relative">
         <p class="rem18 gap10 alignCenter">Need Help?</p>
-        <p class="rem11 gap10 alignCenter">Fullscreen the video or click below to access the Tutorial Section</p>
+        <p class="rem11 gap10 alignCenter textBalance">Watch the tutorial or click below.</p>
         <a href="/ins" class="nav liquid">Learn More <i class="fas fa-chevron-right"></i></a>
         <a href="#" class="nav cnav disabled opacity1 absolute right5 bottom5 scale4"><i class="fas fa-question-circle"></i></a>
     </div>

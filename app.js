@@ -251,11 +251,11 @@ const cpUpload = upload.any();
 
 const photoStorage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'user_photos',           // folder in Cloudinary
-    resource_type: 'image',           // only images
-    public_id: (req, file) => `user_${req.session.user._id}_${Date.now()}`, // unique name
-  }
+  params: async (req, file) => ({
+    folder: 'audres25', // your folder in Cloudinary
+    resource_type: 'auto',
+    public_id: `${Date.now()}-${file.originalname}`
+  })
 });
 
 // Multer middleware for single file upload

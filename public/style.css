@@ -1168,9 +1168,10 @@ progress::-moz-progress-bar { background-color: #4caf50; }
     backdrop-filter: blur(1px) saturate(115%);
     background-size: 300% 300%;
     -webkit-backdrop-filter: blur(1px) saturate(115%);
-    border: none;
-    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.11);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.11);
+    border-right: 0.5px solid rgba(255, 255, 255, 0.01);
+    border-left: 0.5px solid rgba(255, 255, 255, 0.01);
 
     box-shadow: 
         inset -4px -4px 8px rgba(163, 163, 163, 0.07),
@@ -7885,6 +7886,7 @@ p + p {
 .size100 { font-size: 100px; }
 
 .textWrap {  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;  }
+.textBalance { text-wrap: balance; }
 .cap { text-transform: capitalize; }
 .upperCase { text-transform: uppercase; }
 .lowerCase { text-transform: lowercase; }

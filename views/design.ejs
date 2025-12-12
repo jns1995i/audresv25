@@ -56,6 +56,14 @@
         .rem4.p2 {
             margin-top: -1rem !important;
         }
+        .rem2.p6 {
+            margin-top: -0.5rem !important;
+            font-size: 1.6rem !important;
+        }
+        .rem2.p7 {
+            margin-top: -0.3rem !important;
+            font-size: 1.6rem !important;
+        }
         .rem4.p1 {
             margin-top: 0 !important;
         }
@@ -95,7 +103,7 @@
 
     <img src="/images/au.png" alt="" class="absolute top0 right0 scale2 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
     <div class="mainF" style="z-index: 500 !important;">
-        <div class="h700 padding20 col justifyStart relative leftF width65">
+        <div class="h700 padding20 col justifyStart relative leftF width45">
             <div class="height0 col absolute translateCenter" id="headF">
                 <div class="padding10 gemF relative">
                     <div class="corner500 liquid w250 h250 iconix padding10">
@@ -104,8 +112,10 @@
                 </div>
                 <p class="rem4 textWrap textCenter glowImg3 p1">AU Registrar Document</p>
                 <p class="rem4 textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
+                <p class="rem2 textCenter glowImg3 p6 hidden" style="margin-top: 1rem !important;">Request and track your registrar documents</p>
+                <p class="rem2 textCenter glowImg3 p7 hidden" style="margin-top: -3.2rem;">online—fast and easy.</p>
             </div>
-            <div class="height0 absolute left0 bottom20 col" id="rateF">
+            <div class="height0 absolute left0 bottom20 col hidden" id="rateF">
                 <div class="height0 width0 hidden">
                     <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
                 </div>
