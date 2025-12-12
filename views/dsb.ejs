@@ -487,7 +487,7 @@ metrics.forEach(m => {
     const value = analytics[m.key] || 0;
     const percent = analytics[m.percentKey] !== undefined ? analytics[m.percentKey] : 0;
 
-    box.querySelector(".value").innerText = `${value}00`;
+    box.querySelector(".value").innerText = `${value}`;
     box.querySelector(".percentage").innerText = `${percent}`;
 
     container.appendChild(box);
