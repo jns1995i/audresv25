@@ -78,7 +78,7 @@ module.exports = async function analyticsMiddleware(req, res, next) {
 
     const approved = allRequests.filter(r => ["Verified", "For Release", "Claimed"].includes(r.status)).length;
     const onProcess = allRequests.filter(r => ["Reviewed", "Assessed", "For Payment", "For Verification"].includes(r.status)).length;
-    const pending = allRequests.filter(r => r.status === "Pending").length;
+    const pending = allRequests.filter(r => r.status === "Pending" && !r.declineAt).length;
     const declined = allRequests.filter(r => r.declineAt).length;
     const onHold = allRequests.filter(r => r.holdAt).length;
     const toVerify = allRequests.filter(r => r.verify === true).length;

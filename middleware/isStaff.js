@@ -58,13 +58,16 @@ const isStaff = async (req, res, next) => {
         dayjs(rq.assignAt).isBefore(endOfToday)
       );
 
-      // Count statuses only from today's assigned requests
+     function countStatus(arr, status) {
+        return arr.filter(rq => rq.status === status && !rq.declineAt).length;
+      }
+
       formatted.requestSummary = {
         total: todayRequests.length,
-        pending: todayRequests.filter(rq => rq.status === 'Pending').length,
-        processing: todayRequests.filter(rq => rq.status === 'Processing').length,
-        approved: todayRequests.filter(rq => rq.status === 'Approved').length,
-        forRelease: todayRequests.filter(rq => rq.status === 'For Release').length
+        pending: countStatus(todayRequests, 'Pending'),
+        processing: countStatus(todayRequests, 'Processing'),
+        approved: countStatus(todayRequests, 'Approved'),
+        forRelease: countStatus(todayRequests, 'For Release')
       };
 
       return formatted;

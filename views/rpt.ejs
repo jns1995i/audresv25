@@ -15,100 +15,160 @@
     #specificDate, #customStart, #customEnd {
         display: inline-block;
     }
+    .unseen2 {
+        right: -100%;
+        overflow: hidden;
+        transition: right 0.6s ease-in-out;
+        z-index: 100;
+    }
+    .seen2 {
+        right: 0;
+        transition: right 0.4s ease-in-out;
+        z-index: 100;
+    }
 </style>
 <div class="gap10 rowReverse alignStart justifyStart">
-    <form class="absolute right30 top5 corner15 bgWhite width20 col gap15 padding20">
-        <div class="field">
-            <p class="size20 str500">Filtering Panel</p>
-            <hr>
-        </div>
-        <div class="field">
-            <label for="">Choose Date</label>
-            <div class="selectBar" id="">
-                <i class="fas fa-filter"></i>
-                <select id="dateFilter">
-                    <option value="" selected>--Filter</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="thisWeek">This Week</option>
-                    <option value="lastWeek">Last Week</option>
-                    <option value="thisMonth">This Month</option>
-                    <option value="lastMonth">Last Month</option>
-                    <option value="thisYear" selected>This Year</option>
-                    <option value="lastYear">Last Year</option>
-                    <option value="specific">Specific Date</option>
-                    <option value="custom">Custom Range</option>
-                    <option value="overall">Overall</option>
-                </select>
-            </div>
-            <input type="date" id="specificDate" style="display:none;" class="" />
-            <input type="date" id="customStart" style="display:none;" class="" />
-            <input type="date" id="customEnd" style="display:none;" class="" />
-        </div>
-        <div class="field">
-            <label for="">By Document Type</label>
-            <div class="selectBar" id="">
-                <i class="fas fa-filter"></i>
-                <select id="itemTypeFilter">
-                    <option value="" selected>--Filter</option>
-                </select>
-            </div>
-        </div>
-        <div class="field">
-            <label for="">By Campus</label>
-            <div class="selectBar" id="">
-                <i class="fas fa-filter"></i>
-                <select id="campusFilter">
-                    <option value="" selected>--Filter</option>
-                </select>
-            </div>
-        </div>
-        <div class="field">
-            <label for="">By Year Level</label>
-            <div class="selectBar" id="">
-                <i class="fas fa-filter"></i>
-                <select id="yearLevelFilter">
-                    <option value="" selected>--Filter</option>
-                </select>
-            </div>
-        </div>
-        <div class="field">
-            <label for="">By Course</label>
-            <div class="selectBar" id="">
-                <i class="fas fa-filter"></i>
-                <select id="courseFilter">
-                    <option value="" selected>--Filter</option>
-                </select>
-            </div>
-        </div>
-        <div class="field">
-            <label for="">Process By</label>
-            <div class="selectBar" id="">
-                <i class="fas fa-filter"></i>
-                <select id="processByFilter">
-                    <option value="" selected>--Filter</option>
-                </select>
-            </div>
-        </div>
-        <div class="field">
-            <label for="">By Status</label>
-            <div class="selectBar" id="">
-                <i class="fas fa-filter"></i>
-                <select id="statusFilter">
-                    <option value="" selected>--Filter</option>
-                </select>
-            </div>
-        </div>
-        <div class="field gap10">
-            <button type="button"  onclick="exportExcel()" class="nav pnav width100"><i class="fas fa-download"></i> Export Excel</button>
-            <button type="button" onclick="resetFilters()" class="nav width100"> <i class="fas fa-rotate"></i> Reset </button>
-        </div>
+    <form class="fixed right0 top5 shadow2 bgWhite width30 col gap15 padding20 index100 height100 corner0 unseen2 fltCard justifyStart" id="fltCard">
+      
+      <section class="justifyBetween">
+        <a href="javascript:void(0)" class="nav cnav porcelain" id="fltClose"><i class="fas fa-angles-right"></i></a>
+      </section>
+      <div class="height0 justifyBetween padding5">
+          <p class="size20 str500">Filtering Panel</p>
+          <button id="resetFiltersBtn" type="button" class="nav cnav porcelain"><i class="fas fa-rotate"></i></button>
+      </div>
+      <div class="field">
+          <label for="">Choose Date</label>
+          <div class="selectBar" id="">
+              <i class="fas fa-filter"></i>
+              <select id="dateFilter">
+                  <option value="" selected>--Filter</option>
+                  <option value="today">Today</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="thisWeek">This Week</option>
+                  <option value="lastWeek">Last Week</option>
+                  <option value="thisMonth">This Month</option>
+                  <option value="lastMonth">Last Month</option>
+                  <option value="thisYear" selected>This Year</option>
+                  <option value="lastYear">Last Year</option>
+                  <option value="specific">Specific Date</option>
+                  <option value="custom">Custom Range</option>
+                  <option value="overall">Overall</option>
+              </select>
+          </div>
+          <input type="date" id="specificDate" style="display:none;" class="" />
+          <input type="date" id="customStart" style="display:none;" class="" />
+          <input type="date" id="customEnd" style="display:none;" class="" />
+      </div>
+      <div class="field">
+          <label for="">By Document Type</label>
+          <div class="selectBar" id="">
+              <i class="fas fa-filter"></i>
+              <select id="itemTypeFilter">
+                  <option value="" selected>--Filter</option>
+              </select>
+          </div>
+      </div>
+      <div class="field">
+          <label for="">By Campus</label>
+          <div class="selectBar" id="">
+              <i class="fas fa-filter"></i>
+              <select id="campusFilter">
+                  <option value="" selected>--Filter</option>
+              </select>
+          </div>
+      </div>
+      <div class="field">
+          <label for="">By Year Level</label>
+          <div class="selectBar" id="">
+              <i class="fas fa-filter"></i>
+              <select id="yearLevelFilter">
+                  <option value="" selected>--Filter</option>
+              </select>
+          </div>
+      </div>
+      <div class="field">
+          <label for="">By Course</label>
+          <div class="selectBar" id="">
+              <i class="fas fa-filter"></i>
+              <select id="courseFilter">
+                  <option value="" selected>--Filter</option>
+              </select>
+          </div>
+      </div>
+      <div class="field">
+          <label for="">Process By</label>
+          <div class="selectBar" id="">
+              <i class="fas fa-filter"></i>
+              <select id="processByFilter">
+                  <option value="" selected>--Filter</option>
+              </select>
+          </div>
+      </div>
+      <div class="field">
+          <label for="">By Status</label>
+          <div class="selectBar" id="">
+              <i class="fas fa-filter"></i>
+              <select id="statusFilter">
+                  <option value="" selected>--Filter</option>
+              </select>
+          </div>
+      </div>
     </form>
-    <div class="gap10 alignStart overflow-y1 block">
-        <section class="corner15 bgWhite col width75 height15 marginBottom20 alignStart justifyStart">
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+  // Toggle filter panel
+  function toggleCards(show) {
+    document.querySelectorAll(".fltCard").forEach(card => {
+      card.classList.toggle("seen2", show);
+      card.classList.toggle("unseen2", !show);
+    });
+  }
+
+  // Open button(s)
+  document.querySelectorAll(".fltBtn").forEach(btn => {
+    btn.addEventListener("click", () => toggleCards(true));
+  });
+
+  // Close button
+  const closeBtn = document.getElementById("fltClose");
+  if (closeBtn) closeBtn.addEventListener("click", () => toggleCards(false));
+
+  // Excel export button
+  const exportBtn = document.getElementById('exportExcelBtn');
+  if (exportBtn) exportBtn.addEventListener('click', exportExcel);
+
+  // Reset filters button
+  const resetBtn = document.getElementById('resetFiltersBtn');
+  if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+
+});
+
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+const exportBtn = document.getElementById('exportExcelBtn');
+if (exportBtn) exportBtn.addEventListener('click', exportExcel);
+
+const resetBtn = document.getElementById('resetFiltersBtn');
+if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+});
+
+</script>
+
+    <div class="gap10 alignStart overflow-y1 block padding10">
+        <section class="corner10 justifyBetween height10 marginBottom20">
             <a href="/dsb" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
+            <p class="size24">Transactions Record</p>
+            <section class="padding0 width0 gap10">
+              <a href="javascript:void(0)" class="nav cnav borderPrimary fltBtn"><i class="fas fa-filter"></i></a>
+              <button id="exportExcelBtn" type="button" class="nav pnav str400"><i class="fas fa-file-excel"></i> Export Excel File</button>
+            </section>
         </section>
-        <div class="height80 block overflow-x1 overflow-y1 width75 bgWhite corner15 padding20">
+        <div class="height85 block overflow-x1 overflow-y1 bgWhite corner10 padding20 shadow2">
 
             <table class="width0 block" style="width:fit-content;">
                 <thead>
@@ -134,12 +194,13 @@
                         <td><%= rq.tr %></td>
                         <td>
                             <% rq.items.forEach(item => { %>
-                                <p>( <%= item.qty %> ) <%= item.type %>  for  <%= item.purpose %> 
+                                <p style="margin-right: 10px !important;">
                                     <% if ( item.status === "Approved") { %>
-                                        <i class="fas fa-check-circle green marginRight10"></i>
+                                        <i class="fas fa-check-circle green"></i> &nbsp;
                                     <% } else { %>
-                                        <i class="fas fa-xmark-circle red marginRight10"></i>
+                                        <i class="fas fa-xmark-circle red"></i> &nbsp;
                                     <% } %>
+                                    <%= item.type %>  for  <%= item.purpose %> ( <%= item.qty %> )
                                 </p>
                             <% }) %>
                         </td>
@@ -300,12 +361,15 @@ function exportExcel() {
     // Prepare data
     const data = rows.map((rq, i) => ({
         No: i + 1,
-        Date: rq.createdAtFormatted,
+        Date: rq.createdAtFormatted || formatDate(rq.createdAtRaw),
         TR: rq.tr,
-        "Requested Document": rq.items.map(it => `(${it.qty}) ${it.type} for ${it.purpose} ${it.status==="Approved" ? '✓':'✗'}`).join(" | "),
+        "Requested Document": (rq.items || []).map(it => `(${it.qty}) ${it.type} for ${it.purpose} ${it.status==="Approved" ? '✓ Approved':'✗ Declined'}`).join(" | "),
         "Request By": `${rq.requestBy?.fName ?? ""} ${rq.requestBy?.mName ?? ""} ${rq.requestBy?.lName ?? ""} ${rq.requestBy?.xName ?? ""}`,
-        "Year & Course": `${rq.requestBy?.yearLevel ?? ""} - ${rq.requestBy?.course ?? ""}`,
-        Contact: `${rq.requestBy?.email ?? ""} / ${rq.requestBy?.phone ?? ""}`,
+        "Student No.": `${rq.requestBy?.schoolId ?? ""}`,
+        "Campus": `${rq.requestBy?.campus ?? ""}`,
+        "Course": `${rq.requestBy?.course ?? ""}`,
+        "Year": `${rq.requestBy?.yearLevel ?? ""}`,
+        Contact: `${rq.requestBy?.email ?? ""} | ${rq.requestBy?.phone ?? ""}`,
         "Process By": `${rq.processBy?.fName ?? ""} ${rq.processBy?.mName ?? ""} ${rq.processBy?.lName ?? ""} ${rq.processBy?.xName ?? ""}`,
         Status: rq.status,
         Amount: rq.totalAmount.toFixed(2),
@@ -313,14 +377,19 @@ function exportExcel() {
     }));
 
     // Convert to worksheet
-    const ws = XLSX.utils.json_to_sheet(data, { wrapText: true });
+    const ws = XLSX.utils.json_to_sheet(data);
 
     // Create workbook
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Report");
 
     // Export Excel file
-    XLSX.writeFile(wb, "Report.xlsx");
+    try {
+      XLSX.writeFile(wb, "Report.xlsx");
+    } catch (e) {
+      console.error("Export failed:", e);
+    }
+
 }
 
   // ----------------------------
@@ -430,7 +499,7 @@ function exportExcel() {
           <td>${i+1}</td>
           <td>${rq.createdAtRaw}</td>
           <td>${rq.tr}</td>
-          <td>${rq.items.map(it => `<p>( ${it.qty} ) ${it.type} for ${it.purpose} ${it.status==="Approved"?'<i class="fas fa-check-circle green"></i>':'<i class="fas fa-xmark-circle red"></i>'}</p>`).join("")}</td>
+          <td>${rq.items.map(it => `<p> ${it.status==="Approved"?'<i class="fas fa-check-circle green"></i>':'<i class="fas fa-xmark-circle red"></i>'} ${it.type} for ${it.purpose} ( ${it.qty} )</p>`).join("")}</td>
           <td><p>${rq.requestBy?.fName ?? ""} ${rq.requestBy?.mName ?? ""} ${rq.requestBy?.lName ?? ""}</p><p>${rq.requestBy?.schoolId ?? ""}</p></td>
           <td><p>${rq.requestBy?.yearLevel ?? ""} • ${rq.requestBy?.campus ?? ""}</p><p>${rq.requestBy?.course ?? ""}</p></td>
           <td><p>${rq.requestBy?.email ?? ""}</p><p>${rq.requestBy?.phone ?? ""}</p></td>

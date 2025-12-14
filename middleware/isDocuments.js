@@ -29,7 +29,6 @@ module.exports = async (req, res, next) => {
       { type: "Good Moral", amount: 500 },
       { type: "CAR", amount: 150 },
       { type: "No Objection", amount: 500 },
-      { type: "Honorable Dismissal", amount: 500 },
       { type: "NTSP Serial Number", amount: 150 },
       { type: "English Proficiency", amount: 150 },
     ];

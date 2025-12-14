@@ -131,7 +131,8 @@
           <div class="width10 justifyStart"><img src="<%= rq.requestBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>
           <div class="width90 col alignStart">
             <p class="size14 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
-            <p class="str400"><span class="green"><%= rq.requestBy ? rq.requestBy.role : '' %> &bull; </span> <%= rq.requestBy?.course || '--' %></p>
+            <p class="str400"><span class="green"><%= rq.requestBy ? rq.requestBy.role : '' %> &bull; </span> <%= rq.requestBy?.schoolId || '--' %></p>
+            <p class="str400"><span class=""><%= rq.requestBy ? rq.requestBy.campus : '' %> &bull; </span> <%= rq.requestBy?.course || '--' %></p>
             <% if ( title === "To Verify") { %>
               <p class="str400 marginBottom5 blue">
                 <i class="bi bi-building"></i> <%= rq.requestBy?.campus || '--' %>

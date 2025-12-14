@@ -90,7 +90,9 @@ app.use(
         "https://cdnjs.cloudflare.com",
         "https://cdn.jsdelivr.net",
         "https://kit.fontawesome.com",
-        "https://ka-f.fontawesome.com"
+        "https://ka-f.fontawesome.com",
+        "https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js",
+        "https://cdn.sheetjs.com/*"
       ],
       styleSrc: [
         "'self'",
@@ -829,6 +831,21 @@ app.post('/verify1', async (req, res) => {
   try {
     const { requestId, userId } = req.body;
 
+    const student = await users.findById(requestId);
+    
+    let processBy = null;
+    if (student?.campus === 'South' || student?.campus === 'San Jose') {
+      const registrar = await users.findOne({
+        role: 'Registrar',
+        campus: student.campus,
+        archive: false
+      });
+
+      if (registrar) {
+        processBy = registrar._id.toString(); // assign as string
+      }
+    }
+
     // Update user
     await users.findByIdAndUpdate(userId, {
       archive: false,
@@ -839,7 +856,9 @@ app.post('/verify1', async (req, res) => {
     // Update request
     await requests.findByIdAndUpdate(requestId, {
       archive: false,
-      verify: false
+      verify: false,
+      processBy,
+      assignAt: processBy ? new Date() : null
     });
 
     res.redirect('/vrf'); // redirect anywhere you want
@@ -978,6 +997,7 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     }
 
     const userId = req.session.user._id;
+    const student = await users.findById(userId);
 
     // 1️⃣ Normalize form arrays
     const typesArr = [].concat(req.body.type || []);
@@ -1021,6 +1041,19 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
 
     const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
 
+    let processBy = null;
+    if (student?.campus === 'South' || student?.campus === 'San Jose') {
+      const registrar = await users.findOne({
+        role: 'Registrar',
+        campus: student.campus,
+        archive: false
+      });
+
+      if (registrar) {
+        processBy = registrar._id.toString(); // assign as string
+      }
+    }
+
 
     // 7️⃣ Create Request Header
     const newRequest = new requests({
@@ -1028,8 +1061,11 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       archive: false,
       verify: false,
       status: "Pending",
-      tr
+      tr,
+      processBy,
+      assignAt: processBy ? new Date() : null
     });
+
     const savedRequest = await newRequest.save();
 
     // 8️⃣ Create Request Items
@@ -1796,6 +1832,55 @@ app.get('/vrfView/:id', isLogin, isStaff, isVerify, (req, res) => renderRequest(
 
 
 /* Approval Routes */
+app.post('/quick-assign', isLogin, isStaff, async (req, res) => {
+  try {
+    let assignedUsers = req.body.assignedUsers;
+
+    if (!assignedUsers || assignedUsers.length === 0) {
+      return res.status(400).send("No staff selected.");
+    }
+
+    // Convert single string to array if only one checkbox is checked
+    if (!Array.isArray(assignedUsers)) assignedUsers = [assignedUsers];
+
+    // Convert each userId to ObjectId
+    assignedUsers = assignedUsers.map(id => new mongoose.Types.ObjectId(id));
+
+    // Fetch all unassigned requests
+    let unassignedRequests = await requests.find({ processBy: null, archive: false });
+
+    if (unassignedRequests.length === 0) {
+      return res.status(400).send("No unassigned requests available.");
+    }
+
+    const numStaff = assignedUsers.length;
+    const totalRequests = unassignedRequests.length;
+    const base = Math.floor(totalRequests / numStaff);
+    let remainder = totalRequests % numStaff;
+
+    for (let i = 0; i < numStaff; i++) {
+      const userId = assignedUsers[i];
+      let assignCount = base + (remainder > 0 ? 1 : 0);
+      if (remainder > 0) remainder--;
+
+      const toAssign = unassignedRequests.splice(0, assignCount);
+
+      const updatePromises = toAssign.map(reqItem =>
+        requests.findByIdAndUpdate(reqItem._id, {
+          processBy: userId,
+          assignAt: new Date()
+        })
+      );
+
+      await Promise.all(updatePromises);
+    }
+
+    res.redirect('/srv');
+  } catch (err) {
+    console.error('❌ Quick Assign Error:', err);
+    res.status(500).send("Failed to assign requests.");
+  }
+});
 
 app.post("/decItem", async (req, res) => {
     const { requestId, itemId, back, itemRemarks } = req.body; // read itemRemarks
@@ -2165,7 +2250,7 @@ app.post('/newEmp', async (req, res) => {
   try {
     const {
       firstName, middleName, lastName, extName,
-      address, number, email, bDay, bMonth, bYear,
+      address, number, email,
       role, campus, studentNo // employee number
     } = req.body;
 
@@ -2183,13 +2268,6 @@ app.post('/newEmp', async (req, res) => {
       }
     }
 
-    // 3️⃣ Convert month to number
-    const monthMap = {
-      January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
-      July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
-    };
-    const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1;
-
     // 4️⃣ Create new user
     const newUser = new users({
       fName: firstName,
@@ -2199,9 +2277,6 @@ app.post('/newEmp', async (req, res) => {
       address,
       phone: number,
       email: email.toLowerCase(),
-      bDay: Number(bDay),
-      bMonth: bMonthNum,
-      bYear: Number(bYear),
       role,
       campus,
       schoolId: studentNo || undefined,
@@ -4283,6 +4358,8 @@ app.post("/hold5", async (req, res) => {
         res.status(500).send("Server error");
     }
 });
+
+
 
 
 app.use((req, res) => {

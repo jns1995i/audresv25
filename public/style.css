@@ -597,6 +597,7 @@ form {
 .field {
     width: 100%;
     display: flex;
+    height: auto;
     justify-content: start;
     align-items: start;
     padding: 0;

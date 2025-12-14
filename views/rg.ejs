@@ -153,7 +153,7 @@
       }
     </style>
 </head>
-<body class="bgSoft padding0">
+<body class="bgWhite padding0">
   
 
     <div class="mainF relative" style="z-index: 500 !important;">
@@ -179,26 +179,38 @@
             <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
             </section>
 
-            <br>
-
-            <div class="bgWhite index50 col justifyStart height0 colorPrimary cornerRem1 shadow1 ehem" id="">
-                <div class="height0 col justifyCenter alignStart padding20 relative">
-                    <p class="rem2 str500 marginBottom10">Data Privacy Notice</p>
-                    <p class="rem11 str400 textJustify">
-                        By submitting this form, you agree to provide your personal details and valid ID for identity verification purposes only. All information collected will be treated as confidential and will be used solely for processing your document request. In compliance with the Data Privacy Act of 2012, your data will be securely stored and accessed only by authorized personnel from the Registrar’s Office. Your information will not be shared with third parties and will be retained only as necessary.
-                    </p>
-                </div>
-            </div>
-
-            <br>
         </div>
         
         <div class="padding20 rightF width45 col height0 relative" style="z-index: 100 !important;">
             <form id="myForm" action="/reqDirect" method="POST" enctype="multipart/form-data" class="shadow1 padding30 card alignCenter relative colorPrimary ehem" style="z-index: 100;">
-                <div class="col justifyStart alignStart gap10 relative">
-                    <p class="size28 str500 colorPrimary">REQUEST FORM</p>
-                </div>
+                
+                <section class="col padding0 page" id="page1">
+                    <div class="bgWhite index50 col justifyStart height0 colorPrimary" id="">
+                        <div class="height0 col justifyCenter alignStart padding20 relative">
+                            <p class="size20 str500 marginBottom10">Data Privacy Notice</p>
+                            <p class="size14 str400 textJustify">
+                                By submitting this form, you agree to provide your personal details and valid ID for identity verification purposes only. All information collected will be treated as confidential and will be used solely for processing your document request. In compliance with the Data Privacy Act of 2012, your data will be securely stored and accessed only by authorized personnel from the Registrar’s Office. Your information will not be shared with third parties and will be retained only as necessary.
+                            </p>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="height0 row marginBlock15">
+                        <p class="size12 flex textCenter"><input type="checkbox" class="width0 marginRight10" id="agree" required> I have read and understood the DATA PRIVACY NOTICE</p>
+                    </div>
+                </section>
+                
+
                 <div class="col height0 alignStart gap5" id="editCard">
+
+                    <section class="col alignStart gap5 hidden page padding0 hidden" id="page2">
+                        
+
+                        <div class="field">
+                            <p class="rem18 str500 textCenter textBalance">Please select the document(s) you wish to request. Multiple document requests are allowed.</p>
+                        </div>
+
                         <div class="fieldsetsContainer col height0 padding0 width100" id="fieldsetsContainer">
                             <fieldset class="marginBottom10">
                                 <div class="height0 justifyEnd hidden" id="removeDocCard"><a href="javascript:void(0)" class="nav dnav" id="removeDoc">Remove</a></div>
@@ -297,382 +309,520 @@
                             <a href="javascript:void(0)" class="nav pnav" id="addDoc"><i class="fas fa-plus"></i> Additional</a>
                         </div>
                         <div class="height0 bgBlue100 textCenter"> Your total payable amount is &nbsp; <span id="grandTotal"> ₱0.00</span></div>
+                    </section>
 
-                        <br><hr><br>
+                    <section class="col alignStart gap5 page padding0 hidden" id="page3">
 
-                    <div class="field">
-                        <p class="rem16 str500">Personal Information</p>
-                    </div>
-                    <br>
-
-                        
-                    <div class="row height0 width100 gap10 colF1">
-                        <div class="field gap5 width30">
-                            <label for="">First Name*</label>
-                            <input type="text" name="firstName" class="sname" required>
+                        <div class="field">
+                            <p class="rem18 str500">Please provide your personal information below</p>
                         </div>
-                        <div class="field gap5 width30">
-                            <label for="">Middle Name</label>
-                            <input type="text" name="middleName" class="sname">
-                        </div>
-                        <div class="field gap5 width30">
-                            <label for="">Last Name*</label>
-                            <input type="text" name="lastName" class="sname" required>
-                        </div>
-                        <div class="field gap5 width10">
-                            <label for="">Ext</label>
-                            <input type="text" name="extName" class="sname">
-                        </div>
-                    </div>
-                    <script>
-                        function enforceNameFormat(event) {
-                            // Allow only letters and dash
-                            event.target.value = event.target.value.replace(/[^A-Za-z-.\s]/g, '');
-                        }
-
-                        document.addEventListener('DOMContentLoaded', () => {
-                            const nameInputs = document.querySelectorAll('.sname');
-                            nameInputs.forEach(input => {
-                                input.addEventListener('input', enforceNameFormat);
-                            });
-                        });
-                    </script>
-
-                    <div class="row height0 width100 gap10 colF1">
-                        <div class="field gap5">
-                            <label for="">Address*</label>
-                            <input type="text" name="address" required>
-                        </div>
-                    </div>
-                    <div class="row height0 width100 gap10 colF1">
-                        <div class="field col alignStart gap5">
-                            <label for="birthday">Birthday*</label>
-                            <div class="height0 gap5">
-                                <div class="selectBar">
-                                    <select id="bMonth" name="bMonth" required>
-                                        <option value="">Month</option>
-                                    </select>
-                                </div>
-                                <div class="selectBar">
-                                    <select id="bDay" name="bDay" required>
-                                        <option value="">Day</option>
-                                    </select>
-                                </div>
-                                <div class="selectBar">
-                                    <select id="bYear" name="bYear" required>
-                                        <option value="">Year</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="height0 width100 gap10 alignEnd colF1">
-                        <div class="field gap5">
-                            <label for="">Active PHINMA AU or Personal Email*</label>
-                            <input type="email" name="email" id="em" required>
-                        </div>
-                        <div class="field gap5">
-                            <label for="">Phone Number*</label>
-                            <input type="text" id="number" name="number" inputmode="numeric" required class="number">
-                        </div>
-                        <script>
-                            document.getElementById('em').addEventListener('input', function () {
-                                const email = this.value;
                             
-                                fetch(`/check-email?email=${encodeURIComponent(email)}`)
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        const errorMsg = document.getElementById('error');
-                                        if (data.exists) {
-                                            errorMsg.classList.remove('hidden');
-                                        } else {
-                                            errorMsg.classList.add('hidden');
-                                        }
-                                    });
-                            });
-                        </script>
-                    </div>
-                    
-                    <div class="bgRed100 hidden width0" id="error">Email is already used by an existing account!</div>
-
-                    <br><hr><br>
-                    <div class="row height0 gap10 colF1">
-                        <div class="field gap5 height0">
-                            <label for="">Type of Student*</label>
-                            <div class="selectBar">
-                                <select name="role" id="role" required>
-                                    <option value="" selected disabled>Select</option>
-                                    <option value="Student">Current Student</option>
-                                    <option value="Alumni">Alumni</option>
-                                    <option value="Former">Former Students or Transferred to other School</option>
-                                </select>
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field gap5 width30">
+                                <label for="">First Name*</label>
+                                <input type="text" name="firstName" class="sname" required>
                             </div>
-                        </div>
-                        <div class="field gap5">
-                            <label for="">Campus*</label>
-                            <div class="selectBar">
-                                <select name="campus" id="campus" required>
-                                    <option value="" selected disabled>Select</option>
-                                    <option value="Main">Main</option>
-                                    <option value="South">South</option>
-                                    <option value="San Jose">San Jose</option>
-                                </select>
+                            <div class="field gap5 width30">
+                                <label for="">Middle Name</label>
+                                <input type="text" name="middleName" class="sname">
                             </div>
-                        </div>
-                    </div>
-                    <div class="height0 gap10 colF1">
-                        <div class="field gap5">
-                            <div class="height0 justifyBetween">
-                                <label for="sn" id="snLabel">Student Number <span class="hidden">(Optional)</span></label>
+                            <div class="field gap5 width30">
+                                <label for="">Last Name*</label>
+                                <input type="text" name="lastName" class="sname" required>
                             </div>
-                            <input type="text" id="sn" name="studentNo" placeholder="e.g. 01-1920-032235">
+                            <div class="field gap5 width10">
+                                <label for="">Ext</label>
+                                <input type="text" name="extName" class="sname">
+                            </div>
                         </div>
                         <script>
-                            function enforceStudentNumberFormat(event) {
-                                // Allow only digits and dash
-                                event.target.value = event.target.value.replace(/[^0-9-]/g, '');
+                            function enforceNameFormat(event) {
+                                // Allow only letters and dash
+                                event.target.value = event.target.value.replace(/[^A-Za-z-.\s]/g, '');
                             }
 
                             document.addEventListener('DOMContentLoaded', () => {
-                                const snInput = document.querySelector('#sn');
-                                snInput.addEventListener('input', enforceStudentNumberFormat);
+                                const nameInputs = document.querySelectorAll('.sname');
+                                nameInputs.forEach(input => {
+                                    input.addEventListener('input', enforceNameFormat);
+                                });
                             });
                         </script>
-                        <script>
-                        const roleSelect = document.getElementById('role');
-                        const snInput = document.getElementById('sn');
-                        const snLabel = document.getElementById('snLabel');
-                        const optionalSpan = snLabel.querySelector('span');
 
-                        roleSelect.addEventListener('change', () => {
-                            const selected = roleSelect.value;
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field gap5">
+                                <label for="">Address*</label>
+                                <input type="text" name="address" required>
+                            </div>
+                        </div>
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field col alignStart gap5">
+                                <label for="birthday">Birthday*</label>
+                                <div class="height0 gap5">
+                                    <div class="selectBar">
+                                        <select id="bMonth" name="bMonth" required>
+                                            <option value="">Month</option>
+                                        </select>
+                                    </div>
+                                    <div class="selectBar">
+                                        <select id="bDay" name="bDay" required>
+                                            <option value="">Day</option>
+                                        </select>
+                                    </div>
+                                    <div class="selectBar">
+                                        <select id="bYear" name="bYear" required>
+                                            <option value="">Year</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="height0 width100 gap10 alignEnd colF1">
+                            <div class="field gap5">
+                                <label for="">Active PHINMA AU or Personal Email*</label>
+                                <input type="email" name="email" id="em" required>
+                            </div>
+                            <div class="field gap5">
+                                <label for="">Phone Number*</label>
+                                <input type="text" id="number" name="number" inputmode="numeric" required class="number">
+                            </div>
+                            <script>
+                                document.getElementById('em').addEventListener('input', function () {
+                                    const email = this.value;
+                                
+                                    fetch(`/check-email?email=${encodeURIComponent(email)}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const errorMsg = document.getElementById('error');
+                                            if (data.exists) {
+                                                errorMsg.classList.remove('hidden');
+                                            } else {
+                                                errorMsg.classList.add('hidden');
+                                            }
+                                        });
+                                });
+                            </script>
+                        </div>
+                        
+                        <div class="bgRed100 hidden width0" id="error">Email is already used by an existing account!</div>
 
-                            if (selected === 'Student') {
-                                snInput.required = true;
-                                optionalSpan.classList.add('hidden');
-                            } else {
-                                snInput.required = false;
-                                optionalSpan.classList.remove('hidden');
-                            }
-                        });
-                        </script>
-                        <script>
-                            document.getElementById('sn').addEventListener('input', function () {
-                                const studentNo = this.value;
+                        <br><hr><br>
+                        <div class="row height0 gap10 colF1">
+                            <div class="field gap5 height0">
+                                <label for="">Type of Student*</label>
+                                <div class="selectBar">
+                                    <select name="role" id="role" required>
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="Student">Current Student</option>
+                                        <option value="Alumni">Alumni</option>
+                                        <option value="Former">Former Students or Transferred to other School</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="field gap5">
+                                <label for="">Campus*</label>
+                                <div class="selectBar">
+                                    <select name="campus" id="campus" required>
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="Main">Main</option>
+                                        <option value="South">South</option>
+                                        <option value="San Jose">San Jose</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="height0 gap10 colF1">
+                            <div class="field gap5">
+                                <div class="height0 justifyBetween">
+                                    <label for="sn" id="snLabel">Student Number <span class="hidden">(Optional)</span></label>
+                                </div>
+                                <input type="text" id="sn" name="studentNo" placeholder="e.g. 01-1920-032235">
+                            </div>
+                            <script>
+                                function enforceStudentNumberFormat(event) {
+                                    // Allow only digits and dash
+                                    event.target.value = event.target.value.replace(/[^0-9-]/g, '');
+                                }
+
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const snInput = document.querySelector('#sn');
+                                    snInput.addEventListener('input', enforceStudentNumberFormat);
+                                });
+                            </script>
                             
-                                fetch(`/check-studentNo?studentNo=${encodeURIComponent(studentNo)}`)
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        const errorMsg = document.getElementById('error2');
-                                        if (data.exists) {
-                                            errorMsg.classList.remove('hidden');
-                                        } else {
-                                            errorMsg.classList.add('hidden');
-                                        }
-                                    });
-                            });
-                        </script>
-                        <script>
-                            document.getElementById("role").addEventListener("change", function() {
-                                const role = this.value;
-                                const yearLevelField = document.getElementById("yearLevelField");
-                                const yearLevelSelect = document.getElementById("yearLevel");
+                            <script>
+                                function enforceYearNumberFormat(event) {
+                                    // Allow only digits and dash
+                                    event.target.value = event.target.value.replace(/[^0-9-]/g, '');
+                                }
 
-                                // Clear previous options
-                                yearLevelSelect.innerHTML = "";
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const snInput = document.querySelector('#yearGraduate');
+                                    snInput.addEventListener('input', enforceYearNumberFormat);
+                                });
+                            </script>
+                            
+                            <script>
+                                function enforceYearNumber2Format(event) {
+                                    // Allow only digits and dash
+                                    event.target.value = event.target.value.replace(/[^0-9-]/g, '');
+                                }
 
-                                if (role === "Alumni") {
-                                    // Show only Graduated
-                                    const option = document.createElement("option");
-                                    option.value = "Graduated";
-                                    option.textContent = "Graduated";
-                                    option.selected = true;
-                                    yearLevelSelect.appendChild(option);
-                                    yearLevelField.classList.remove("hidden");
-                                } else if (role === "Student" || role === "Former") {
-                                    const options = [
-                                        "1st Year","2nd Year","3rd Year","4th Year",
-                                        "Grade 11","Grade 12","Year 1 (Grad School)","Year 2 (Grad School)","Year 3 (Grad School)"
-                                    ];
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const snInput = document.querySelector('#yearAttended');
+                                    snInput.addEventListener('input', enforceYearNumber2Format);
+                                });
+                            </script>
+                            <script>
+                            const roleSelect = document.getElementById('role');
+                            const snInput = document.getElementById('sn');
+                            const snLabel = document.getElementById('snLabel');
+                            const optionalSpan = snLabel.querySelector('span');
 
-                                    const defaultOption = document.createElement("option");
-                                    defaultOption.value = "";
-                                    defaultOption.textContent = "Select";
-                                    defaultOption.disabled = true;
-                                    defaultOption.selected = true;
-                                    yearLevelSelect.appendChild(defaultOption);
+                            roleSelect.addEventListener('change', () => {
+                                const selected = roleSelect.value;
 
-                                    options.forEach(opt => {
-                                        const option = document.createElement("option");
-                                        option.value = opt;
-                                        option.textContent = opt;
-                                        yearLevelSelect.appendChild(option);
-                                    });
-
-                                    yearLevelField.classList.remove("hidden");
+                                if (selected === 'Student') {
+                                    snInput.required = true;
+                                    optionalSpan.classList.add('hidden');
                                 } else {
-                                    yearLevelField.classList.add("hidden");
+                                    snInput.required = false;
+                                    optionalSpan.classList.remove('hidden');
                                 }
                             });
+                            </script>
+                            <script>
+                                document.getElementById('sn').addEventListener('input', function () {
+                                    const studentNo = this.value;
+                                
+                                    fetch(`/check-studentNo?studentNo=${encodeURIComponent(studentNo)}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const errorMsg = document.getElementById('error2');
+                                            if (data.exists) {
+                                                errorMsg.classList.remove('hidden');
+                                            } else {
+                                                errorMsg.classList.add('hidden');
+                                            }
+                                        });
+                                });
+                            </script>
+                            <script>
+                                document.getElementById("role").addEventListener("change", function() {
+                                    const role = this.value;
+                                    const yearLevelField = document.getElementById("yearLevelField");
+                                    const yearLevelSelect = document.getElementById("yearLevel");
 
-                            // ⭐ Run once on page load to set default correctly
-                            document.getElementById("role").dispatchEvent(new Event("change"));
-                        </script>
+                                    // Clear previous options
+                                    yearLevelSelect.innerHTML = "";
 
-                        <div class="field height0 col alignStart gap5 hidden" id="yearGraduateContainer">
-                            <label for="yearGraduate">Year Graduated</label>
-                            <input type="text" id="yearGraduate" name="yearGraduated">
-                        </div>
-                        <div class="field height0 col alignStart gap5 hidden" id="yearAttendedContainer">
-                            <label for="yearAttended">Year Last Attended</label>
-                            <input type="text" id="yearAttended" name="yearAttended">
-                        </div>
-                    </div>
-                    
-                    <div class="bgRed100 width0 hidden" id="error2">Student number is already registered!</div>
-                    <div class="row height0 gap10 colF1">
-                        <div class="field height0 col alignStart gap5 hidden" id="yearLevelField">
-                            <label for="yearLevel">Year Level</label>
-                            <div class="selectBar">
-                                <select name="yearLevel" id="yearLevel">
-                                    <option value="" selected disabled>Select</option>
-                                    <option value="1st Year">1st Year</option>
-                                    <option value="2nd Year">2nd Year</option>
-                                    <option value="3rd Year">3rd Year</option>
-                                    <option value="4th Year">Fourth Year</option>
-                                    <option value="Grade 11">Grade 11</option>
-                                    <option value="Grade 12">Grade 12</option>
-                                    <option value="Year 1 (Grad School)"> Year 1 (Grad School)</option>
-                                    <option value="Year 2 (Grad School)"> Year 2 (Grad School)</option>
-                                    <option value="Year 3 (Grad School)"> Year 3 (Grad School)</option>
-                                </select>
+                                    if (role === "Alumni") {
+                                        // Show only Graduated
+                                        const option = document.createElement("option");
+                                        option.value = "Graduated";
+                                        option.textContent = "Graduated";
+                                        option.selected = true;
+                                        yearLevelSelect.appendChild(option);
+                                        yearLevelField.classList.remove("hidden");
+                                    } else if (role === "Student" || role === "Former") {
+                                        const options = [
+                                            "1st Year","2nd Year","3rd Year","4th Year",
+                                            "Grade 11","Grade 12","Year 1 (Grad School)","Year 2 (Grad School)","Year 3 (Grad School)"
+                                        ];
+
+                                        const defaultOption = document.createElement("option");
+                                        defaultOption.value = "";
+                                        defaultOption.textContent = "Select";
+                                        defaultOption.disabled = true;
+                                        defaultOption.selected = true;
+                                        yearLevelSelect.appendChild(defaultOption);
+
+                                        options.forEach(opt => {
+                                            const option = document.createElement("option");
+                                            option.value = opt;
+                                            option.textContent = opt;
+                                            yearLevelSelect.appendChild(option);
+                                        });
+
+                                        yearLevelField.classList.remove("hidden");
+                                    } else {
+                                        yearLevelField.classList.add("hidden");
+                                    }
+                                });
+
+                                // ⭐ Run once on page load to set default correctly
+                                document.getElementById("role").dispatchEvent(new Event("change"));
+                            </script>
+                            <script>
+                            const roleSelect2 = document.getElementById("role");
+
+                            const yearGraduateContainer = document.getElementById("yearGraduateContainer");
+                            const yearGraduateInput = document.getElementById("yearGraduate");
+
+                            const yearAttendedContainer = document.getElementById("yearAttendedContainer");
+                            const yearAttendedInput = document.getElementById("yearAttended");
+
+                            function updateYearFields() {
+                                const role = roleSelect2.value;
+
+                                // reset
+                                yearGraduateContainer.classList.add("hidden");
+                                yearAttendedContainer.classList.add("hidden");
+
+                                yearGraduateInput.required = false;
+                                yearAttendedInput.required = false;
+
+                                if (role === "Alumni") {
+                                    yearGraduateContainer.classList.remove("hidden");
+                                    yearGraduateInput.required = true;
+                                }
+
+                                if (role === "Former") {
+                                    yearAttendedContainer.classList.remove("hidden");
+                                    yearAttendedInput.required = true;
+                                }
+                            }
+
+                            roleSelect2.addEventListener("change", updateYearFields);
+                            updateYearFields(); // run on load
+                            </script>
+
+                            <div class="field height0 col alignStart gap5 hidden" id="yearGraduateContainer">
+                                <label for="yearGraduate">Year Graduated</label>
+                                <input type="text" id="yearGraduate" name="yearGraduated">
+                            </div>
+                            <div class="field height0 col alignStart gap5 hidden" id="yearAttendedContainer">
+                                <label for="yearAttended">Year Last Attended</label>
+                                <input type="text" id="yearAttended" name="yearAttended">
                             </div>
                         </div>
-                    </div>
-                    <div class="row height0 width100 gap10 colF1">
+                        
+                        <div class="bgRed100 width0 hidden" id="error2">Student number is already registered!</div>
+                        <div class="row height0 gap10 colF1">
+                            <div class="field height0 col alignStart gap5 hidden" id="yearLevelField">
+                                <label for="yearLevel">Year Level</label>
+                                <div class="selectBar">
+                                    <select name="yearLevel" id="yearLevel">
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="1st Year">1st Year</option>
+                                        <option value="2nd Year">2nd Year</option>
+                                        <option value="3rd Year">3rd Year</option>
+                                        <option value="4th Year">Fourth Year</option>
+                                        <option value="Grade 11">Grade 11</option>
+                                        <option value="Grade 12">Grade 12</option>
+                                        <option value="Year 1 (Grad School)"> Year 1 (Grad School)</option>
+                                        <option value="Year 2 (Grad School)"> Year 2 (Grad School)</option>
+                                        <option value="Year 3 (Grad School)"> Year 3 (Grad School)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field gap5">
+                                <label for="">Course or Strand*</label>
+                                <div class="selectBar">
+                                    <select name="course" required>
+                                        <option value="" selected disabled>Select</option>
+                                        <option value="Bachelor of Arts in Political Science">Bachelor of Arts in Political Science</option>
+                                        <option value="Bachelor of Early Childhood Education">Bachelor of Early Childhood Education</option>
+                                        <option value="Bachelor of Elementary Education">Bachelor of Elementary Education</option>
+                                        <option value="Bachelor of Science in Accountancy">Bachelor of Science in Accountancy</option>
+                                        <option value="Bachelor of Science in Accounting Information System">Bachelor of Science in Accounting Information System</option>
+                                        <option value="Bachelor of Science in Business Administration - Banking and Microfinance">Bachelor of Science in Business Administration - Banking and Microfinance</option>
+                                        <option value="Bachelor of Science in Business Administration - Financial Management">Bachelor of Science in Business Administration - Financial Management</option>
+                                        <option value="Bachelor of Science in Business Administration - Human Resource Management">Bachelor of Science in Business Administration - Human Resource Management</option>
+                                        <option value="Bachelor of Science in Business Administration - Marketing Management">Bachelor of Science in Business Administration - Marketing Management</option>
+                                        <option value="Bachelor of Science in Civil Engineering">Bachelor of Science in Civil Engineering</option>
+                                        <option value="Bachelor of Science in Criminology">Bachelor of Science in Criminology</option>
+                                        <option value="Bachelor of Science in Electrical Engineering">Bachelor of Science in Electrical Engineering</option>
+                                        <option value="Bachelor of Science in Entrepreneurship">Bachelor of Science in Entrepreneurship</option>
+                                        <option value="Bachelor of Science in Hospitality Management">Bachelor of Science in Hospitality Management</option>
+                                        <option value="Bachelor of Science in Information Technology">Bachelor of Science in Information Technology</option>
+                                        <option value="Bachelor of Science in Management Accounting">Bachelor of Science in Management Accounting</option>
+                                        <option value="Bachelor of Science in Medical Laboratory Science">Bachelor of Science in Medical Laboratory Science</option>
+                                        <option value="Bachelor of Science in Nursing">Bachelor of Science in Nursing</option>
+                                        <option value="Bachelor of Science in Pharmacy">Bachelor of Science in Pharmacy</option>
+                                        <option value="Bachelor of Science in Psychology">Bachelor of Science in Psychology</option>
+                                        <option value="Bachelor of Secondary Education - English">Bachelor of Secondary Education - English</option>
+                                        <option value="Bachelor of Secondary Education - Filipino">Bachelor of Secondary Education - Filipino</option>
+                                        <option value="Bachelor of Secondary Education - Mathematics">Bachelor of Secondary Education - Mathematics</option>
+                                        <option value="Bachelor of Secondary Education - Science">Bachelor of Secondary Education - Science</option>
+                                        <option value="Doctor of Philosophy major in Educational Management">Doctor of Philosophy major in Educational Management</option>
+                                        <option value="Doctor of Philosophy major in Filipino">Doctor of Philosophy major in Filipino</option>
+                                        <option value="Doctor of Philosophy major in Psychology and Guidance">Doctor of Philosophy major in Psychology and Guidance</option>
+                                        <option value="Doctor of Philosophy major in Science Education">Doctor of Philosophy major in Science Education</option>
+                                        <option value="Master of Arts Major in Educational Management (Thesis & Non-Thesis)">Master of Arts Major in Educational Management (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in English (Thesis & Non-Thesis)">Master of Arts Major in English (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Guidance and Counseling (Thesis & Non-Thesis)">Master of Arts Major in Guidance and Counseling (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Mathematics (Thesis & Non-Thesis)">Master of Arts Major in Mathematics (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Physical Education (Thesis & Non-Thesis)">Master of Arts Major in Physical Education (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Psychology (Thesis & Non-Thesis)">Master of Arts Major in Psychology (Thesis & Non-Thesis)</option>
+                                        <option value="Master of Arts Major in Public Management">Master of Arts Major in Public Management</option>
+                                        <option value="Master of Arts Major in Science Education">Master of Arts Major in Science Education</option>
+                                        <option value="Master of Science in Business Administration major in Management">Master of Science in Business Administration major in Management</option>
+                                        <option value="ABM Specializes in Hospitality and Tourism">ABM Specializes in Hospitality and Tourism</option>
+                                        <option value="GAS - Criminology">GAS - Criminology</option>
+                                        <option value="GAS - Education">GAS - Education</option>
+                                        <option value="GAS - Information Technology">GAS - Information Technology</option>
+                                        <option value="HUMSS">HUMSS</option>
+                                        <option value="STEM">STEM</option>
+                                        <option value="STEM Health (Nursing, Pharmacy, Medical Laboratory Science, Psychology)">STEM Health (Nursing, Pharmacy, Medical Laboratory Science, Psychology)</option>
+                                    </select>                        
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="col alignStart gap5 page hidden" id="page4">
+                        
+
+                        <div class="field">
+                            <p class="rem18 str500 textBalance textCenter">To proceed, please upload a valid ID for verification.</p>
+                        </div>
+                        <br>
+
+                        <div id="idList" class="heigth100 bgWhite index100 height0 colorPrimary alignEnd relative cornerRem1 padding20 borderPrimary" style="z-index: 200 !important;">
+                            <a href="javascript:void(0)" class="nav cnav absolute right10 top10 hidden" id="xBtn"><i class="fas fa-times"></i></a>
+                            <div class="height0 col alignStart gap5">
+                                <p class="rem16 str500">Guidelines</p>
+                                <p class="rem1 str400">To complete your request, you must upload a valid government-issued or school ID. This is required for identity verification and ensures your request is securely processed.</p>
+                                <br>
+                                <p class="rem16 str500">Accepted IDs</p>
+                                <hr class="width90">
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> School ID</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Phinma Alumni ID</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Philippine Passport</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Driver’s License</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Unified Multi-Purpose ID (UMID) / SSS ID</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> PhilSys National ID</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> GSIS e-Card</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> PRC ID</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Postal ID</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Voter’s ID / Voter’s Certification</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Alien Certificate of Registration (ACR)</p>
+                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Firearms License (PNP-issued)</p>
+                                <br>
+                                <p class="rem16 str500">Requirements</p>
+                                <hr class="width90">
+                                <p class="size12 str500">1. The ID must clearly show your full name & photo.</p>
+                                <p class="size12 str500">2. The uploaded file must be in JPG, JPEG or PNG format.</p>
+                                <p class="size12 str500">3. Maximum file size: 10 MB.</p>
+                                <p class="size12 str500">4. Ensure the ID is legible and not expired.</p>
+                            </div>
+                        </div>
                         <div class="field gap5">
-                            <label for="">Course or Strand*</label>
-                            <div class="selectBar">
-                                <select name="course" required>
-                                    <option value="" selected disabled>Select</option>
-                                    <option value="Bachelor of Arts in Political Science">Bachelor of Arts in Political Science</option>
-                                    <option value="Bachelor of Early Childhood Education">Bachelor of Early Childhood Education</option>
-                                    <option value="Bachelor of Elementary Education">Bachelor of Elementary Education</option>
-                                    <option value="Bachelor of Science in Accountancy">Bachelor of Science in Accountancy</option>
-                                    <option value="Bachelor of Science in Accounting Information System">Bachelor of Science in Accounting Information System</option>
-                                    <option value="Bachelor of Science in Business Administration - Banking and Microfinance">Bachelor of Science in Business Administration - Banking and Microfinance</option>
-                                    <option value="Bachelor of Science in Business Administration - Financial Management">Bachelor of Science in Business Administration - Financial Management</option>
-                                    <option value="Bachelor of Science in Business Administration - Human Resource Management">Bachelor of Science in Business Administration - Human Resource Management</option>
-                                    <option value="Bachelor of Science in Business Administration - Marketing Management">Bachelor of Science in Business Administration - Marketing Management</option>
-                                    <option value="Bachelor of Science in Civil Engineering">Bachelor of Science in Civil Engineering</option>
-                                    <option value="Bachelor of Science in Criminology">Bachelor of Science in Criminology</option>
-                                    <option value="Bachelor of Science in Electrical Engineering">Bachelor of Science in Electrical Engineering</option>
-                                    <option value="Bachelor of Science in Entrepreneurship">Bachelor of Science in Entrepreneurship</option>
-                                    <option value="Bachelor of Science in Hospitality Management">Bachelor of Science in Hospitality Management</option>
-                                    <option value="Bachelor of Science in Information Technology">Bachelor of Science in Information Technology</option>
-                                    <option value="Bachelor of Science in Management Accounting">Bachelor of Science in Management Accounting</option>
-                                    <option value="Bachelor of Science in Medical Laboratory Science">Bachelor of Science in Medical Laboratory Science</option>
-                                    <option value="Bachelor of Science in Nursing">Bachelor of Science in Nursing</option>
-                                    <option value="Bachelor of Science in Pharmacy">Bachelor of Science in Pharmacy</option>
-                                    <option value="Bachelor of Science in Psychology">Bachelor of Science in Psychology</option>
-                                    <option value="Bachelor of Secondary Education - English">Bachelor of Secondary Education - English</option>
-                                    <option value="Bachelor of Secondary Education - Filipino">Bachelor of Secondary Education - Filipino</option>
-                                    <option value="Bachelor of Secondary Education - Mathematics">Bachelor of Secondary Education - Mathematics</option>
-                                    <option value="Bachelor of Secondary Education - Science">Bachelor of Secondary Education - Science</option>
-                                    <option value="Doctor of Philosophy major in Educational Management">Doctor of Philosophy major in Educational Management</option>
-                                    <option value="Doctor of Philosophy major in Filipino">Doctor of Philosophy major in Filipino</option>
-                                    <option value="Doctor of Philosophy major in Psychology and Guidance">Doctor of Philosophy major in Psychology and Guidance</option>
-                                    <option value="Doctor of Philosophy major in Science Education">Doctor of Philosophy major in Science Education</option>
-                                    <option value="Master of Arts Major in Educational Management (Thesis & Non-Thesis)">Master of Arts Major in Educational Management (Thesis & Non-Thesis)</option>
-                                    <option value="Master of Arts Major in English (Thesis & Non-Thesis)">Master of Arts Major in English (Thesis & Non-Thesis)</option>
-                                    <option value="Master of Arts Major in Guidance and Counseling (Thesis & Non-Thesis)">Master of Arts Major in Guidance and Counseling (Thesis & Non-Thesis)</option>
-                                    <option value="Master of Arts Major in Mathematics (Thesis & Non-Thesis)">Master of Arts Major in Mathematics (Thesis & Non-Thesis)</option>
-                                    <option value="Master of Arts Major in Physical Education (Thesis & Non-Thesis)">Master of Arts Major in Physical Education (Thesis & Non-Thesis)</option>
-                                    <option value="Master of Arts Major in Psychology (Thesis & Non-Thesis)">Master of Arts Major in Psychology (Thesis & Non-Thesis)</option>
-                                    <option value="Master of Arts Major in Public Management">Master of Arts Major in Public Management</option>
-                                    <option value="Master of Arts Major in Science Education">Master of Arts Major in Science Education</option>
-                                    <option value="Master of Science in Business Administration major in Management">Master of Science in Business Administration major in Management</option>
-                                    <option value="ABM Specializes in Hospitality and Tourism">ABM Specializes in Hospitality and Tourism</option>
-                                    <option value="GAS - Criminology">GAS - Criminology</option>
-                                    <option value="GAS - Education">GAS - Education</option>
-                                    <option value="GAS - Information Technology">GAS - Information Technology</option>
-                                    <option value="HUMSS">HUMSS</option>
-                                    <option value="STEM">STEM</option>
-                                    <option value="STEM Health (Nursing, Pharmacy, Medical Laboratory Science, Psychology)">STEM Health (Nursing, Pharmacy, Medical Laboratory Science, Psychology)</option>
-                                </select>                        
-                            </div>
+                            <label for="" class="relative width100">Upload here</label>
+                            <input type="file" name="vId" required>
                         </div>
-                    </div>
-                    <br>
-                    <div id="idList" class="heigth100 bgWhite index100 height0 colorPrimary alignEnd relative cornerRem1 padding20 borderPrimary" style="z-index: 200 !important;">
-                        <a href="javascript:void(0)" class="nav cnav absolute right10 top10 hidden" id="xBtn"><i class="fas fa-times"></i></a>
-                        <div class="height0 col alignStart gap5">
-                            <p class="rem16 str500">Uploading Valid ID Guidelines</p>
-                            <p class="rem1 str400">To complete your request, you must upload a valid government-issued or school ID. This is required for identity verification and ensures your request is securely processed.</p>
-                            <br>
-                            <p class="rem16 str500">Accepted IDs</p>
-                            <hr class="width90">
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> School ID</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Phinma Alumni ID</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Philippine Passport</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Driver’s License</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Unified Multi-Purpose ID (UMID) / SSS ID</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> PhilSys National ID</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> GSIS e-Card</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> PRC ID</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Postal ID</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Voter’s ID / Voter’s Certification</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Alien Certificate of Registration (ACR)</p>
-                            <p class="size12 str500"><i class="fas fa-check-circle"></i> Firearms License (PNP-issued)</p>
-                            <br>
-                            <p class="rem16 str500">Requirements</p>
-                            <hr class="width90">
-                            <p class="size12 str500">1. The ID must clearly show your full name & photo.</p>
-                            <p class="size12 str500">2. The uploaded file must be in JPG, JPEG or PNG format.</p>
-                            <p class="size12 str500">3. Maximum file size: 10 MB.</p>
-                            <p class="size12 str500">4. Ensure the ID is legible and not expired.</p>
+                        <p class="bgRed100 limitPhoto2 hidden marginTop10">Photo must not be larger than 500MB.</p>
+                        <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                        const input = document.querySelector('input[name="vId"]');
+                        const warning = document.querySelector('.limitPhoto2');
+
+                        input.addEventListener('change', function () {
+                            warning.classList.add("hidden");
+
+                            if (this.files.length > 0) {
+                            const file = this.files[0];
+                            const maxSize = 500 * 1024 * 1024; // 500MB
+
+                            if (file.size > maxSize) {
+                                warning.textContent = "Photo must not be larger than 500MB.";
+                                warning.classList.remove("hidden");
+                                this.value = ""; // clear file input
+                            }
+                            }
+                        });
+                        });
+                        </script>
+                        <div class="bgYellow cornerRem1 padding20 textCenter">
+                            TAKE NOTE: Please review all the details carefully before submitting your request. Ensure that all selections and information are correct, as changes may not be allowed after submission.
                         </div>
-                    </div>
-                    <div class="field gap5">
-                        <label for="" class="relative width100">Upload Valid ID </label>
-                        <input type="file" name="vId" required>
-                    </div>
-                    <p class="bgRed100 limitPhoto2 hidden marginTop10">Photo must not be larger than 500MB.</p>
-                    <script>
-                    document.addEventListener("DOMContentLoaded", () => {
-                    const input = document.querySelector('input[name="vId"]');
-                    const warning = document.querySelector('.limitPhoto2');
-
-                    input.addEventListener('change', function () {
-                        warning.classList.add("hidden");
-
-                        if (this.files.length > 0) {
-                        const file = this.files[0];
-                        const maxSize = 500 * 1024 * 1024; // 500MB
-
-                        if (file.size > maxSize) {
-                            warning.textContent = "Photo must not be larger than 500MB.";
-                            warning.classList.remove("hidden");
-                            this.value = ""; // clear file input
-                        }
-                        }
-                    });
-                    });
-                    </script>
+                        <div class="field height0 marginTop15 width100 alignEnd">
+                            <button type="submit" class="nav tnav pnav sbBtn" id="ferry"><i class="fas fa-check-circle"></i>Submit</button>
+                            <button type="reset" class="nav tnav pnav sbBtn hidden" id="johnn" disbaled><i class="fas fa-paper-plane"></i>Submitting ...</button>
+                        </div>
+                    </section>
                 </div>  
-                <div class="height0 row marginBlock15">
-                    <p class="size12 flex textCenter"><input type="checkbox" class="width0 marginRight10" required> I have read and understood the DATA PRIVACY NOTICE</p>
-                </div>
-                <div class="bgYellow cornerRem1 padding20 textCenter">
-                    TAKE NOTE: Please review all the details carefully before submitting your request. Ensure that all selections and information are correct, as changes may not be allowed after submission.
-                </div>
-                <div class="field height0 marginTop15 width100 alignEnd">
-                    <button type="submit" class="nav tnav pnav sbBtn" id="ferry"><i class="fas fa-check-circle"></i>Submit</button>
-                    <button type="reset" class="nav tnav pnav sbBtn hidden" id="johnn" disbaled><i class="fas fa-paper-plane"></i>Submitting ...</button>
-                </div>
+                <section class="justifyBetween">
+                    <a href="javascript:void(0)" class="nav bgTint4 white hidden" id="backNav"><i class="fas fa-chevron-left"></i> Back &nbsp;</a>
+                    <a href="javascript:void(0)" class="nav bgTint4 white" id="nextNav">&nbsp; Next <i class="fas fa-chevron-right"></i></a>
+                </section>
             </form>
         </div>
     </div>
+
+    <script>
+        const pages = [
+            document.getElementById('page1'),
+            document.getElementById('page2'),
+            document.getElementById('page3'),
+            document.getElementById('page4')
+            ];
+
+            const backNav = document.getElementById('backNav');
+            const nextNav = document.getElementById('nextNav');
+            const agreeCheckbox = document.getElementById('agree');
+
+            let currentPage = 0;
+
+            // ==========================
+            // Helpers
+            // ==========================
+            function showPage(index) {
+            pages.forEach((p, i) =>
+                p.classList.toggle('hidden', i !== index)
+            );
+
+            // Back button
+            backNav.classList.toggle('hidden', index === 0);
+
+            // Next button hides on page4
+            nextNav.classList.toggle('hidden', index === pages.length - 1);
+
+            currentPage = index;
+            }
+
+            function pageHasInvalidFields(page) {
+            const requiredFields = page.querySelectorAll('[required]');
+            return [...requiredFields].some(field => !field.checkValidity());
+            }
+
+            // ==========================
+            // NEXT
+            // ==========================
+            nextNav.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const page = pages[currentPage];
+
+            // Page 1 checkbox rule
+            if (currentPage === 0 && !agreeCheckbox.checked) {
+                agreeCheckbox.reportValidity();
+                return;
+            }
+
+            // Required fields validation (page 2–4)
+            if (pageHasInvalidFields(page)) {
+                page.querySelector('[required]').reportValidity();
+                return;
+            }
+
+            showPage(currentPage + 1);
+            });
+
+            // ==========================
+            // BACK
+            // ==========================
+            backNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 0) {
+                showPage(currentPage - 1);
+            }
+            });
+
+    </script>
 
     <script>
     document.querySelectorAll('.showPass').forEach(button => {

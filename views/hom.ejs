@@ -7,6 +7,9 @@
             height: 230px;
             transform: scaleX(-1);
         }
+        .card2 {
+            flex-direction: column-reverse;
+        }
     }
 </style>
 
@@ -49,75 +52,76 @@
         <img src="/images/student.png" alt="" id="StudentSticker" class="absolute h260 top10" style="right: -40px;">
     </section>
     <br>
-    <div class="height0 padding10 borderRadius10 justifyBetween width100 gap10 relative corner15 liquidX">
-        <p class="size16 gap10 alignCenter">Need Help?</p>
-        <a href="/ins2" class="nav liquid">Learn more here <i class="fas fa-chevron-right"></i></a>
+    <div class="height0 padding10 borderRadius10 justifyBetween width100 gap10 relative corner15 liquidX str400">
+        <p class="str400 textCenter textBalance"><i class="fas fa-info-circle marginRight5"></i> Service Hours: Monday to Friday, 8:00 AM–5:00 PM. Any requests submitted beyond office hours will be queued and processed on the next official working day.</p>
     </div>
 </section>
 <br>
-<section class="col card2 width45 padding15 bgWhite corner20 gap10">
-    <% if (requests && requests.length > 0) { %>
-        <div class="height0 justifyBetween padding5">
-            <p class="size30 str400">Recent</p>
-            <% if (requests && requests.length > 0) { %>
-            <a href="/reqAll" class="rem16 paddingLeft10 str400">See All</a>
-            <% } %>
-        </div>
+<section class="col card2 width45 padding5 gap10">
+    <div class="height0 padding10 borderRadius10 justifyBetween gap10 relative corner15 shadow1 liquidX">
+        <p class="size16 gap10 alignCenter">Need Help?</p>
+        <a href="/ins2" class="nav liquid">Learn more here <i class="fas fa-chevron-right"></i></a>
+    </div>
+    <section class="col padding10 bgWhite corner20 gap10">
+        <% if (requests && requests.length > 0) { %>
+            <div class="height0 justifyBetween padding5">
+                <p class="size30 str400">Recent</p>
+                <% if (requests && requests.length > 0) { %>
+                <a href="/reqAll" class="rem16 paddingLeft10 str400">See All</a>
+                <% } %>
+            </div>
 
-        <section class="bgWhite col gap5 corner15">
-            <% requests.slice(0, 3).forEach(req => { %>
-                <a href="/reqView/<%= req._id %>" class="width100 col alignStart padding10 shadow1 corner10 relative">
-                    <% if (req.items && req.items.length > 0) { %>
-                        <% req.items.forEach(item => { %>
-                        <p class="size16 str500"><%= item.qty %> <%= item.type %></p>
-                        <% }) %>
-                    <% } else { %>
-                        <p class="size12 str500">No items found for this request.</p>
-                    <% } %>
-                    <p class="size12 str500">TR# <%= req.tr %></p>
-                    <% if ( req.holdAt ) { %>
-                        <div class="size12 str400 padding0 border0 str500 width0 statIcon bgRed100"  style="background-color: transparent;">
-                            On Hold
-                        </div>
-                    <% } else if ( req.declineAt ) { %>
-                        <div class="size12 str400 padding0 border0 str500 width0 statIcon bgRed100 border0"  style="background-color: transparent;">
-                            Declined
-                        </div>
-                    <% } else { %>
-                        <div class="size12 str400 padding0 str500 width0 statIcon corner0
-                        <% if ( req.status === "Pending" ) { %>
-                            bgBlue100
-                        <% } else if ( req.status === "Reviewed" ) { %>
-                            bgViolet100
-                        <% } else if ( req.status === "Assessed" ) { %>
-                            bgYellow100
-                        <% } else if ( req.status === "Verified" ) { %>
-                            bgGreen100
-                        <% } else if ( req.status === "For Release" ) { %>
-                            bgGreen100
-                        <% } else if ( req.status === "Claimed" ) { %>
-                            bgGray100
+            <section class="bgWhite col gap5 corner15">
+                <% requests.slice(0, 3).forEach(req => { %>
+                    <a href="/reqView/<%= req._id %>" class="width100 col alignStart padding10 shadow1 corner10 relative">
+                        <% if (req.items && req.items.length > 0) { %>
+                            <% req.items.forEach(item => { %>
+                            <p class="size16 str500"><%= item.qty %> <%= item.type %></p>
+                            <% }) %>
                         <% } else { %>
-                            bgBlue100
-                        <% } %> border0
-                        " style="background-color: transparent;">
-                            <i class="fas fa-hourglass inline rem1 w15 h15 hidden"></i>
-                            <%= req.status === "Assessed" ? "For Payment" : req.status === "Reviewed" ? "For Assessment" : req.status || "" %>
-                        </div>
-                    <% } %>
-                    <p class="size12 darkGray absolute right10 top10"><%= formatCustomDate(req.createdAt) %></p>
-                </a>
-            <% }) %>
-        </section>
-    <% } else { %>
-        <div class="height0 padding5 col gap10">
-            <p class="size20 str400">You have no requests yet!</p>
-            <a href="/reqPre" class="nav porcelain">Start Request Now</a>
-        </div>
-    <% } %>
-
-    <section class="corner15 borderGray textCenter">
-        <p><i class="fas fa-info-circle marginRight5"></i> Service Hours: Monday–Friday, 8:00 AM–5:00 PM. Requests sent after hours are queued for the next working day.</p>
+                            <p class="size12 str500">No items found for this request.</p>
+                        <% } %>
+                        <p class="size12 str500">TR# <%= req.tr %></p>
+                        <% if ( req.holdAt ) { %>
+                            <div class="size12 str400 padding0 border0 str500 width0 statIcon bgRed100"  style="background-color: transparent;">
+                                On Hold
+                            </div>
+                        <% } else if ( req.declineAt ) { %>
+                            <div class="size12 str400 padding0 border0 str500 width0 statIcon bgRed100 border0"  style="background-color: transparent;">
+                                Declined
+                            </div>
+                        <% } else { %>
+                            <div class="size12 str400 padding0 str500 width0 statIcon corner0
+                            <% if ( req.status === "Pending" ) { %>
+                                bgBlue100
+                            <% } else if ( req.status === "Reviewed" ) { %>
+                                bgViolet100
+                            <% } else if ( req.status === "Assessed" ) { %>
+                                bgYellow100
+                            <% } else if ( req.status === "Verified" ) { %>
+                                bgGreen100
+                            <% } else if ( req.status === "For Release" ) { %>
+                                bgGreen100
+                            <% } else if ( req.status === "Claimed" ) { %>
+                                bgGray100
+                            <% } else { %>
+                                bgBlue100
+                            <% } %> border0
+                            " style="background-color: transparent;">
+                                <i class="fas fa-hourglass inline rem1 w15 h15 hidden"></i>
+                                <%= req.status === "Assessed" ? "For Payment" : req.status === "Reviewed" ? "For Assessment" : req.status || "" %>
+                            </div>
+                        <% } %>
+                        <p class="size12 darkGray absolute right10 top10"><%= formatCustomDate(req.createdAt) %></p>
+                    </a>
+                <% }) %>
+            </section>
+        <% } else { %>
+            <div class="height0 padding5 col gap10">
+                <p class="size20 str400">You have no requests yet!</p>
+                <a href="/reqPre" class="nav porcelain">Start Request Now</a>
+            </div>
+        <% } %>
     </section>
-
 </section>
+

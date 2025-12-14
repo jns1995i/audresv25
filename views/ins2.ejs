@@ -10,6 +10,10 @@
     <link rel="icon" href="/images/logo.png">
     <title><%= title ? `${title}` : 'AUDRES25' %></title>
     <style>
+        strong {
+            font-weight: 600 !important;
+            font-size: inherit;
+        }
   body {
     overflow-y: auto !important;
     display: block !important;
@@ -29,29 +33,27 @@
     left: initial !important;
     transform: none !important;
   }
-  .gemF {
-      height: 200px !important;
-      img {
-          height: 150px;
-      }
-  }
-  .rem48 {
-      font-size: 3rem;
-  }
-  .rem48.p2 {
-      margin-top: -2rem !important;
-      font-size: 3rem;
-  }
-  .rem48.p1 {
-      font-size: 3rem;
-  }
-  .logoF {
-      height: 60px;
-      width: 60px;
-      position: absolute;
-      top: 30% !important;
-      left: 53% !important;
-  }
+    .gemF {
+        height: 100px !important;
+        margin-top: 0 !important;
+    }
+    .iconix {
+        height: 100px;
+        width: 100px;
+        padding: 10px;
+        img {
+            height: 100% !important;
+        }
+    }
+    .rem48 {
+        font-size: 3rem;
+    }
+    .rem48.p2 {
+        margin-top: -2rem !important;
+    }
+    .rem48.p1 {
+        margin-top: 0 !important;
+    }
   img.logo {
       height: 70%;
   }
@@ -60,6 +62,7 @@
             display: block;
             overflow-y: auto;
             height: 100vh;
+            padding: 0;
         }
         .mainF {
             flex-direction: column;
@@ -69,6 +72,7 @@
         .leftF {
           height: auto !important;
             width: 100%;
+            padding: 0 !important;
         }
         .gemF {
           height: auto !important;
@@ -99,11 +103,11 @@
         .rightF {
             height: fit-content;
             width: 100%;
-            padding-block: 0 !important;
+            padding: 0 !important;
             margin-bottom: 100px !important;
         }
         #headF {
-            flex-direction: column-reverse !important;
+            flex-direction: column !important;
         }
         .crd {
           display: none !important;
@@ -114,53 +118,98 @@
             width: 100%;
           }
          }
+        .gradientText {
+        background: linear-gradient(to bottom,white,  white, var(--tint8));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, 0.2),
+            0 0 8px rgba(61, 77, 255, 0.3),
+            0 0 10px rgba(255, 255, 255, 0.2);
+            color-scheme: light !important;
+            -webkit-print-color-adjust: exact; /* prevent color alterations */
+            -webkit-text-fill-color: initial; /* reset text fill */
+            print-color-adjust: exact;    
+        }
+        #watermark {
+            transform: scale(1);
+        }
+        .ehem {
+            border-radius: 0 !important;
+        }
+        .manuel {
+            border-radius: 0 !important;
+        }
       }
     </style>
 </head>
-<body class="abstractBG">
+<body class="bgSoft">
   
 
-    <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+
 
     <div class="mainF alignStart" style="z-index: 500 !important;">
         <div class="height0 padding20 col justifyStart relative leftF width40 gap15">
-            <div class="height0 col" id="headF">
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p1">AU Registrar Document</p>
-                <p class="rem48 gradientText textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
-                <div class="h400 padding10 gemF relative" style="margin-top: -3rem;">
-                    <img src="/images/gold.png" alt="" class="height100 glowImg" style="transform: rotate(-10deg);">
-                    
-                    <div class="corner500 h80 liquid borderWhite absolute w80 logoF glowImg2"  style="left: 55%; top: 30%;">
-                        <img src="/images/au.png" alt="" class="logo corner500 height80 bgWhite opacity7">
+            <section class="col padding0 abstractBG corner15 manuel">
+                <img src="/images/au.png" alt="" class="absolute top0 right0 scale3 bgWhite corner500" style="opacity: 0.05; filter: grayscale(0.9); z-index: 0;" id="watermark">
+                <div class="height0 col absolute translateCenter" id="headF">
+                    <div class="padding10 gemF relative">
+                        <div class="corner500 liquid w300 h300 iconix padding30">
+                            <img src="/images/au.png" alt="" class="corner500 h200 bgWhite">
+                        </div>
                     </div>
+                    <p class="rem18 textWrap textCenter glowImg3 p1 textBalance">AU Registrar Document Request System</p>
+                    <p class="rem28 textWrap textCenter glowImg3 textBalance" style="margin-top: -3.6rem;">Request Guidelines & Tutorial</p>
                 </div>
-            </div>
-            
-            <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Home</a></div>
+                
+                <div class="height0 paddingInline10 paddingBlock10 justifyStart"><a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back to Login</a></div>
+            </section>
 
-            <video autoplay muted loop playsinline controls class="width98 cornerRem1 glowImg2" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
-
-            <div class="liquid index50 col justifyStart height0 colorPrimary cornerRem1" id="">
-                <div class="height0 col justifyCenter alignStart padding20 relative">
-                    <p class="rem2 str400 marginBottom10">WHAT TO?</p>
-                    <p class="rem11 str400 textJustify">
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Sed voluptatum veritatis suscipit harum voluptatibus delectus temporibus dolores ad. Aperiam ratione earum, placeat vero veritatis maiores et totam at culpa obcaecati!
-                    </p>
-                </div>
-            </div>
+            <video autoplay muted loop playsinline controls class="width98 cornerRem1 porcelain" style="opacity: 1;"><source src="/images/video.mp4" type="video/mp4"></video>
         </div>
+        <br>
 
         <div class="padding20 rightF width55 col height0 relative justifyStart gap15" style="z-index: 100 !important;">
 
-            <div class="height0 padding20 cornerRem1 bgWhite colorPrimary col alignStart">
-                    <p class="rem2 str400 marginBottom10">HOW TO?</p>
-                <p class="rem11 str400 textJustify">
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Recusandae vitae iusto beatae rerum, repellendus, numquam inventore officiis placeat cupiditate eum cum consequuntur dolores error maiores iure, pariatur natus nihil quasi.
+            <div class="bgWhite index50 col justifyStart height0 colorPrimary cornerRem1 ehem shadow1" id="">
+                <div class="height0 col justifyCenter alignStart padding20 relative">
+                    <p class="rem2 str400 marginBottom10">WHAT CAN I REQUEST?</p>
+                    <% documents.forEach(doc => { %>
+                        <p class="rem11 str400 textJustify"><i class="fas fa-check-square" style="color: green;"></i> <%= doc.type %></p>
+                    <% }) %>
+                </div>
+            </div>
+
+            <div class="height0 padding20 cornerRem1 bgWhite colorPrimary col alignStart ehem shadow1 gap10">
+                <p class="rem2 str400 marginBottom10">HOW CAN I REQUEST?</p>
+                <p class="rem11 str400">For New Users: </p>
+                <p class="rem11 str400">1. Click the <strong>Get Started</strong> button.</p>
+                <img src="/images/1.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">2. Read and agree to the <strong>Data Privacy Notice</strong>, then click the <strong>Next</strong> button </p>
+                <img src="/images/2.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">3. Select the document you wish to request. Choose the document type, enter the number of copies, and select the purpose.</p>
+                <img src="/images/3.png" alt="" class="width100 corner10">
+                <img src="/images/4.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">
+                <strong>Note:</strong> You may request multiple documents by clicking the <strong>Add</strong> button.
                 </p>
+                <img src="/images/5.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">4. Provide all the required personal information in the form.</p>
+                <img src="/images/6.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">5. Review the guidelines and prepare a valid ID for verification.</p>
+                <img src="/images/7.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">6. Upload a clear copy of your valid ID, then submit your request.</p>
+                <img src="/images/8.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">7. You will receive a notification confirming that your request has been submitted.</p>
+                <img src="/images/9.png" alt="" class="width100 corner10">
+                <p class="rem11 str400">8. Check the email address you provided for updates on the status of your request.</p>
             </div>
                             
-            <div id="" class=" height0 index50 height0 colorPrimary alignEnd relative cornerRem1 padding20 liquid">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fuga distinctio repudiandae aliquid maxime ullam sequi hic tempore, tenetur, ad aperiam veniam sit eos debitis nulla architecto quasi, sapiente ea consequatur.
+           <div class="height0 index50 colorPrimary alignEnd relative cornerRem1 padding20 bgWhite ehem shadow1">
+                <p class="rem11 str400 textCenter textBalance">
+                    For questions or concerns, you may contact us through our office hotline at <%= seedUser.phone %> or email us at <%= seedUser.email %>
+                </p>
             </div>
 
         </div>

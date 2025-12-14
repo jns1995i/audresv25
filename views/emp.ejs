@@ -11,21 +11,27 @@
         padding: 20px;
         overflow-y: hidden;
     }
-    #empCard.seen {
-        position: relative !important;
-        margin-bottom: 200px;
-        height: 100% !important;
-        padding: 10px;
+    
+    .unseen2 {
+        right: -100%;
+        overflow: hidden;
+        transition: right 0.6s ease-in-out;
+        z-index: 100;
+    }
+    .seen2 {
+        right: 0;
+        transition: right 0.4s ease-in-out;
+        z-index: 100;
     }
 </style>
 
-<div class="bgYellow unseen corner15 col empCard2" id="empCard">
-    <section class="justifyEnd padding0 width80">
-        <a href="javascript:void(0)" class="nav" id="empClose"><i class="fas fa-xmark"></i> Close</a>
+<div class="bgWhite unseen2 fixed top0 col empCard2 width50 shadow2 justifyStart padding20" id="empCard">
+    <section class="justifyStart padding10">
+        <a href="javascript:void(0)" class="nav cnav porcelain" id="empClose"><i class="fas fa-angles-right"></i></a>
     </section>
     <br>
-    <form action="/newEmp" method="POST" class="gap30 row padding30 width80 alignStart empCard2">
-        <section class="col alignStart width40 gap10">
+    <form action="/newEmp" method="POST" class="gap30 row padding30 alignStart empCard2 porcelain">
+        <section class="col alignStart gap10">
             <p class="rem24 str500">New Employee</p>
             <div class="field gap5">
                 <label for="">First Name*</label>
@@ -52,96 +58,114 @@
                 </div>
             </div>
         </section>
-        <section class="col alignStart width60 gap10">
-            <br>
-            <div class="row height0 width100 gap10 colF1">
-                <div class="field col alignStart gap5">
-                    <label for="birthday">Birthday*</label>
-                    <div class="height0 gap5">
-                        <div class="selectBar">
-                            <select id="bMonth" name="bMonth" required>
-                                <option value="">Month</option>
-                            </select>
-                        </div>
-                        <div class="selectBar">
-                            <select id="bDay" name="bDay" required>
-                                <option value="">Day</option>
-                            </select>
-                        </div>
-                        <div class="selectBar">
-                            <select id="bYear" name="bYear" required>
-                                <option value="">Year</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+        <section class="col alignStart gap10">
+            <div class="field gap5">
+                <label for="">Email*</label>
+                <input type="email" name="email" id="em" required>
             </div>
-            <div class="height0 width100 gap10 alignEnd colF1">
-                <div class="field gap5">
-                    <label for="">Email*</label>
-                    <input type="email" name="email" id="em" required>
+            <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const firstNameInput = document.querySelector('input[name="firstName"]');
+  const middleNameInput = document.querySelector('input[name="middleName"]');
+  const lastNameInput = document.querySelector('input[name="lastName"]');
+  const emailInput = document.querySelector('input[name="email"]');
+
+  function generateEmail() {
+    const firstName = firstNameInput.value.trim();
+    const middleName = middleNameInput.value.trim();
+    const lastName = lastNameInput.value.trim();
+
+    if (!firstName || !lastName) return; // require at least first and last name
+
+    // Take first letter of first name
+    const firstInitial = firstName.charAt(0).toLowerCase();
+
+    // Take first letter of middle name (if exists)
+    const middleInitial = middleName ? middleName.charAt(0).toLowerCase() : '';
+
+    // Take full last name
+    const last = lastName.toLowerCase();
+
+    const generatedEmail = `${firstInitial}${middleInitial}${last}.au@phinmaed.com`;
+
+    // Only set email if user hasn’t manually changed it
+    if (!emailInput.dataset.userEdited) {
+      emailInput.value = generatedEmail;
+    }
+  }
+
+  // Detect if user edits email manually
+  emailInput.addEventListener('input', () => {
+    emailInput.dataset.userEdited = true;
+  });
+
+  // Generate email when first/middle/last name changes
+  [firstNameInput, middleNameInput, lastNameInput].forEach(input => {
+    input.addEventListener('input', generateEmail);
+  });
+});
+</script>
+
+            
+            <section class="bgRed100 width0 hidden" id="error">Email is already used by an existing account!</section>
+
+            <div class="field gap5">
+                <label for="">Phone Number*</label>
+                <input type="text" id="number" name="number" inputmode="numeric" required class="number">
+            </div>
+            <script>
+                document.getElementById('em').addEventListener('input', function () {
+                    const email = this.value;
+                
+                    fetch(`/check-email?email=${encodeURIComponent(email)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const errorMsg = document.getElementById('error');
+                            if (data.exists) {
+                                errorMsg.classList.remove('hidden');
+                            } else {
+                                errorMsg.classList.add('hidden');
+                            }
+                        });
+                });
+            </script>
+
+
+            <div class="field gap5">
+                <div class="height0 justifyBetween">
+                    <label for="sn" id="snLabel">Employee Number <span class="hidden">(Optional)</span></label>
                 </div>
-                <div class="field gap5">
-                    <label for="">Phone Number*</label>
-                    <input type="text" id="number" name="number" inputmode="numeric" required class="number">
-                </div>
-                <script>
-                    document.getElementById('em').addEventListener('input', function () {
-                        const email = this.value;
-                    
-                        fetch(`/check-email?email=${encodeURIComponent(email)}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                const errorMsg = document.getElementById('error');
-                                if (data.exists) {
-                                    errorMsg.classList.remove('hidden');
-                                } else {
-                                    errorMsg.classList.add('hidden');
-                                }
-                            });
-                    });
-                    </script>
+                <input type="text" id="sn" name="studentNo" placeholder="">
             </div>
             
-            <section class="bgRed100 hidden width0" id="error">Email is already used by an existing account!</section>
-
-            <br><hr><br>
-            <div class="row height0 gap10 colF1">
-                <div class="field gap5">
-                    <div class="height0 justifyBetween">
-                        <label for="sn" id="snLabel">Employee Number <span class="hidden">(Optional)</span></label>
-                    </div>
-                    <input type="text" id="sn" name="studentNo" placeholder="">
-                </div>
-                <script>
-                    document.getElementById('sn').addEventListener('input', function () {
-                        const studentNo = this.value;
-                    
-                        fetch(`/check-studentNo?studentNo=${encodeURIComponent(studentNo)}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                const errorMsg = document.getElementById('error2');
-                                if (data.exists) {
-                                    errorMsg.classList.remove('hidden');
-                                } else {
-                                    errorMsg.classList.add('hidden');
-                                }
-                            });
-                    });
-                </script>
-                <div class="field gap5">
-                    <label for="">Campus*</label>
-                    <div class="selectBar">
-                        <select name="campus" id="campus" required>
-                            <option value="" selected disabled>Select</option>
-                            <option value="Main">Main</option>
-                            <option value="South">South</option>
-                            <option value="San Jose">San Jose</option>
-                        </select>
-                    </div>
+            <section class="bgRed100 width0 hidden" id="error2">Employee number is already registered!</section>
+            <script>
+                document.getElementById('sn').addEventListener('input', function () {
+                    const studentNo = this.value;
+                
+                    fetch(`/check-studentNo?studentNo=${encodeURIComponent(studentNo)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const errorMsg = document.getElementById('error2');
+                            if (data.exists) {
+                                errorMsg.classList.remove('hidden');
+                            } else {
+                                errorMsg.classList.add('hidden');
+                            }
+                        });
+                });
+            </script>
+            <div class="field gap5">
+                <label for="">Campus*</label>
+                <div class="selectBar">
+                    <select name="campus" id="campus" required>
+                        <option value="" selected disabled>Select</option>
+                        <option value="Main">Main</option>
+                        <option value="South">South</option>
+                        <option value="San Jose">San Jose</option>
+                    </select>
                 </div>
             </div>
-            <section class="bgRed100 width0 hidden" id="error2">Student number is already registered!</section>
             <div class="height0 gap10 colF1">
                 <div class="field gap5 height0">
                     <label for="">Role*</label>
@@ -242,8 +266,8 @@
 <script>
 function toggleCards(show) {
     document.querySelectorAll(".empCard2").forEach(card => {
-        card.classList.toggle("seen", show);
-        card.classList.toggle("unseen", !show);
+        card.classList.toggle("seen2", show);
+        card.classList.toggle("unseen2", !show);
     });
 }
 
@@ -253,43 +277,6 @@ document.querySelectorAll(".empBtn").forEach(btn => {
 
 document.getElementById("empClose").addEventListener("click", () => toggleCards(false));
 
-</script>
-<script>
-    // Populate Day Dropdown (1-31)
-    const daySelect = document.getElementById("bDay");
-    for (let i = 1; i <= 31; i++) {
-        let option = document.createElement("option");
-        option.value = i;
-        option.textContent = i;
-        daySelect.appendChild(option);
-    }
-
-    // Populate Month Dropdown (January-December) with values as words
-const monthSelect = document.getElementById("bMonth");
-const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-];
-
-months.forEach(month => {
-    let option = document.createElement("option");
-    option.value = month; // Store month name as value
-    option.textContent = month;
-    monthSelect.appendChild(option);
-});
-
-
-    // Populate Year Dropdown (Current Year to 1980)
-    const yearSelect = document.getElementById("bYear");
-    const currentYear = new Date().getFullYear();
-    const maxYear = currentYear - 18; // Must be 18 or older
-
-    for (let i = maxYear; i >= 1980; i--) {
-        let option = document.createElement("option");
-        option.value = i;
-        option.textContent = i;
-        yearSelect.appendChild(option);
-    }
 </script>
 <script>
     function enforceNumericInput(event) {

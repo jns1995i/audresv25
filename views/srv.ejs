@@ -13,9 +13,196 @@
   .rqCard .selectBar:hover {
     background-color: transparent !important;
   }
+  .unseen2 {
+    right: -100%;
+    overflow: hidden;
+    transition: right 0.6s ease-in-out;
+    z-index: 100;
+  }
+  .seen2 {
+    right: 0;
+    transition: right 0.4s ease-in-out;
+    z-index: 100;
+  }
 </style>
 
 <% let loopRequests = (['Admin', 'Head', 'Dev'].includes(user.role)) ? requests : userRequests; %>
+
+<div class="bgWhite shadow2 fixed top0 width25 index100 col justifyStart padding20 unseen2" id="qPanel">
+  <section class="justifyBetween">
+    <a href="javascript:void(0)" class="nav cnav porcelain" id="qClose"><i class="fas fa-angles-right"></i></a>
+  </section>
+  <br>
+  <form action="/quick-assign" method="POST" class="porcelain padding20">
+    <section class="justifyBetween padding0">
+      <p class="size22">Quick Assign</p>
+    </section>
+    <section class="col alignStart padding0">
+        <p class="size14 green str400"><%= loopRequests.filter(r => !r.processBy).length %> requests found</p>
+    </section>
+    <% const unassignedRequests = loopRequests.filter(r => !r.processBy); %>
+    <% if (unassignedRequests.length > users.length ) { %>
+    <br>
+    <section class="justifyBetween padding0 col alignStart gap5">
+      <p class="size12">Select the team members to assign these requests:</p>
+      <p class="kelt bgRed100"><i class="fas fa-info-circle"></i> Please select at least one team member!</p>
+    </section>
+    <br>
+    <% users.filter(user => user.campus === 'Main').forEach(user => { %>
+      <div class="height0 gap5 marginBottom10 justifyStart">
+        <input type="checkbox" name="assignedUsers" value="<%= user._id.toString() %>">
+        <p class="flex"><%= user.fName %> <%= user.lName %> 
+          <span class="marginLeft10 green str600 countAss"></span>
+        </p>
+      </div>
+    <% }) %>
+    <br>
+    <section class="bgWhite corner10">This action can't be undone</section>
+    <br>
+    <div class="field alignEnd">
+      <button type="submit" class="nav pnav width100"><i class="fas fa-check"></i> Assign To All</button>
+    </div>
+    <% } else { %>
+      <br>
+      <p class="textBalance">The number of unassigned requests is currently less than the number of available staff.</p>
+    <% } %>
+  </form>
+  <div class="absolute top0 left0 bgWhite padding40" id="warnCard">
+    <section class="col porcelain gap10">
+      <%- include('icons/bell') %>
+      <p class="size14 textCenter textBalance">Are you sure you want to assign the selected staff to these requests? This action can't be undone!</p>
+      <section class="gap5 col padding0">
+        <a href="javascript:void(0)" class="nav width100 corner10 pnav" id="Proceed">Submit</a>
+        <a href="javascript:void(0)" class="width100 colorPrimary" id="closeWarn">No, Go Back</a>
+      </section>
+    </section>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const qForm = document.querySelector('#qPanel form');
+  const warnCard = document.getElementById('warnCard');
+  const proceedBtn = document.getElementById('Proceed');
+  const closeWarn = document.getElementById('closeWarn');
+  const assignBtn = qForm.querySelector('button[type="submit"]');
+  const checkboxes = qForm.querySelectorAll('input[name="assignedUsers"]');
+  const keltDiv = document.querySelector('.kelt'); // the hidden warning div
+
+  // Hide warnCard and keltDiv by default
+  warnCard.style.display = 'none';
+  if (keltDiv) keltDiv.classList.add('hidden');
+
+  // When "Assign To All" button is clicked
+  assignBtn.addEventListener('click', (e) => {
+    e.preventDefault(); // stop form from submitting immediately
+
+    // Check if at least one checkbox is checked
+    const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
+
+    if (!isAnyChecked) {
+      // Show hidden warning div
+      if (keltDiv) keltDiv.classList.remove('hidden');
+      return; // stop execution if none checked
+    }
+
+    // Hide keltDiv if at least one checked
+    if (keltDiv) keltDiv.classList.add('hidden');
+
+    // Show confirmation overlay
+    warnCard.style.display = 'flex';
+  });
+
+  // Automatically hide keltDiv when any checkbox is clicked
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      const isAnyChecked = Array.from(checkboxes).some(c => c.checked);
+      if (isAnyChecked && keltDiv) {
+        keltDiv.classList.add('hidden');
+      }
+    });
+  });
+
+  // When "Cancel" is clicked
+  closeWarn.addEventListener('click', () => {
+    warnCard.style.display = 'none'; // hide confirmation overlay
+  });
+
+  // When "Submit" on warnCard is clicked
+  proceedBtn.addEventListener('click', () => {
+    warnCard.style.display = 'none'; // hide confirmation
+    qForm.submit(); // submit the form
+  });
+});
+</script>
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const totalRequests = <%= loopRequests.filter(r => !r.processBy).length %>;
+  const checkboxes = document.querySelectorAll('input[name="assignedUsers"]');
+
+  function updateCounts() {
+    const checked = Array.from(checkboxes).filter(cb => cb.checked);
+    const numChecked = checked.length;
+
+    if (numChecked === 0) {
+      checkboxes.forEach(cb => {
+        const span = cb.closest('div').querySelector('.countAss');
+        span.textContent = '';
+      });
+      return;
+    }
+
+    const base = Math.floor(totalRequests / numChecked);
+    let remainder = totalRequests % numChecked;
+
+    checked.forEach(cb => {
+      const span = cb.closest('div').querySelector('.countAss');
+      let count = base;
+      if (remainder > 0) {
+        count += 1;
+        remainder -= 1;
+      }
+      span.textContent = count;
+    });
+
+    // Clear unchecked spans
+    checkboxes.forEach(cb => {
+      if (!cb.checked) {
+        const span = cb.closest('div').querySelector('.countAss');
+        span.textContent = '';
+      }
+    });
+  }
+
+  checkboxes.forEach(cb => cb.addEventListener('change', updateCounts));
+});
+
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const qBtn = document.getElementById("qBtn");
+  const qClose = document.getElementById("qClose");
+  const qPanel = document.getElementById("qPanel");
+
+  if (!qBtn || !qClose || !qPanel) return;
+
+  qBtn.addEventListener("click", () => {
+    qPanel.classList.remove("unseen2");
+    qPanel.classList.add("seen2");
+  });
+
+  qClose.addEventListener("click", () => {
+    qPanel.classList.remove("seen2");
+    qPanel.classList.add("unseen2");
+  });
+});
+</script>
+
 <%- include('partials/header') %>
 <section class="col">
   <% if (loopRequests.length === 0) { %>
@@ -133,8 +320,9 @@
 
           <div class="width10 justifyStart"><img src="<%= rq.requestBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>
           <div class="width90 col alignStart">
-            <p class="size14 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
-            <p class="str400"><span class="green"><%= rq.requestBy ? rq.requestBy.role : '' %> &bull; </span> <%= rq.requestBy?.course || '--' %></p>
+            <p class="size16 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
+            <p class="str400"><span class="green"><%= rq.requestBy ? rq.requestBy.role : '' %> &bull; </span> <%= rq.requestBy?.schoolId || '--' %></p>
+            <p class="str400"><span class=""><%= rq.requestBy ? rq.requestBy.campus : '' %> &bull; </span> <%= rq.requestBy?.course || '--' %></p>
             <% if ( title === "To Verify") { %>
               <p class="str400 marginBottom5 blue">
                 <i class="bi bi-building"></i> <%= rq.requestBy?.campus || '--' %>

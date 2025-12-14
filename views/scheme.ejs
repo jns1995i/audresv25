@@ -68,8 +68,8 @@
                 <img src="<%= seedUser.photo ? seedUser.photo : '/images/au.png' %>" alt="Profile" class="h60 w60 corner500 liquid shadow1">
             </div>
         <div class="height0 padding10 gap5 cright justifyEnd">
-            <a href="/prf" class=" h60 w60 corner500 liquid padding0">
-                <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="height90 width90 borderPrimary">
+            <a href="/prf" class=" h60 w60 corner500 liquid">
+                <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="height90 width90" style="border: 0.2px solid rgba(255, 255, 255, 0.5);">
             </a>
         </div>
     </div>
@@ -82,10 +82,10 @@
   <div class="bgWhite corner20 height0 width25 col padding20">
     <%- include('icons/lg') %>
     <br>
-    <p class="size18 textCenter str500 width100" style="text-wrap: balanced;">Are you sure you want <br> to log out?</p>
+    <p class="size18 textCenter str500 width100" style="text-wrap: balanced;">Are you sure you want <br> to Sign Out?</p>
     <div class="height0 marginTop10 gap10">
       <a href="javascript:void(0)" class="nav width100" id="lgClose"> Cancel</a>
-      <a href="/logout" class="nav pnav width100"> Log Out</a>
+      <a href="/logout" class="nav pnav width100"> Sign Out</a>
     </div>
   </div>
 </div>
