@@ -1,5 +1,82 @@
 <% layout('layout') %>
 <style>
+  @media (max-width: 900px) {
+    body {
+      overflow-y: auto;
+      margin-bottom: 100px;
+    }
+    .sidef {
+      display: none !important;
+    }
+    .mainf {
+      width: 100%;
+      display: block;
+      height: auto;
+      margin-bottom: 100px !important;
+    }
+    #mainPanel {
+      display: none;
+    }
+    #headPanel {
+      height: auto !important;
+      width: 100%;
+      flex-direction: column;
+      .tnav {
+        width: 100%;
+      }
+    }
+    .sub {
+        margin-top: 10px;
+        flex-direction: column !important;
+        height: auto;
+        width: 100% !important;
+        padding: 0;
+        div {
+            width: 100% !important;
+        }
+    }
+    #trail {
+        flex-direction: column !important;
+        height: auto !important;
+        width: 100% !important;
+        div {
+            justify-content: start !important;
+            width: 100% !important;
+        }
+        p {
+            text-align: left !important;
+            width: 100%;
+            margin-top: 10px;
+        }
+    }
+    #trail div {
+        width: 100% !important;
+        min-width: 100%;
+    }
+    .selectBar select {
+        min-width: 100% !important;
+    }
+    #trail #pagination {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    #qBtn {
+      display: none;
+    }
+    .ttl {
+      display: none;
+    }
+    .reqPlts {
+      display: block !important;
+    }
+    .jik {
+      display: flex !important;
+    }
+  }
+  .reqPlts {
+    display: none;
+  }
   td:last-child, th:last-child {
       display: block !important;
   }
@@ -50,7 +127,7 @@
     <div class="width20 justifyStart">
         <span id="totalRecords" class="totalRecords"></span>
     </div>
-    <div class="width80 justifyEnd gap5">
+    <div class="width80 justifyEnd gap5" id="trail">
         <p>
             Display Per Page:
         </p>
