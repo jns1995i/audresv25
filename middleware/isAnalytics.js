@@ -537,7 +537,7 @@ module.exports = async function analyticsMiddleware(req, res, next) {
 
     const toVerifyUsers = await users.countDocuments({
       role: { $in: ["Student", "Alumni", "Former", "Test"] },
-      archive: false,
+      archive: true,
       verify: true
     });
 
