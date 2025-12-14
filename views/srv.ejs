@@ -1,5 +1,46 @@
 <% layout('layout') %>
 <style>
+  @media (max-width: 900px) {
+    body {
+      overflow-y: auto;
+      margin-bottom: 100px;
+    }
+    .sidef {
+      display: none !important;
+    }
+    .mainf {
+      width: 100%;
+      display: block;
+      height: auto;
+      margin-bottom: 100px !important;
+    }
+    #mainPanel {
+      display: none;
+    }
+    #headPanel {
+      height: auto !important;
+      width: 100%;
+      flex-direction: column;
+      .tnav {
+        width: 100%;
+      }
+    }
+    #qBtn {
+      display: none;
+    }
+    .ttl {
+      display: none;
+    }
+    .reqPlts {
+      display: block !important;
+    }
+    .jik {
+      display: flex !important;
+    }
+  }
+  .reqPlts {
+    display: none;
+  }
   a:hover {
     transform: scale(1.02);
   }
@@ -204,7 +245,88 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <%- include('partials/header') %>
-<section class="col">
+<section class="reqPlts col">
+  <section class="col" id="">
+    <% if (loopRequests.length === 0) { %>
+      <div class="h500 borderGray borderDotted corner16">
+      </div>
+    <% } else { %>
+      <section class="width0 col hidden" id="NoRecords">
+        <%- include('icons/notFound') %>
+        <p class="size18 str400">Sorry, No Record Found!</p>
+      </section>
+      <% loopRequests.forEach((rq, i) => { %>
+        <% if (!rq.declineAt) { %>
+        <div class="height0 padding8 rqCard col">
+
+          <% if ( title === 'Transactions') { %>
+            <a href="/srvView/<%= rq._id %>" class="width100 col bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+          <% } else if ( title === 'For Release') { %>
+            <a href="/relView/<%= rq._id %>" class="width100 col bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+          <% } else if ( title === 'Processing') { %>
+            <a href="/prcView/<%= rq._id %>" class="width100 col bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+          <% } else if ( title === 'Approved') { %>
+            <a href="/aprView/<%= rq._id %>" class="width100 col bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+          <% } else if ( title === 'To Verify') { %>
+            <a href="/vrfView/<%= rq._id %>" class="width100 col bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+          <% } else { %>
+            <a href="/srvView/<%= rq._id %>" class="width100 col bgWhite shadow1 padding20 gap0 corner12 alignStart relative rqPlt">
+          <% } %>
+            <p class="absolute top20 right20"><%= rq.createdAtFormatted %></p>
+
+            <div class="width100 justifyStart"><img src="<%= rq.requestBy?.photo || '/images/profile.png' %>" alt="Profile" class="h40 w40 wMin40 borderPrimary corner500"></div>
+            <br>
+            <div class="width100 col alignStart">
+              <p class="size16 str500"><%= rq.requestBy ? rq.requestBy.fName : '' %> <%= rq.requestBy ? rq.requestBy.mName : '' %> <%= rq.requestBy ? rq.requestBy.lName : '' %> <%= rq.requestBy ? rq.requestBy.xName : '' %></p>
+              <p class="str400"><span class="green"><%= rq.requestBy ? rq.requestBy.role : '' %> &bull; </span> <%= rq.requestBy?.schoolId || '--' %></p>
+              <p class="str400"><span class=""><%= rq.requestBy ? rq.requestBy.campus : '' %> &bull; </span> <%= rq.requestBy?.course || '--' %></p>
+              <% if ( title === "To Verify") { %>
+                <p class="str400 marginBottom5 blue">
+                  <i class="bi bi-building"></i> <%= rq.requestBy?.campus || '--' %>
+                  &nbsp; | &nbsp;
+                  <i class="fas fa-address-card"></i> <%= rq.requestBy?.schoolId || 'No Student Number' %>
+                </p>
+              <% } else { %>
+                <p class="str400 marginBottom5 blue textWrap" style="width: 85%;" title="<%= rq.items?.map(item => item.type || '').join(', ') || '' %>">
+                  <i class="fas fa-receipt"></i> <%= rq.tr ? rq.tr : '' %> &bull; <i class="fas fa-file-lines"></i> 
+                  <%= rq.items?.map(item => item.type || '').join(', ') || '' %>
+                </p>
+              <% } %>
+            </div>
+            
+            <br>
+            <% if ( rq.holdAt) { %>
+              <p class="str400 bgRed100"> On Hold</p>
+            <% } else if ( rq.declineAt) { %>
+              <p class="str400 bgRed100"> Declined</p>
+            <% } else { %>
+              <p class="str400
+                <% if ( rq.status === "Pending" ) { %>
+                    bgBlue100
+                <% } else if ( rq.status === "Reviewed" ) { %>
+                    bgViolet100
+                <% } else if ( rq.status === "Assessed" ) { %>
+                    bgYellow100
+                <% } else if ( rq.status === "Verified" ) { %>
+                    bgGreen100
+                <% } else if ( rq.status === "For Release" ) { %>
+                    bgGreen100
+                <% } else if ( rq.status === "Claimed" ) { %>
+                    bgGray100
+                <% } else { %>
+                    bgBlue100
+                <% } %>
+                  border0"> <%= rq.status === "Assessed" ? "For Payment" : rq.status === "Reviewed" ? "For Assessment" : rq.status || "" %>
+                </p>
+            <% } %>
+          </a>
+        </div>
+        <% } %>
+      <% }) %>
+    <% } %>
+  </section>
+</section>
+<section class="col" id="mainPanel">
   <% if (loopRequests.length === 0) { %>
     <div class="h500 borderGray borderDotted corner16">
     </div>

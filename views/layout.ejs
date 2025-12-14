@@ -13,9 +13,43 @@
     <style>
       @media (max-width: 900px) {
         body {
-          display: none !important;
+          display: block !important;
+          height: 100dvh;
+          -webkit-overflow-scrolling: touch;
+          overflow-y: auto;
+        }
+        
+        body::-webkit-scrollbar { display: none; }
+        .sidef {
+          width: 100%;
+          height: 100%;
+          position: fixed;
+          right: 0;
+          top: 0;
+          z-index: 100;
+          border-radius: 0;
+          justify-content: start;
+          .menu {
+            height: auto !important;
+          }
+          .abstractBG2 {
+            border: 0.5px solid white;
+          }
+          .profileLabel {
+            font-size: 16px;
+          }
+        }
+        .mnav:not(.exc) {
+          display: none;
+        }
+        .exc {
+          background-color: rgba(255, 255, 255, 0.047);
+          width: 100%;
+          margin-bottom: 20px;
+          font-size: 16px;
         }
       }
+      body::-webkit-scrollbar { display: flex; }
       #info p {
           display: flex;
           justify-content: center;
@@ -63,7 +97,7 @@
     <div class="height80 menu relative">
       <br>
       <a href="/dsb" class="nav mnav <% if ( active === 'dsb') { %> active <% } %>"> <i class="bi bi-grid-fill"></i> Dashboard</a>
-      <a href="/srv" class="nav mnav <% if ( active === 'srv') { %> active <% } %>"> <i class="fas fa-receipt"></i> Transactions</a>
+      <a href="/srv" class="nav mnav <% if ( active === 'srv') { %> active <% } %> exc"> <i class="fas fa-receipt"></i> Transactions</a>
       <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
       <a href="/emp" class="nav mnav <% if ( active === 'emp') { %> active <% } %>"> <i class="fas fa-user-tie"></i> Employees</a>
       <% } %>
@@ -88,8 +122,8 @@
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 borderWhite">
         </a>
         <section class="width0 col alignStart">
-          <p class="rem11 str400 textWrap">Hello <%= user.fName %></p>
-          <p class="rem09 str400 textWrap"><%= user.role %></p>
+          <p class="size16 str400 textWrap profileLabel"><%= user.fName %></p>
+          <p class="size14 str400 textWrap profileLabel"><%= user.role %></p>
         </section>
       <% } %>
     </div>

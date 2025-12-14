@@ -1,12 +1,13 @@
 
 <div class="height0 padding0 corner12 gap5 relative">
-  <section class="width0 padding15 gap10">
+  <section class="width0 padding15 gap10" id="headPanel">
+    <a href="/dsb" class="nav jik hidden <% if ( title === 'To Verify' && active === 'srv') { %> active <% } %>"><i class="fas fa-chevron-left"></i> Go Back</a>
     <a href="/vrf" class="nav tnav <% if ( title === 'To Verify' && active === 'srv') { %> active <% } %>"><i class="fas fa-user-check"></i> To Verify</a>
     <a href="/srv" class="nav tnav <% if ( title === 'Transactions' && active === 'srv') { %> active <% } %>"><i class="fas fa-hourglass-half"></i> Pending</a>
     <a href="/prc" class="nav tnav <% if ( title === 'Processing' && active === 'srv') { %> active <% } %>"><i class="fas fa-clock"></i> Processing</a>
     <a href="/apr" class="nav tnav <% if ( title === 'Approved' && active === 'srv') { %> active <% } %>"><i class="fas fa-check-circle"></i> Approved</a>
     <a href="/rel" class="nav tnav <% if ( title === 'For Release' && active === 'srv') { %> active <% } %>"><i class="fas fa-dolly wMin20"></i> For Release</a>
-    <a href="/srvAll" class="nav tnav <% if ( title === 'All Transactions' && active === 'srv') { %> active <% } %>"><i class="fas fa-list wMin20"></i> All Transactions</a>
+    <a href="/srvAll" class="nav tnav ttl <% if ( title === 'All Transactions' && active === 'srv') { %> active <% } %>"><i class="fas fa-list wMin20"></i> All Transactions</a>
   </section>
   <a href="javascript:void(0)" class="nav tnav active absolute right10 opacity0 <% if ( title === 'Transactions' && active === 'srv') { %> opacity10 <% } %>" id="qBtn"><i class="fas fa-bolt wMin20"></i> Quick Assign</a>
 </div>
@@ -16,7 +17,7 @@
 <% let loopRequests = (['Admin', 'Head', 'Dev'].includes(user.role)) ? requests : userRequests; %>
 
 <% if (loopRequests.length === 0) { %>
-  <div class="height0 marginTop5 corner12 gap5">
+  <div class="height0 marginTop5 corner12 gap5 ttl">
     <div class="width90 gap5 justifyBetween">
       <p class="rem28 str400">
         No Transaction
@@ -36,7 +37,7 @@
     </div>
   </div>
 <% } else if (loopRequests.length === 1) { %>
-  <div class="height0 marginTop5 corner12 gap5">
+  <div class="height0 marginTop5 corner12 gap5 ttl">
     <div class="width90 justifyBetween gap5">
       <p class="rem28 str400">
        1 Transaction
@@ -50,7 +51,7 @@
     </div>
   </div>
 <% } else { %>
-  <div class="height0 marginTop5 corner12 gap5">
+  <div class="height0 marginTop5 corner12 gap5 ttl">
     <div class="width90 justifyBetween gap5">
       <p class="rem28 str400">
        <%= loopRequests.length %> Transactions
