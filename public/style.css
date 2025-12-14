@@ -957,10 +957,6 @@ th {
     text-overflow: ellipsis;
 }
 
-th:last-child {
-    text-align: center;
-}
-
 
 #pagination {
     display: flex;
@@ -1705,6 +1701,19 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .cornerRem57 { border-radius: 5.7rem; }
 .cornerRem58 { border-radius: 5.8rem; }
 .cornerRem59 { border-radius: 5.9rem; }
+
+.cornerNotch { corner-shape: notch; }
+.cornerSquircle { corner-shape: squircle; }
+.cornerBevel { corner-shape: bevel; }
+.cornerScoop { corner-shape: scoop; }
+.cornerRound { corner-shape: round; }
+.cornerSquare { corner-shape: square; }
+.cornerSuper05 { corner-shape: superellipse(0.5); }
+.cornerSuper1 { corner-shape: superellipse(1); }
+.cornerSuper15 { corner-shape: superellipse(1.5); }
+.cornerSuper2 { corner-shape: superellipse(2); }
+.cornerSuper3 { corner-shape: superellipse(3); }
+
 
 .cornerTop0 { border-top-right-radius: 0 !important; border-top-left-radius: 0 !important;}
 .cornerTopRight0 { border-top-right-radius: 0 !important;}

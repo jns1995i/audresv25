@@ -4772,215 +4772,147 @@ app.get('/trsAllView/:id', isLogin, isRequest, isStaff, (req, res) => renderAsse
 app.get('/toPayView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'toPay'));
 app.get('/verView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'ver'));
 
+// Helper function to create log
+async function createLog(userId, actionText) {
+    const currentUser = await users.findById(userId);
+    await Log.create({
+        who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+        what: actionText
+    });
+}
 
+// Helper to get view route
+function getViewRoute(back, requestId) {
+    const viewRoutes = {
+        trs: `/trsView/${requestId}`,
+        toPay: `/toPayView/${requestId}`,
+        ver: `/verView/${requestId}`,
+    };
+    return viewRoutes[back] || `/trsView/${requestId}`;
+}
+
+// ===== HOLD 4 =====
 app.post("/hold4", async (req, res) => {
     const { requestId, back, requestRemarks } = req.body;
 
     try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
+        const requestDoc = await requests.findById(requestId).populate('processBy');
         if (!requestDoc) return res.status(404).send("Request not found");
 
         requestDoc.declineAt = null;
         requestDoc.holdAt = new Date();
         requestDoc.remarks = requestRemarks || "";
-
         await requestDoc.save();
 
-        // Redirect to correct view
-        const viewRoutes = {
-            trs: `/trsView/${requestId}`,
-            toPay: `/toPayView/${requestId}`,
-            ver: `/verView/${requestId}`,
-        };
-
-        const userId = req.session.user._id;
-        const currentUser = await users.findById(userId);
         const student = requestDoc.processBy;
+        const userId = req.session.user._id;
+        await createLog(userId, `Hold the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`);
 
-                        // ===== CREATE LOGIN LOG =====
-        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
-        await Log.create({
-          who: isWho,
-          what: `Hold the transaction requested by ${isStudent} with tr# ${requestDoc.tr}`
-        });
-
-        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
-
+        res.redirect(getViewRoute(back, requestId));
     } catch (err) {
-        console.error("Hold Error:", err);
+        console.error("Hold4 Error:", err);
         res.status(500).send("Server error");
     }
 });
 
+// ===== REVERT 4 =====
 app.post("/revert4", async (req, res) => {
     const { requestId, back } = req.body;
 
     try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
+        const requestDoc = await requests.findById(requestId).populate('processBy');
         if (!requestDoc) return res.status(404).send("Request not found");
 
         requestDoc.declineAt = null;
         requestDoc.holdAt = null;
-
         await requestDoc.save();
 
-        // Redirect to correct view
-        const viewRoutes = {
-            trs: `/trsView/${requestId}`,
-            toPay: `/toPayView/${requestId}`,
-            ver: `/verView/${requestId}`,
-        };
-
-        const userId = req.session.user._id;
-        const currentUser = await users.findById(userId);
         const student = requestDoc.processBy;
+        const userId = req.session.user._id;
+        await createLog(userId, `Revert its action to the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`);
 
-                        // ===== CREATE LOGIN LOG =====
-        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
-        await Log.create({
-          who: isWho,
-          what: `Revert it's action to the transaction requested by ${isStudent} with tr# ${requestDoc.tr}`
-        });
-
-        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
-
+        res.redirect(getViewRoute(back, requestId));
     } catch (err) {
-        console.error("Hold Error:", err);
+        console.error("Revert4 Error:", err);
         res.status(500).send("Server error");
     }
 });
 
+// ===== APPROVE 4 =====
 app.post("/approve4", async (req, res) => {
     const { requestId, back } = req.body;
 
     try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
+        const requestDoc = await requests.findById(requestId).populate('processBy');
         if (!requestDoc) return res.status(404).send("Request not found");
 
         requestDoc.status = "Assessed";
         requestDoc.declineAt = null;
         requestDoc.holdAt = null;
         requestDoc.assessAt = new Date();
-
         await requestDoc.save();
 
-        // Redirect to correct view
-        const viewRoutes = {
-            trs: `/trsView/${requestId}`,
-            toPay: `/toPayView/${requestId}`,
-            ver: `/verView/${requestId}`,
-        };
-
-        const userId = req.session.user._id;
-        const currentUser = await users.findById(userId);
         const student = requestDoc.processBy;
+        const userId = req.session.user._id;
+        await createLog(userId, `Mark the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as Assessed with tr# ${requestDoc.tr}`);
 
-                        // ===== CREATE LOGIN LOG =====
-        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
-        await Log.create({
-          who: isWho,
-          what: `Mark the transaction requested by ${isStudent} with tr# ${requestDoc.tr}  as Assessed`
-        });
-
-        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
-
+        res.redirect(getViewRoute(back, requestId));
     } catch (err) {
-        console.error("Hold Error:", err);
+        console.error("Approve4 Error:", err);
         res.status(500).send("Server error");
     }
 });
 
+// ===== VERIFY 4 =====
 app.post("/verify4", async (req, res) => {
     const { requestId, back } = req.body;
 
     try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
+        const requestDoc = await requests.findById(requestId).populate('processBy');
         if (!requestDoc) return res.status(404).send("Request not found");
 
         requestDoc.status = "Verified";
         requestDoc.declineAt = null;
         requestDoc.holdAt = null;
         requestDoc.verifyAt = new Date();
-
         await requestDoc.save();
 
-        // Redirect to correct view
-        const viewRoutes = {
-            trs: `/trsView/${requestId}`,
-            toPay: `/toPayView/${requestId}`,
-            ver: `/verView/${requestId}`,
-        };
-
-        
-        const userId = req.session.user._id;
-        const currentUser = await users.findById(userId);
         const student = requestDoc.processBy;
+        const userId = req.session.user._id;
+        await createLog(userId, `Mark the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as Verified with tr# ${requestDoc.tr}`);
 
-                        // ===== CREATE LOGIN LOG =====
-        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
-        await Log.create({
-          who: isWho,
-          what: `Mark the transaction requested by ${isStudent} with tr# ${requestDoc.tr}  as Verified`
-        });
-
-        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
-
+        res.redirect(getViewRoute(back, requestId));
     } catch (err) {
-        console.error("Hold Error:", err);
+        console.error("Verify4 Error:", err);
         res.status(500).send("Server error");
     }
 });
 
+// ===== HOLD 5 (Proof of Payment Reupload) =====
 app.post("/hold5", async (req, res) => {
     const { requestId, back, requestRemarks } = req.body;
 
     try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
+        const requestDoc = await requests.findById(requestId).populate('processBy');
         if (!requestDoc) return res.status(404).send("Request not found");
 
         requestDoc.declineAt = null;
-        requestDoc.payPhoto = null;
+        requestDoc.payPhoto = null; // clear proof of payment
         requestDoc.holdAt = new Date();
         requestDoc.remarks = requestRemarks || "";
-
         await requestDoc.save();
 
-        const userId = req.session.user._id;
-        const currentUser = await users.findById(userId);
         const student = requestDoc.processBy;
+        const userId = req.session.user._id;
+        await createLog(userId, `Request for re-uploading of the proof of payment in the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`);
 
-                        // ===== CREATE LOGIN LOG =====
-        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
-        await Log.create({
-          who: isWho,
-          what: `Request for re-uploading of the proof of payment in the transaction requested by ${isStudent} with tr# ${requestDoc.tr}`
-        });
-
-
-        // Redirect to correct view
-        const viewRoutes = {
-            trs: `/trsView/${requestId}`,
-            toPay: `/toPayView/${requestId}`,
-            ver: `/verView/${requestId}`,
-        };
-
-        res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
-
+        res.redirect(getViewRoute(back, requestId));
     } catch (err) {
-        console.error("Hold Error:", err);
+        console.error("Hold5 Error:", err);
         res.status(500).send("Server error");
     }
 });
+
 
 
 app.use((req, res) => {
