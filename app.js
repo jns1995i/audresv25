@@ -4651,6 +4651,10 @@ app.get('/resetPage2', isLogin, myRequest, (req, res) => {
   res.render('resetPage2', { title: 'New Password' });
 });
 
+app.get('/resetPage4', isLogin, myRequest, (req, res) => {
+  res.render('resetPage4', { title: 'New Password' });
+});
+
 
 app.get('/trs', isLogin, isRequest, isStaff, (req, res) => {
   const filteredRequests = req.requests.filter(

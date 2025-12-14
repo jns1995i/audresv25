@@ -736,11 +736,11 @@
                         });
                         });
                         </script>
+                        <br>    
                         <div class="bgYellow cornerRem1 padding20 textCenter">
                             TAKE NOTE: Please review all the details carefully before submitting your request. Ensure that all selections and information are correct, as changes may not be allowed after submission.
                         </div>
                         <div class="field height0 marginTop15 width100 alignEnd">
-                            <button type="submit" class="nav tnav pnav sbBtn" id="ferry"><i class="fas fa-check-circle"></i>Submit</button>
                             <button type="reset" class="nav tnav pnav sbBtn hidden" id="johnn" disbaled><i class="fas fa-paper-plane"></i>Submitting ...</button>
                         </div>
                     </section>
@@ -748,6 +748,7 @@
                 <section class="justifyBetween">
                     <a href="javascript:void(0)" class="nav bgTint4 white hidden" id="backNav"><i class="fas fa-chevron-left"></i> Back &nbsp;</a>
                     <a href="javascript:void(0)" class="nav bgTint4 white" id="nextNav">&nbsp; Next <i class="fas fa-chevron-right"></i></a>
+                    <button type="submit" class="nav tnav pnav sbBtn hidden" id="ferry"><i class="fas fa-check-circle"></i>Submit</button>
                 </section>
             </form>
         </div>
@@ -763,6 +764,7 @@
 
             const backNav = document.getElementById('backNav');
             const nextNav = document.getElementById('nextNav');
+            const ferry = document.getElementById('ferry');
             const agreeCheckbox = document.getElementById('agree');
 
             let currentPage = 0;
@@ -780,6 +782,9 @@
 
             // Next button hides on page4
             nextNav.classList.toggle('hidden', index === pages.length - 1);
+
+            
+            ferry.classList.toggle('hidden', index !== pages.length - 1);
 
             currentPage = index;
             }
