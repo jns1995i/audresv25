@@ -14,6 +14,12 @@
       height: auto;
       margin-bottom: 100px !important;
     }
+    .searchBar {
+        width: 100%;
+    }
+    #title {
+        display: none;
+    }
     #mainPanel {
       display: none;
     }
@@ -25,6 +31,9 @@
         width: 100%;
       }
     }
+        #xtra {
+            display: flex !important;
+        }
     .sub {
         margin-top: 10px;
         flex-direction: column !important;
@@ -85,8 +94,12 @@
     font-weight: 600;
   }
 </style>
+<div class="justifyBetween height10 padding15 corner10 relative hidden" id="xtra">
+    <a href="/dsb" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
+    <p class="size20">Activity Log</p>
+</div>
 <div class="justifyBetween height10 padding15 corner10 relative bgWhite">
-    <p class="size30">Activity Log</p>
+    <p class="size30" id="title">Activity Log</p>
     <div class="searchBar colorPrimary width20" style="border-radius: 10px;">
         <i class="fas fa-search"></i>
         <input type="search" name="" id="univ" class="">

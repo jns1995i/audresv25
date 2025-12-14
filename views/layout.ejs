@@ -122,8 +122,8 @@
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h50 w50 corner500 borderWhite">
         </a>
         <section class="width0 col alignStart">
-          <p class="size16 str400 textWrap profileLabel"><%= user.fName %></p>
-          <p class="size14 str400 textWrap profileLabel"><%= user.role %></p>
+          <p class="size14 str400 textWrap profileLabel"><%= user.fName %></p>
+          <p class="size12 str300 textWrap profileLabel"><%= user.role %> <i class="bi bi-patch-check-fill size12"></i></p>
         </section>
       <% } %>
     </div>
