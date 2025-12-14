@@ -82,7 +82,13 @@ module.exports = async function analyticsMiddleware(req, res, next) {
     const declined = allRequests.filter(r => r.declineAt).length;
     const onHold = allRequests.filter(r => r.holdAt).length;
     const toVerify = allRequests.filter(r => r.verify === true).length;
-
+    const toVerifyUsers = await requests.countDocuments({
+      archive: true,
+      verify: true,
+      ...(start && end && {
+        createdAt: { $gte: start.toDate(), $lte: end.toDate() }
+      })
+    });
 
     const getPercent = (count) => {
       if (totalRequests === 0) return 0;
@@ -533,12 +539,6 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       role: { $in: ["Student", "Alumni", "Former", "Test"] },
       archive: false,
       verify: false
-    });
-
-    const toVerifyUsers = await users.countDocuments({
-      role: { $in: ["Student", "Alumni", "Former", "Test"] },
-      archive: true,
-      verify: true
     });
 
 // ================================

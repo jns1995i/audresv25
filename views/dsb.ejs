@@ -496,8 +496,6 @@ metrics.forEach(m => {
 tpl.remove();
 
   document.getElementById("activeUserCount").innerText = `${analytics.activeUserCount || 0} Active`;
-  // const countU = analytics.toVerifyUsers || 0;
-  // document.getElementById("toVerifyUsers").innerText =`${countU} User${countU === 1 ? "" : "s"}`;
   document.getElementById("toVerifyUsers").innerText = analytics.toVerifyUsers || 0;
   document.getElementById("avgApprovalTime").innerText = analytics.avgApprovalTime || 0;
   document.getElementById("avgApprovalTimeStat").innerText = analytics.avgApprovalTimeStat || 0;
