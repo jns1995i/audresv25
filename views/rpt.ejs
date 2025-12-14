@@ -27,7 +27,29 @@
         z-index: 100;
     }
 </style>
-<div class="gap10 rowReverse alignStart justifyStart">
+
+<div
+  class="fixed right0 top80 col height0 padding15 width20 index100 bgWhite shadow2 corner15 cornerTopRight0 cornerBottomRight0 textBalance unseen2"
+  id="passCard5"
+>
+  <form id="exportConfirmForm" class="padding0 corner0 gap10">
+    <label>Please enter your password first</label>
+    <input type="password" id="exportPassword" required>
+    <p class="bgRed100 hidden" id="helk"><i class="fas fa-info-circle"></i> Incorrect Password!</p>
+
+    <button type="submit" class="nav pnav width100 padding10 corner10">
+      Proceed
+    </button>
+
+    <a href="javascript:void(0)" id="cancelExport" class="padding0 size10">
+      Cancel
+    </a>
+  </form>
+
+</div>
+
+<div class="gap10 rowReverse alignStart justifyStart relative">
+
     <form class="fixed right0 top5 shadow2 bgWhite width30 col gap15 padding20 index100 height100 corner0 unseen2 fltCard justifyStart" id="fltCard">
       
       <section class="justifyBetween">
@@ -136,9 +158,6 @@
   const closeBtn = document.getElementById("fltClose");
   if (closeBtn) closeBtn.addEventListener("click", () => toggleCards(false));
 
-  // Excel export button
-  const exportBtn = document.getElementById('exportExcelBtn');
-  if (exportBtn) exportBtn.addEventListener('click', exportExcel);
 
   // Reset filters button
   const resetBtn = document.getElementById('resetFiltersBtn');
@@ -149,15 +168,85 @@
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-const exportBtn = document.getElementById('exportExcelBtn');
-if (exportBtn) exportBtn.addEventListener('click', exportExcel);
+document.addEventListener('DOMContentLoaded', () => {
+  const exportBtn = document.getElementById('exportExcelBtn');
+  const resetBtn = document.getElementById('resetFiltersBtn');
+  const passCard = document.getElementById('passCard5');
+  const cancelBtn = document.getElementById('cancelExport');
+  const exportForm = document.getElementById('exportConfirmForm');
+  const helk = document.getElementById('helk');
 
-const resetBtn = document.getElementById('resetFiltersBtn');
-if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+  // ===== SHOW PASSWORD CARD =====
+  exportBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    passCard.classList.remove('unseen2');
+    passCard.classList.add('seen2');
+  });
+
+  function hidePassCard() {
+    passCard.classList.remove('seen2');
+    passCard.classList.add('unseen2');
+
+    // Clear the password field
+    const passwordInput = document.getElementById('exportPassword');
+    if (passwordInput) passwordInput.value = '';
+
+    // Hide the error message if visible
+    if (helk) helk.classList.add('hidden');
+  }
+
+  cancelBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    hidePassCard();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (
+      passCard.classList.contains('seen2') &&
+      !passCard.contains(e.target) &&
+      e.target !== exportBtn
+    ) {
+      hidePassCard();
+    }
+  });
+
+  // ===== ✅ ONLY SUBMIT HANDLER =====
+  exportForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const password = document.getElementById('exportPassword').value;
+    helk.classList.add('hidden');
+
+    if (!password) return;
+
+    try {
+      const res = await fetch('/verify-export-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) {
+        helk.classList.remove('hidden');
+        return; // ✅ STOP HERE
+      }
+
+      hidePassCard();
+
+      // ✅ DOWNLOAD ONLY IF PASSWORD IS CORRECT
+      exportExcel();
+
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  resetBtn?.addEventListener('click', resetFilters);
 });
-
 </script>
+
 
     <div class="gap10 alignStart overflow-y1 block padding10">
         <section class="corner10 justifyBetween height10 marginBottom20">

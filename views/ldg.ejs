@@ -1,0 +1,17 @@
+<% layout('layout') %>
+
+<section class="col alignStart">
+    <% if (logs.length === 0) { %>
+        <div class="col gap5 height100"> 
+            <%- include('icons/notFound') %>
+            <p class="size20">No logs found!</p>
+        </div>
+    <% } else { %>
+      <% logs.forEach((log, index) => { %>
+        <section class="gap10 justifyStart padding2">
+            <section class="width15 justifyStart padding0 size12"><%= log.createdAtFormatted  %></section>
+            <section class="width0 justifyStart padding0 size12"><%= log.who %> <%= log.what %></section>
+        </section>
+      <% }) %>
+    <% } %>
+</section>

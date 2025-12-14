@@ -27,12 +27,14 @@ const isStudent = require('./middleware/isStudent');
 const isStuArc = require('./middleware/isStuArc');
 const isUser = require('./middleware/isUser');
 const analyticsMiddleware = require('./middleware/isAnalytics');
+const isLog = require('./middleware/isLog');
 
 const users = require('./model/user');
 const requests = require('./model/request');
 const Ratings = require('./model/Rating');
 const documents = require('./model/document');
 const items = require('./model/item');
+const Log = require('./model/logs');
 const { isWeakMap } = require('util/types');
 
 const app = express();
@@ -159,6 +161,7 @@ app.use(isDocuments);
 app.use(isSeed);
 const flash = require('connect-flash');
 const { truncate } = require('fs/promises');
+app.use(isLog);
 
 app.use(flash());
 
@@ -395,6 +398,14 @@ app.post('/login', async (req, res) => {
     // Store user in session
     req.session.user = user;
 
+       // ===== CREATE LOGIN LOG =====
+    const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Logged in'
+    });
+
+
     if (user.access === 1) {
   
       const adminRoles = ["Admin", "Head", "Dev", "Seed"];
@@ -436,6 +447,7 @@ app.get('/login2',isUser, async (req, res) => {
   res.render('index2', { title: 'VVP', active: 'dsb' });
 });
 
+
 app.post('/vvp', async (req, res) => {
     const { userId } = req.body;
 
@@ -447,6 +459,12 @@ app.post('/vvp', async (req, res) => {
         }
 
         req.session.user = user; // override login
+               // ===== CREATE LOGIN LOG =====
+        const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`;
+        await Log.create({
+          who: isWho,
+          what: 'Logged in'
+        });
 
         // Redirect like your original login logic
         if (user.access === 1) {
@@ -499,6 +517,13 @@ app.post('/fg', async (req, res) => {
     await user.save();
 
     console.log(`🔑 User ${email} got new password: ${newPass}`);
+    
+            // ===== CREATE LOGIN LOG =====
+    const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Forgot Password'
+    });
 
     // 📌 Flash success
     req.session.success = "Temporary password has been sent to your email!";
@@ -552,11 +577,26 @@ app.get('/ins2', isLogin, (req, res) => {
   res.render('ins2', { title: "Tutorial Page"});
 })
 
-app.get('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) console.error(err);
-    res.redirect('/');
-  });
+app.get('/logout', async (req, res) => {
+  try {
+    if (req.session.user) {
+      // ===== CREATE LOGOUT LOG =====
+      const isWho = `${req.session.user.fName} ${req.session.user.mName} ${req.session.user.lName} ${req.session.user.xName}`;
+      await Log.create({
+        who: isWho,
+        what: 'Logged out'
+      });
+    }
+
+    // Destroy session
+    req.session.destroy(err => {
+      if (err) console.error(err);
+      res.redirect('/');
+    });
+  } catch (err) {
+    console.error('⚠️ Error logging logout:', err);
+    req.session.destroy(() => res.redirect('/'));
+  }
 });
 
 /*
@@ -817,6 +857,13 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     }));
 
     await items.insertMany(itemDocs);
+    
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${savedUser.fName} ${savedUser.mName} ${savedUser.lName} ${savedUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Registered and request a new document with TR# ${savedRequest.tr}`
+    });
 
     // 1️⃣1️⃣ Success
     res.redirect('/regSuccess');
@@ -826,13 +873,20 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
   }
 });
-
 app.post('/verify1', async (req, res) => {
   try {
-    const { requestId, userId } = req.body;
+    const { requestId } = req.body;
 
-    const student = await users.findById(requestId);
-    
+    // ✅ Get the logged-in user from the session
+    const staff = req.session.user;
+    if (!staff) return res.redirect('/'); // not logged in
+
+    // ✅ Get the request and student
+    const studentRequest = await requests.findById(requestId).populate('requestBy');
+    if (!studentRequest) return res.redirect('/vrf');
+
+    const student = studentRequest.requestBy;
+
     let processBy = null;
     if (student?.campus === 'South' || student?.campus === 'San Jose') {
       const registrar = await users.findOne({
@@ -842,12 +896,12 @@ app.post('/verify1', async (req, res) => {
       });
 
       if (registrar) {
-        processBy = registrar._id.toString(); // assign as string
+        processBy = registrar._id.toString();
       }
     }
 
-    // Update user
-    await users.findByIdAndUpdate(userId, {
+    // Update user (student)
+    await users.findByIdAndUpdate(student._id, {
       archive: false,
       reset: true,
       verify: false
@@ -861,24 +915,52 @@ app.post('/verify1', async (req, res) => {
       assignAt: processBy ? new Date() : null
     });
 
-    res.redirect('/vrf'); // redirect anywhere you want
+    // ===== CREATE LOG =====
+    const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`;
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Verified the registration and first request of ${theStudent}`
+    });
+
+    res.redirect('/vrf');
   } catch (err) {
     console.error(err);
     res.redirect('/vrf');
   }
 });
 
+
 app.post('/decline1', async (req, res) => {
   try {
     const { requestId } = req.body;
 
+    // ✅ Get the logged-in staff from session
+    const staff = req.session.user;
+    if (!staff) return res.redirect('/'); // not logged in
+
+    // ✅ Get the request and the student
+    const studentRequest = await requests.findById(requestId).populate('requestBy');
+    if (!studentRequest) return res.redirect('/vrf');
+
+    const student = studentRequest.requestBy;
+
+    // ✅ Update request to declined
     await requests.findByIdAndUpdate(requestId, {
       status: "Declined",
       archive: true,
       verify: true
     });
 
-    res.redirect('/vrf'); // or another page
+    // ===== CREATE LOG =====
+    const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`;
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Declined the request of ${theStudent}`
+    });
+
+    res.redirect('/vrf');
   } catch (err) {
     console.error(err);
     res.redirect('/vrf');
@@ -1084,6 +1166,13 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     }));
     await items.insertMany(itemDocs);
 
+                // ===== CREATE LOGIN LOG =====
+    const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Request a document with tr# ${savedRequest.tr}`
+    });
+
     // 9️⃣ Redirect success
     res.redirect('/reqSuccess');
 
@@ -1140,9 +1229,19 @@ app.get('/getUser', async (req, res) => {
   }
 });
 
-app.get('/prf', isLogin, (req, res) => {
+app.get('/prf', isLogin, async (req, res) => { // ✅ added async
   const msg = req.session.msg;
   delete req.session.msg;
+
+  const userId = req.session.user._id;
+  const student = await users.findById(userId);
+
+  // ===== CREATE LOGIN LOG =====
+  const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+  await Log.create({
+    who: isWho,
+    what: 'View Profile Page'
+  });
 
   res.render('prf', {
     title: 'Profile',
@@ -1151,6 +1250,7 @@ app.get('/prf', isLogin, (req, res) => {
     messagePass: msg?.type === 'error' ? msg.text : ''
   });
 });
+
 
 
 app.post('/check-pass', async (req, res) => {
@@ -1222,6 +1322,13 @@ app.post('/rst', async (req, res) => {
     currentUser.password = createPass;
     await currentUser.save();
 
+                // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Change Password'
+    });
+
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     return res.redirect('/prf');
 
@@ -1275,6 +1382,13 @@ app.post('/rstFG', async (req, res) => {
     currentUser.reset = null;
     await currentUser.save();
 
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Change Password'
+    });
+
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     return res.redirect('/prf');
 
@@ -1319,6 +1433,14 @@ app.post('/edt', async (req, res) => {
     );
 
     req.session.user = updatedUser;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Edit Contact information'
+    });
 
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect('/prf');
@@ -1347,6 +1469,14 @@ app.post('/pht', isLogin, uploadPhoto.single('photo'), async (req, res) => {
     );
 
     req.session.user = updatedUser;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Edit Contact information'
+    });
 
     req.session.msg = { type: "success", text: "Photo updated successfully!" };
     return res.redirect('/prf');
@@ -1531,6 +1661,16 @@ app.post('/paymentUpload', isLogin, uploadPhoto.array('payPhoto', 10), async (re
       status: 'For Verification',
       payMode,
       payAt
+    });
+
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Upload Proof of Payment'
     });
 
     // 5️⃣ Redirect on success
@@ -1749,24 +1889,46 @@ app.get('/vrf', isLogin, isVerify, isStaff, (req, res) => {
   });
 });
 
-
 app.patch('/req/processBy/:id', isLogin, isRequest, isStaff, async (req, res) => {
   try {
     const { processBy } = req.body;
     const rq = await requests.findById(req.params.id);
     if (!rq) return res.status(404).json({ error: 'Request not found' });
 
+    // Update processBy and assignAt
     rq.processBy = processBy || null;
     rq.assignAt = processBy ? new Date() : null;
     await rq.save();
 
-    console.log('✅ Updated processBy for request:', rq._id); // debugging
+    // Logged-in user
+    const currentUser = req.session.user;
+
+    // If processBy is assigned, fetch staff info
+    let staffName = '';
+    if (processBy) {
+      const staffUser = await users.findById(processBy);
+      if (staffUser) {
+        staffName = `${staffUser.fName} ${staffUser.mName} ${staffUser.lName} ${staffUser.xName}`;
+      }
+    }
+
+    // ===== CREATE LOG =====
+    await Log.create({
+      who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+      what: processBy
+        ? `Assigned the transaction with tr# ${rq.tr} to ${staffName}`
+        : `Removed assignment from transaction with tr# ${rq.tr}`
+    });
+
+    console.log('✅ Updated processBy for request:', rq._id);
     res.status(200).json({ message: 'Staff successfully assigned!' });
+
   } catch (err) {
     console.error('❌ Error in PATCH /req/processBy/:id', err);
     res.status(500).json({ error: 'Something went wrong while assigning staff.' });
   }
 });
+
 
 // Generic handler to display a request
 async function renderRequest(req, res, backRoute, viewName = 'srvView') {
@@ -1840,14 +2002,10 @@ app.post('/quick-assign', isLogin, isStaff, async (req, res) => {
       return res.status(400).send("No staff selected.");
     }
 
-    // Convert single string to array if only one checkbox is checked
     if (!Array.isArray(assignedUsers)) assignedUsers = [assignedUsers];
-
-    // Convert each userId to ObjectId
     assignedUsers = assignedUsers.map(id => new mongoose.Types.ObjectId(id));
 
-    // Fetch all unassigned requests
-    let unassignedRequests = await requests.find({ processBy: null, archive: false });
+    let unassignedRequests = await requests.find({ processBy: null, archive: false }).populate('requestBy');
 
     if (unassignedRequests.length === 0) {
       return res.status(400).send("No unassigned requests available.");
@@ -1857,6 +2015,8 @@ app.post('/quick-assign', isLogin, isStaff, async (req, res) => {
     const totalRequests = unassignedRequests.length;
     const base = Math.floor(totalRequests / numStaff);
     let remainder = totalRequests % numStaff;
+
+    const assignmentDetails = [];
 
     for (let i = 0; i < numStaff; i++) {
       const userId = assignedUsers[i];
@@ -1873,366 +2033,403 @@ app.post('/quick-assign', isLogin, isStaff, async (req, res) => {
       );
 
       await Promise.all(updatePromises);
+
+      assignmentDetails.push({
+        staffId: userId,
+        assignedCount: toAssign.length
+      });
     }
 
+    const currentUser = await users.findById(req.session.user._id);
+
+    // ===== LOGGING =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    let whatMsg = `Assigned ${totalRequests} pending request(s) to ${numStaff} staff(s).`;
+    await Log.create({ who: isWho, what: whatMsg });
+
     res.redirect('/srv');
+
   } catch (err) {
     console.error('❌ Quick Assign Error:', err);
     res.status(500).send("Failed to assign requests.");
   }
 });
 
+// ===== DECLINE SINGLE ITEM =====
 app.post("/decItem", async (req, res) => {
-    const { requestId, itemId, back, itemRemarks } = req.body; // read itemRemarks
+  const { requestId, itemId, back, itemRemarks } = req.body;
 
-    try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
 
-        // Find the specific item to decline
-        const itemDoc = await items.findById(itemId);
-        if (!itemDoc) return res.status(404).send("Item not found");
+    const itemDoc = await items.findById(itemId);
+    if (!itemDoc) return res.status(404).send("Item not found");
 
-        // Update item status and remarks
-        itemDoc.status = "Declined";
-        itemDoc.remarks = itemRemarks || itemDoc.remarks;
-        await itemDoc.save();
+    itemDoc.status = "Declined";
+    itemDoc.remarks = itemRemarks || itemDoc.remarks;
+    await itemDoc.save();
 
-        // Remove declineAt & holdAt if approving any item
-        requestDoc.holdAt = null;
+    requestDoc.holdAt = null;
 
-        // Fetch all items for this request
-        const allItems = await items.find({ tr: requestDoc.tr });
+    const allItems = await items.find({ tr: requestDoc.tr });
+    const hasPending = allItems.some(it => it.status === "Pending");
+    const allDeclined = allItems.every(it => it.status === "Declined");
 
-        const hasPending = allItems.some(it => it.status === "Pending");
-        const allDeclined = allItems.every(it => it.status === "Declined");
-
-        if (!hasPending) {
-            if (allDeclined) {
-                requestDoc.declineAt = new Date(); // all declined
-            } else {
-                requestDoc.status = "Reviewed";
-                requestDoc.approveAt = new Date();
-            }
-            await requestDoc.save();
-        }
-
-        // Redirect to the correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
-    }
-});
-
-app.post("/appItem", async (req, res) => {
-    const { requestId, itemId, back } = req.body;
-
-    try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
-
-        // Find the specific item
-        const itemDoc = await items.findById(itemId);
-        if (!itemDoc) return res.status(404).send("Item not found");
-
-        // Update item status
-        itemDoc.status = "Approved";
-        await itemDoc.save();
-
-        // Remove declineAt & holdAt if approving any item
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        requestDoc.reviewAt = new Date();
-
-        // Check if any items are still pending
-        const pendingItems = await items.find({ tr: requestDoc.tr, status: "Pending" });
-
-        // If no pending items left → mark request as Reviewed
-        if (pendingItems.length === 0) {
-            requestDoc.status = "Reviewed";
-            requestDoc.reviewAt = new Date();
-        }
-
-        await requestDoc.save();
-
-        // Redirect to correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
-
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
-    }
-});
-
-app.post("/appAllItem", async (req, res) => {
-    const { requestId, back } = req.body;
-
-    try {
-        // Find request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
-
-        // Get all items for this request (same TR)
-        const allItems = await items.find({ tr: requestDoc.tr });
-
-        if (allItems.length === 0) {
-            return res.status(400).send("No items found for this request");
-        }
-
-        // Approve all items
-        await items.updateMany(
-            { tr: requestDoc.tr },
-            { 
-                $set: {
-                    status: "Approved",
-                    remarks: null
-                }
-            }
-        );
-
-        // Update request info
+    if (!hasPending) {
+      if (allDeclined) requestDoc.declineAt = new Date();
+      else {
         requestDoc.status = "Reviewed";
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        requestDoc.reviewAt = new Date();
-        await requestDoc.save();
-
-        // Redirect to correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
-
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
+        requestDoc.approveAt = new Date();
+      }
+      await requestDoc.save();
     }
+
+    // ===== LOGGING =====
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
+    await Log.create({
+      who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+      what: `Declined a document(s) requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName}`
+    });
+
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
 
+// ===== APPROVE SINGLE ITEM =====
+app.post("/appItem", async (req, res) => {
+  const { requestId, itemId, back } = req.body;
+
+  try {
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
+
+    const itemDoc = await items.findById(itemId);
+    if (!itemDoc) return res.status(404).send("Item not found");
+
+    itemDoc.status = "Approved";
+    await itemDoc.save();
+
+    requestDoc.declineAt = null;
+    requestDoc.holdAt = null;
+    requestDoc.reviewAt = new Date();
+
+    const pendingItems = await items.find({ tr: requestDoc.tr, status: "Pending" });
+    if (pendingItems.length === 0) {
+      requestDoc.status = "Reviewed";
+      requestDoc.reviewAt = new Date();
+    }
+    await requestDoc.save();
+
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
+    await Log.create({
+      who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+      what: `Approved a document(s) requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName}`
+    });
+
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+// ===== APPROVE ALL ITEMS =====
+app.post("/appAllItem", async (req, res) => {
+  const { requestId, back } = req.body;
+
+  try {
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
+
+    const allItems = await items.find({ tr: requestDoc.tr });
+    if (allItems.length === 0) return res.status(400).send("No items found for this request");
+
+    await items.updateMany(
+      { tr: requestDoc.tr },
+      { $set: { status: "Approved", remarks: null } }
+    );
+
+    requestDoc.status = "Reviewed";
+    requestDoc.declineAt = null;
+    requestDoc.holdAt = null;
+    requestDoc.reviewAt = new Date();
+    await requestDoc.save();
+
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
+    await Log.create({
+      who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+      what: `Approved all documents requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`
+    });
+
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+// ===== DECLINE ALL ITEMS =====
 app.post("/decline3", async (req, res) => {
-    const { requestId, back, requestRemarks } = req.body;
+  const { requestId, back, requestRemarks } = req.body;
 
-    try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
 
-        // Decline all items under this request
-        await items.updateMany(
-            { tr: requestDoc.tr },
-            { status: "Declined" }
-        );
+    await items.updateMany({ tr: requestDoc.tr }, { status: "Declined" });
 
-        requestDoc.declineAt = new Date();
-        requestDoc.holdAt = null;
-        requestDoc.remarks = requestRemarks || "";
-        requestDoc.status = "Pending";
+    requestDoc.declineAt = new Date();
+    requestDoc.holdAt = null;
+    requestDoc.remarks = requestRemarks || "";
+    requestDoc.status = "Pending";
+    await requestDoc.save();
 
-        await requestDoc.save();
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
+    await Log.create({
+      who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+      what: `Declined all documents requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`
+    });
 
-        // Redirect to correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
 
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
-
-    } catch (err) {
-        console.error("Decline Error:", err);
-        res.status(500).send("Server error");
-    }
+  } catch (err) {
+    console.error("Decline Error:", err);
+    res.status(500).send("Server error");
+  }
 });
+
 
 
 app.post("/hold3", async (req, res) => {
-    const { requestId, back, requestRemarks } = req.body;
+  const { requestId, back, requestRemarks } = req.body;
 
-    try {
-        // Find the request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    // Find the request and populate the requester
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
 
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = new Date();
-        requestDoc.remarks = requestRemarks || "";
+    requestDoc.declineAt = null;
+    requestDoc.holdAt = new Date();
+    requestDoc.remarks = requestRemarks || "";
 
-        await requestDoc.save();
+    await requestDoc.save();
 
-        // Redirect to correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
+    // Logged-in user
+    const currentUser = req.session.user;
 
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    // The student who requested the document
+    const student = requestDoc.requestBy;
 
-    } catch (err) {
-        console.error("Decline Error:", err);
-        res.status(500).send("Server error");
-    }
+    // ===== CREATE LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Hold the transaction requested by ${theStudent} with tr# ${requestDoc.tr}`
+    });
+
+    // Redirect to correct view
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error("Hold Error:", err);
+    res.status(500).send("Server error");
+  }
 });
-
+// ===== RESTORE ROUTE =====
 app.post("/restore3", async (req, res) => {
-    const { requestId, back } = req.body;
+  const { requestId, back } = req.body;
 
+  try {
+    // Fetch request and populate requester
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
+
+    // Check if items exist
+    const hasItems = await items.exists({ tr: requestDoc.tr });
+    if (!hasItems) return res.status(400).send("No items found for this request");
+
+    // Approve all items
+    await items.updateMany(
+      { tr: requestDoc.tr },
+      { $set: { status: "Pending", remarks: null } }
+    );
+
+    // Update request
+    requestDoc.status = "Pending";
+    requestDoc.declineAt = null;
+    requestDoc.holdAt = null;
+    requestDoc.updatedAt = new Date();
+    await requestDoc.save();
+
+    // ===== LOGGING =====
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
     try {
-        // Find request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
-
-        // Get all items for this request (same TR)
-        const allItems = await items.find({ tr: requestDoc.tr });
-
-        if (allItems.length === 0) {
-            return res.status(400).send("No items found for this request");
-        }
-
-        // Approve all items
-        await items.updateMany(
-            { tr: requestDoc.tr },
-            { 
-                $set: {
-                    status: "Pending",
-                    remarks: null
-                }
-            }
-        );
-
-        // Update request info
-        requestDoc.status = "Pending";
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        requestDoc.updatedAt = new Date();
-        await requestDoc.save();
-
-        // Redirect to correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
-
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
-
+      await Log.create({
+        who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+        what: `Reverted action to a transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`
+      });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
+      console.error("⚠️ Failed to log restore action:", err);
     }
+
+    // Redirect
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
 
+// ===== FOR RELEASE ROUTE =====
 app.post("/fRel", async (req, res) => {
-    const { requestId, back } = req.body;
+  const { requestId, back } = req.body;
 
+  try {
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
+
+    const hasItems = await items.exists({ tr: requestDoc.tr });
+    if (!hasItems) return res.status(400).send("No items found for this request");
+
+    // Update request
+    requestDoc.status = "For Release";
+    requestDoc.declineAt = null;
+    requestDoc.holdAt = null;
+    requestDoc.remarks = null;
+    requestDoc.turnAt = new Date();
+    await requestDoc.save();
+
+    // ===== LOGGING =====
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
     try {
-        // Find request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
-
-        // Get all items for this request (same TR)
-        const allItems = await items.find({ tr: requestDoc.tr });
-
-        if (allItems.length === 0) {
-            return res.status(400).send("No items found for this request");
-        }
-
-
-        // Update request info
-        requestDoc.status = "For Release";
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        requestDoc.remarks = null;
-        requestDoc.turnAt = new Date();
-        await requestDoc.save();
-
-        // Redirect to correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
-
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
-
+      await Log.create({
+        who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+        what: `Marked the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as For Release with tr# ${requestDoc.tr}`
+      });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
+      console.error("⚠️ Failed to log For Release action:", err);
     }
+
+    // Redirect
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
 
+// ===== CLAIM ROUTE =====
 app.post("/claim3", async (req, res) => {
-    const { requestId, back, claimedBy } = req.body;
+  const { requestId, back, claimedBy } = req.body;
 
+  try {
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
+
+    const hasItems = await items.exists({ tr: requestDoc.tr });
+    if (!hasItems) return res.status(400).send("No items found for this request");
+
+    // Update request
+    requestDoc.status = "Claimed";
+    requestDoc.declineAt = null;
+    requestDoc.holdAt = null;
+    requestDoc.remarks = null;
+    requestDoc.claimedBy = claimedBy;
+    requestDoc.claimedAt = new Date();
+    await requestDoc.save();
+
+    // ===== LOGGING =====
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
     try {
-        // Find request
-        const requestDoc = await requests.findById(requestId);
-        if (!requestDoc) return res.status(404).send("Request not found");
-
-        // Get all items for this request (same TR)
-        const allItems = await items.find({ tr: requestDoc.tr });
-
-        if (allItems.length === 0) {
-            return res.status(400).send("No items found for this request");
-        }
-
-
-        // Update request info
-        requestDoc.status = "Claimed";
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        requestDoc.remarks = null;
-        requestDoc.claimedBy = claimedBy;
-        requestDoc.claimedAt = new Date();
-        await requestDoc.save();
-
-        // Redirect to correct view
-        const viewRoutes = {
-            srv: `/srvView/${requestId}`,
-            prc: `/prcView/${requestId}`,
-            rel: `/relView/${requestId}`,
-            apr: `/aprView/${requestId}`,
-            vrf: `/vrfView/${requestId}`
-        };
-
-        res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
-
+      await Log.create({
+        who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+        what: `Marked the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as Claimed with tr# ${requestDoc.tr}`
+      });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
+      console.error("⚠️ Failed to log Claim action:", err);
     }
+
+    // Redirect
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
 
 /* end of Approval Routes */
@@ -2289,6 +2486,21 @@ app.post('/newEmp', async (req, res) => {
 
     await newUser.save();
 
+                    // Logged-in user
+    const currentUser = req.session.user;
+
+    // The student who requested the document
+    const student = newUser;
+
+    // ===== CREATE LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Create an account for ${theStudent}`
+    });
+
+
     // 5️⃣ Redirect to employee list page
     res.redirect('/emp');
 
@@ -2307,6 +2519,19 @@ app.get('/empView/:id', isLogin, isEmp, async (req, res) => {
     const userId = req.params.id;
 
     const student = req.users.find(u => u._id.toString() === userId);
+
+    
+    const staffId = req.session.user._id;
+    const currentUser = await users.findById(staffId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `View ${isStudent} information`
+    });
+
 
     if (!student) {
       return res.status(404).render('empView', {
@@ -2354,6 +2579,19 @@ app.get('/empViewArc/:id', isLogin, isEmpArc, async (req, res) => {
     const userId = req.params.id;
 
     const student = req.users.find(u => u._id.toString() === userId);
+
+    
+    const staffId = req.session.user._id;
+    const currentUser = await users.findById(staffId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `View ${isStudent} information in the Archive`
+    });
+
 
     if (!student) {
       return res.status(404).render('empView', {
@@ -2459,6 +2697,13 @@ app.post('/rst4', async (req, res) => {
     student.password = createPass;
     await student.save();
 
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: theStudent,
+      what: `Reset Paasword`
+    });
+
+
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     return res.redirect(redirectUrl || '/emp');
 
@@ -2496,6 +2741,17 @@ app.get('/autoPass4', async (req, res) => {
       text: `New password generated!` 
     };
 
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Generate New Password for ${isStudent}`
+    });
+
     return res.redirect(redirectUrl || '/emp');
 
   } catch (err) {
@@ -2525,6 +2781,18 @@ app.get('/archive4', async (req, res) => {
     student.suspendAt = new Date();
     student.suspendIs = suspendIs || 'No reason provided';
     await student.save();
+
+    
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Move ${isStudent} to Archive`
+    });
 
     req.session.msg = { 
       type: "success", 
@@ -2562,6 +2830,19 @@ app.get('/archiveX4', async (req, res) => {
     student.suspendAt = new Date();
     student.suspendIs = suspendIs || 'No reason provided';
     await student.save();
+
+        
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Remove ${isStudent} to Archive`
+    });
+
 
     req.session.msg = { 
       type: "success", 
@@ -2648,6 +2929,19 @@ app.post('/edt4', async (req, res) => {
 
     await users.findByIdAndUpdate(studentId, updateData);
 
+        
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Edit ${isStudent}'s Information`
+    });
+
+
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect(redirectUrl || '/emp');
 
@@ -2679,6 +2973,20 @@ app.post('/pht4', uploadPhoto.single('photo'), async (req, res) => {
 
     req.session.msg = { type: "success", text: "Photo updated successfully!" };
     return res.redirect(redirectUrl || '/emp');
+
+    
+        
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Update ${isStudent}'s Photo`
+    });
+
 
   } catch (err) {
     console.error(err);
@@ -2743,8 +3051,16 @@ app.post('/rst2', async (req, res) => {
     currentUser.password = createPass;
     await currentUser.save();
 
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Change Password`
+    });
+
+
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     return res.redirect('/acc');
+
 
   } catch (err) {
     console.error(err);
@@ -2796,6 +3112,13 @@ app.post('/rst2FG', async (req, res) => {
     currentUser.password = createPass;
     currentUser.reset = null;
     await currentUser.save();
+
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Change Password`
+    });
+
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
@@ -2851,6 +3174,13 @@ app.post('/rst3FG', async (req, res) => {
     currentUser.password = createPass;
     currentUser.reset = null;
     await currentUser.save();
+
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Change Password`
+    });
+
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
@@ -2905,6 +3235,13 @@ app.post('/rst4FG', async (req, res) => {
     currentUser.password = createPass;
     currentUser.reset = null;
     await currentUser.save();
+
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Change Password`
+    });
+
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
@@ -2960,6 +3297,13 @@ app.post('/rst4FGA', async (req, res) => {
     currentUser.password = createPass;
     currentUser.reset = null;
     await currentUser.save();
+
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Change Password`
+    });
+
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
@@ -3006,6 +3350,15 @@ app.post('/edt2', async (req, res) => {
     );
 
     req.session.user = updatedUser;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Edit Contact information'
+    });
+
 
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect('/acc');
@@ -3035,6 +3388,14 @@ app.post('/pht2', isLogin, uploadPhoto.single('photo'), async (req, res) => {
     );
 
     req.session.user = updatedUser;
+
+    const currentUser = await users.findById(userId);
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Update Photo'
+    });
 
     req.session.msg = { type: "success", text: "Photo updated successfully!" };
     return res.redirect('/acc');
@@ -3097,6 +3458,19 @@ app.get('/stuView/:id', isLogin, isStudent, async (req, res) => {
 
     const student = req.users.find(u => u._id.toString() === userId);
 
+
+    const staffId = req.session.user._id;
+    const currentUser = await users.findById(staffId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `View ${isStudent} information`
+    });
+
+
     if (!student) {
       return res.status(404).render('stuView', {
         title: 'Students',
@@ -3144,6 +3518,19 @@ app.get('/stuViewDsb/:id', isLogin, isStudent, async (req, res) => {
     const userId = req.params.id;
 
     const student = req.users.find(u => u._id.toString() === userId);
+
+    
+    const staffId = req.session.user._id;
+    const currentUser = await users.findById(staffId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `View ${isStudent} information`
+    });
+
 
     if (!student) {
       return res.status(404).render('stuView', {
@@ -3193,6 +3580,19 @@ app.get('/crtView/:id', isLogin, isStudent, async (req, res) => {
 
     const student = req.users.find(u => u._id.toString() === userId);
 
+    
+    const staffId = req.session.user._id;
+    const currentUser = await users.findById(staffId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `View ${isStudent} information`
+    });
+
+
     if (!student) {
       return res.status(404).render('stuView', {
         title: 'Current',
@@ -3241,6 +3641,19 @@ app.get('/almView/:id', isLogin, isStudent, async (req, res) => {
 
     const student = req.users.find(u => u._id.toString() === userId);
 
+    
+    const staffId = req.session.user._id;
+    const currentUser = await users.findById(staffId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `View ${isStudent} information`
+    });
+
+
     if (!student) {
       return res.status(404).render('stuView', {
       title: 'Alumni',
@@ -3288,6 +3701,19 @@ app.get('/frmView/:id', isLogin, isStudent, async (req, res) => {
     const userId = req.params.id;
 
     const student = req.users.find(u => u._id.toString() === userId);
+
+    
+    const staffId = req.session.user._id;
+    const currentUser = await users.findById(staffId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `View ${isStudent} information`
+    });
+
 
     if (!student) {
       return res.status(404).render('stuView', {
@@ -3426,6 +3852,17 @@ app.get('/autoPass3', async (req, res) => {
     student.password = newPassword;
     await student.save();
 
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Generate New Password for ${isStudent}`
+    });
+
     req.session.msg = { 
       type: "success", 
       text: `New password generated!` 
@@ -3461,6 +3898,19 @@ app.get('/archive3', async (req, res) => {
     student.suspendAt = new Date();
     student.suspendIs = suspendIs || 'No reason provided';
     await student.save();
+
+    
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Move ${isStudent} to archive`
+    });
+
 
     req.session.msg = { 
       type: "success", 
@@ -3498,6 +3948,19 @@ app.get('/archiveX3', async (req, res) => {
     student.suspendAt = new Date();
     student.suspendIs = suspendIs || 'No reason provided';
     await student.save();
+
+    
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Remove ${isStudent} to Archive`
+    });
+
 
     req.session.msg = { 
       type: "success", 
@@ -3593,6 +4056,19 @@ app.post('/edt3', async (req, res) => {
 
     await users.findByIdAndUpdate(studentId, updateData);
 
+        
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Edit ${isStudent} Information`
+    });
+
+
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect(redirectUrl || '/stu');
 
@@ -3609,6 +4085,20 @@ app.post('/pht3', uploadPhoto.single('photo'), async (req, res) => {
   try {
     const { studentId, redirectUrl } = req.body;
 
+                
+    const userId = req.session.user._id;
+    const currentUser = await users.findById(userId);
+    const student = await users.findById(studentId);
+
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Update ${isStudent} Photo`
+    });
+
+
     if (!studentId) {
       req.session.msg = { type: "error", text: "Student ID not provided!" };
       return res.redirect(redirectUrl || '/stu');
@@ -3624,6 +4114,7 @@ app.post('/pht3', uploadPhoto.single('photo'), async (req, res) => {
 
     req.session.msg = { type: "success", text: "Photo updated successfully!" };
     return res.redirect(redirectUrl || '/stu');
+
 
   } catch (err) {
     console.error(err);
@@ -3768,6 +4259,13 @@ app.post('/updateSeed', isSeed, isDocuments, async (req, res) => {
     seedUser.phone = phone;
     await seedUser.save();
 
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Update the System Contact Information`
+    });
+
     req.session.seedMsg = { type: 'success', text: 'School contact info updated successfully!' };
     res.redirect('/cog');
   } catch (err) {
@@ -3798,6 +4296,13 @@ app.post('/update-documents', isLogin, async (req, res) => {
       });
     }
 
+                        // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Update the Documents Information in the system`
+    });
+
     req.session.docMsg = { type: "success", text: "Documents updated successfully!" };
     res.redirect('/cog');
   } catch (err) {
@@ -3819,6 +4324,13 @@ app.get('/dsb', isLogin, analyticsMiddleware, isEmp, (req, res) => {
     title: 'Dashboard',
     active: 'dsb',
     analytics
+  });
+});
+
+app.get('/ldg', isLogin, isLog, (req, res) => {
+  res.render('ldg', {
+    title: 'Logs',
+    active: 'ldg'
   });
 });
 
@@ -3879,6 +4391,25 @@ const requestsWithTotal = requestsToShow.map(rq => {
     totalCount
   });
 });
+
+app.post('/verify-export-password', isLogin, (req, res) => {
+  const { password } = req.body;
+
+  // Use the user from isLogin middleware
+  const currentUser = req.user;
+  if (!currentUser) {
+    return res.status(401).json({ ok: false, message: 'Not logged in' });
+  }
+
+  // Plain text comparison
+  if (password !== currentUser.password) {
+    return res.json({ ok: false });
+  }
+
+  res.json({ ok: true });
+});
+
+
 
 
 /* Accounting */
@@ -3946,6 +4477,13 @@ app.post('/rst2A', async (req, res) => {
     currentUser.password = createPass;
     await currentUser.save();
 
+                    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Reset password'
+    });
+
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     return res.redirect('/acc2');
 
@@ -3999,6 +4537,14 @@ app.post('/rst2FGA', async (req, res) => {
     currentUser.password = createPass;
     currentUser.reset = null;
     await currentUser.save();
+
+                        // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Reset password'
+    });
+
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
@@ -4046,6 +4592,13 @@ app.post('/edt2A', async (req, res) => {
 
     req.session.user = updatedUser;
 
+                        // ===== CREATE LOGIN LOG =====
+    const isWho = `${updatedUser.fName} ${updatedUser.mName} ${updatedUser.lName} ${updatedUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Update Information'
+    });
+
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect('/acc2');
 
@@ -4074,6 +4627,14 @@ app.post('/pht2A', isLogin, uploadPhoto.single('photo'), async (req, res) => {
     );
 
     req.session.user = updatedUser;
+
+                            // ===== CREATE LOGIN LOG =====
+    const isWho = `${updatedUser.fName} ${updatedUser.mName} ${updatedUser.lName} ${updatedUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: 'Update Photo'
+    });
+
 
     req.session.msg = { type: "success", text: "Photo updated successfully!" };
     return res.redirect('/acc2');
@@ -4233,6 +4794,18 @@ app.post("/hold4", async (req, res) => {
             ver: `/verView/${requestId}`,
         };
 
+        const userId = req.session.user._id;
+        const currentUser = await users.findById(userId);
+        const student = requestDoc.processBy;
+
+                        // ===== CREATE LOGIN LOG =====
+        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+        await Log.create({
+          who: isWho,
+          what: `Hold the transaction requested by ${isStudent} with tr# ${requestDoc.tr}`
+        });
+
         res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
 
     } catch (err) {
@@ -4260,6 +4833,18 @@ app.post("/revert4", async (req, res) => {
             toPay: `/toPayView/${requestId}`,
             ver: `/verView/${requestId}`,
         };
+
+        const userId = req.session.user._id;
+        const currentUser = await users.findById(userId);
+        const student = requestDoc.processBy;
+
+                        // ===== CREATE LOGIN LOG =====
+        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+        await Log.create({
+          who: isWho,
+          what: `Revert it's action to the transaction requested by ${isStudent} with tr# ${requestDoc.tr}`
+        });
 
         res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
 
@@ -4291,6 +4876,18 @@ app.post("/approve4", async (req, res) => {
             ver: `/verView/${requestId}`,
         };
 
+        const userId = req.session.user._id;
+        const currentUser = await users.findById(userId);
+        const student = requestDoc.processBy;
+
+                        // ===== CREATE LOGIN LOG =====
+        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+        await Log.create({
+          who: isWho,
+          what: `Mark the transaction requested by ${isStudent} with tr# ${requestDoc.tr}  as Assessed`
+        });
+
         res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
 
     } catch (err) {
@@ -4321,6 +4918,19 @@ app.post("/verify4", async (req, res) => {
             ver: `/verView/${requestId}`,
         };
 
+        
+        const userId = req.session.user._id;
+        const currentUser = await users.findById(userId);
+        const student = requestDoc.processBy;
+
+                        // ===== CREATE LOGIN LOG =====
+        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+        await Log.create({
+          who: isWho,
+          what: `Mark the transaction requested by ${isStudent} with tr# ${requestDoc.tr}  as Verified`
+        });
+
         res.redirect(viewRoutes[back] || `/trsView/${requestId}`);
 
     } catch (err) {
@@ -4344,6 +4954,19 @@ app.post("/hold5", async (req, res) => {
 
         await requestDoc.save();
 
+        const userId = req.session.user._id;
+        const currentUser = await users.findById(userId);
+        const student = requestDoc.processBy;
+
+                        // ===== CREATE LOGIN LOG =====
+        const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+        const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+        await Log.create({
+          who: isWho,
+          what: `Request for re-uploading of the proof of payment in the transaction requested by ${isStudent} with tr# ${requestDoc.tr}`
+        });
+
+
         // Redirect to correct view
         const viewRoutes = {
             trs: `/trsView/${requestId}`,
@@ -4358,8 +4981,6 @@ app.post("/hold5", async (req, res) => {
         res.status(500).send("Server error");
     }
 });
-
-
 
 
 app.use((req, res) => {

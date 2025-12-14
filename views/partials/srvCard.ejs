@@ -77,11 +77,11 @@
             <p class="rem16 str400 flex gap10 justifyCenter alignCenter">
                 &#8369;<%= totalAmount || "0" %>.00 
                 <% if ( request.status === "For Verification") { %>
-                <span class="bgBlue100 border0 width0">Pending</span>
+                <span class="bgBlue100 border0 width0"> <i class="fas fa-check-circle"></i> Paid </span>
                 <% } else if (  request.status === "Verified" ) { %>
-                <span class="bgGreen100 border0 width0"> <i class="fas fa-check-circle"></i> Paid </span>
-                <a href="<%= request.payPhoto %>" target="_blank" class=" width0"><i class="fas fa-eye"></i> View</a>
+                <span class="bgGreen100 border0 width0"> <i class="fas fa-check-circle"></i> Verified </span>
                 <% } else { %>
+                <span class="bgBlue100 border0 width0">Pending</span>
                 <% } %>
             </p>
         </section>

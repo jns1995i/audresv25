@@ -703,70 +703,39 @@ switch (filter) {
   // ================================
   // PROCESS-BY ANALYTICS
   // ================================
-  const processByAggRaw = await requests.aggregate([
-    { $match: dateFilter },
-
-    // Only requests processed by someone
-    { $match: { processBy: { $exists: true, $ne: null } } },
-
-    {
-      $group: {
-        _id: { staffId: "$processBy", status: "$status" },
-        count: { $sum: 1 }
-      }
-    },
-
-    // Flatten per staff
-    {
-      $group: {
-        _id: "$_id.staffId",
-        statuses: {
-          $push: {
-            status: "$_id.status",
-            count: "$count"
-          }
-        },
-        totalProcessed: { $sum: "$count" }
-      }
-    },
-
-    // Attach staff details
-    {
-      $lookup: {
-        from: "users",
-        localField: "_id",
-        foreignField: "_id",
-        as: "staffInfo"
-      }
-    },
-    { $unwind: "$staffInfo" },
-
-    {
-      $project: {
-          _id: 0,
-          staffId: "$_id",
-
-          // FULL NAME (cleaned: no double spaces, middle optional)
-          fullName: {
-            $trim: {
-              input: {
-                $concat: [
-                  "$staffInfo.fName", " ",
-                  { $ifNull: ["$staffInfo.mName", ""] }, " ",
-                  "$staffInfo.lName"
-                ]
-              }
-            }
-          },
-
-          // DISPLAY NAME (First Name + Last Initial)
-          displayName: "$staffInfo.fName",
-
-          totalProcessed: 1,
-          statuses: 1
-        }
+const processByAggRaw = await requests.aggregate([
+  { $match: dateFilter },
+  { $match: { processBy: { $exists: true, $ne: null } } },
+  {
+    $group: {
+      _id: "$processBy",
+      totalProcessed: { $sum: 1 },
+      statuses: { $push: "$status" }
     }
-  ]);
+  },
+  {
+    $lookup: {
+      from: "users",
+      localField: "_id",
+      foreignField: "_id",
+      as: "staffInfo"
+    }
+  },
+  { $unwind: "$staffInfo" },
+  {
+    $project: {
+      _id: 0,
+      staffId: "$_id",
+      fullName: { 
+        $trim: { input: { $concat: ["$staffInfo.fName", " ", { $ifNull: ["$staffInfo.mName", ""] }, " ", "$staffInfo.lName"] } } 
+      },
+      displayName: { $concat: ["$staffInfo.fName", " ", { $substr: ["$staffInfo.lName", 0, 1] }, "."] },
+      totalProcessed: 1,
+      statuses: 1
+    }
+  }
+]);
+
 
   // GET OVERALL TOTAL OF ALL STAFF
   const overallTotalProcessed = processByAggRaw.reduce(
