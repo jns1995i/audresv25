@@ -671,80 +671,12 @@
                                 </div>
                             </div>
                         </div>
-                    </section>
-
-                    <section class="col alignStart gap5 page hidden" id="page4">
-                        
-
-                        <div class="field">
-                            <p class="rem18 str500 textBalance textCenter">To proceed, please upload a valid ID for verification.</p>
-                        </div>
-                        <br>
-
-                        <div id="idList" class="heigth100 bgWhite index100 height0 colorPrimary alignEnd relative cornerRem1 padding20 borderPrimary" style="z-index: 200 !important;">
-                            <a href="javascript:void(0)" class="nav cnav absolute right10 top10 hidden" id="xBtn"><i class="fas fa-times"></i></a>
-                            <div class="height0 col alignStart gap5">
-                                <p class="rem16 str500">Guidelines</p>
-                                <p class="rem1 str400">To complete your request, you must upload a valid government-issued or school ID. This is required for identity verification and ensures your request is securely processed.</p>
-                                <br>
-                                <p class="rem16 str500">Accepted IDs</p>
-                                <hr class="width90">
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> School ID</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Phinma Alumni ID</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Philippine Passport</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Driver’s License</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Unified Multi-Purpose ID (UMID) / SSS ID</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> PhilSys National ID</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> GSIS e-Card</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> PRC ID</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Postal ID</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Voter’s ID / Voter’s Certification</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Alien Certificate of Registration (ACR)</p>
-                                <p class="size12 str500"><i class="fas fa-check-circle"></i> Firearms License (PNP-issued)</p>
-                                <br>
-                                <p class="rem16 str500">Requirements</p>
-                                <hr class="width90">
-                                <p class="size12 str500">1. The ID must clearly show your full name & photo.</p>
-                                <p class="size12 str500">2. The uploaded file must be in JPG, JPEG or PNG format.</p>
-                                <p class="size12 str500">3. Maximum file size: 10 MB.</p>
-                                <p class="size12 str500">4. Ensure the ID is legible and not expired.</p>
-                            </div>
-                        </div>
-                        <div class="field gap5">
-                            <label for="" class="relative width100">Upload here</label>
-                            <input type="file" name="vId" required>
-                        </div>
-                        <p class="bgRed100 limitPhoto2 hidden marginTop10">Photo must not be larger than 500MB.</p>
-                        <script>
-                        document.addEventListener("DOMContentLoaded", () => {
-                        const input = document.querySelector('input[name="vId"]');
-                        const warning = document.querySelector('.limitPhoto2');
-
-                        input.addEventListener('change', function () {
-                            warning.classList.add("hidden");
-
-                            if (this.files.length > 0) {
-                            const file = this.files[0];
-                            const maxSize = 500 * 1024 * 1024; // 500MB
-
-                            if (file.size > maxSize) {
-                                warning.textContent = "Photo must not be larger than 500MB.";
-                                warning.classList.remove("hidden");
-                                this.value = ""; // clear file input
-                            }
-                            }
-                        });
-                        });
-                        </script>
                         <br>    
                         <div class="bgYellow cornerRem1 padding20 textCenter">
                             TAKE NOTE: Please review all the details carefully before submitting your request. Ensure that all selections and information are correct, as changes may not be allowed after submission.
                         </div>
-                        <div class="field height0 marginTop15 width100 alignEnd">
-                            <button type="reset" class="nav tnav pnav sbBtn hidden" id="johnn" disbaled><i class="fas fa-paper-plane"></i>Submitting ...</button>
-                        </div>
                     </section>
-                </div>  
+ 
                 <section class="justifyBetween">
                     <a href="javascript:void(0)" class="nav bgTint4 white hidden" id="backNav"><i class="fas fa-chevron-left"></i> Back &nbsp;</a>
                     <a href="javascript:void(0)" class="nav bgTint4 white" id="nextNav">&nbsp; Next <i class="fas fa-chevron-right"></i></a>
@@ -758,8 +690,7 @@
         const pages = [
             document.getElementById('page1'),
             document.getElementById('page2'),
-            document.getElementById('page3'),
-            document.getElementById('page4')
+            document.getElementById('page3')
             ];
 
             const backNav = document.getElementById('backNav');
@@ -780,7 +711,7 @@
             // Back button
             backNav.classList.toggle('hidden', index === 0);
 
-            // Next button hides on page4
+            // Next button hides on page3
             nextNav.classList.toggle('hidden', index === pages.length - 1);
 
             

@@ -720,7 +720,6 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
   }
 });
-*/
 
 app.post('/reqDirect', cpUpload, async (req, res) => {
   try {
@@ -873,6 +872,152 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
   }
 });
+
+*/
+
+app.post('/reqDirect', cpUpload, async (req, res) => {
+  try {
+    const {
+      firstName, middleName, lastName, extName,
+      address, number, email, bDay, bMonth, bYear,
+      role, campus, studentNo, yearLevel, course,
+      schoolYear, semester, type, purpose, qty,
+      yearGraduated, yearAttended
+    } = req.body;
+
+    // 1️⃣ Check existing email
+    const existingEmail = await users.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" });
+    }
+
+    // 2️⃣ Check student number
+    if (role === 'Student' && studentNo) {
+      const existingStudent = await users.findOne({ schoolId: studentNo });
+      if (existingStudent) {
+        return res.render('index', { error: 'Student Number is already registered!', title: "AUDRESv25" });
+      }
+    }
+
+    // 4️⃣ Convert month to number
+    const monthMap = {
+      January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+      July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
+    };
+    const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1;
+    const paddedMonth = String(bMonthNum).padStart(2, '0');
+
+    // 5️⃣ Create User
+    const newUser = new users({
+      fName: firstName,
+      mName: middleName,
+      lName: lastName,
+      xName: extName,
+      address,
+      phone: number,
+      email: email.toLowerCase(),
+      bDay: Number(bDay),
+      bMonth: bMonthNum,
+      bYear: Number(bYear),
+      role,
+      campus,
+      schoolId: studentNo || undefined,
+      yearLevel,
+      course,
+      yearGraduated: yearGraduated || '',
+      yearAttended: yearAttended || '',
+      username: email,
+      password: generatePassword(),
+      archive: true,
+      verify: true,
+    });
+
+    const savedUser = await newUser.save();
+    // 1️⃣ Get all TRs
+    const allRequests = await requests.find({}, { tr: 1 });
+
+    // 2️⃣ Find the max sequence
+    let maxSeq = 0;
+    allRequests.forEach(r => {
+      if (r.tr && r.tr.length >= 3) {
+        // Take the last 3 digits as sequence
+        const seq = parseInt(r.tr.slice(-3), 10);
+        if (!isNaN(seq)) maxSeq = Math.max(maxSeq, seq);
+      }
+    });
+
+    // 3️⃣ Increment sequence
+    const nextSeq = maxSeq + 1;
+    const seqStr = String(nextSeq).padStart(3, '0');
+
+    // 4️⃣ Build TR
+    const year = new Date().getFullYear().toString().slice(-2); // "25"
+    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
+    const userLastTwo = savedUser._id.toString().slice(-2); // e.g., "35"
+
+    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
+
+    // 7️⃣ Create request header
+    const newRequest = new requests({
+      requestBy: savedUser._id,
+      archive: true,
+      verify: true,
+      status: "Pending",
+      tr
+    });
+
+    const savedRequest = await newRequest.save();
+
+    // 8️⃣ Upload request photos
+    const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
+    const reqPhotoUrlsMap = await Promise.all(
+      reqPhotos.map(async file => {
+        if (!file.path) return null;
+        const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
+        return result.secure_url;
+      })
+    );
+
+    // 9️⃣ Normalize arrays
+    const typesArr = [].concat(type || []);
+    const purposesArr = [].concat(purpose || []);
+    const qtyArr = [].concat(qty || []);
+    const schoolYearsArr = [].concat(schoolYear || []);
+    const semestersArr = [].concat(semester || []);
+
+    // 🔟 Create request items
+    const itemDocs = typesArr.map((t, i) => ({
+      requestId: savedRequest._id,
+      tr, // same TR
+      type: t || '',
+      purpose: purposesArr[i] || '',
+      qty: qtyArr[i] || 1,
+      schoolYear: schoolYearsArr[i] || '',
+      semester: semestersArr[i] || '',
+      proof: reqPhotoUrlsMap[i] || null,
+      archive: false,
+      verify: false,
+      status: "Pending"
+    }));
+
+    await items.insertMany(itemDocs);
+    
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${savedUser.fName} ${savedUser.mName} ${savedUser.lName} ${savedUser.xName}`;
+    await Log.create({
+      who: isWho,
+      what: `Registered and request a new document with TR# ${savedRequest.tr}`
+    });
+
+    // 1️⃣1️⃣ Success
+    res.redirect('/regSuccess');
+
+  } catch (err) {
+    console.error(err);
+    res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
+  }
+});
+
 app.post('/verify1', async (req, res) => {
   try {
     const { requestId } = req.body;
