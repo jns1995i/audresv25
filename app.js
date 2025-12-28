@@ -599,6 +599,16 @@ app.get('/logout', async (req, res) => {
   }
 });
 
+async function getRegistrarByAssign(assign) {
+  const registrar = await users.findOne({
+    role: "Registrar",
+    assign,
+    archive: false
+  });
+  return registrar ? registrar._id.toString() : null;
+}
+
+
 /*
 app.post('/reqDirect', cpUpload, async (req, res) => {
   try {
@@ -882,7 +892,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       address, number, email, bDay, bMonth, bYear,
       role, campus, studentNo, yearLevel, course,
       schoolYear, semester, type, purpose, qty,
-      yearGraduated, yearAttended
+      yearGraduated, yearAttended, work
     } = req.body;
 
     // 1️⃣ Check existing email
@@ -926,6 +936,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       course,
       yearGraduated: yearGraduated || '',
       yearAttended: yearAttended || '',
+      work: work || '',
       username: email,
       password: generatePassword(),
       archive: true,
@@ -1031,17 +1042,112 @@ app.post('/verify1', async (req, res) => {
     if (!studentRequest) return res.redirect('/vrf');
 
     const student = studentRequest.requestBy;
-
     let processBy = null;
-    if (student?.campus === 'South' || student?.campus === 'San Jose') {
+
+    /* =========================
+      1. CAMPUS CHECK
+    ========================= */
+    if (student?.campus === "South" || student?.campus === "San Jose") {
       const registrar = await users.findOne({
-        role: 'Registrar',
+        role: "Registrar",
         campus: student.campus,
         archive: false
       });
 
       if (registrar) {
         processBy = registrar._id.toString();
+      }
+    }
+
+    /* =========================
+      2. OLD RECORDS (≤ 2006)
+    ========================= */
+    if (!processBy) {
+      const year = student.yearGraduated || student.yearAttended;
+
+      if (year && Number(year) <= 2006) {
+        processBy = await getRegistrarByAssign("Old");
+      }
+    }
+
+    /* =========================
+      3. YEAR LEVEL
+    ========================= */
+    if (!processBy && student.yearLevel) {
+      const yl = String(student.yearLevel).toLowerCase();
+
+
+      if (yl.includes("first") || yl.includes("1st")) {
+        processBy = await getRegistrarByAssign("CAS");
+      }
+      else if (
+        yl.includes("grade 9") ||
+        yl.includes("grade 10") ||
+        yl.includes("grade 11") ||
+        yl.includes("grade 12")
+      ) {
+        processBy = await getRegistrarByAssign("CELA");
+      }
+    }
+
+    /* =========================
+      4. COURSE → ASSIGN
+    ========================= */
+    if (!processBy && student.course) {
+      let targetAssign = null;
+      const course = student.course;
+
+      if ([
+        "Bachelor of Science in Business Administration - Marketing Management",
+        "Bachelor of Science in Business Administration - Banking and Microfinance",
+        "Bachelor of Science in Business Administration - Financial Management",
+        "Bachelor of Science in Business Administration - Human Resource Management",
+        "Bachelor of Science in Accountancy",
+        "Bachelor of Science in Management Accounting",
+        "Bachelor of Science in Accounting Information System",
+        "Bachelor of Science in Hospitality Management",
+        "Bachelor of Science in Entrepreneurship"
+      ].includes(course)) {
+        targetAssign = "CMA";
+
+      } else if ([
+        "Bachelor of Science in Electrical Engineering",
+        "Bachelor of Science in Civil Engineering"
+      ].includes(course)) {
+        targetAssign = "COE";
+
+      } else if ([
+        "Bachelor of Science in Information Technology"
+      ].includes(course)) {
+        targetAssign = "CIT";
+
+      } else if ([
+        "Bachelor of Science in Pharmacy",
+        "Bachelor of Science in Psychology",
+        "Bachelor of Science in Nursing",
+        "Bachelor of Science in Medical Laboratory Science"
+      ].includes(course)) {
+        targetAssign = "CAHS";
+
+      } else if ([
+        "Bachelor of Elementary Education",
+        "Bachelor of Arts in Political Science",
+        "Bachelor of Early Childhood Education",
+        "Bachelor of Secondary Education - Science",
+        "Bachelor of Secondary Education - Mathematics",
+        "Bachelor of Secondary Education - English",
+        "Bachelor of Secondary Education - Filipino"
+      ].includes(course)) {
+        targetAssign = "CELA";
+
+      } else if ([
+        "Bachelor of Science in Criminology"
+      ].includes(course)) {
+        targetAssign = "CCJE";
+      }
+
+      if (targetAssign) {
+        processBy = await getRegistrarByAssign(targetAssign);
       }
     }
 
@@ -1234,7 +1340,9 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     const semestersArr = [].concat(req.body.semester || []);
 
     // 2️⃣ Upload proof photos
-    const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
+    const reqPhotos = (req.files || []).filter(
+      f => f.fieldname === 'reqPhoto[]'
+    );
     const reqPhotoUrls = await Promise.all(
       reqPhotos.map(async file => {
         const result = await cloudinary.uploader.upload(file.path, {
@@ -1269,18 +1377,113 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
 
     let processBy = null;
-    if (student?.campus === 'South' || student?.campus === 'San Jose') {
+
+    /* =========================
+      1. CAMPUS CHECK
+    ========================= */
+    if (student?.campus === "South" || student?.campus === "San Jose") {
       const registrar = await users.findOne({
-        role: 'Registrar',
+        role: "Registrar",
         campus: student.campus,
         archive: false
       });
 
       if (registrar) {
-        processBy = registrar._id.toString(); // assign as string
+        processBy = registrar._id.toString();
       }
     }
 
+    /* =========================
+      2. OLD RECORDS (≤ 2006)
+    ========================= */
+    if (!processBy) {
+      const year = student.yearGraduated || student.yearAttended;
+
+      if (year && Number(year) <= 2006) {
+        processBy = await getRegistrarByAssign("Old");
+      }
+    }
+
+    /* =========================
+      3. YEAR LEVEL
+    ========================= */
+    if (!processBy && student.yearLevel) {
+      const yl = String(student.yearLevel).toLowerCase();
+
+
+      if (yl.includes("first") || yl.includes("1st")) {
+        processBy = await getRegistrarByAssign("CAS");
+      }
+      else if (
+        yl.includes("grade 9") ||
+        yl.includes("grade 10") ||
+        yl.includes("grade 11") ||
+        yl.includes("grade 12")
+      ) {
+        processBy = await getRegistrarByAssign("CELA");
+      }
+    }
+
+    /* =========================
+      4. COURSE → ASSIGN
+    ========================= */
+    if (!processBy && student.course) {
+      let targetAssign = null;
+      const course = student.course;
+
+      if ([
+        "Bachelor of Science in Business Administration - Marketing Management",
+        "Bachelor of Science in Business Administration - Banking and Microfinance",
+        "Bachelor of Science in Business Administration - Financial Management",
+        "Bachelor of Science in Business Administration - Human Resource Management",
+        "Bachelor of Science in Accountancy",
+        "Bachelor of Science in Management Accounting",
+        "Bachelor of Science in Accounting Information System",
+        "Bachelor of Science in Hospitality Management",
+        "Bachelor of Science in Entrepreneurship"
+      ].includes(course)) {
+        targetAssign = "CMA";
+
+      } else if ([
+        "Bachelor of Science in Electrical Engineering",
+        "Bachelor of Science in Civil Engineering"
+      ].includes(course)) {
+        targetAssign = "COE";
+
+      } else if ([
+        "Bachelor of Science in Information Technology"
+      ].includes(course)) {
+        targetAssign = "CIT";
+
+      } else if ([
+        "Bachelor of Science in Pharmacy",
+        "Bachelor of Science in Psychology",
+        "Bachelor of Science in Nursing",
+        "Bachelor of Science in Medical Laboratory Science"
+      ].includes(course)) {
+        targetAssign = "CAHS";
+
+      } else if ([
+        "Bachelor of Elementary Education",
+        "Bachelor of Arts in Political Science",
+        "Bachelor of Early Childhood Education",
+        "Bachelor of Secondary Education - Science",
+        "Bachelor of Secondary Education - Mathematics",
+        "Bachelor of Secondary Education - English",
+        "Bachelor of Secondary Education - Filipino"
+      ].includes(course)) {
+        targetAssign = "CELA";
+
+      } else if ([
+        "Bachelor of Science in Criminology"
+      ].includes(course)) {
+        targetAssign = "CCJE";
+      }
+
+      if (targetAssign) {
+        processBy = await getRegistrarByAssign(targetAssign);
+      }
+    }
 
     // 7️⃣ Create Request Header
     const newRequest = new requests({
@@ -1304,7 +1507,7 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       qty: qtyArr[i] || 1,
       schoolYear: schoolYearsArr[i] || '',
       semester: semestersArr[i] || '',
-      proof: reqPhotoUrls[i] || null,
+      proof: reqPhotoUrls[i] ?? null,
       archive: false,
       verify: false,
       status: "Pending"
@@ -2484,7 +2687,7 @@ app.post("/restore3", async (req, res) => {
 
 // ===== FOR RELEASE ROUTE =====
 app.post("/fRel", async (req, res) => {
-  const { requestId, back } = req.body;
+  const { requestId, back, itemRemarks, paperUsed } = req.body;
 
   try {
     const requestDoc = await requests.findById(requestId).populate('requestBy');
@@ -2497,7 +2700,8 @@ app.post("/fRel", async (req, res) => {
     requestDoc.status = "For Release";
     requestDoc.declineAt = null;
     requestDoc.holdAt = null;
-    requestDoc.remarks = null;
+    requestDoc.remarks = null;  // save remarks
+    requestDoc.paper = paperUsed || null;      // save paper count
     requestDoc.turnAt = new Date();
     await requestDoc.save();
 

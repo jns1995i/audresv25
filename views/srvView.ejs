@@ -36,7 +36,13 @@
                             porcelain 
                             <% } %>
                             corner15 padding15 relative">
-                                <section class="padding0 alignStart col">
+                                <section class="padding0 alignStart col paddingLeft80">
+                                    <a href="" class="nav cnavLG absolute left20 disabled glass colorPrimary">
+                                        <i class="fas fa-file size35"></i>
+                                    </a>
+                                    <div class="w50 h50 absolute left20 hidden">
+                                        <i class="fas fa-file size35"></i>
+                                    </div>
                                     <p class="rem14 str500 flex alignCenter">
                                         <%= item.qty %> <%= item.type %>
                                         <% if ( item.proof ) { %>
@@ -51,11 +57,11 @@
                                     </p>
                                     <p class="rem12"></p>
                                     <% if ( item.status === "Declined") { %>
-                                        <a href="" class="disabled nav cnavLG absolute translateY right10 bgRed100"><i class="fas fa-xmark-circle"></i></a>
+                                        <a href="" class="disabled nav cnavLG absolute translateY right10 bgRed100 hidden"><i class="fas fa-xmark-circle"></i></a>
                                     <% } else if ( item.status === "Approved") { %>
-                                        <a href="" class="disabled nav cnavLG absolute translateY right10 bgGreen100"><i class="fas fa-check-circle"></i></a>
+                                        <a href="" class="disabled nav cnavLG absolute translateY right10 bgGreen100 hidden"><i class="fas fa-check-circle"></i></a>
                                     <% } else { %>
-                                        <section class="padding10 gap5 width0 corner10 absolute right10 top10">
+                                        <section class="padding10 gap5 width0 corner10 absolute right10 top10 hidden">
                                             <form action="/decItem" method="POST" class="form2">
                                                 <input type="hidden" name="requestId" value="<%= request._id %>">
                                                 <input type="hidden" name="itemId" value="<%= item._id %>">
@@ -67,6 +73,14 @@
                                                 <input type="hidden" name="itemId" value="<%= item._id %>">
                                                 <input type="hidden" name="back" value="<%= back %>">
                                                 <button type="submit" class="nav corner10 pnav"><i class="fas fa-check-circle"></i> Approve</button>
+                                            </form>
+                                        </section>
+                                        <section class="padding10 gap5 width0 corner10 absolute right10 top10 hidden">
+                                            <form action="/remarksItem" method="POST" class="form2">
+                                                <input type="hidden" name="requestId" value="<%= request._id %>">
+                                                <input type="hidden" name="itemId" value="<%= item._id %>">
+                                                <input type="hidden" name="back" value="<%= back %>">
+                                                <button type="submit" class="nav corner10 gnav"><i class="fas fa-paper-plane"></i> Send Remarks</button>
                                             </form>
                                         </section>
                                     <% } %>
@@ -88,21 +102,16 @@
             <%- include('partials/notes') %>
             <% const hasPending = request.items && request.items.some(it => it.status === "Pending"); %>
             <% if (hasPending) { %>
-                <section class="gap10 justifyBetween corner15 shadow1 bgWhite">
+                <section class="gap10 justifyBetween corner15 shadow1 bgWhite hidden">
                     <p class="rem14 str500">Quick Action <i class="fas fa-arrow-right"></i></p>
-                    <form action="/appAllItem" method="POST" class="form2">
-                        <input type="hidden" name="requestId" value="<%= request._id %>">
-                        <input type="hidden" name="back" value="<%= back %>">
-                        <button type="submit" class="nav corner10 pnav"><i class="fas fa-check-double"></i> Approve Request</button>
-                    </form>
                 </section>
             <% } %>
 
             <% if (hasPending) { %>
                 <section class="gap10 justifyBetween corner15 col bgWhite padding20 shadow1">
-                    <p class="rem14 str500 darkGray">Special Action</p>
+                    <p class="rem14 str500">Quick Action</p>
                     <section class="padding0 gap10">
-                        <form action="/decline3" method="POST" class="form2 width100">
+                        <form action="/decline3" method="POST" class="form2 width100 hidden">
                             <input type="hidden" name="requestId" value="<%= request._id %>">
                             <input type="hidden" name="back" value="<%= back %>">
                             <button type="submit" class="nav dnav-fill corner10 width100"><i class="fas fa-xmark-circle"></i> Decline Request</button>
@@ -111,10 +120,15 @@
                         <form action="/hold3" method="POST" class="form2 width100">
                             <input type="hidden" name="requestId" value="<%= request._id %>">
                             <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav dnav-fill corner10 width100"><i class="fas fa-clock"></i> Hold Request</button>
+                            <button type="submit" class="nav borderPrimary corner10 width100"><i class="fas fa-clock"></i> Hold Request</button>
                         </form>
                         <% } else { %>
                         <% } %>
+                        <form action="/appAllItem" method="POST" class="form2 width100">
+                            <input type="hidden" name="requestId" value="<%= request._id %>">
+                            <input type="hidden" name="back" value="<%= back %>">
+                            <button type="submit" class="nav corner10 pnav width100"><i class="fas fa-check-circle marginRight5"></i> Approve Request</button>
+                        </form>
                     </section>
                 </section>
             <% } %>
@@ -157,20 +171,19 @@
             <% } %>
             
             <% if ( request.status === "Verified") { %>
-            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20">
-                <%- include('icons/success') %>
-                <p class="rem12 str500 textCenter green">Confirm that the document is fully prepared and ready for release.</p>
-                <form action="/fRel" method="POST" class="form2">
+            <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20 claimX">
+                <p class="size14 str400 textCenter textBalance">Update the request if the document is fully prepared and ready for release.</p>
+                <form action="/fRel" method="POST" class="form2 marginTop5">
                     <input type="hidden" name="requestId" value="<%= request._id %>">
                     <input type="hidden" name="back" value="<%= back %>">
-                    <button type="submit" class="nav corner10 gnav"><i class="fas fa-dolly"></i>Ready For Release</button>
+                    <button type="submit" class="nav pnav"><i class="fas fa-dolly"></i>Mark as Ready For Release</button>
                 </form>
             </section>
             <% } %>
 
             <style>
                 .claimX #successIcon {
-                    border: 0.5px solid blue !important;
+                    border: 0.5px solid rgb(6, 6, 69) !important;
                     i.fa-thumbs-up {
                         color: rgb(8, 8, 92);
                     }
@@ -179,13 +192,13 @@
                         
             <% if ( request.status === "For Release") { %>
             <section class="gap10 justifyBetween corner20 bgWhite shadow1 col padding20 claimX">
-                <%- include('icons/success') %>
-                <p class="rem12 str500 textCenter colorPrimary">Has the document been claimed?</p>
+                <p class="size14 str500 textCenter colorPrimary textBalance bgBlue100"><i class="fas fa-info-circle"></i> Update the status of the document once it was claimed</p>
                 <form action="/claim3" method="POST" class="form2 width100">
                     <input type="hidden" name="requestId" value="<%= request._id %>">
                     <input type="hidden" name="back" value="<%= back %>">
-                    <div class="field">
-                        <input type="text" name="claimedBy" placeholder="Enter Claimant's Name">
+                    <div class="field marginTop10">
+                        <label for="">Name of Claimant</label>
+                        <input type="text" name="claimedBy" placeholder="Enter Claimant's Name" required>
                     </div>
                     <br>
                     <button type="submit" class="nav corner10 pnav width100"><i class="fas fa-dolly"></i>Mark as Claimed</button>
@@ -224,6 +237,13 @@
                     <option value="" selected disabled>Select Reason</option>
                 </select>
             </div>
+            <div class="width100 widthMax100 marginBottom15" id="InputDiv" style="display: none;">
+                <textarea name="" id="inputFlex"></textarea>
+            </div>
+            <div class="field marginBottom15" id="paperDiv" style="display: none;">
+                <label for="">No. of used paper</label>
+                <input type="text" name="" id="paperInput" placeholder="Enter number">
+            </div>
             <section class="bgBlue100 col padding15 textCenter">
                 <p class="rem12">This action cannot be undone!</p>
             </section>
@@ -243,6 +263,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeNoticeCard = document.getElementById("closeNoticeCard");
     const selectDiv = document.getElementById("SelectDiv");
     const selectFlex = document.getElementById("selectFlex");
+    const inputDiv = document.getElementById("InputDiv");
+    const inputFlex = document.getElementById("inputFlex");
+    const paperDiv = document.getElementById("paperDiv");
+    const paperInput = document.getElementById("paperInput");
+
+
 
     let currentForm = null; // form to submit
     let currentAction = null; // store action type: 'item', 'decline3', 'hold3'
@@ -255,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const actions = [
         { selector: 'form[action="/decItem"] button', message: "Are you sure you want to decline this requested document? Select your reason below", reason: "decline", type: "item" },
         { selector: 'form[action="/appItem"] button', message: "You are about to approve this requested document", type: "item" },
+        { selector: 'form[action="/remarksItem"] button', message: "Are you sure you want to send this remarks?", type: "item" },
         { selector: 'form[action="/decline3"] button', message: "Are you sure you want to decline this whole transaction? Select your reason below", reason: "decline", type: "transaction" },
         { selector: 'form[action="/hold3"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", type: "transaction" },
         { selector: 'form[action="/appAllItem"] button', message: "Are you sure you want to approve all the requested documents? It will be marked as Reviewed and will proceed to Accounting for Assessment", type: "transaction" },
@@ -283,8 +310,34 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.addEventListener("click", e => {
                 e.preventDefault();
                 currentForm = btn.closest("form");
+                // ✅ Run native form validation first
+                if (!currentForm.checkValidity()) {
+                    currentForm.reportValidity();
+                    return;
+                }
                 currentAction = action; // store the action type
                 noticeMsg.textContent = action.message;
+
+                // Reset input first
+                inputDiv.style.display = "none";
+                inputFlex.required = false;
+                inputFlex.value = "";
+                paperDiv.style.display = "none";
+                paperInput.required = false;
+                paperInput.value = "";
+
+                // Show paper input ONLY for fRel
+                if (currentForm.action.includes("/fRel")) {
+                    paperDiv.style.display = "flex";
+                    paperInput.required = true;
+                }
+
+
+                // Show textarea ONLY for remarksItem
+                if (currentForm.action.includes("/remarksItem")) {
+                    inputDiv.style.display = "flex";
+                    inputFlex.required = true;
+                }
 
                 if (action.reason && reasonOptions[action.reason]) {
                     populateSelect(action.reason);
@@ -305,6 +358,11 @@ document.addEventListener("DOMContentLoaded", () => {
         selectDiv.style.display = "none";
         selectFlex.required = false;
         selectFlex.value = "";
+        inputDiv.style.display = "none";
+        inputFlex.required = false;
+        inputFlex.value = "";
+
+
     });
 
     proceedBtn.addEventListener("click", () => {
@@ -315,10 +373,20 @@ document.addEventListener("DOMContentLoaded", () => {
             selectFlex.reportValidity();
             return;
         }
+        // Validate remarks textarea if visible
+        if (inputDiv.style.display !== "none" && !inputFlex.checkValidity()) {
+            inputFlex.reportValidity();
+            return;
+        }
+        // Validate paper input if visible
+        if (paperDiv.style.display !== "none" && !paperInput.checkValidity()) {
+            paperInput.reportValidity();
+            return;
+        }
 
         // Inject the reason into a hidden input before submitting
         let reasonValue = selectFlex.value;
-        if (reasonValue) {
+        if (reasonValue && inputDiv.style.display === "none") {
             let inputName = "";
 
             if (currentAction.type === "item") {
@@ -338,6 +406,32 @@ document.addEventListener("DOMContentLoaded", () => {
             hiddenInput.value = reasonValue;
             currentForm.appendChild(hiddenInput);
         }
+
+        // Inject remarks input if used
+        if (inputDiv.style.display !== "none") {
+            let existing = currentForm.querySelector('input[name="itemRemarks"]');
+            if (existing) existing.remove();
+
+            const remarksInput = document.createElement("input");
+            remarksInput.type = "hidden";
+            remarksInput.name = "itemRemarks";
+            remarksInput.value = inputFlex.value.trim();
+
+            currentForm.appendChild(remarksInput);
+        }
+        // Inject paper count if used
+        if (paperDiv.style.display !== "none") {
+            let existing = currentForm.querySelector('input[name="paperUsed"]');
+            if (existing) existing.remove();
+
+            const paperHidden = document.createElement("input");
+            paperHidden.type = "hidden";
+            paperHidden.name = "paperUsed";
+            paperHidden.value = paperInput.value.trim();
+
+            currentForm.appendChild(paperHidden);
+        }
+
 
         currentForm.submit();
     });

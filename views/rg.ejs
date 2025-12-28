@@ -128,7 +128,6 @@
           }
          }
          .sbBtn {
-            width: 100%;
             text-align: center;
             justify-content: center;
          }
@@ -245,29 +244,42 @@
                                     </div>
                                 </div>
                                 <div class="field upload hidden marginTop10">
-                                    <label class="str500">Please upload photo of School Request</label>
+                                    <label class="str500">Please upload photo of School Request*</label>
                                     <input type="file" name="reqPhoto[]" class="bgYellow">
                                 </div>
-                                <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>
+
+                                <p class="bgRed100 limitPhoto hidden marginTop10"></p>
                                 <script>
                                 document.addEventListener("DOMContentLoaded", () => {
-                                const input = document.querySelector('input[name="reqPhoto[]"]');
-                                const warning = document.querySelector('.limitPhoto');
+                                    const input = document.querySelector('input[name="reqPhoto[]"]');
+                                    const warning = document.querySelector('.limitPhoto');
 
-                                input.addEventListener('change', function () {
-                                    warning.classList.add("hidden");
-
-                                    if (this.files.length > 0) {
-                                    const file = this.files[0];
                                     const maxSize = 500 * 1024 * 1024; // 500MB
 
-                                    if (file.size > maxSize) {
-                                        warning.textContent = "Photo must not be larger than 500MB.";
-                                        warning.classList.remove("hidden");
-                                        this.value = ""; // clear file input
-                                    }
-                                    }
-                                });
+                                    input.addEventListener('change', function () {
+                                        warning.classList.add("hidden");
+                                        warning.textContent = "";
+
+                                        if (!this.files || this.files.length === 0) return;
+
+                                        const file = this.files[0];
+
+                                        // ✅ Check if file is an image
+                                        if (!file.type.startsWith("image/")) {
+                                            warning.textContent = "Only photo files are allowed!";
+                                            warning.classList.remove("hidden");
+                                            this.value = ""; // clear uploaded file
+                                            return;
+                                        }
+
+                                        // ✅ Check file size
+                                        if (file.size > maxSize) {
+                                            warning.textContent = "Photo must not be larger than 500MB!";
+                                            warning.classList.remove("hidden");
+                                            this.value = ""; // clear uploaded file
+                                            return;
+                                        }
+                                    });
                                 });
                                 </script>
                                 <br>
@@ -318,21 +330,23 @@
                         </div>
                             
                         <div class="row height0 width100 gap10 colF1">
-                            <div class="field gap5 width30">
+                            <div class="field gap5">
                                 <label for="">First Name*</label>
-                                <input type="text" name="firstName" class="sname" required>
+                                <input type="text" name="firstName" class="sname" placeholder="Enter your first name" required>
                             </div>
-                            <div class="field gap5 width30">
+                            <div class="field gap5">
                                 <label for="">Middle Name</label>
-                                <input type="text" name="middleName" class="sname">
+                                <input type="text" name="middleName" class="sname" placeholder="Enter your middle name">
                             </div>
-                            <div class="field gap5 width30">
+                        </div>
+                        <div class="row height0 width100 gap10 colF1">
+                            <div class="field gap5">
                                 <label for="">Last Name*</label>
-                                <input type="text" name="lastName" class="sname" required>
+                                <input type="text" name="lastName" class="sname" placeholder="Enter your last name" required>
                             </div>
-                            <div class="field gap5 width10">
-                                <label for="">Ext</label>
-                                <input type="text" name="extName" class="sname">
+                            <div class="field gap5">
+                                <label for="">Extension Name <span class="gray size10">Optional</span></label>
+                                <input type="text" name="extName" class="sname" placeholder="e.g. Jr. I, II, III, Sr.">
                             </div>
                         </div>
                         <script>
@@ -352,7 +366,7 @@
                         <div class="row height0 width100 gap10 colF1">
                             <div class="field gap5">
                                 <label for="">Address*</label>
-                                <input type="text" name="address" required>
+                                <input type="text" name="address" placeholder="e.g. Barangay 1, Cabanatuan City, Nueva Ecija" required>
                             </div>
                         </div>
                         <div class="row height0 width100 gap10 colF1">
@@ -380,7 +394,7 @@
                         <div class="height0 width100 gap10 alignEnd colF1">
                             <div class="field gap5">
                                 <label for="">Active PHINMA AU or Personal Email*</label>
-                                <input type="email" name="email" id="em" required>
+                                <input type="email" name="email" id="em" placeholder="" required>
                             </div>
                             <div class="field gap5">
                                 <label for="">Phone Number*</label>
@@ -671,6 +685,22 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="field height0 col alignStart gap5 hidden" id="workField">
+                            <label for="work">Work or Career</label>
+                            <div class="selectBar">
+                                <select name="work" id="work">
+                                    <option value="" selected disabled>Select</option>
+                                    <option value="DEPED">DEPED</option>
+                                    <option value="Entrepreneur">Entrepreneur</option>
+                                    <option value="Government Employee">Government Employee</option>
+                                    <option value="Military Personnel">Military Personnel</option>
+                                    <option value="OFW">OFW</option>
+                                    <option value="Private Employee">Private Employee</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Unemployed">Unemployed</option>
+                                </select>
+                            </div>
+                        </div>
                         <br>    
                         <div class="bgYellow cornerRem1 padding20 textCenter">
                             TAKE NOTE: Please review all the details carefully before submitting your request. Ensure that all selections and information are correct, as changes may not be allowed after submission.
@@ -680,7 +710,7 @@
                 <section class="justifyBetween">
                     <a href="javascript:void(0)" class="nav bgTint4 white hidden" id="backNav"><i class="fas fa-chevron-left"></i> Back &nbsp;</a>
                     <a href="javascript:void(0)" class="nav bgTint4 white" id="nextNav">&nbsp; Next <i class="fas fa-chevron-right"></i></a>
-                    <button type="submit" class="nav tnav pnav sbBtn hidden" id="ferry"><i class="fas fa-check-circle"></i>Submit</button>
+                    <button type="submit" class="nav bgTint4 white sbBtn hidden" id="ferry"><i class="fas fa-check-circle"></i>Submit</button>
                 </section>
             </form>
         </div>
@@ -817,15 +847,16 @@
     // Hide both fields initially
     document.getElementById("yearGraduateContainer").classList.add("hidden");
     document.getElementById("yearAttendedContainer").classList.add("hidden");
+    document.getElementById("workField").classList.add("hidden");
 
     // Show the correct field based on role selection
     if (role === "Alumni") {
         document.getElementById("yearGraduateContainer").classList.remove("hidden");
+        document.getElementById("workField").classList.remove("hidden");
     } else if (role === "Former") {
         document.getElementById("yearAttendedContainer").classList.remove("hidden");
     }
 });
-
 </script>
 
 <script>

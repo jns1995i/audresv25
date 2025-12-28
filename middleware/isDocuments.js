@@ -10,6 +10,7 @@ module.exports = async (req, res, next) => {
       { type: "Form 137", amount: 200 },
       { type: "Form 138", amount: 150 },
       { type: "Authentication", amount: 80 },
+      { type: "Honorable Dismissal", amount: 500 },
 
       // CAV
       { type: "CAV (Graduate)", amount: 240 },

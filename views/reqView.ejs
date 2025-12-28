@@ -26,6 +26,9 @@
             backdrop-filter: blur(10px);
             background-color: var(--shade12);
         }
+        #noteX p {
+            font-size: 14px !important;
+        }
       @media (max-width: 1024px) {
         body {
             display: block;
@@ -107,7 +110,7 @@
                 <% } %>
                 <p class="rem2 str400">#<%= rq.tr %></p>
             </section>
-            <section class="padding10 corner20 col bgWhite">
+            <section class="corner20 col padding10 gap10 bgWhite">
                 
                <%- include('partials/notes3') %>
                 <%- include('partials/status') %>
@@ -194,7 +197,10 @@
                     <% } else { %>
                         <% items.forEach((it, index) => { %>
                             <section class="bgWhite shadow1 corner12 padding15 relative">
-                                <section class="padding0 alignStart justifyCenter col">
+                                <a href="" class="nav cnavLG absolute left15 disabled glass colorPrimary">
+                                    <i class="fas fa-file size35"></i>
+                                </a>
+                                <section class="padding0 alignStart justifyCenter col paddingLeft70">
                                     <p class="size12 str500"><%= it.qty %> <%= it.type %></p>
                                     <p class="size12">for <%= it.purpose %> Purpose</p>
                                     <p class="size12"><%= it.semester %> Semester &bull; <%= it.schoolYear %></p>
@@ -203,8 +209,14 @@
                                             <i class="fas fa-info-circle"></i> Note: <%= it.remarks %>
                                         </p>
                                     <% } %>
+                                
+                                <% if (it.type === 'Certificate of Grades') { %>
+                                    <p class="bgBlue100 textBalance" style="margin-top: 5px !important;">
+                                    Kindly bring two (2) photocopies of your 2x2 ID picture.
+                                    </p>
+                                <% } %>
                                 </section>
-                                <section class="padding0 justifyEnd absolute right20 translateY">
+                                <section class="padding0 justifyEnd absolute right20 translateY hidden">
                                     <% if (it.status === "Declined") { %>
                                         <a href="" class="nav cnav disabled bgRed100"><i class="fas fa-xmark-circle"></i></a>
                                     <% } else if ( it.status === "Approved") { %>
@@ -217,7 +229,7 @@
                         <% }) %>
                     <% } %>
                 </section>
-                <section class="bgBlue100 corner15 justifyBetween padding10 marginTop15" style="align-self: center;">
+                <section class="bgBlue100 corner15 justifyBetween padding10 marginTop15 hidden" style="align-self: center;">
                     <p class="size16"><i class="fas fa-info-circle"></i> Total Payables</p>
                     <p class="size16 str500">&#8369;<%= totalAmount || "0" %>.00</p>
                 </section>

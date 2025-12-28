@@ -200,29 +200,42 @@
                                     </div>
                                 </div>
                                 <div class="field upload hidden marginTop10">
-                                    <label class="str500">Please upload photo of School Request</label>
+                                    <label class="str500">Please upload photo of School Request*</label>
                                     <input type="file" name="reqPhoto[]" class="bgYellow">
                                 </div>
-                                <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>
+
+                                <p class="bgRed100 limitPhoto hidden marginTop10"></p>
                                 <script>
                                 document.addEventListener("DOMContentLoaded", () => {
-                                const input = document.querySelector('input[name="reqPhoto[]"]');
-                                const warning = document.querySelector('.limitPhoto');
+                                    const input = document.querySelector('input[name="reqPhoto[]"]');
+                                    const warning = document.querySelector('.limitPhoto');
 
-                                input.addEventListener('change', function () {
-                                    warning.classList.add("hidden");
-
-                                    if (this.files.length > 0) {
-                                    const file = this.files[0];
                                     const maxSize = 500 * 1024 * 1024; // 500MB
 
-                                    if (file.size > maxSize) {
-                                        warning.textContent = "Photo must not be larger than 500MB.";
-                                        warning.classList.remove("hidden");
-                                        this.value = ""; // clear file input
-                                    }
-                                    }
-                                });
+                                    input.addEventListener('change', function () {
+                                        warning.classList.add("hidden");
+                                        warning.textContent = "";
+
+                                        if (!this.files || this.files.length === 0) return;
+
+                                        const file = this.files[0];
+
+                                        // ✅ Check if file is an image
+                                        if (!file.type.startsWith("image/")) {
+                                            warning.textContent = "Only photo files are allowed!";
+                                            warning.classList.remove("hidden");
+                                            this.value = ""; // clear uploaded file
+                                            return;
+                                        }
+
+                                        // ✅ Check file size
+                                        if (file.size > maxSize) {
+                                            warning.textContent = "Photo must not be larger than 500MB!";
+                                            warning.classList.remove("hidden");
+                                            this.value = ""; // clear uploaded file
+                                            return;
+                                        }
+                                    });
                                 });
                                 </script>
                                 <br>

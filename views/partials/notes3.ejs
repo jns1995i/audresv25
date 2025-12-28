@@ -1,6 +1,5 @@
  <% if ( rq.holdAt ) { %>
                 <section class=" bgWhite padding0 relative">
-                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         Your request has been hold! Due to
                         <% if ( rq.remarks === "Incomplete") { %>
@@ -13,7 +12,6 @@
                 </section>
                 <% } else if ( rq.declineAt ) { %>
                 <section class=" bgWhite padding0 relative col">
-                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
                         We regret to inform you that your request has been declined. For further assistance, please visit the Registrar’s Office on your campus, or contact us through our official hotline at <%= seedUser.phone %> or via email at <%= seedUser.email %>
                         <% if ( rq.remarks === "Incomplete") { %>
@@ -23,22 +21,29 @@
                     </section>
                 </section>
                 <% } else { %>
-                <section class=" bgWhite padding0 relative">
-                    <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
-                    <section class="bgSoft textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
+                <section class="padding0 relative bgBlue100 corner20">
+                    <section class=" textCenter colorPrimary col padding20" id="noteX" style="min-height: 60px;">
                         <% if (rq.status === "Pending") { %>
                         <p class="">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed. Thank you for your patience!</p>
                         <% } else if (rq.status === "Reviewed") { %>
                             <p class="">Good news! Your request has been reviewed and has now been forwarded to the Accounting Department for assessment.</p>
                         <% } else if (rq.status === "Assessed") { %>
-                            <p class="">Your request is now ready FOR PAYMENT. You can pay at any cashier window or pay it <span class="inline str600">ONLINE</span> at your convenience. For online payment instructions, click <a href="/pay" class="inline width0 height0 str600">here</a>. Please make sure to take a screenshot of the transaction receipt or take photo of the receipt the cashier and upload it below.</p>
+                            <section class="bgWhite col corner15">
+                                <p>Your request is now ready <strong style="font-weight: 600; font-size: inherit;">FOR PAYMENT</strong>.</p>
+                                <p class="size16 str500">Pay the total amount of &#8369;<%= totalAmount || "0" %>.00</p>
+                            </section>
+                            <br>
+                            <p>You can pay it <span class="inline str600">ONLINE</span> at your convenience or pay at any cashier window if you are inside the school premises</p>
+                            <br>
+                            <p class="textBalance"><i class="fas fa-info-circle"></i> Take Note: You are required to upload your proof of payment below. So Please make sure to take a screenshot of the receipt from your online transaction or take a photo of your receipt from the cashier after payment</p>
+                            <p class="hidden">  For online payment instructions, click <a href="/ins2" target="_blank" class="navy inline width0 height0 str500 size14">here</a>. Please make sure to take a screenshot of the transaction receipt or take photo of the receipt from the cashier and upload it <a class="size14 str500 navy inline" href="https://bit.ly/OnlinePaymentGcashBanktransferECPAYPayMaya" target="_blank">here</a></p>
                             <br>
                            <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
                                 <input type="hidden" name="id" value="<%= rq ? rq._id : '' %>">
                                 <div class="field hidden">
                                     <label for="">Payment Method</label>
                                     <div class="selectBar">
-                                        <select name="payMode" id="payMode" required>
+                                        <select name="payMode" id="payMode">
                                             <option value="Online" selected>Select Method</option>
                                             <option value="Cash">Cash</option>
                                             <option value="GCash">GCash</option>
@@ -58,8 +63,7 @@
                                     <input name="payPhoto" type="file" multiple required>
                                     <label for=""><i class="fas fa-info-circle inline"></i> Multiple file can be uploaded</label>
                                 </div>
-
-                                <p class="bgRed100 limitPhoto hidden marginTop10">Photo must not be larger than 500MB.</p>
+                                <p class="bgRed100 limitPhoto hidden marginTop10"></p>
 
                                 <div class="field alignEnd">
                                     <button class="nav pnav w120">Upload</button>
@@ -69,20 +73,30 @@
                                     const input = document.querySelector('input[name="payPhoto"]');
                                     const warning = document.querySelector('.limitPhoto');
 
+                                    const maxSize = 500 * 1024 * 1024; // 500MB
+
                                     input.addEventListener('change', function () {
                                         warning.classList.add("hidden");
+                                        warning.textContent = "";
 
-                                        if (this.files.length > 0) {
-                                            const maxSize = 500 * 1024 * 1024; // 500MB
-                                            for (let i = 0; i < this.files.length; i++) {
-                                                const file = this.files[i];
-                                                if (file.size > maxSize) {
-                                                    warning.textContent = `Photo "${file.name}" exceeds 500MB.`;
-                                                    warning.classList.remove("hidden");
-                                                    this.value = ""; // clear all files
-                                                    break;
-                                                }
-                                            }
+                                        if (!this.files || this.files.length === 0) return;
+
+                                        const file = this.files[0];
+
+                                        // ✅ Check if file is an image
+                                        if (!file.type.startsWith("image/")) {
+                                            warning.textContent = "Only photo files are allowed!";
+                                            warning.classList.remove("hidden");
+                                            this.value = ""; // clear uploaded file
+                                            return;
+                                        }
+
+                                        // ✅ Check file size
+                                        if (file.size > maxSize) {
+                                            warning.textContent = "Photo must not be larger than 500MB!";
+                                            warning.classList.remove("hidden");
+                                            this.value = ""; // clear uploaded file
+                                            return;
                                         }
                                     });
                                 });
@@ -90,18 +104,17 @@
                             </form>
 
                         <% } else if (rq.status === "For Verification") { %>
-                            <p class="">Please give us 24 hours to verify your payment. Thank you.</p>
+                            <p class="">Please wait while we are verifying your payment. Thank you</p>
                         <% } else if (rq.status === "Verified") { %>
-                            <p class="">Your payment has been verified. We will notify you via the email you provided once your document is ready for release.</p>
+                            <%- include('../icons/successBlue') %>
+                            <br>
+                            <p class="">Request has been approved! We will notify you via the email you provided once your document is ready for release.</p>
                         <% } else if (rq.status === "For Release") { %>
                             <div class="height0 col bgWhite padding20 corner15">
-                                <p><i class="fas fa-check-circle blue corner500" style="font-size: 12px; outline: 1px solid rgb(3, 18, 106, 0.2);"></i>
-                                Great News! you can now claim your document anytime.
-                                <% if (rq.purpose === 'Board Exam') { %>
-                                    Please proceed to the Registrar’s Office to claim your document. Kindly bring two (2) photocopies of your 2x2 ID picture.
-                                <% } %>
-                                Upon claiming, please present the QR code below to verify your transaction details. If someone will be claiming the document on your behalf, they must present a signed authorization letter along with a valid ID and 1 photocopy of picture. 
-                                <br><br>
+                                <p><i class="fas fa-check-circle corner500" style="font-size: 12px; outline: 1px solid rgb(3, 18, 106, 0.2);"></i>
+                                Great News! You can now claim your document anytime. Please proceed to the Registrar’s Office to claim your document by presenting the QR Code below and the requirements needed listed below the request details. 
+                                </p>
+                                <br>
                                     
                                 <div class="bgWhite height0 gap5 justifyCenter alignCenter width0 padding5 corner10 darkShadow relative">
                                     <div class="height0 col hidden">
@@ -116,6 +129,8 @@
                                     <canvas id="qrcodeCanvas" width="100" height="100" class="hMax150 wMax150"></canvas>
                                     <a href="javascript:void(0)" class="nav cnav qrBtn absolute bottom5 right5 glass"><i class="fas fa-download"></i></a>
                                 </div>
+                                <br>
+                                <p>If someone will be claiming the document on your behalf, they must present a signed authorization letter along with a valid ID and 1 photocopy of picture.</p>
                             </div>
                             <script>
                                 document.addEventListener('DOMContentLoaded', () => {
@@ -173,12 +188,6 @@
                                     }
                                 });
                             </script>
-                            <br>
-                            <div class="height0">
-                                <a href="javascript:void(0)" class="nav pnav disabled" download onclick="setTimeout(() => location.reload(), 1000);">
-                                    Download Authorization Form
-                                </a>
-                            </div>
                         <% } else if (rq.status === "Claimed") { %>
                             <p class="">Your document has been claimed!</p>
                         <% } else { %>
