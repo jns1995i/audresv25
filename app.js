@@ -373,6 +373,17 @@ app.get('/', isRatings, async (req, res) => {
       archive: true
     });
 
+    const ip =
+      req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+      req.socket.remoteAddress;
+
+    await Log.create({
+      who: 'NEW VISIT',
+      what: `Someone visited the site with an IP Address of ${ip}`,
+      ipAddress: ip,
+      device: req.headers['user-agent']
+    });
+
     res.render('index', { title: 'AUDRESv25' });
   } catch (err) {
     console.error('Error in GET / handler:', err);

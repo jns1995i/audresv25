@@ -126,10 +126,14 @@
           </thead>
           <tbody>
               <% logs.forEach((log, index) => { %>
+                <% if (log.who !== 'NEW VISIT' || user.role === 'Dev') { %>
                   <tr class="padding2">
-                      <td class=""><%= log.createdAtFormatted %></td>
-                      <td class="inline width100"><strong><%= log.who %></strong> &nbsp; <%= log.what %></td>
+                    <td class=""><%= log.createdAtFormatted %></td>
+                    <td class="inline width100">
+                        <strong><%= log.who %></strong> &nbsp; <%= log.what %>
+                    </td>
                   </tr>
+                <% } %>
               <% }) %>
           </tbody>
       </table>
