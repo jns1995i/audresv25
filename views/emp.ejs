@@ -46,16 +46,19 @@
                 <input type="text" name="lastName" required class="sname">
             </div>
             <div class="field gap5">
-                <label for="">Ext</label>
+                <label for="">Extension Name</label>
                 <input type="text" name="extName" class="sname">
-            </div>
-            <div class="row height0 width100 gap10 colF1">
             </div>
             <div class="row height0 width100 gap10 colF1">
                 <div class="field gap5">
                     <label for="">Address*</label>
                     <input type="text" name="address" required>
                 </div>
+            </div>
+
+            <div class="field gap5">
+                <label for="">Phone Number*</label>
+                <input type="text" id="number" name="number" inputmode="numeric" required class="number">
             </div>
         </section>
         <section class="col alignStart gap10">
@@ -108,11 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             
             <section class="bgRed100 width0 hidden" id="error">Email is already used by an existing account!</section>
-
-            <div class="field gap5">
-                <label for="">Phone Number*</label>
-                <input type="text" id="number" name="number" inputmode="numeric" required class="number">
-            </div>
             <script>
                 document.getElementById('em').addEventListener('input', function () {
                     const email = this.value;
@@ -180,6 +178,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             </div>
+            <br>
+            <%
+            const ASSIGN_OPTIONS = [
+            { code: "CAS", label: "CAS" },
+            { code: "CELA", label: "CELA" },
+            { code: "CMA", label: "CMA" },
+            { code: "COE", label: "COE" },
+            { code: "CIT", label: "CIT" },
+            { code: "CAHS", label: "CAHS" },
+            { code: "CCJE", label: "CCJE" },
+            { code: "San Jose", label: "San Jose" },
+            { code: "South", label: "South" }
+            ];
+            %>
+
+            <div class="field gap5 height0">
+                <label for="">Assign*</label>
+                <div class="selectBar">
+                    <select name="assign" id="assign" required>
+                        <option value="" selected disabled>Select</option>
+                       <% ASSIGN_OPTIONS.forEach(opt => { %>
+                            <option value="<%= opt.code %>"><%= opt.label %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+            <br>
             <section class="justifyBetween padding0">
                 <button type="reset" class="nav"><i class="fas fa-rotate"></i>Clear Form</button>
                 <button type="submit" class="nav pnav"><i class="fas fa-plus"></i>Create Account</button>

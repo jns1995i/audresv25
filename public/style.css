@@ -1547,6 +1547,7 @@ progress::-moz-progress-bar { background-color: #4caf50; }
 .floatLeft { float: left;}
 .floatRight { float: right;}
 .divCenter { align-content: center;}
+.flex1 { flex: 1; }
 
 
 /* Justify Content */
@@ -7894,6 +7895,8 @@ p + p {
 .size98 { font-size: 98px; }
 .size99 { font-size: 99px; }
 .size100 { font-size: 100px; }
+
+.sizeInherit { font-size: inherit; }
 
 .textWrap {  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;  }
 .textBalance { text-wrap: balance; }

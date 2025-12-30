@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
     enum: ['Student', 'Registrar','Accounting','Admin','Head','Alumni','Former','Seed','Dev'],
     required: true
   },
+  assign: { type: String, trim: true },
 
   access: { type: Number, enum: [0, 1], default: 0 },
   reset: { type: Boolean, default: false },

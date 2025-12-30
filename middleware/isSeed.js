@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
       });
 
       if (user) {
-        console.log(`User "${username}" already exists.`);
+        // console.log(`User "${username}" already exists.`);
         return user;
       }
 
@@ -72,7 +72,7 @@ module.exports = async (req, res, next) => {
 
     req.seedUser = seedUser;
     res.locals.seedUser = seedUser;
-    console.log(`🌱 Seed user loaded: ${seedUser.fName} ${seedUser.lName}`);
+    // console.log(`🌱 Seed user loaded: ${seedUser.fName} ${seedUser.lName}`);
 
     next();
   } catch (err) {

@@ -128,7 +128,21 @@ filterSelect.addEventListener("change", () => {
 </script>
 
 <br>
-
+<section class="corner15 bgWhite padding0 relative alignStretch">
+  <div class="width30 col padding10 gap20 height0">
+    <div class="bgWhite shadow1 corner15 padding20 col alignStart justifyBetween">
+      <p class="size20 str400">Total Revenue</p>
+      <p class="size26 str400" id="totalRevenue"></p>
+    </div>
+    <div class="bgWhite shadow1 corner15 padding20 col alignStart justifyBetween">
+      <p class="size20 str400">Total Paper Used</p>
+      <p class="size26 str400" id="totalPaper"></p>
+    </div>
+  </div>
+  <section class="width70 h300 corner15 bgWhite padding0">
+      <canvas id="revenueChart"></canvas>
+  </section>
+</section>
 
 <br>
 
@@ -283,9 +297,11 @@ filterSelect.addEventListener("change", () => {
       <table class="corner10 porcelain">
         <thead>
           <tr>
-            <th class="width60">Type</th>
-            <th class="width15">Qty</th>
-            <th class="width25">Requests</th>
+            <th class="width50">Type</th>
+            <th class="width10 textCenter">Qty</th>
+            <th class="width10 textCenter">Rqst</th>
+            <th class="width15 textCenter">Paper</th>
+            <th class="width15 textCenter">Rev</th>
           </tr>
         </thead>
         <tbody id="documentStats"></tbody>
@@ -503,6 +519,10 @@ tpl.remove();
   document.getElementById("avgReviewTimeStat").innerText = analytics.avgReviewTimeStat || 0;
   document.getElementById("avgAssessTime").innerText = analytics.avgAssessTime || 0;
   document.getElementById("avgAssessTimeStat").innerText = analytics.avgAssessTimeStat || 0;
+  document.getElementById("totalRevenue").innerText = `₱ ${Number(analytics.totalRevenue || 0).toLocaleString()}`;
+  document.getElementById("totalPaper").innerText = `${analytics.totalPaper || 0} Copies`;
+  const totalPaper = analytics.totalPaper || 0;
+  document.getElementById("totalPaper").innerText = totalPaper === 0 ? "No Used" : `${totalPaper} Piece${totalPaper === 1 ? "" : "s"}`;
 
 
   const countU = analytics.currentUsersCount || 0;
@@ -623,11 +643,25 @@ populateTable("courseTable", analytics.courseStats, d => `
     <td>${d.count}</td>
 `, "No Courses Found", 2);
 
+// Helper functions
+function formatNumber(num) {
+    return num.toLocaleString();
+}
+
+// function formatPaper(num) {
+//     if (!num || num === 0) return "No Used";
+//     return num === 1 ? "1 Copy" : `${num.toLocaleString()} Copies`;
+// }
+
+// Populate document stats table
 populateTable("documentStats", analytics.documentStats, d => `
     <td>${d._id}</td>
-    <td>${d.totalQty}</td>
-    <td>${d.totalRequests}</td>
-`, "No Document Statistics", 3);
+    <td class="textCenter">${formatNumber(d.totalQty)}</td>
+    <td class="textCenter">${formatNumber(d.totalRequests)}</td>
+    <td class="textCenter">${d.totalPaper}</td>
+    <td class="textRight" style="text-align: right !important;">₱ ${formatNumber(d.totalRevenue)}</td>
+`, "No Document Statistics", 5);
+
 
 populateTable("purposeTable", analytics.purposeStats, d => `
     <td>${d._id}</td>
@@ -645,6 +679,19 @@ populateTable("purposeTable", analytics.purposeStats, d => `
   } else {
     createChart('trendChart', [], [], 'line', 'Requests');
   }
+
+    // Charts
+  if (analytics.revenue && analytics.revenue.length) {
+    // Filter out zero-revenue entries
+    const filteredRevenue = analytics.revenue.filter(d => d.revenue > 0);
+    const labels = filteredRevenue.map(d => d.label);  // only months/days/hours with revenue
+    const data = filteredRevenue.map(d => d.revenue);  // use revenue field
+    createChart('revenueChart', labels, data, 'bar', 'Revenue');
+  } else {
+    createChart('revenueChart', [], [], 'bar', 'Revenue');
+  }
+
+
 
   if(analytics.roleStats && analytics.roleStats.length) 
     createChart('roleChart', analytics.roleStats.map(d=>d._id), analytics.roleStats.map(d=>d.count), 'bar', 'Request Per Student Type');

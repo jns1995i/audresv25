@@ -137,7 +137,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  console.log(`ID Session ID: ${req.sessionID}`);
+  // console.log(`ID Session ID: ${req.sessionID}`);
   next();
 });
 
@@ -193,7 +193,7 @@ app.use((req, res, next) => {
   req.session.success = null;
   req.session.denied = null;
 
-  console.log(`🌀 Global variables ready Supreme Ferry`);
+  // console.log(`🌀 Global variables ready Supreme Ferry`);
   next();
 });
 
@@ -2701,20 +2701,35 @@ app.post("/fRel", async (req, res) => {
   const { requestId, back, itemRemarks, paperUsed } = req.body;
 
   try {
+    // Find the request
     const requestDoc = await requests.findById(requestId).populate('requestBy');
     if (!requestDoc) return res.status(404).send("Request not found");
 
-    const hasItems = await items.exists({ tr: requestDoc.tr });
-    if (!hasItems) return res.status(400).send("No items found for this request");
+    // Find items associated with this request
+    const requestItems = await items.find({ tr: requestDoc.tr });
+    if (!requestItems || requestItems.length === 0) 
+      return res.status(400).send("No items found for this request");
 
     // Update request
     requestDoc.status = "For Release";
     requestDoc.declineAt = null;
     requestDoc.holdAt = null;
-    requestDoc.remarks = null;  // save remarks
-    requestDoc.paper = paperUsed || null;      // save paper count
+    requestDoc.remarks = itemRemarks || null;  // save remarks if any
     requestDoc.turnAt = new Date();
     await requestDoc.save();
+
+    // Update paper for each item
+    if (Array.isArray(paperUsed)) {
+      await Promise.all(
+        requestItems.map((item, i) => {
+          item.paper = paperUsed[i] || 0;
+          return item.save();
+        })
+      );
+    } else if (requestItems.length === 1) {
+      requestItems[0].paper = paperUsed || 0;
+      await requestItems[0].save();
+    }
 
     // ===== LOGGING =====
     const currentUser = req.session.user;
@@ -2743,6 +2758,7 @@ app.post("/fRel", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
 
 // ===== CLAIM ROUTE =====
 app.post("/claim3", async (req, res) => {
@@ -2808,7 +2824,7 @@ app.post('/newEmp', async (req, res) => {
     const {
       firstName, middleName, lastName, extName,
       address, number, email,
-      role, campus, studentNo // employee number
+      role, campus, studentNo, assign // employee number
     } = req.body;
 
     // 1️⃣ Check if email is already used
@@ -2836,6 +2852,7 @@ app.post('/newEmp', async (req, res) => {
       email: email.toLowerCase(),
       role,
       campus,
+      assign,
       schoolId: studentNo || undefined,
       username: email,           // default username
       password: generatePassword(),
@@ -3231,6 +3248,7 @@ app.post('/edt4', async (req, res) => {
       email,
       phone,
       address,
+      assign,
 
       role,
       campus,
@@ -3283,6 +3301,7 @@ app.post('/edt4', async (req, res) => {
       address,
       role,
       campus,
+      assign,
       schoolId,
       username // Automatically applied
     };

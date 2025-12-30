@@ -238,7 +238,43 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       ]),
       items.aggregate([
         { $match: { tr: { $in: requestTRs } } },
-        { $group: { _id: "$type", totalQty: { $sum: "$qty" }, totalRequests: { $sum: 1 } } },
+
+        // Lookup document info to get amount
+        {
+          $lookup: {
+            from: "documents",
+            localField: "type",
+            foreignField: "type",
+            as: "docInfo"
+          }
+        },
+        { $unwind: "$docInfo" },
+
+        // Convert paper to number if needed and calculate revenue
+        {
+          $addFields: {
+            paperCount: {
+              $cond: [
+                { $isNumber: "$paper" },
+                "$paper",
+                { $toDouble: "$paper" }
+              ]
+            },
+            revenue: { $multiply: ["$qty", "$docInfo.amount"] }
+          }
+        },
+
+        // Group by document type
+        {
+          $group: {
+            _id: "$type",
+            totalQty: { $sum: "$qty" },
+            totalRequests: { $sum: 1 },
+            totalRevenue: { $sum: "$revenue" },
+            totalPaper: { $sum: "$paperCount" }
+          }
+        },
+
         { $sort: { totalQty: -1 } }
       ])
     ]);
@@ -874,6 +910,281 @@ const processByDeclineAgg = processByDeclineAggRaw.map(s => ({
 
 processByDeclineAgg.sort((a, b) => b.totalDeclined - a.totalDeclined);
 
+const totalRevenueAgg = await requests.aggregate([
+  // 1️⃣ Filter requests by approved statuses
+  { 
+    $match: { 
+      status: { $in: ["Approved", "Verified", "For Release", "Claimed"] }, 
+      ...dateFilter
+    } 
+  },
+
+  // 2️⃣ Get their transaction references
+  {
+    $project: { tr: 1 }
+  },
+
+  // 3️⃣ Lookup items in the same transaction
+  {
+    $lookup: {
+      from: "items",
+      localField: "tr",
+      foreignField: "tr",
+      as: "items"
+    }
+  },
+  { $unwind: "$items" }, // flatten items
+
+  // 4️⃣ Lookup document to get amount for each item type
+  {
+    $lookup: {
+      from: "documents",
+      localField: "items.type",
+      foreignField: "type",
+      as: "docInfo"
+    }
+  },
+  { $unwind: "$docInfo" }, // flatten document info
+
+  // 5️⃣ Calculate revenue per item (qty * amount)
+  {
+    $project: {
+      revenue: { $multiply: ["$items.qty", "$docInfo.amount"] }
+    }
+  },
+
+  // 6️⃣ Sum all revenues
+  {
+    $group: {
+      _id: null,
+      totalRevenue: { $sum: "$revenue" }
+    }
+  }
+]);
+
+const totalRevenue = totalRevenueAgg[0]?.totalRevenue || 0;
+
+
+    //trend revenue
+let trendRevenue = [];
+
+if (filter !== "overall" && start && end) {
+  switch (filter) {
+    case "today":
+    case "yesterday": {
+      // hours 0-23
+      const labels = Array.from({ length: 24 }, (_, i) => i);
+
+      const counts = await requests.aggregate([
+        { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
+        { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
+        { $unwind: "$items" },
+        { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
+        { $unwind: "$docInfo" },
+        { $project: { hour: { $hour: "$createdAt" }, revenue: { $multiply: ["$items.qty", "$docInfo.amount"] } } },
+        { $group: { _id: "$hour", totalRevenue: { $sum: "$revenue" } } }
+      ]);
+
+      trendRevenue = labels.map(h => {
+        const found = counts.find(c => c._id === h);
+        return { label: `${h}:00`, revenue: found ? found.totalRevenue : 0 };
+      });
+
+      break;
+    }
+
+    case "thisWeek":
+    case "lastWeek": {
+      const dayNames = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+
+      const counts = await requests.aggregate([
+        { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
+        { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
+        { $unwind: "$items" },
+        { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
+        { $unwind: "$docInfo" },
+        {
+          $project: {
+            day: { $dayOfWeek: "$createdAt" }, // Sunday = 1, Saturday = 7
+            revenue: { $multiply: ["$items.qty", "$docInfo.amount"] }
+          }
+        },
+        { $group: { _id: "$day", totalRevenue: { $sum: "$revenue" } } }
+      ]);
+
+      // Map Sunday-first correctly
+      trendRevenue = dayNames.map((name, index) => {
+        const dayNumber = index + 1; // SUN=1, MON=2, ..., SAT=7
+        const found = counts.find(c => c._id === dayNumber);
+        return { label: name, revenue: found ? found.totalRevenue : 0 };
+      });
+
+      break;
+    }
+
+    case "specific":
+    case "thisYear":
+    case "lastYear": {
+      const mNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+      const counts = await requests.aggregate([
+        { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
+        { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
+        { $unwind: "$items" },
+        { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
+        { $unwind: "$docInfo" },
+        { $project: { month: { $month: "$createdAt" }, revenue: { $multiply: ["$items.qty", "$docInfo.amount"] } } },
+        { $group: { _id: "$month", totalRevenue: { $sum: "$revenue" } } }
+      ]);
+
+      trendRevenue = mNames.map((m, i) => {
+        const monthNum = i + 1;
+        const found = counts.find(c => c._id === monthNum);
+        return { label: m, revenue: found ? found.totalRevenue : 0 };
+      });
+
+      break;
+    }
+
+    case "thisMonth":
+    case "lastMonth":
+    case "custom": {
+      const totalDays = end.diff(start, "day") + 1;
+      const dateList = Array.from({ length: totalDays }, (_, i) => {
+        const d = start.clone().add(i, "day");
+        return { display: d.format("MM-DD"), match: d.format("YYYY-MM-DD") };
+      });
+
+      const counts = await requests.aggregate([
+        { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
+        { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
+        { $unwind: "$items" },
+        { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
+        { $unwind: "$docInfo" },
+        { $project: { 
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Etc/UTC" } },
+            revenue: { $multiply: ["$items.qty", "$docInfo.amount"] } 
+        } },
+        { $group: { _id: "$date", totalRevenue: { $sum: "$revenue" } } }
+      ]);
+
+      trendRevenue = dateList.map(d => {
+        const found = counts.find(c => c._id === d.match);
+        return { label: d.display, revenue: found ? found.totalRevenue : 0 };
+      });
+
+      break;
+    }
+
+// case "overall":
+// default: {
+//   const yearlyRevenue = await requests.aggregate([
+//     { $match: { 
+//         status: { $in: ["Approved","Verified","For Release","Claimed"] },
+//         archive: false,
+//         verify: false
+//     } },
+//     { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
+//     { $unwind: { path: "$items", preserveNullAndEmptyArrays: true } },
+//     { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "doc" } },
+//     { $unwind: { path: "$doc", preserveNullAndEmptyArrays: true } },
+//     { $project: { 
+//         year: { $year: "$createdAt" },
+//         revenue: { 
+//             $cond: [
+//                 { $and: [ { $ifNull: ["$items.qty", false] }, { $ifNull: ["$doc.amount", false] } ] },
+//                 { $multiply: ["$items.qty", { $toDouble: "$doc.amount" }] },
+//                 0
+//             ] 
+//         }
+//     } },
+//     { $group: { _id: "$year", totalRevenue: { $sum: "$revenue" } } },
+//     { $sort: { _id: 1 } }
+//   ]);
+//   console.log("✅ YEARLY REVENUE (overall):", yearlyRevenue);  // ✅ <--- here
+//   trendRevenue = yearlyRevenue.map(y => ({
+//       label: `${y._id}`,
+//       revenue: y.totalRevenue
+//   }));
+//     console.log("📊 TREND REVENUE (FINAL):", trendRevenue);  // ✅ <--- here
+//   break;
+// }
+  }
+}
+
+if (filter === "overall") {
+  const yearlyRevenue = await requests.aggregate([
+    { $match: { 
+        status: { $in: ["Approved","Verified","For Release","Claimed"] },
+        archive: false,
+        verify: false
+    } },
+    { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
+    { $unwind: { path: "$items", preserveNullAndEmptyArrays: true } },
+    { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "doc" } },
+    { $unwind: { path: "$doc", preserveNullAndEmptyArrays: true } },
+    { $project: { 
+        year: { $year: "$createdAt" },
+        revenue: { 
+            $cond: [
+                { $and: [ { $ifNull: ["$items.qty", false] }, { $ifNull: ["$doc.amount", false] } ] },
+                { $multiply: ["$items.qty", { $toDouble: "$doc.amount" }] },
+                0
+            ] 
+        }
+    } },
+    { $group: { _id: "$year", totalRevenue: { $sum: "$revenue" } } },
+    { $sort: { _id: 1 } }
+  ]);
+
+  console.log("✅ YEARLY REVENUE (overall):", yearlyRevenue);
+
+  trendRevenue = yearlyRevenue.map(y => ({ label: `${y._id}`, revenue: y.totalRevenue }));
+  console.log("📊 TREND REVENUE (FINAL):", trendRevenue);
+}
+
+
+const totalPaperAgg = await requests.aggregate([
+  // 1️⃣ Filter requests by date or status
+  { $match: dateFilter },
+
+  // 2️⃣ Lookup items for each request
+  {
+    $lookup: {
+      from: "items",
+      localField: "tr",      // assuming items have the same transaction reference
+      foreignField: "tr",
+      as: "items"
+    }
+  },
+
+  // 3️⃣ Flatten items array
+  { $unwind: "$items" },
+
+  // 4️⃣ Convert item.paper to number
+  {
+    $project: {
+      paperCount: {
+        $cond: [
+          { $isNumber: "$items.paper" },  // if already number
+          "$items.paper",
+          { $toDouble: "$items.paper" }   // convert string to number
+        ]
+      }
+    }
+  },
+
+  // 5️⃣ Sum all papers
+  {
+    $group: {
+      _id: null,
+      totalPaper: { $sum: "$paperCount" }
+    }
+  }
+]);
+
+const totalPaper = totalPaperAgg[0]?.totalPaper || 0;
+
 
     // ================================
     // FINAL OBJECT
@@ -909,6 +1220,7 @@ processByDeclineAgg.sort((a, b) => b.totalDeclined - a.totalDeclined);
       documentStats,
 
       trend: trendAgg,
+      revenue: trendRevenue,
 
       currentUsersCount, previousUsersCount, registrationGrowth,
       currentPeriodLabel,
@@ -921,7 +1233,9 @@ processByDeclineAgg.sort((a, b) => b.totalDeclined - a.totalDeclined);
       overallVerifiedTotal,
 
       processByDeclineStats: processByDeclineAgg,
-      overallDeclinedTotal
+      overallDeclinedTotal,
+      totalRevenue,
+      totalPaper
 
     };
 

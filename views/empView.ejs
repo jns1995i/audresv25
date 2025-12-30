@@ -53,6 +53,13 @@
             <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= student.email || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= student.phone || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= student.address || "--" %></p>
+            <% if (student.role ==='Registrar') { %>
+                <% if (student.assign) { %>
+                    <p class="rem12 str500 bgBlue100" style="margin-top: 5px !important;">Assign to<strong class="str600 sizeInherit margin0"><%= student.assign || "--" %></strong></p>
+                <% } else { %>
+                    <p class="rem12 str500 bgBlue100" style="margin-top: 5px !important;">Unassigned</p>
+                <% } %>
+            <% } %>
         </div>
     </div>
 
@@ -310,9 +317,39 @@
                             <label>Employee Number</label>
                             <input type="text" id="schoolId" name="schoolId" value="<%= student.schoolId %>">
                         </div>
-                        
-                    
+
                         <div class="bgRed100 width0 hidden" id="error2">Employee number is already registered!</div>
+                        <br>
+                        
+                        <%
+                        const ASSIGN_OPTIONS = [
+                        { code: "CAS", label: "CAS" },
+                        { code: "CELA", label: "CELA" },
+                        { code: "CMA", label: "CMA" },
+                        { code: "COE", label: "COE" },
+                        { code: "CIT", label: "CIT" },
+                        { code: "CAHS", label: "CAHS" },
+                        { code: "CCJE", label: "CCJE" },
+                        { code: "San Jose", label: "San Jose" },
+                        { code: "South", label: "South" }
+                        ];
+                        %>
+                        <div class="field gap5 height0">
+                            <label for="">Assign*</label>
+                            <div class="selectBar">
+                                <select name="assign" id="assign" required>
+                                <option value="" disabled>Select</option>
+                                <% ASSIGN_OPTIONS.forEach(opt => { %>
+                                    <option
+                                    value="<%= opt.code %>"
+                                    <%= student.assign === opt.code ? "selected" : "" %>>
+                                    <%= opt.label %>
+                                    </option>
+                                <% }) %>
+
+                                </select>
+                            </div>
+                        </div>
 
                         <div class="field alignEnd">
                             <button type="submit" class="nav pnav w100">

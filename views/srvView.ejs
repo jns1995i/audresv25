@@ -45,6 +45,9 @@
                                     </div>
                                     <p class="rem14 str500 flex alignCenter">
                                         <%= item.qty %> <%= item.type %>
+                                        <% if (item.paper) { %>
+                                            <span class="marginLeft5 bgBlue100 corner5 border0 width0 height0 inline"><i class="fas fa-print"></i> &nbsp; <%= item.paper %></span>
+                                        <% } %>
                                         <% if ( item.proof ) { %>
                                             &nbsp; <a href="<%= item.proof %>"  target="_blank" class="navy"><i class="fas fa-exclamation-circle w15"></i> View Requirements</a>
                                         <% } %>
@@ -84,9 +87,6 @@
                                             </form>
                                         </section>
                                     <% } %>
-                                </section>
-                                <section class="padding5 gap5 width0 corner10 absolute top0 right0">
-                                
                                 </section>
                             </section>
                         <% }); %>
@@ -228,9 +228,9 @@
 <div class="bgSoft absolute top0 left0 hidden" id="noticeCard">
     <section class="width35 padding30 corner20 bgWhite shadow1 col">
         <%- include('icons/warning') %>
-            <p class="size30 str500">WARNING!</p>
+            <p class="size30 str500" id="title"></p>
             <section class="col textCenter">
-                <p class="rem1" id="noticeMsg">Message here</p>
+                <p class="rem1 textBalance" id="noticeMsg">Message here</p>
             </section>
             <div class="selectBar width100 widthMax100 marginBottom15" id="SelectDiv" style="display: none;">
                 <select name="" id="selectFlex">
@@ -240,9 +240,14 @@
             <div class="width100 widthMax100 marginBottom15" id="InputDiv" style="display: none;">
                 <textarea name="" id="inputFlex"></textarea>
             </div>
-            <div class="field marginBottom15" id="paperDiv" style="display: none;">
-                <label for="">No. of used paper</label>
-                <input type="text" name="" id="paperInput" placeholder="Enter number">
+            <div class="field marginBottom15 porcelain" id="paperDiv" style="display: none;">
+                <% if (request.items && request.items.length > 0) { %>
+                        <% request.items.forEach(item => { %>
+                            <div class="row justifyBetween" data-item-type="<%= item.type %>"></div>
+                        <% }); %>
+                <% } else { %>
+                    <p>No items found for this request.</p>
+                <% } %>
             </div>
             <section class="bgBlue100 col padding15 textCenter">
                 <p class="rem12">This action cannot be undone!</p>
@@ -259,6 +264,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const noticeCard = document.getElementById("noticeCard");
     const noticeMsg = document.getElementById("noticeMsg");
+    const title = document.getElementById("title");
     const proceedBtn = document.getElementById("proceedBtn");
     const closeNoticeCard = document.getElementById("closeNoticeCard");
     const selectDiv = document.getElementById("SelectDiv");
@@ -266,9 +272,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputDiv = document.getElementById("InputDiv");
     const inputFlex = document.getElementById("inputFlex");
     const paperDiv = document.getElementById("paperDiv");
-    const paperInput = document.getElementById("paperInput");
-
-
 
     let currentForm = null; // form to submit
     let currentAction = null; // store action type: 'item', 'decline3', 'hold3'
@@ -279,15 +282,15 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const actions = [
-        { selector: 'form[action="/decItem"] button', message: "Are you sure you want to decline this requested document? Select your reason below", reason: "decline", type: "item" },
-        { selector: 'form[action="/appItem"] button', message: "You are about to approve this requested document", type: "item" },
-        { selector: 'form[action="/remarksItem"] button', message: "Are you sure you want to send this remarks?", type: "item" },
-        { selector: 'form[action="/decline3"] button', message: "Are you sure you want to decline this whole transaction? Select your reason below", reason: "decline", type: "transaction" },
-        { selector: 'form[action="/hold3"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", type: "transaction" },
-        { selector: 'form[action="/appAllItem"] button', message: "Are you sure you want to approve all the requested documents? It will be marked as Reviewed and will proceed to Accounting for Assessment", type: "transaction" },
-        { selector: 'form[action="/fRel"] button', message: "Are you sure you want to mark this request as Ready for Release?", type: "transaction" },
-        { selector: 'form[action="/restore3"] button', message: "Are you sure you want to proceed? This will reset all the status of the whole transaction", type: "transaction" },
-        { selector: 'form[action="/claim3"] button', message: "Are you sure you want to proceed? This will mark the transaction as claimed", type: "transaction" },
+        { selector: 'form[action="/decItem"] button', message: "Are you sure you want to decline this requested document? Select your reason below", reason: "decline", title: "WARNING", type: "item" },
+        { selector: 'form[action="/appItem"] button', message: "You are about to approve this requested document", title: "WARNING", type: "item" },
+        { selector: 'form[action="/remarksItem"] button', message: "Are you sure you want to send this remarks?", title: "WARNING", type: "item" },
+        { selector: 'form[action="/decline3"] button', message: "Are you sure you want to decline this whole transaction? Select your reason below", reason: "decline", title: "WARNING", type: "transaction" },
+        { selector: 'form[action="/hold3"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", title: "HOLD?", type: "transaction" },
+        { selector: 'form[action="/appAllItem"] button', message: "Are you sure you want to approve all the requested documents? It will be marked as Reviewed and will proceed to Accounting for Assessment", title: "WARNING", type: "transaction" },
+        { selector: 'form[action="/fRel"] button', message: "Enter first the number of paper used per document!", title: "MARK AS FOR RELEASE?", type: "transaction" },
+        { selector: 'form[action="/restore3"] button', message: "Are you sure you want to proceed? This will reset all the status of the whole transaction", title: "WARNING", type: "transaction" },
+        { selector: 'form[action="/claim3"] button', message: "Are you sure you want to proceed? This will mark the transaction as claimed", title: "WARNING", type: "transaction" },
     ];
 
     function populateSelect(reasonType) {
@@ -317,21 +320,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 currentAction = action; // store the action type
                 noticeMsg.textContent = action.message;
+                title.textContent = action.title;
 
                 // Reset input first
                 inputDiv.style.display = "none";
                 inputFlex.required = false;
                 inputFlex.value = "";
                 paperDiv.style.display = "none";
-                paperInput.required = false;
-                paperInput.value = "";
+                // remove any old paper inputs
+                paperDiv.querySelectorAll("input[name='paperUsed[]']").forEach(i => i.remove());
 
-                // Show paper input ONLY for fRel
                 if (currentForm.action.includes("/fRel")) {
                     paperDiv.style.display = "flex";
-                    paperInput.required = true;
-                }
 
+                    // Create an input for each item
+                    paperDiv.querySelectorAll("[data-item-type]").forEach(div => {
+                        const itemType = div.dataset.itemType;
+                        div.innerHTML = `
+                            <label class="width0">${itemType} :</label>
+                            <input type="number" min="0" class="width30 paperInput" name="paperUsed[]" required>
+                        `;
+                    });
+                }
 
                 // Show textarea ONLY for remarksItem
                 if (currentForm.action.includes("/remarksItem")) {
@@ -361,8 +371,6 @@ document.addEventListener("DOMContentLoaded", () => {
         inputDiv.style.display = "none";
         inputFlex.required = false;
         inputFlex.value = "";
-
-
     });
 
     proceedBtn.addEventListener("click", () => {
@@ -378,10 +386,15 @@ document.addEventListener("DOMContentLoaded", () => {
             inputFlex.reportValidity();
             return;
         }
-        // Validate paper input if visible
-        if (paperDiv.style.display !== "none" && !paperInput.checkValidity()) {
-            paperInput.reportValidity();
-            return;
+        // Validate paper inputs if visible
+        if (paperDiv.style.display !== "none") {
+            const paperInputs = paperDiv.querySelectorAll("input[name='paperUsed[]']");
+            for (let input of paperInputs) {
+                if (!input.checkValidity()) {
+                    input.reportValidity();
+                    return;
+                }
+            }
         }
 
         // Inject the reason into a hidden input before submitting
@@ -419,21 +432,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             currentForm.appendChild(remarksInput);
         }
-        // Inject paper count if used
+
+        // Inject paper counts if used
         if (paperDiv.style.display !== "none") {
-            let existing = currentForm.querySelector('input[name="paperUsed"]');
-            if (existing) existing.remove();
-
-            const paperHidden = document.createElement("input");
-            paperHidden.type = "hidden";
-            paperHidden.name = "paperUsed";
-            paperHidden.value = paperInput.value.trim();
-
-            currentForm.appendChild(paperHidden);
+            const paperInputs = paperDiv.querySelectorAll("input[name='paperUsed[]']");
+            paperInputs.forEach(input => {
+                const hidden = document.createElement("input");
+                hidden.type = "hidden";
+                hidden.name = "paperUsed[]";
+                hidden.value = input.value.trim();
+                currentForm.appendChild(hidden);
+            });
         }
-
 
         currentForm.submit();
     });
 });
 </script>
+

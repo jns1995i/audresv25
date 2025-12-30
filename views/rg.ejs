@@ -1023,7 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Populate Year Dropdown (Only ages 19+ allowed)
     const yearSelect = document.getElementById("bYear");
     const currentYear = new Date().getFullYear();
-    const maxYearAllowed = currentYear - 19; // Must be 19 or older
+    const maxYearAllowed = currentYear - 15; // Must be 19 or older
 
     for (let i = maxYearAllowed; i >= 1980; i--) {
         let option = document.createElement("option");
