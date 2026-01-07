@@ -69,8 +69,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
   etag: true
 }));
 
-app.use(analyticsMiddleware);
-
 app.use(session({
   secret: process.env.SESSION_SECRET || 'ferry2025',
   resave: false,
@@ -156,6 +154,8 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+app.use(analyticsMiddleware);
 
 app.use(isDocuments);
 app.use(isSeed);

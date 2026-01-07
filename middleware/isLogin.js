@@ -1,3 +1,8 @@
+
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
+dayjs.extend(relativeTime);
+
 const User = require('../model/user');
 const Request = require('../model/request');
 const Item = require('../model/item'); // import item model
@@ -34,8 +39,15 @@ module.exports = async (req, res, next) => {
 
     // For each request, fetch matching items by tr
     const requestsWithItems = await Promise.all(userRequests.map(async rq => {
-      const items = await Item.find({ tr: rq.tr }); // match by request.tr
-      return { ...rq.toObject(), items }; // attach items array
+      const items = await Item.find({ tr: rq.tr });
+      const obj = rq.toObject();
+
+      // Add formatted dates manually
+      obj.createdAtFormatted = rq.createdAt ? dayjs(rq.createdAt).format('MMM D, YYYY h:mm A') : '—';
+      obj.assignAtFormatted = rq.assignAt ? dayjs(rq.assignAt).format('MMM D, YYYY h:mm A') : '—';
+
+      obj.items = items;
+      return obj;
     }));
 
     req.userRequests = requestsWithItems;

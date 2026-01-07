@@ -91,21 +91,6 @@ module.exports = async function analyticsMiddleware(req, res, next) {
     const approved = allRequests.filter(r => ["Verified", "For Release", "Claimed"].includes(r.status)).length;
     const onProcess = allRequests.filter(r => ["Reviewed", "Assessed", "For Payment", "For Verification"].includes(r.status)).length;
     const pending = allRequests.filter(r => r.status === "Pending" && !r.declineAt).length;
-    const myPending = allRequests.filter(r => {
-      // Only Pending requests
-      if (r.status !== "Pending") return false;
-
-      // processBy must exist
-      if (!r.processBy) return false;
-
-      // Convert both to string for comparison
-      const processById = r.processBy.toString();
-      const userId = req.user._id.toString();
-      console.log('req.user.fName')
-
-      return processById === userId;
-    }).length;
-
 
     const declined = allRequests.filter(r => r.declineAt).length;
     const onHold = allRequests.filter(r => r.holdAt).length;
@@ -148,6 +133,37 @@ module.exports = async function analyticsMiddleware(req, res, next) {
       count: s.count,
       percentage: totalRequests === 0 ? 0 : Number(((s.count / totalRequests) * 100).toFixed(1)) // numeric only
     }));
+
+
+    // hello
+const mongoose = require("mongoose");
+
+let myPending = 0;
+
+if (req.user?._id) {
+  const userIdStr = req.user._id.toString();
+
+  const myPendingAgg = await requests.aggregate([
+    { 
+      $addFields: {
+        processByStr: { $toString: "$processBy" }   // convert DB value to string
+      }
+    },
+    {
+      $match: {
+        ...dateFilter,
+        status: "Pending",
+        declineAt: { $exists: false },
+        processByStr: userIdStr
+      }
+    },
+    { $count: "total" }
+  ]);
+
+  myPending = myPendingAgg[0]?.total || 0;
+}
+
+console.log("My pending requests:", myPending);
 
     // ================================
     // ACTIVE USERS
