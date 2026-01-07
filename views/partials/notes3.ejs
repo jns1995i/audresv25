@@ -1,13 +1,7 @@
  <% if ( rq.holdAt ) { %>
-                <section class=" bgWhite padding0 relative">
-                    <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
-                        Your request has been hold! Due to
-                        <% if ( rq.remarks === "Incomplete") { %>
-                            Incomplete Grades.
-                        <% } else if ( rq.remarks === "Balance") { %>
-                            Remaining Balance on Account.
-                        <% } else { %>
-                        <% } %> For further assistance, please visit the Registrar’s Office on your campus, or contact us through our official hotline at <%= seedUser.phone %> or via email at <%= seedUser.email %>
+                <section class=" bgWhite padding0 relative col">
+                    <section class="bgGray100 textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
+                        Your request has been hold! <%= rq.remarks %>
                     </section>
                 </section>
                 <% } else if ( rq.declineAt ) { %>
@@ -24,7 +18,7 @@
                 <section class="padding0 relative bgBlue100 corner20">
                     <section class=" textCenter colorPrimary col padding20" id="noteX" style="min-height: 60px;">
                         <% if (rq.status === "Pending") { %>
-                        <p class="">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed. Thank you for your patience!</p>
+                        <p class="">We have received your request, and the registrar is now reviewing it. We will notify you once it has been processed.</p>
                         <% } else if (rq.status === "Reviewed") { %>
                             <p class="">Good news! Your request has been reviewed and has now been forwarded to the Accounting Department for assessment.</p>
                         <% } else if (rq.status === "Assessed") { %>
@@ -112,8 +106,12 @@
                         <% } else if (rq.status === "For Release") { %>
                             <div class="height0 col bgWhite padding20 corner15">
                                 <p><i class="fas fa-check-circle corner500" style="font-size: 12px; outline: 1px solid rgb(3, 18, 106, 0.2);"></i>
-                                Great News! You can now claim your document anytime. Please proceed to the Registrar’s Office to claim your document by presenting the QR Code below and the requirements needed listed below the request details. 
+                                Great News! You can now claim your document anytime at the School Registrar Office.
                                 </p>
+                                <br>
+                                <p class="textBalance porcelain">Present the QR Code below including the requirements needed</p>
+                                <br>
+                                <p>If someone will be claiming the document on your behalf, they must present a signed authorization letter along with original and 1 photocopy of any valid ID</p>
                                 <br>
                                     
                                 <div class="bgWhite height0 gap5 justifyCenter alignCenter width0 padding5 corner10 darkShadow relative">
@@ -129,9 +127,91 @@
                                     <canvas id="qrcodeCanvas" width="100" height="100" class="hMax150 wMax150"></canvas>
                                     <a href="javascript:void(0)" class="nav cnav qrBtn absolute bottom5 right5 glass"><i class="fas fa-download"></i></a>
                                 </div>
-                                <br>
-                                <p>If someone will be claiming the document on your behalf, they must present a signed authorization letter along with a valid ID and 1 photocopy of picture.</p>
                             </div>
+                            <section class="bgWhite padding15 corner15 marginTop15 col">
+                                <% if (rq.rating) { %>
+                                    <p class="marginBottom10 textCenter textBalance">Thank you for your feedback!</p>
+                                <% } else { %>
+                                    <p class="marginBottom10 textCenter textBalance">We’d love your feedback! Take a moment to rate us.</p>
+                                <% } %>
+                                
+                                <form id="rateForm" class="height0 padding0 transparent">
+                                    <div class="height0 gap10">
+                                        <i class="fas fa-star gray rateStar rem2" data-value="1"></i>
+                                        <i class="fas fa-star gray rateStar rem2" data-value="2"></i>
+                                        <i class="fas fa-star gray rateStar rem2" data-value="3"></i>
+                                        <i class="fas fa-star gray rateStar rem2" data-value="4"></i>
+                                        <i class="fas fa-star gray rateStar rem2" data-value="5"></i>
+                                    </div>
+                                    <input type="hidden" name="rating" id="ratingValue">
+                                    <button type="submit" class="hidden">Submit</button>
+                                </form>
+
+                                <div id="rateMessage" class="bgGreen100 textCenter marginBlock15 hidden width0"></div>
+
+                                <script>
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const stars = document.querySelectorAll('.rateStar');
+                                    const ratingInput = document.getElementById('ratingValue');
+                                    const rateMessage = document.getElementById('rateMessage');
+
+                                    const requestId = '<%= rq._id %>';
+                                    const currentRating = <%= rq.rating || 0 %>; // load existing rating
+
+                                    // Function to highlight stars based on a value
+                                    function highlightStars(value) {
+                                        stars.forEach(s => {
+                                            if (Number(s.dataset.value) <= value) {
+                                                s.classList.add('yellow');
+                                                s.classList.remove('gray');
+                                            } else {
+                                                s.classList.remove('yellow');
+                                                s.classList.add('gray');
+                                            }
+                                        });
+                                    }
+
+                                    // Initialize stars with current rating
+                                    highlightStars(currentRating);
+                                    ratingInput.value = currentRating;
+
+                                    // Handle star clicks
+                                    stars.forEach(star => {
+                                        star.addEventListener('click', () => {
+                                            const value = Number(star.dataset.value);
+                                            ratingInput.value = value;
+                                            highlightStars(value);
+
+                                            // Send rating to backend
+                                            fetch(`/rate2/${requestId}`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ rating: value })
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    rateMessage.textContent = `You rate us with ${data.rating} stars!`;
+                                                    rateMessage.classList.remove('hidden');
+                                                } else {
+                                                    rateMessage.textContent = data.error || 'Failed to submit rating';
+                                                    rateMessage.classList.remove('hidden');
+                                                }
+                                            })
+                                            .catch(err => {
+                                                rateMessage.textContent = 'Error submitting rating. Please try again.';
+                                                rateMessage.classList.remove('hidden');
+                                            });
+                                        });
+                                    });
+
+                                    // Prevent fallback submit
+                                    const rateForm = document.getElementById('rateForm');
+                                    rateForm.addEventListener('submit', e => e.preventDefault());
+                                });
+                                </script>
+                            </section>
+                            
                             <script>
                                 document.addEventListener('DOMContentLoaded', () => {
                                     const downloadBtn = document.querySelector('.qrBtn');
@@ -196,3 +276,5 @@
                     </section>
                 </section>
                 <% } %>
+
+                

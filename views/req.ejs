@@ -186,6 +186,12 @@
                                         <input name="qty[]" type="number" class="number" required>
                                     </div>
                                 </div>
+                          <div class="wf" style="display: none;">
+    This is WF content.
+</div>
+
+
+
                                 <div class="row gap10 marginTop10">
                                     <div class="field additional-options">
                                         <label>Purpose</label>
@@ -271,7 +277,7 @@
                             </fieldset>
                         </div>
                         <p class="height0 bgBlue100 hidden textCenter" id="warning1"><i class="fas fa-exclamation-circle"></i> Please fill out all the required fields before adding a new one!</p>
-                        <div class="height0 bgSoft darkGray corner10 padding10 textCenter str500 width100 justifyCenter alignCenter"><i class="fas fa-info-circle marginRight5"></i> Dismissal Form &nbsp; <a href="" class="underline colorPrimary str500 width0 padding0 margin0 size12">Download Here</a></div>
+                        <div class="height0 bgSoft darkGray corner10 padding10 textCenter str500 width100 justifyCenter alignCenter hidden"><i class="fas fa-info-circle marginRight5"></i> Dismissal Form &nbsp; <a href="/docs/df.pdf" class="underline colorPrimary str500 width0 padding0 margin0 size12" download>Download Here</a></div>
                         <div class="height0 justifyBetween padding5">
                             <p class=" str500">Need Another Document?</p>
                             <a href="javascript:void(0)" class="nav pnav" id="addDoc"><i class="fas fa-plus"></i> Additional</a>
@@ -621,6 +627,24 @@ function updateTotalAmount(fieldset) {
 // Call updateGrandTotal on page load in case there are existing fieldsets
 document.addEventListener("DOMContentLoaded", () => {
     updateGrandTotal();
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('select[name="type[]"]').forEach(select => {
+        select.addEventListener('change', function() {
+            const wfDiv = select.closest('fieldset').querySelector('.wf');
+            console.log("Selected:", `"${select.value}"`); // debug to see spaces
+            if (select.value.trim().toLowerCase() === "honorable dismissal") {
+                wfDiv.style.display = "block";
+            } else {
+                wfDiv.style.display = "none";
+            }
+        });
+
+        // Trigger once in case the value is already set on load
+        select.dispatchEvent(new Event('change'));
+    });
 });
 </script>
 

@@ -169,7 +169,7 @@
                     <p class="rem48 textWrap textCenter glowImg3 p1">AU Registrar Document</p>
                     <p class="rem48 textWrap textCenter glowImg3 p2" style="margin-top: -3.6rem;">Request System</p>
                 </div>
-                <div class="height0 gap10 marginBottom20" id="rateF">
+                <div class="height0 gap10 marginBottom20 hidden" id="rateF">
                     <div class="height0 width0">
                         <p>Average Rating: <%= ratings.averageRating.toFixed(1) %> ⭐ &nbsp; | &nbsp; <%= ratings.totalRatings %> votes</p>
                     </div>
@@ -315,7 +315,7 @@
                             </fieldset>
                         </div>
                         <p class="height0 bgBlue100 hidden textCenter" id="warning1"><i class="fas fa-exclamation-circle"></i> Please fill out all the required fields before adding a new one!</p>
-                        <div class="height0 bgSoft darkGray corner10 padding10 textCenter str500 width100 justifyCenter alignCenter"><i class="fas fa-info-circle marginRight5"></i> Dismissal Form &nbsp; <a href="" class="underline colorPrimary str500 width0 padding0 margin0 size12">Download Here</a></div>
+                        <div class="height0 bgSoft darkGray corner10 padding10 textCenter str500 width100 justifyCenter alignCenter hidden"><i class="fas fa-info-circle marginRight5"></i> Dismissal Form &nbsp; <a href="/docs/df.pdf" target="_blank" class="underline colorPrimary str500 width0 padding0 margin0 size12" id="df" download>Download Here</a></div>
                         <div class="height0 justifyBetween padding5">
                             <p class=" str500">Need Another Document?</p>
                             <a href="javascript:void(0)" class="nav pnav" id="addDoc"><i class="fas fa-plus"></i> Additional</a>

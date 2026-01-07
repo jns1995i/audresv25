@@ -42,7 +42,6 @@
             <p class="rem12 str500"><i class="fas fa-building w15"></i> <%= user.campus || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= user.email || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= user.phone || "--" %></p>
-            <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= user.address || "--" %></p>
         </div>
     </div>
     
@@ -154,7 +153,7 @@
             <p class="rem18 str500">Update Contact</p>
             <hr class="width70"><br>
             <div class="bgGreen100 col alignStart">
-                    <p class="rem1 textCenter">Take Note! Only phone number and address can be modified. For mispelling and incorrect information, please contact Admin.</p>
+                    <p class="rem1 textCenter">Take Note! Only email and phone number can be modified. For mispelling and incorrect information, please contact Admin.</p>
             </div>
             <br>
             <form id="editForm" method="POST" class="padding0 corner0 gap5">
@@ -168,10 +167,6 @@
                 <div class="field">
                     <label for="phone">Contact</label>
                     <input type="phone" id="phone" class="phone" name="phone">
-                </div>
-                <div class="field">
-                    <label for="address">Address</label>
-                    <input type="address" id="address" name="address">
                 </div>
                 <div class="field alignEnd">
                     <button type="submit" class="nav pnav w100">
@@ -194,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log('Fetched user:', user); // Check in browser console
         document.getElementById('email').value = user.email || '';
         document.getElementById('phone').value = user.phone || '';
-        document.getElementById('address').value = user.address || '';
     })
     .catch(err => console.error('Error fetching user data:', err));
 });

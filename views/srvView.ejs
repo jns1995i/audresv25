@@ -64,7 +64,7 @@
                                     <% } else if ( item.status === "Approved") { %>
                                         <a href="" class="disabled nav cnavLG absolute translateY right10 bgGreen100 hidden"><i class="fas fa-check-circle"></i></a>
                                     <% } else { %>
-                                        <section class="padding10 gap5 width0 corner10 absolute right10 top10 hidden">
+                                        <section class="padding10 gap5 width0 corner10 absolute right10 top10">
                                             <form action="/decItem" method="POST" class="form2">
                                                 <input type="hidden" name="requestId" value="<%= request._id %>">
                                                 <input type="hidden" name="itemId" value="<%= item._id %>">
@@ -240,6 +240,9 @@
             <div class="width100 widthMax100 marginBottom15" id="InputDiv" style="display: none;">
                 <textarea name="" id="inputFlex"></textarea>
             </div>
+            <div class="width100 widthMax100 marginBottom15" id="InputDiv2" style="display: none;">
+                <textarea name="" id="inputFlex2"></textarea>
+            </div>
             <div class="field marginBottom15 porcelain" id="paperDiv" style="display: none;">
                 <% if (request.items && request.items.length > 0) { %>
                         <% request.items.forEach(item => { %>
@@ -271,22 +274,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectFlex = document.getElementById("selectFlex");
     const inputDiv = document.getElementById("InputDiv");
     const inputFlex = document.getElementById("inputFlex");
+    const inputDiv2 = document.getElementById("InputDiv2");
+    const inputFlex2 = document.getElementById("inputFlex2");
     const paperDiv = document.getElementById("paperDiv");
 
-    let currentForm = null; // form to submit
-    let currentAction = null; // store action type: 'item', 'decline3', 'hold3'
+    let currentForm = null;
+    let currentAction = null;
 
     const reasonOptions = {
         hold: ["Incomplete", "Payment", "Illegible"],
-        decline: ["Payment", "Balance", "Illegible", "Unidentified"]
+        decline: ["Illegible"]
     };
 
     const actions = [
-        { selector: 'form[action="/decItem"] button', message: "Are you sure you want to decline this requested document? Select your reason below", reason: "decline", title: "WARNING", type: "item" },
+        { selector: 'form[action="/decItem"] button', message: "Are you sure you want to decline this requested document? Select your reason below", title: "WARNING", type: "item" },
         { selector: 'form[action="/appItem"] button', message: "You are about to approve this requested document", title: "WARNING", type: "item" },
         { selector: 'form[action="/remarksItem"] button', message: "Are you sure you want to send this remarks?", title: "WARNING", type: "item" },
         { selector: 'form[action="/decline3"] button', message: "Are you sure you want to decline this whole transaction? Select your reason below", reason: "decline", title: "WARNING", type: "transaction" },
-        { selector: 'form[action="/hold3"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", title: "HOLD?", type: "transaction" },
+        { selector: 'form[action="/hold3"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", title: "HOLD?", type: "transaction" },
         { selector: 'form[action="/appAllItem"] button', message: "Are you sure you want to approve all the requested documents? It will be marked as Reviewed and will proceed to Accounting for Assessment", title: "WARNING", type: "transaction" },
         { selector: 'form[action="/fRel"] button', message: "Enter first the number of paper used per document!", title: "MARK AS FOR RELEASE?", type: "transaction" },
         { selector: 'form[action="/restore3"] button', message: "Are you sure you want to proceed? This will reset all the status of the whole transaction", title: "WARNING", type: "transaction" },
@@ -308,32 +313,37 @@ document.addEventListener("DOMContentLoaded", () => {
         selectDiv.style.display = "flex";
     }
 
+    // Attach click listeners to all action buttons
     actions.forEach(action => {
         document.querySelectorAll(action.selector).forEach(btn => {
             btn.addEventListener("click", e => {
                 e.preventDefault();
                 currentForm = btn.closest("form");
-                // ✅ Run native form validation first
+
                 if (!currentForm.checkValidity()) {
                     currentForm.reportValidity();
                     return;
                 }
-                currentAction = action; // store the action type
+
+                currentAction = action;
                 noticeMsg.textContent = action.message;
                 title.textContent = action.title;
 
-                // Reset input first
+                // Reset all inputs
                 inputDiv.style.display = "none";
                 inputFlex.required = false;
                 inputFlex.value = "";
+
+                inputDiv2.style.display = "none";
+                inputFlex2.required = false;
+                inputFlex2.value = "";
+
                 paperDiv.style.display = "none";
-                // remove any old paper inputs
                 paperDiv.querySelectorAll("input[name='paperUsed[]']").forEach(i => i.remove());
 
+                // Paper inputs for /fRel
                 if (currentForm.action.includes("/fRel")) {
                     paperDiv.style.display = "flex";
-
-                    // Create an input for each item
                     paperDiv.querySelectorAll("[data-item-type]").forEach(div => {
                         const itemType = div.dataset.itemType;
                         div.innerHTML = `
@@ -343,12 +353,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 }
 
-                // Show textarea ONLY for remarksItem
+                // Textarea for remarksItem
                 if (currentForm.action.includes("/remarksItem")) {
                     inputDiv.style.display = "flex";
                     inputFlex.required = true;
                 }
 
+                // Textarea for hold3
+                if (currentForm.action.includes("/hold3")) {
+                    inputDiv2.style.display = "flex";
+                    inputFlex2.required = true;
+                }
+
+                // Populate select if needed
                 if (action.reason && reasonOptions[action.reason]) {
                     populateSelect(action.reason);
                 } else {
@@ -365,28 +382,44 @@ document.addEventListener("DOMContentLoaded", () => {
         noticeCard.classList.add("hidden");
         currentForm = null;
         currentAction = null;
+
         selectDiv.style.display = "none";
         selectFlex.required = false;
         selectFlex.value = "";
+
         inputDiv.style.display = "none";
         inputFlex.required = false;
         inputFlex.value = "";
+
+        inputDiv2.style.display = "none";
+        inputFlex2.required = false;
+        inputFlex2.value = "";
+
+        paperDiv.style.display = "none";
     });
 
     proceedBtn.addEventListener("click", () => {
         if (!currentForm) return;
 
-        // If select is visible, ensure a value is selected
+        // Validate select
         if (selectDiv.style.display !== "none" && !selectFlex.checkValidity()) {
             selectFlex.reportValidity();
             return;
         }
-        // Validate remarks textarea if visible
+
+        // Validate inputDiv
         if (inputDiv.style.display !== "none" && !inputFlex.checkValidity()) {
             inputFlex.reportValidity();
             return;
         }
-        // Validate paper inputs if visible
+
+        // Validate inputDiv2
+        if (inputDiv2.style.display !== "none" && !inputFlex2.checkValidity()) {
+            inputFlex2.reportValidity();
+            return;
+        }
+
+        // Validate paperDiv
         if (paperDiv.style.display !== "none") {
             const paperInputs = paperDiv.querySelectorAll("input[name='paperUsed[]']");
             for (let input of paperInputs) {
@@ -397,30 +430,20 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Inject the reason into a hidden input before submitting
-        let reasonValue = selectFlex.value;
-        if (reasonValue && inputDiv.style.display === "none") {
-            let inputName = "";
+        // Inject select reason
+        if (selectDiv.style.display !== "none" && selectFlex.value) {
+            let inputName = currentAction.type === "item" ? "itemRemarks" : "requestRemarks";
+            let existing = currentForm.querySelector(`input[name="${inputName}"]`);
+            if (existing) existing.remove();
 
-            if (currentAction.type === "item") {
-                inputName = "itemRemarks"; // send as item.remarks in backend
-            } else if (currentAction.type === "transaction") {
-                inputName = "requestRemarks"; // send as request.remarks in backend
-            }
-
-            // Remove existing hidden input if any
-            let existingInput = currentForm.querySelector(`input[name="${inputName}"]`);
-            if (existingInput) existingInput.remove();
-
-            // Append new hidden input
             const hiddenInput = document.createElement("input");
             hiddenInput.type = "hidden";
             hiddenInput.name = inputName;
-            hiddenInput.value = reasonValue;
+            hiddenInput.value = selectFlex.value;
             currentForm.appendChild(hiddenInput);
         }
 
-        // Inject remarks input if used
+        // Inject inputDiv remarks
         if (inputDiv.style.display !== "none") {
             let existing = currentForm.querySelector('input[name="itemRemarks"]');
             if (existing) existing.remove();
@@ -429,11 +452,22 @@ document.addEventListener("DOMContentLoaded", () => {
             remarksInput.type = "hidden";
             remarksInput.name = "itemRemarks";
             remarksInput.value = inputFlex.value.trim();
-
             currentForm.appendChild(remarksInput);
         }
 
-        // Inject paper counts if used
+        // Inject inputDiv2 remarks (hold3)
+        if (inputDiv2.style.display !== "none") {
+            let existing = currentForm.querySelector('input[name="requestRemarks"]');
+            if (existing) existing.remove();
+
+            const remarksInput2 = document.createElement("input");
+            remarksInput2.type = "hidden";
+            remarksInput2.name = "requestRemarks";
+            remarksInput2.value = inputFlex2.value.trim();
+            currentForm.appendChild(remarksInput2);
+        }
+
+        // Inject paper counts
         if (paperDiv.style.display !== "none") {
             const paperInputs = paperDiv.querySelectorAll("input[name='paperUsed[]']");
             paperInputs.forEach(input => {
@@ -449,4 +483,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-

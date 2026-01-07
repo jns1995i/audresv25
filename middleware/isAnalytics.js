@@ -76,9 +76,37 @@ module.exports = async function analyticsMiddleware(req, res, next) {
     const allRequests = await requests.find(dateFilter);
     const totalRequests = allRequests.length;
 
+    // Compute average rating
+    const ratings = allRequests
+      .map(r => Number(r.rating))            // convert to number
+      .filter(r => !isNaN(r) && r >= 1 && r <= 5); // only 1-5
+
+    const totalRatings = ratings.length;
+    const sumRatings = ratings.reduce((acc, val) => acc + val, 0);
+
+    // Average rating, rounded to nearest whole number
+    const avgRating = totalRatings === 0 ? 0 : Math.round(sumRatings / totalRatings);
+
+
     const approved = allRequests.filter(r => ["Verified", "For Release", "Claimed"].includes(r.status)).length;
     const onProcess = allRequests.filter(r => ["Reviewed", "Assessed", "For Payment", "For Verification"].includes(r.status)).length;
     const pending = allRequests.filter(r => r.status === "Pending" && !r.declineAt).length;
+    const myPending = allRequests.filter(r => {
+      // Only Pending requests
+      if (r.status !== "Pending") return false;
+
+      // processBy must exist
+      if (!r.processBy) return false;
+
+      // Convert both to string for comparison
+      const processById = r.processBy.toString();
+      const userId = req.user._id.toString();
+      console.log('req.user.fName')
+
+      return processById === userId;
+    }).length;
+
+
     const declined = allRequests.filter(r => r.declineAt).length;
     const onHold = allRequests.filter(r => r.holdAt).length;
     const toVerify = allRequests.filter(r => r.verify === true).length;
@@ -1197,7 +1225,7 @@ const totalPaper = totalPaperAgg[0]?.totalPaper || 0;
       totalRequests,
       approved, approvedPercent,
       declined, declinedPercent,
-      pending, pendingPercent,
+      pending, pendingPercent, myPending,
       onHold, onHoldPercent,
       onProcess, onProcessPercent,
       avgApprovalTime, avgApprovalTimeStat,
@@ -1235,7 +1263,9 @@ const totalPaper = totalPaperAgg[0]?.totalPaper || 0;
       processByDeclineStats: processByDeclineAgg,
       overallDeclinedTotal,
       totalRevenue,
-      totalPaper
+      totalPaper,
+      
+      avgRating, sumRatings, totalRatings, ratings
 
     };
 

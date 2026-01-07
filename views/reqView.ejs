@@ -61,7 +61,7 @@
 </head>
 <body class="block overflow-y1">
     
-    <section class="absolute top10 right10 width0 opacity05">
+    <section class="absolute top10 right10 width0 opacity0">
         <div class="selectBar">
             <select name="status" id="status">
                 <option value="Pending" <%= rq.status === "Pending" ? "selected" : "" %>>Pending</option>
@@ -114,54 +114,6 @@
                 
                <%- include('partials/notes3') %>
                 <%- include('partials/status') %>
-
-                <% if (rq.holdAt) { %>
-
-                <div class="height0 paddingLeft30 justifyBetween red"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgRed100" style="border-radius: 1.5rem !important;">
-                    <div class="height0 width0 gap5 paddingInline10">
-                        <%
-                        const options = { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric', 
-                            hour: 'numeric', 
-                            minute: '2-digit', 
-                            hour12: true 
-                        }; 
-                        const formattedDate2 = new Date(rq.holdAt).toLocaleString('en-US', options); 
-                        %>
-                        <p class=" str500"><%= formattedDate2 %></p>
-                    </div>
-                    <a href="" class="nav disabled dnav"><i class="fas fa-clock"></i> On Hold</a>
-                </section>
-
-                <% } %>
-
-                <% if (rq.declineAt) { %>
-
-                <div class="height0 paddingLeft30 justifyBetween black"><i class="fas fa-ellipsis-vertical"></i></div>
-
-                <section class="height0 justifyBetween bgRed100" style="border-radius: 1.5rem !important;">
-                    <div class="height0 width0 gap5 paddingInline10">
-                        <%
-                        const options = { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric', 
-                            hour: 'numeric', 
-                            minute: '2-digit', 
-                            hour12: true 
-                        }; 
-                        const formattedDate3 = new Date(rq.declineAt).toLocaleString('en-US', options); 
-                        %>
-                        <p class=" str500"><%= formattedDate3 %></p>
-                    </div>
-                    <a href="" class="nav disabled dnav"><i class="fas fa-xmark-circle"></i> Declined</a>
-                </section>
-                
-                <% } %>
 
             </section>
         </section>

@@ -56,9 +56,6 @@
         width: 95% !important;
         border-radius: 18px;
     }
-    #controls {
-        width: fit-content !important;
-    }
   }
 </style>
 
@@ -66,7 +63,7 @@
 
 <div class="height0 width100" id="prfMain">
 
-    <div class="height0 width30 col padding10 prfCard">
+    <div class="height0 width50 col padding10 prfCard">
         <br>
         <div class="height0 width0 relative corner15">
             <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h120 w120 corner500 borderWhite">
@@ -124,8 +121,8 @@
         <p class="rem2 str400 textCenter"><%= user.fName %> <%= user.mName || '' %> <%= user.lName %> <%= user.xName || '' %></p>
         <p class="rem16 str400"><%= user.role %> <i class="bi bi-patch-check-fill"></i></p>
         <br>
-        <div class="height0 corner20 width0 gap10 padding10" id="controls">
-            <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i> Go Back</a>
+        <div class="height0 corner20 gap10 padding10 justifyBetween" id="controls">
+            <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i> Home Page</a>
             <a href="javascript:void(0)" class="nav liquid" id="lgOpen"><i class="fas fa-share-square"></i> Sign Out</a>
         </div>
         <br>

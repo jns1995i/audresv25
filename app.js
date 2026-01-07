@@ -955,6 +955,92 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     });
 
     const savedUser = await newUser.save();
+
+    let processBy = null;
+
+// 1️⃣ CAMPUS CHECK
+if (savedUser?.campus === "South" || savedUser?.campus === "San Jose") {
+  const registrar = await users.findOne({
+    role: "Registrar",
+    campus: savedUser.campus,
+    archive: false
+  });
+  if (registrar) processBy = registrar._id.toString();
+}
+
+// 2️⃣ OLD RECORDS (≤ 2006)
+if (!processBy) {
+  const year = savedUser.yearGraduated || savedUser.yearAttended;
+  if (year && Number(year) <= 2006) {
+    processBy = await getRegistrarByAssign("Old");
+  }
+}
+
+// 3️⃣ YEAR LEVEL
+if (!processBy && savedUser.yearLevel) {
+  const yl = String(savedUser.yearLevel).toLowerCase();
+  if (yl.includes("first") || yl.includes("1st")) {
+    processBy = await getRegistrarByAssign("CAS");
+  } else if (
+    yl.includes("grade 9") ||
+    yl.includes("grade 10") ||
+    yl.includes("grade 11") ||
+    yl.includes("grade 12")
+  ) {
+    processBy = await getRegistrarByAssign("CELA");
+  }
+}
+
+// 4️⃣ COURSE → ASSIGN
+if (!processBy && savedUser.course) {
+  let targetAssign = null;
+  const course = savedUser.course;
+
+  if ([
+    "Bachelor of Science in Business Administration - Marketing Management",
+    "Bachelor of Science in Business Administration - Banking and Microfinance",
+    "Bachelor of Science in Business Administration - Financial Management",
+    "Bachelor of Science in Business Administration - Human Resource Management",
+    "Bachelor of Science in Accountancy",
+    "Bachelor of Science in Management Accounting",
+    "Bachelor of Science in Accounting Information System",
+    "Bachelor of Science in Hospitality Management",
+    "Bachelor of Science in Entrepreneurship"
+  ].includes(course)) {
+    targetAssign = "CMA";
+  } else if ([
+    "Bachelor of Science in Electrical Engineering",
+    "Bachelor of Science in Civil Engineering"
+  ].includes(course)) {
+    targetAssign = "COE";
+  } else if (["Bachelor of Science in Information Technology"].includes(course)) {
+    targetAssign = "South";
+  } else if ([
+    "Bachelor of Science in Pharmacy",
+    "Bachelor of Science in Psychology",
+    "Bachelor of Science in Nursing",
+    "Bachelor of Science in Medical Laboratory Science"
+  ].includes(course)) {
+    targetAssign = "CAHS";
+  } else if ([
+    "Bachelor of Elementary Education",
+    "Bachelor of Arts in Political Science",
+    "Bachelor of Early Childhood Education",
+    "Bachelor of Secondary Education - Science",
+    "Bachelor of Secondary Education - Mathematics",
+    "Bachelor of Secondary Education - English",
+    "Bachelor of Secondary Education - Filipino"
+  ].includes(course)) {
+    targetAssign = "CELA";
+  } else if (["Bachelor of Science in Criminology"].includes(course)) {
+    targetAssign = "CCJE";
+  }
+
+  if (targetAssign) {
+    processBy = await getRegistrarByAssign(targetAssign);
+  }
+}
+
     // 1️⃣ Get all TRs
     const allRequests = await requests.find({}, { tr: 1 });
 
@@ -985,7 +1071,9 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       archive: true,
       verify: true,
       status: "Pending",
-      tr
+      tr,
+      processBy,          // ✅ include the assigned registrar
+      assignAt: processBy ? new Date() : null
     });
 
     const savedRequest = await newRequest.save();
@@ -1130,7 +1218,7 @@ app.post('/verify1', async (req, res) => {
       } else if ([
         "Bachelor of Science in Information Technology"
       ].includes(course)) {
-        targetAssign = "CIT";
+        targetAssign = "South";
 
       } else if ([
         "Bachelor of Science in Pharmacy",
@@ -1548,23 +1636,31 @@ app.get('/reqSuccess', (req, res) => {
   res.render('reqSuccess', { title: 'Success' });
 });
 
-app.post('/rate2', async (req, res) => {
-  console.log('Incoming rating:', req.body);
-  try {
-    const { rating } = req.body;
-    if (!rating) return res.status(400).json({ error: 'No rating provided' });
+// Assuming you have a Request model for your 'request' collection
+app.post("/rate2/:id", async (req, res) => {
+    const id = req.params.id;             // request _id
+    const { rating } = req.body;          // rating value from frontend
 
-    await Ratings.create({
-      rating: Number(rating),
-      createdAt: new Date(),
-      ip: req.ip
-    });
+    try {
+        const updatedRequest = await requests.findByIdAndUpdate(
+            id,
+            { rating: Number(rating) },    // update rating
+            { new: true }                  // return updated document
+        );
 
-    res.json({ success: true, message: 'Rating recorded' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
-  }
+        if (!updatedRequest)
+            return res.status(404).json({ success: false, error: "Request not found" });
+
+        res.json({ success: true, rating: updatedRequest.rating });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: "Error updating rating" });
+    }
+});
+
+app.get("/request/:id", async (req, res) => {
+    const rq = await requests.findById(req.params.id); // fetch request document
+    res.render("requestPage", { rq }); // pass `rq` to EJS
 });
 
 app.get('/getUser', async (req, res) => {
@@ -2416,7 +2512,7 @@ app.post('/quick-assign', isLogin, isStaff, async (req, res) => {
 
 // ===== DECLINE SINGLE ITEM =====
 app.post("/decItem", async (req, res) => {
-  const { requestId, itemId, back, itemRemarks } = req.body;
+  const { requestId, itemId, back } = req.body;
 
   try {
     const requestDoc = await requests.findById(requestId).populate('requestBy');
@@ -2426,7 +2522,6 @@ app.post("/decItem", async (req, res) => {
     if (!itemDoc) return res.status(404).send("Item not found");
 
     itemDoc.status = "Declined";
-    itemDoc.remarks = itemRemarks || itemDoc.remarks;
     await itemDoc.save();
 
     requestDoc.holdAt = null;
@@ -2823,7 +2918,7 @@ app.post('/newEmp', async (req, res) => {
   try {
     const {
       firstName, middleName, lastName, extName,
-      address, number, email,
+     number, email,
       role, campus, studentNo, assign // employee number
     } = req.body;
 
@@ -2847,7 +2942,6 @@ app.post('/newEmp', async (req, res) => {
       mName: middleName,
       lName: lastName,
       xName: extName,
-      address,
       phone: number,
       email: email.toLowerCase(),
       role,
@@ -3247,7 +3341,6 @@ app.post('/edt4', async (req, res) => {
       xName,
       email,
       phone,
-      address,
       assign,
 
       role,
@@ -3260,7 +3353,7 @@ app.post('/edt4', async (req, res) => {
       return res.redirect(redirectUrl || '/emp');
     }
 
-    if (!fName || !lName || !email || !phone || !address || !schoolId) {
+    if (!fName || !lName || !email || !phone || !schoolId) {
       req.session.msg = { type: "error", text: "Please fill in all required fields!" };
       return res.redirect(redirectUrl || '/emp');
     }
@@ -3298,7 +3391,6 @@ app.post('/edt4', async (req, res) => {
       xName,
       email: email.toLowerCase(),
       phone,
-      address,
       role,
       campus,
       assign,
@@ -3312,14 +3404,17 @@ app.post('/edt4', async (req, res) => {
     const userId = req.session.user._id;
     const currentUser = await users.findById(userId);
 
-                    // ===== CREATE LOGIN LOG =====
+                    // ===== CREATE EDIt LOG =====
+      // After updating the user
+    const editedUser = await users.findById(studentId);
+
     const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`;
+    const isStudent = `${editedUser.fName} ${editedUser.mName} ${editedUser.lName} ${editedUser.xName}`;
+
     await Log.create({
       who: isWho,
       what: `Edit ${isStudent}'s Information`
     });
-
 
     req.session.msg = { type: "success", text: "Profile updated successfully!" };
     return res.redirect(redirectUrl || '/emp');
@@ -3702,10 +3797,10 @@ app.post('/edt2', async (req, res) => {
     }
 
     const userId = req.session.user._id;
-    const { email, phone, address } = req.body;
+    const { email, phone } = req.body;
 
     // Validate required fields
-    if (!email || !phone || !address) {
+    if (!email || !phone) {
       req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
       return res.redirect('/acc');
     }
@@ -3724,7 +3819,7 @@ app.post('/edt2', async (req, res) => {
     // Update user
     const updatedUser = await users.findByIdAndUpdate(
       userId,
-      { email: email.toLowerCase(), phone, address },
+      { email: email.toLowerCase(), phone },
       { new: true }
     );
 
@@ -4943,10 +5038,10 @@ app.post('/edt2A', async (req, res) => {
     }
 
     const userId = req.session.user._id;
-    const { email, phone, address } = req.body;
+    const { email, phone } = req.body;
 
     // Validate required fields
-    if (!email || !phone || !address) {
+    if (!email || !phone) {
       req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
       return res.redirect('/acc2');
     }
@@ -4965,7 +5060,7 @@ app.post('/edt2A', async (req, res) => {
     // Update user
     const updatedUser = await users.findByIdAndUpdate(
       userId,
-      { email: email.toLowerCase(), phone, address },
+      { email: email.toLowerCase(), phone },
       { new: true }
     );
 

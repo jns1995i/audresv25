@@ -2,7 +2,7 @@
                 <section class=" padding0 relative marginTop15">
                     <p class="absolute right5 top0" style="transform: rotate(45deg)!important;"><i class="fas fa-thumbtack size16"></i></p>
                     <section class="bgYellow textCenter colorPrimary col corner20 padding10" style="min-height: 60px;">
-                        Request has been hold due to <%= request.remarks %>
+                        Request has been hold! Remarks: "<%= request.remarks %>"
                     </section>
                 </section>
                 <% } else if ( request.declineAt ) { %>

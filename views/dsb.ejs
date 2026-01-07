@@ -45,10 +45,17 @@
   <section class="height0 col width70 justifyBetween padding0">
     <section class="relative justifyBetween padding0">
       <p class="size40 str400" id="">Dashboard</p>
-      <section class="gap5 padding0 width0">
-        <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests <div id="pending" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
-        <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify <div id="toVerifyUsers" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
-      </section>
+      <% if (user.role === "Head") { %>
+        <section class="gap5 padding0 width0">
+          <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests <div id="pending" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
+          <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify <div id="toVerifyUsers" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
+        </section>
+      <% } else if (user.role === "Registrar") { %>
+        <section class="gap5 padding0 width0">
+          <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests <div id="myPending" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
+        </section>
+      <% } else { %>
+      <% } %>
     </section>
     <section class="gap20 padding0 corner15" id="metricsContainer">
       <section id="metric" class="keyMetrics bgWhite gap10">
@@ -73,7 +80,9 @@
 
 <section class="col corner15 bgWhite padding0 relative">
   <section class="justifyBetween paddingInline15">
-    <p class="size30 str400" id="totalRequests"></p>
+    <section class="padding0 width0 gap5">
+      <p class="size30 str400" id="totalRequests"></p>
+    </section>
     <section class="width0 gap10 padding0">
       <div class="selectBar w200">
           <i class="fas fa-filter"></i>
@@ -131,15 +140,19 @@ filterSelect.addEventListener("change", () => {
 <section class="corner15 bgWhite padding0 relative alignStretch">
   <div class="width30 col padding10 gap20 height0">
     <div class="bgWhite shadow1 corner15 padding20 col alignStart justifyBetween">
-      <p class="size20 str400">Total Revenue</p>
-      <p class="size26 str400" id="totalRevenue"></p>
+      <p class="size16 str400">Total Revenue</p>
+      <p class="size20 str400" id="totalRevenue"></p>
     </div>
     <div class="bgWhite shadow1 corner15 padding20 col alignStart justifyBetween">
-      <p class="size20 str400">Total Paper Used</p>
-      <p class="size26 str400" id="totalPaper"></p>
+      <p class="size16 str400">Total Paper Used</p>
+      <p class="size20 str400" id="totalPaper"></p>
+    </div>
+    <div class="bgWhite shadow1 corner15 padding20 col alignStart justifyBetween">
+      <p class="size16 str400">Average Ratings</p>
+      <p class="size20 str400" id="avgRating"></p>
     </div>
   </div>
-  <section class="width70 h300 corner15 bgWhite padding0">
+  <section class="width70 corner15 bgWhite padding0">
       <canvas id="revenueChart"></canvas>
   </section>
 </section>
@@ -477,7 +490,7 @@ document.getElementById("filterInfo").innerText =
         : "";
 
 document.getElementById("totalRequests").innerText = `${analytics.totalRequests || 0} Total Request`;
-document.getElementById("pending").innerText = analytics.pending || 0;
+// document.getElementById("pending").innerText = analytics.pending || 0;
 
 // Loop for status counts and percentages
 const metrics = [
@@ -511,8 +524,17 @@ metrics.forEach(m => {
 
 tpl.remove();
 
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
+}
+
+setText("pending", analytics.pending || 0);
+setText("myPending", analytics.myPending || 0);
+setText("toVerifyUsers", analytics.toVerifyUsers || 0);
+
   document.getElementById("activeUserCount").innerText = `${analytics.activeUserCount || 0} Active`;
-  document.getElementById("toVerifyUsers").innerText = analytics.toVerifyUsers || 0;
+  // document.getElementById("toVerifyUsers").innerText = analytics.toVerifyUsers || 0;
   document.getElementById("avgApprovalTime").innerText = analytics.avgApprovalTime || 0;
   document.getElementById("avgApprovalTimeStat").innerText = analytics.avgApprovalTimeStat || 0;
   document.getElementById("avgReviewTime").innerText = analytics.avgReviewTime || 0;
@@ -521,6 +543,24 @@ tpl.remove();
   document.getElementById("avgAssessTimeStat").innerText = analytics.avgAssessTimeStat || 0;
   document.getElementById("totalRevenue").innerText = `₱ ${Number(analytics.totalRevenue || 0).toLocaleString()}`;
   document.getElementById("totalPaper").innerText = `${analytics.totalPaper || 0} Copies`;
+
+  const avgRating = analytics.avgRating || 0; // fallback to 0
+  const maxStars = 5;
+
+  let starsHTML = "";
+
+  // Generate yellow stars for the rating
+  for (let i = 1; i <= maxStars; i++) {
+    if (i <= avgRating) {
+      starsHTML += '<i class="fas fa-star yellow"></i> ';
+    } else {
+      starsHTML += '<i class="fas fa-star gray"></i> ';
+    }
+  }
+
+  // Display as "Average Ratings: [stars]"
+  document.getElementById("avgRating").innerHTML = `${starsHTML}`;
+
   const totalPaper = analytics.totalPaper || 0;
   document.getElementById("totalPaper").innerText = totalPaper === 0 ? "No Used" : `${totalPaper} Piece${totalPaper === 1 ? "" : "s"}`;
 

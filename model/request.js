@@ -40,6 +40,7 @@ const requestSchema = new mongoose.Schema({
 
   claimedBy: { type: String, trim: true }, // name of claimant
   releaseBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+  rating: { type: String, trim: true },
 
   remarks: { type: String, trim: true },
   notes: { type: String, trim: true },

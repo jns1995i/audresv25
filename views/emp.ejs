@@ -49,13 +49,6 @@
                 <label for="">Extension Name</label>
                 <input type="text" name="extName" class="sname">
             </div>
-            <div class="row height0 width100 gap10 colF1">
-                <div class="field gap5">
-                    <label for="">Address*</label>
-                    <input type="text" name="address" required>
-                </div>
-            </div>
-
             <div class="field gap5">
                 <label for="">Phone Number*</label>
                 <input type="text" id="number" name="number" inputmode="numeric" required class="number">
@@ -188,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { code: "CIT", label: "CIT" },
             { code: "CAHS", label: "CAHS" },
             { code: "CCJE", label: "CCJE" },
+            { code: "OLD", label: "OLD" },
             { code: "San Jose", label: "San Jose" },
             { code: "South", label: "South" }
             ];
@@ -234,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
                 <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
                 <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
-                <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
+                <p class="size10 textWrap textCenter green"><i class="fas fa-suitcase"></i> <%= user.assign || 'Unknown' %></p>
             </a>
             <% } %>
         <% }) %>
@@ -274,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <a href="/empView/<%= user._id %>" class="height0 w120 col gap5">
                         <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h80 w80 corner500 shadow1">
                         <p class="size14 textWrap textCenter"><%= user.fName %> <i class="bi bi-patch-check-fill navy"></i></p>
-                        <p class="size10 textWrap textCenter green"><i class="bi bi-building"></i> <%= user.campus || 'Unknown' %></p>
+                        <p class="size10 textWrap textCenter green"><i class="fas fa-user-cog"></i> <%= user.role || 'Unknown' %></p>
                     </a>
                     <% } %>
                 <% }) %>

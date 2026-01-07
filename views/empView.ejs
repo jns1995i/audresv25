@@ -52,7 +52,6 @@
             <p class="rem12 str500"><i class="fas fa-building w15"></i> <%= student.campus || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= student.email || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= student.phone || "--" %></p>
-            <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= student.address || "--" %></p>
             <% if (student.role ==='Registrar') { %>
                 <% if (student.assign) { %>
                     <p class="rem12 str500 bgBlue100" style="margin-top: 5px !important;">Assign to<strong class="str600 sizeInherit margin0"><%= student.assign || "--" %></strong></p>
@@ -277,11 +276,6 @@
                             <input type="text" id="phone" name="phone" class="phone" value="<%= student.phone %>">
                         </div>
 
-                        <div class="field">
-                            <label>Address</label>
-                            <input type="text" id="address" name="address" value="<%= student.address %>">
-                        </div>
-
                     </section>
 
                     <section class="padding0 col alignStart gap5">
@@ -330,6 +324,7 @@
                         { code: "CIT", label: "CIT" },
                         { code: "CAHS", label: "CAHS" },
                         { code: "CCJE", label: "CCJE" },
+                        { code: "OLD", label: "OLD" },
                         { code: "San Jose", label: "San Jose" },
                         { code: "South", label: "South" }
                         ];
