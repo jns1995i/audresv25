@@ -45,7 +45,7 @@
   <section class="height0 col width70 justifyBetween padding0">
     <section class="relative justifyBetween padding0">
       <p class="size40 str400" id="">Dashboard</p>
-      <% if (user.role === "Head") { %>
+      <% if (user.role === "Head" || user.role === "Admin") { %>
         <section class="gap5 padding0 width0">
           <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests <div id="pending" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
           <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify <div id="toVerifyUsers" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
@@ -92,9 +92,9 @@
           <option value="yesterday">Yesterday</option>
           <option value="thisWeek">This Week</option>
           <option value="lastWeek">Last Week</option>
-          <option value="thisMonth">This Month</option>
+          <option value="thisMonth" selected>This Month</option>
           <option value="lastMonth">Last Month</option>
-          <option value="thisYear" selected>This Year</option>
+          <option value="thisYear">This Year</option>
           <option value="lastYear">Last Year</option>
           <option value="specific">Specific Date</option>
           <option value="custom">Custom Range</option>
@@ -148,7 +148,7 @@ filterSelect.addEventListener("change", () => {
       <p class="size20 str400" id="totalPaper"></p>
     </div>
     <div class="bgWhite shadow1 corner15 padding20 col alignStart justifyBetween">
-      <p class="size16 str400">Average Ratings</p>
+      <p class="size16 str400">Average Ratings <span class="bgBlue100 border0" id="totalRatings"></span></p>
       <p class="size20 str400" id="avgRating"></p>
     </div>
   </div>
@@ -543,6 +543,7 @@ setText("toVerifyUsers", analytics.toVerifyUsers || 0);
   document.getElementById("avgAssessTimeStat").innerText = analytics.avgAssessTimeStat || 0;
   document.getElementById("totalRevenue").innerText = `₱ ${Number(analytics.totalRevenue || 0).toLocaleString()}`;
   document.getElementById("totalPaper").innerText = `${analytics.totalPaper || 0} Copies`;
+  document.getElementById("totalRatings").innerText = `${analytics.totalRatings || 0} out ${analytics.activeUserCount || 0} Users`;
 
   const avgRating = analytics.avgRating || 0; // fallback to 0
   const maxStars = 5;
@@ -560,6 +561,7 @@ setText("toVerifyUsers", analytics.toVerifyUsers || 0);
 
   // Display as "Average Ratings: [stars]"
   document.getElementById("avgRating").innerHTML = `${starsHTML}`;
+
 
   const totalPaper = analytics.totalPaper || 0;
   document.getElementById("totalPaper").innerText = totalPaper === 0 ? "No Used" : `${totalPaper} Piece${totalPaper === 1 ? "" : "s"}`;

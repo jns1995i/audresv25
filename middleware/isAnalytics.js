@@ -137,33 +137,22 @@ module.exports = async function analyticsMiddleware(req, res, next) {
 
     // hello
 const mongoose = require("mongoose");
-
 let myPending = 0;
 
-if (req.user?._id) {
-  const userIdStr = req.user._id.toString();
+const userId = req.user?._id;
 
-  const myPendingAgg = await requests.aggregate([
-    { 
-      $addFields: {
-        processByStr: { $toString: "$processBy" }   // convert DB value to string
-      }
-    },
-    {
-      $match: {
-        ...dateFilter,
-        status: "Pending",
-        declineAt: { $exists: false },
-        processByStr: userIdStr
-      }
-    },
-    { $count: "total" }
-  ]);
+if (userId) {
+  // Always count pending assigned to this user, regardless of date
+  const filter = {
+    status: "Pending",
+    processBy: userId,
+    declineAt: null   // or handle null/undefined if needed
+  };
 
-  myPending = myPendingAgg[0]?.total || 0;
+  myPending = await requests.countDocuments(filter);
 }
 
-console.log("My pending requests:", myPending);
+console.log("My pending requests (all time):", myPending);
 
     // ================================
     // ACTIVE USERS

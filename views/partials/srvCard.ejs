@@ -4,13 +4,18 @@
 
     <section class="col alignStart info corner16 padding5 bgSoft">
         <section class="corner16 justifyBetween relative">
-            <p class="size20 str500">
-                <img src="<%= request.requestBy?.photo || '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h30 w30 corner500 marginRight5">
-                <%= request.requestBy ? request.requestBy.fName : '' %>
-                <%= request.requestBy ? request.requestBy.mName : '' %>
-                <%= request.requestBy ? request.requestBy.lName : '' %>
-                <%= request.requestBy ? request.requestBy.xName : '' %>
-            </p>
+            <section class="size20 str500 width0 padding0">
+                <img src="<%= request.requestBy?.photo || '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h40 w40 corner500 marginRight5">
+                <section class="padding0 col alignStart gap0 paddingLeft10 width0">
+                    <p class="size10 darkGray">Requested By</p>
+                    <p class="size20 str500">
+                    <%= request.requestBy ? request.requestBy.fName : '' %>
+                    <%= request.requestBy ? request.requestBy.mName : '' %>
+                    <%= request.requestBy ? request.requestBy.lName : '' %>
+                    <%= request.requestBy ? request.requestBy.xName : '' %>
+                    </p>
+                </section>
+            </section>
             <a href="javascript:void(0)" id="showBtn" class="size16"><i class="fas fa-chevron-down"></i></a>
         </section>
         <section class="paddingInline10 col alignStart bgWhite corner15 hidden" id="showCard">
@@ -86,23 +91,24 @@
             </p>
         </section>
     </section>
+<% if (user.role === "Accounting") { %>
+    <% if (["For Verification", "Verified", "Claimed", "For Release"].includes(request.status)) { %>
+        <% if (request.payPhoto && request.payPhoto.length > 0) { %>
+        <section class="corner15 gap20 padding5 bgSoft justifyBetween">
+            <section class="size16 str400 width0">View Payment Here <i class="fas fa-arrow-right marginLeft5"></i> </section>
 
-<% if (["For Verification", "Verified", "Claimed", "For Release"].includes(request.status)) { %>
-    <% if (request.payPhoto && request.payPhoto.length > 0) { %>
-    <section class="corner15 gap20 padding5 bgSoft justifyBetween">
-        <section class="size16 str400 width0">View Payment Here <i class="fas fa-arrow-right marginLeft5"></i> </section>
-
-        <section class="gap20 bgWhite corner15 width0">
-                <% request.payPhoto.forEach((photo, index) => { %>
-                    <a href="<%= photo %>" target="_blank" class="nav">
-                        <i class="fas fa-eye"></i> Payment <%= index + 1 %>
-                    </a>
-                <% }) %>
+            <section class="gap20 bgWhite corner15 width0">
+                    <% request.payPhoto.forEach((photo, index) => { %>
+                        <a href="<%= photo %>" target="_blank" class="nav">
+                            <i class="fas fa-eye"></i> Payment <%= index + 1 %>
+                        </a>
+                    <% }) %>
+            </section>
         </section>
-    </section>
-    <% } else { %>
+        <% } else { %>
+        <% } %>
     <% } %>
-  <% } %>
+<% } %>
                 <script>
                 document.addEventListener('DOMContentLoaded', () => {
                     const btn = document.querySelector('#showBtn');

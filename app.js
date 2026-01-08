@@ -428,7 +428,7 @@ app.post('/login', async (req, res) => {
         return res.redirect('/dsb');
 
       } else if (user.role === "Accounting") {
-        return res.redirect('/ovr');
+        return res.redirect('/trs');
 
       } else {
         return res.redirect('/');  // If access=1 but role does not match any
@@ -484,7 +484,7 @@ app.post('/vvp', async (req, res) => {
             if (adminRoles.includes(user.role) || user.role === "Registrar") {
                 return res.redirect('/dsb');
             } else if (user.role === "Accounting") {
-                return res.redirect('/ovr');
+                return res.redirect('/trs');
             } else {
                 return res.redirect('/');
             }
@@ -4786,7 +4786,7 @@ app.post('/update-documents', isLogin, async (req, res) => {
   }
 });
 
-app.get('/api/analytics', analyticsMiddleware, (req, res) => {
+app.get('/api/analytics', isLogin, analyticsMiddleware, (req, res) => {
   res.json(res.locals.analytics);
 });
 
