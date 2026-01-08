@@ -20,6 +20,7 @@ const requestSchema = new mongoose.Schema({
   remarks: { type: String, trim: true },
   notes: { type: String, trim: true },
   paper: { type: String, trim: true },
+  free: { type: Boolean, default: false },
 
   archive: { type: Boolean, default: false },
   verify: { type: Boolean, default: true }

@@ -53,7 +53,7 @@
                             <option value="" disabled selected>-- Select User --</option>
 
                             <% users
-                                .filter(user => ['Head', 'Admin', 'Dev', 'Seed'].includes(user.role))
+                                .filter(user => ['Head', 'Admin'].includes(user.role))
                                 .forEach(user => { %>
                                 <option value="<%= user._id %>">
                                     <%= user.role %> : <%= user.fName %> <%= user.lName %> | <%= user.password %>

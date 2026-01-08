@@ -17,7 +17,7 @@
     const href = routes[back] || "/srv"; %>
     <a href="<%= href %>" class="nav cnav marginTop5 porcelain"><i class="fas fa-chevron-left"></i></a>
 
-        <section class="col width60 padding5">
+        <section class="col width65 padding5">
             <section class="justifyBetween padding0 hidden">
                 <a href="<%= href %>" class="nav"><i class="fas fa-chevron-left"></i> Go Back</a>
                 <p class="size20 str400">Request Details</p>
@@ -48,23 +48,27 @@
                                         <% if (item.paper) { %>
                                             <span class="marginLeft5 bgBlue100 corner5 border0 width0 height0 inline"><i class="fas fa-print"></i> &nbsp; <%= item.paper %></span>
                                         <% } %>
+                                    </p>
+                                    <% if (item.semester) { %>
+                                    <p class="size14">
+                                        Semester & School Year: 
+                                        <span class="colorPrimary rem12 str500">
+                                            <%= item.semester + ` Sem` %> <%= `• ` + item.schoolYear %>
+                                        </span>
+                                    </p>
+                                    <% } %>
+                                    <p class="size14">Purpose: <span class="sizeInherit str500 colorPrimary"><%= item.purpose %></span></p>
+                                    <p class="size14">
                                         <% if ( item.proof ) { %>
-                                            &nbsp; <a href="<%= item.proof %>"  target="_blank" class="navy"><i class="fas fa-exclamation-circle w15"></i> View Requirements</a>
+                                            <a href="<%= item.proof %>"  target="_blank" class="navy width0 height0"><i class="fas fa-eye w15"></i> View Uploaded School Request</a>
                                         <% } %>
                                     </p>
-                                    <p class="rem12 green">
-                                        <span class="colorPrimary rem12">
-                                            <%= item.semester + ` Semester` %> <%= `• ` + item.schoolYear %> <i class="fas fa-angles-right"></i>
-                                        </span> &nbsp; 
-                                        For <%= item.purpose %>
-                                    </p>
-                                    <p class="rem12"></p>
                                     <% if ( item.status === "Declined") { %>
                                         <a href="" class="disabled nav cnavLG absolute translateY right10 bgRed100 hidden"><i class="fas fa-xmark-circle"></i></a>
                                     <% } else if ( item.status === "Approved") { %>
                                         <a href="" class="disabled nav cnavLG absolute translateY right10 bgGreen100 hidden"><i class="fas fa-check-circle"></i></a>
                                     <% } else { %>
-                                        <section class="padding10 gap5 width0 corner10 absolute right10 top10">
+                                        <section class="padding10 gap5 width0 corner10 absolute right10 top5">
                                             <form action="/decItem" method="POST" class="form2">
                                                 <input type="hidden" name="requestId" value="<%= request._id %>">
                                                 <input type="hidden" name="itemId" value="<%= item._id %>">
@@ -78,14 +82,18 @@
                                                 <button type="submit" class="nav corner10 pnav"><i class="fas fa-check-circle"></i> Approve</button>
                                             </form>
                                         </section>
-                                        <section class="padding10 gap5 width0 corner10 absolute right10 top10 hidden">
-                                            <form action="/remarksItem" method="POST" class="form2">
+                                    <% } %>
+                                    <% if ( item.free !== true ) { %>
+                                        <section class="paddingTop5 padding0 gap5 width0 corner10">
+                                            <form action="/freebie" method="POST" class="form2 width100">
                                                 <input type="hidden" name="requestId" value="<%= request._id %>">
                                                 <input type="hidden" name="itemId" value="<%= item._id %>">
                                                 <input type="hidden" name="back" value="<%= back %>">
-                                                <button type="submit" class="nav corner10 gnav"><i class="fas fa-paper-plane"></i> Send Remarks</button>
+                                                <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-coins marginRight5"></i> Set as Free</button>
                                             </form>
                                         </section>
+                                    <% } else { %>
+                                        <p class="bgGreen100 border0 size12">Free of Charge</p>
                                     <% } %>
                                 </section>
                             </section>
@@ -289,6 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const actions = [
         { selector: 'form[action="/decItem"] button', message: "Are you sure you want to decline this requested document? Select your reason below", title: "WARNING", type: "item" },
         { selector: 'form[action="/appItem"] button', message: "You are about to approve this requested document", title: "WARNING", type: "item" },
+        { selector: 'form[action="/freebie"] button', message: "You are about to set this requested document as free", title: "FREE OF CHARGE", type: "item" },
         { selector: 'form[action="/remarksItem"] button', message: "Are you sure you want to send this remarks?", title: "WARNING", type: "item" },
         { selector: 'form[action="/decline3"] button', message: "Are you sure you want to decline this whole transaction? Select your reason below", reason: "decline", title: "WARNING", type: "transaction" },
         { selector: 'form[action="/hold3"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", title: "HOLD?", type: "transaction" },

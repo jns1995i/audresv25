@@ -56,6 +56,10 @@
                                         <a href="" class="disabled nav cnavLG absolute translateY right10 bgBlue100"><i class="fas fa-check-circle"></i></a>
                                     <% } else { %>
                                     <% } %>
+                                <% if ( item.free !== true ) { %>
+                                <% } else { %>
+                                    <p class="bgGreen100 border0 size12">Free of Charge</p>
+                                <% } %>
                                 </section>
                                 <section class="padding5 gap5 width0 corner10 absolute top0 right0">
                                 
@@ -195,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const actions = [
         { selector: 'form[action="/hold4"] button', message: "Are you sure you want to hold this whole transaction? Select your reason below", reason: "hold", type: "transaction" },
-        { selector: 'form[action="/approve4"] button', message: "Are you sure this request passed the assessment? It will be marked as For Payment", type: "transaction" },
+        { selector: 'form[action="/approve4"] button', message: "Are you sure this request passed the assessment? It will be marked as For Payment or will be marked as Verified if all the documents are free", type: "transaction" },
 
         { selector: 'form[action="/hold5"] button', message: "Are you sure you want to proceed? This will hold the request and delete all the uploaded proof of payment. Please select your reason below", reason: "hold", type: "transaction" },
         { selector: 'form[action="/verify4"] button', message: "Are you sure you want to proceed? This request and payment will be marked as Verified", type: "transaction" },

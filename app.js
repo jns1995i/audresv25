@@ -1969,7 +1969,7 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
     const rqItems = await items.find({ tr: rq.tr });
 
     let totalAmount = 0;
-    const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
     const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } });
 
     approvedItems.forEach(it => {
@@ -2029,7 +2029,7 @@ app.get('/reqView2/:id', isLogin, async (req, res) => {
     const rqItems = await items.find({ tr: rq.tr });
 
     let totalAmount = 0;
-    const approvedItems = rqItems.filter(it => it.status === "Approved");
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
     const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } });
 
     approvedItems.forEach(it => {
@@ -2406,7 +2406,7 @@ async function renderRequest(req, res, backRoute, viewName = 'srvView') {
     const rqItems = rq.items || []; // assuming req.requests contains items array
 
     // Filter approved items
-    const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
 
     // Calculate totalAmount
     let totalAmount = 0;
@@ -2608,6 +2608,44 @@ app.post("/appItem", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+
+// ===== SET FREE SINGLE ITEM =====
+app.post("/freebie", async (req, res) => {
+  const { requestId, itemId, back } = req.body;
+
+  try {
+    const requestDoc = await requests.findById(requestId).populate('requestBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
+
+    const itemDoc = await items.findById(itemId);
+    if (!itemDoc) return res.status(404).send("Item not found");
+
+    itemDoc.free = true;
+    await itemDoc.save();
+
+    const currentUser = req.session.user;
+    const student = requestDoc.requestBy;
+    await Log.create({
+      who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+      what: `Set a document(s) requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as free`
+    });
+
+    const viewRoutes = {
+      srv: `/srvView/${requestId}`,
+      prc: `/prcView/${requestId}`,
+      rel: `/relView/${requestId}`,
+      apr: `/aprView/${requestId}`,
+      vrf: `/vrfView/${requestId}`
+    };
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
 
 // ===== APPROVE ALL ITEMS =====
 app.post("/appAllItem", async (req, res) => {
@@ -4833,7 +4871,7 @@ app.get('/rpt', isLogin, isRequest, isStaff, (req, res) => {
   // Calculate totalAmount for each request
 const requestsWithTotal = requestsToShow.map(rq => {
   const rqItems = rq.items || [];
-  const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
 
   let totalAmount = 0;
   for (const it of approvedItems) {
@@ -5212,7 +5250,7 @@ async function renderAssess(req, res, backRoute, viewName = 'trsView') {
     const rqItems = rq.items || []; // assuming req.requests contains items array
 
     // Filter approved items
-    const approvedItems = rqItems.filter(it => it.status === "Approved" || it.status === "Pending");
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
 
     // Calculate totalAmount
     let totalAmount = 0;
@@ -5317,29 +5355,63 @@ app.post("/revert4", async (req, res) => {
 });
 
 // ===== APPROVE 4 =====
+
 app.post("/approve4", async (req, res) => {
-    const { requestId, back } = req.body;
+  const { requestId, back } = req.body;
 
-    try {
-        const requestDoc = await requests.findById(requestId).populate('processBy');
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    // Fetch the request
+    const requestDoc = await requests.findById(requestId).populate('processBy');
+    if (!requestDoc) return res.status(404).send("Request not found");
 
-        requestDoc.status = "Assessed";
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        requestDoc.assessAt = new Date();
-        await requestDoc.save();
+    // Fetch all items where items.tr matches request.tr
+    const matchedItems = await items.find({ tr: requestDoc.tr }).lean();
+    console.log("Matched items:", matchedItems); // DEBUG
 
-        const student = requestDoc.processBy;
-        const userId = req.session.user._id;
-        await createLog(userId, `Mark the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as Assessed with tr# ${requestDoc.tr}`);
+    const now = new Date();
 
-        res.redirect(getViewRoute(back, requestId));
-    } catch (err) {
-        console.error("Approve4 Error:", err);
-        res.status(500).send("Server error");
+    // Determine request status based on matched items
+    if (matchedItems.length === 1 && (matchedItems[0].free === true || matchedItems[0].free === "true")) {
+      // Single matched item and free
+      requestDoc.status = "Verified";
+      requestDoc.assessAt = now;
+      requestDoc.verifyAt = now;
+    } else if (
+      matchedItems.length > 1 &&
+      matchedItems.every(it => it.free === true || it.free === "true")
+    ) {
+      // Multiple matched items, all free
+      requestDoc.status = "Verified";
+      requestDoc.assessAt = now;
+      requestDoc.verifyAt = now;
+    } else {
+      // Not all free → Assessed
+      requestDoc.status = "Assessed";
+      requestDoc.assessAt = now;
+      requestDoc.verifyAt = null;
     }
+
+    // Clear other timestamps
+    requestDoc.declineAt = null;
+    requestDoc.holdAt = null;
+
+    await requestDoc.save();
+
+    // Log the action
+    const student = requestDoc.processBy;
+    const userId = req.session.user._id;
+    await createLog(
+      userId,
+      `Marked the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as ${requestDoc.status} with tr# ${requestDoc.tr}`
+    );
+
+    res.redirect(getViewRoute(back, requestId));
+  } catch (err) {
+    console.error("Approve4 Error:", err);
+    res.status(500).send("Server error");
+  }
 });
+
 
 // ===== VERIFY 4 =====
 app.post("/verify4", async (req, res) => {

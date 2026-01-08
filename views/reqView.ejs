@@ -188,7 +188,7 @@
             </section>
         </section>
         <% if ( rq.status !== "Pending" && rq.status !== "Reviewed" && rq.status !== "Assessed" ) { %>
-            <% if ( rq.payPhoto ) { %>
+            <% if (rq.payPhoto && rq.payPhoto.length > 0) { %>
                 <section class="col width20">
                     <section class="justifyStart"><p class="rem18">Payment Details</p></section>
                     <section class="corner20 col bgWhite gap5">

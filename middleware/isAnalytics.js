@@ -437,14 +437,26 @@ console.log("My pending requests (all time):", myPending);
         case "yesterday": {
           // hours 0-23
           const labels = Array.from({ length: 24 }, (_, i) => i);
+
           const counts = await requests.aggregate([
             { $match: dateFilter },
-            { $group: { _id: { hour: { $hour: "$createdAt" } }, count: { $sum: 1 } } }
+            {
+              $group: {
+                _id: {
+                  hour: { $hour: { date: "$createdAt", timezone: "Asia/Manila" } }
+                },
+                count: { $sum: 1 }
+              }
+            }
           ]);
+
           trendAgg = labels.map(h => {
             const found = counts.find(c => c._id.hour === h);
-            return { label: `${h}:00`, count: found ? found.count : 0 };
+            const hour12 = h % 12 === 0 ? 12 : h % 12;
+            const ampm = h < 12 ? "AM" : "PM";
+            return { label: `${hour12}${ampm}`, count: found ? found.count : 0 };
           });
+
           break;
         }
       case "thisWeek":
@@ -942,7 +954,6 @@ const processByDeclineAgg = processByDeclineAggRaw.map(s => ({
 }));
 
 processByDeclineAgg.sort((a, b) => b.totalDeclined - a.totalDeclined);
-
 const totalRevenueAgg = await requests.aggregate([
   // 1️⃣ Filter requests by approved statuses
   { 
@@ -953,9 +964,7 @@ const totalRevenueAgg = await requests.aggregate([
   },
 
   // 2️⃣ Get their transaction references
-  {
-    $project: { tr: 1 }
-  },
+  { $project: { tr: 1 } },
 
   // 3️⃣ Lookup items in the same transaction
   {
@@ -967,6 +976,9 @@ const totalRevenueAgg = await requests.aggregate([
     }
   },
   { $unwind: "$items" }, // flatten items
+
+  // 3️⃣b Filter out free items
+  { $match: { "items.free": { $ne: true } } }, // skip items where free === true
 
   // 4️⃣ Lookup document to get amount for each item type
   {
@@ -998,6 +1010,7 @@ const totalRevenueAgg = await requests.aggregate([
 const totalRevenue = totalRevenueAgg[0]?.totalRevenue || 0;
 
 
+
     //trend revenue
 let trendRevenue = [];
 
@@ -1012,6 +1025,10 @@ if (filter !== "overall" && start && end) {
         { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
         { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
         { $unwind: "$items" },
+        
+  // 🔹 Filter out free items
+  { $match: { $or: [ { "items.free": false }, { "items.free": "false" }, { "items.free": { $exists: false } } ] } },
+
         { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
         { $unwind: "$docInfo" },
         { $project: { hour: { $hour: "$createdAt" }, revenue: { $multiply: ["$items.qty", "$docInfo.amount"] } } },
@@ -1034,6 +1051,10 @@ if (filter !== "overall" && start && end) {
         { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
         { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
         { $unwind: "$items" },
+        
+  // 🔹 Filter out free items
+  { $match: { $or: [ { "items.free": false }, { "items.free": "false" }, { "items.free": { $exists: false } } ] } },
+
         { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
         { $unwind: "$docInfo" },
         {
@@ -1064,6 +1085,10 @@ if (filter !== "overall" && start && end) {
         { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
         { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
         { $unwind: "$items" },
+        
+  // 🔹 Filter out free items
+  { $match: { $or: [ { "items.free": false }, { "items.free": "false" }, { "items.free": { $exists: false } } ] } },
+
         { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
         { $unwind: "$docInfo" },
         { $project: { month: { $month: "$createdAt" }, revenue: { $multiply: ["$items.qty", "$docInfo.amount"] } } },
@@ -1092,6 +1117,10 @@ if (filter !== "overall" && start && end) {
         { $match: { status: { $in: ["Approved","Verified","For Release","Claimed"] }, ...dateFilter } },
         { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
         { $unwind: "$items" },
+        
+  // 🔹 Filter out free items
+  { $match: { $or: [ { "items.free": false }, { "items.free": "false" }, { "items.free": { $exists: false } } ] } },
+
         { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "docInfo" } },
         { $unwind: "$docInfo" },
         { $project: { 
@@ -1108,40 +1137,6 @@ if (filter !== "overall" && start && end) {
 
       break;
     }
-
-// case "overall":
-// default: {
-//   const yearlyRevenue = await requests.aggregate([
-//     { $match: { 
-//         status: { $in: ["Approved","Verified","For Release","Claimed"] },
-//         archive: false,
-//         verify: false
-//     } },
-//     { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
-//     { $unwind: { path: "$items", preserveNullAndEmptyArrays: true } },
-//     { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "doc" } },
-//     { $unwind: { path: "$doc", preserveNullAndEmptyArrays: true } },
-//     { $project: { 
-//         year: { $year: "$createdAt" },
-//         revenue: { 
-//             $cond: [
-//                 { $and: [ { $ifNull: ["$items.qty", false] }, { $ifNull: ["$doc.amount", false] } ] },
-//                 { $multiply: ["$items.qty", { $toDouble: "$doc.amount" }] },
-//                 0
-//             ] 
-//         }
-//     } },
-//     { $group: { _id: "$year", totalRevenue: { $sum: "$revenue" } } },
-//     { $sort: { _id: 1 } }
-//   ]);
-//   console.log("✅ YEARLY REVENUE (overall):", yearlyRevenue);  // ✅ <--- here
-//   trendRevenue = yearlyRevenue.map(y => ({
-//       label: `${y._id}`,
-//       revenue: y.totalRevenue
-//   }));
-//     console.log("📊 TREND REVENUE (FINAL):", trendRevenue);  // ✅ <--- here
-//   break;
-// }
   }
 }
 
@@ -1154,6 +1149,10 @@ if (filter === "overall") {
     } },
     { $lookup: { from: "items", localField: "tr", foreignField: "tr", as: "items" } },
     { $unwind: { path: "$items", preserveNullAndEmptyArrays: true } },
+    
+  // 🔹 Filter out free items
+  { $match: { $or: [ { "items.free": false }, { "items.free": "false" }, { "items.free": { $exists: false } } ] } },
+
     { $lookup: { from: "documents", localField: "items.type", foreignField: "type", as: "doc" } },
     { $unwind: { path: "$doc", preserveNullAndEmptyArrays: true } },
     { $project: { 
