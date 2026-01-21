@@ -46,9 +46,19 @@
     <section class="relative justifyBetween padding0">
       <p class="size40 str400" id="">Dashboard</p>
       <% if (user.role === "Head" || user.role === "Admin") { %>
-        <section class="gap5 padding0 width0">
-          <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests <div id="pending" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
-          <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify <div id="toVerifyUsers" class="marginLeft5 divCenter bgTint6 w18 h18 white corner500 str500"> 0</div></a>
+        <section class="gap0 padding0 width0">
+          <section class="width0 relative">
+            <a href="/srv" class="nav"><i class="fas fa-bell"></i> Pending Requests &nbsp;</a>
+            <% if ( analytics.pending !== 0 ) { %>
+              <div id="pending" class="marginLeft5 divCenter bgOrange w23 h23 white corner500 str500 absolute right0 top5"></div>
+            <% } %>
+          </section>
+          <section class="width0 relative">
+            <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify &nbsp;</a>
+            <% if ( analytics.toVerifyUsers !== 0 ) { %>
+              <div id="toVerifyUsers" class="marginLeft5 divCenter bgOrange w23 h23 white corner500 str500 absolute right0 top5"> 0</div>
+            <% } %>
+          </section>
         </section>
       <% } else if (user.role === "Registrar") { %>
         <section class="gap5 padding0 width0">

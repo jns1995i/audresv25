@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../public/style.css">
+</head>
+<body class="block overflow-y1">
+
+    <div id="colorPalette" class="height0 wrap gap20"></div>
+
+    <script>
+const colors = [
+  'Red','Orange','Amber','Yellow','Lime','Green','Emerald','Teal','Cyan','Sky',
+  'Blue','Indigo','Violet','Purple','Fuchsia','Pink','Rose','Slate','Gray','Zinc','Neutral','Stone'
+];
+
+const shades = ['50','100','200','300','400','500','600','700','800','900','950'];
+
+const container = document.getElementById('colorPalette');
+
+colors.forEach(color => {
+  shades.forEach(shade => {
+    const className = `bc${color}${shade}`;
+    const labelClass = `text${color}${shade}`;
+
+    const block = document.createElement('div');
+    block.className = 'field width0 alignCenter';
+    block.innerHTML = `
+      <div class="h45 w45 corner5 ${className}"></div>
+      <label for="" class="size12 str500 ${labelClass}">${className}</label>
+    `;
+    container.appendChild(block);
+  });
+});
+</script>
+    
+</body>
+</html>
