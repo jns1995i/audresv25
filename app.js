@@ -1040,6 +1040,11 @@ if (!processBy && savedUser.course) {
     processBy = await getRegistrarByAssign(targetAssign);
   }
 }
+  const firstInitial = (savedUser.fName || '').charAt(0).toLowerCase();
+  const lastInitial = (savedUser.lName || '').charAt(0).toLowerCase();
+  const campusCode = (savedUser.campus || '').substring(0, 2).toLowerCase();
+
+  const nameCampusCode = `${firstInitial}${lastInitial}${campusCode}`;
 
     // 1️⃣ Get all TRs
     const allRequests = await requests.find({}, { tr: 1 });
@@ -1063,7 +1068,7 @@ if (!processBy && savedUser.course) {
     const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
     const userLastTwo = savedUser._id.toString().slice(-2); // e.g., "35"
 
-    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
+    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}${nameCampusCode}`;
 
     // 7️⃣ Create request header
     const newRequest = new requests({
@@ -1079,14 +1084,14 @@ if (!processBy && savedUser.course) {
     const savedRequest = await newRequest.save();
 
     // 8️⃣ Upload request photos
-    const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
-    const reqPhotoUrlsMap = await Promise.all(
-      reqPhotos.map(async file => {
-        if (!file.path) return null;
-        const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
-        return result.secure_url;
-      })
-    );
+  //  const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
+  //  const reqPhotoUrlsMap = await Promise.all(
+  //    reqPhotos.map(async file => {
+  //      if (!file.path) return null;
+  //      const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
+  //      return result.secure_url;
+  //    })
+  //  );
 
     // 9️⃣ Normalize arrays
     const typesArr = [].concat(type || []);
@@ -1104,7 +1109,6 @@ if (!processBy && savedUser.course) {
       qty: qtyArr[i] || 1,
       schoolYear: schoolYearsArr[i] || '',
       semester: semestersArr[i] || '',
-      proof: reqPhotoUrlsMap[i] || null,
       archive: false,
       verify: false,
       status: "Pending"
@@ -1439,18 +1443,24 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     const semestersArr = [].concat(req.body.semester || []);
 
     // 2️⃣ Upload proof photos
-    const reqPhotos = (req.files || []).filter(
-      f => f.fieldname === 'reqPhoto[]'
-    );
-    const reqPhotoUrls = await Promise.all(
-      reqPhotos.map(async file => {
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'request_photos'
-        });
-        return result.secure_url;
-      })
-    );
-        
+    // const reqPhotos = (req.files || []).filter(
+    //   f => f.fieldname === 'reqPhoto[]'
+    // );
+    // const reqPhotoUrls = await Promise.all(
+    //   reqPhotos.map(async file => {
+    //     const result = await cloudinary.uploader.upload(file.path, {
+    //       folder: 'request_photos'
+    //     });
+    //     return result.secure_url;
+    //   })
+    // );
+    
+    const firstInitial = (savedUser.fName || '').charAt(0).toLowerCase();
+    const lastInitial = (savedUser.lName || '').charAt(0).toLowerCase();
+    const campusCode = (savedUser.campus || '').substring(0, 2).toLowerCase();
+
+    const nameCampusCode = `${firstInitial}${lastInitial}${campusCode}`;
+    
     // 1️⃣ Get all TRs
     const allRequests = await requests.find({}, { tr: 1 });
 
@@ -1473,7 +1483,8 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
     const userLastTwo = userId.toString().slice(-2); // e.g., "35"
 
-    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}`;
+    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}${nameCampusCode}`;
+
 
     let processBy = null;
 
@@ -1606,7 +1617,6 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       qty: qtyArr[i] || 1,
       schoolYear: schoolYearsArr[i] || '',
       semester: semestersArr[i] || '',
-      proof: reqPhotoUrls[i] ?? null,
       archive: false,
       verify: false,
       status: "Pending"

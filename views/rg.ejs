@@ -244,8 +244,8 @@
                                     </div>
                                 </div>
                                 <div class="field upload hidden marginTop10">
-                                    <label class="str500">Please upload photo of School Request*</label>
-                                    <input type="file" name="reqPhoto[]" class="bgYellow">
+                                    <label class="str500 bgBlue100">Make sure to bring original copy of your request from other school.</label>
+                                    <input type="file" name="reqPhoto[]" class="bgYellow hidden" style="display: none !important;">
                                 </div>
 
                                 <p class="bgRed100 limitPhoto hidden marginTop10"></p>
@@ -915,10 +915,8 @@ function handleDocumentTypeChange(select) {
     optionsSelect.onchange = () => {
         if (optionsSelect.value === "Requirement for Other School") {
             uploadDiv.classList.remove("hidden");
-            fileInput.setAttribute("required", true);
         } else {
             uploadDiv.classList.add("hidden");
-            fileInput.removeAttribute("required");
         }
     };
 

@@ -32,7 +32,10 @@
                             <p class="textBalance"><i class="fas fa-info-circle"></i> Take Note: You are required to upload your proof of payment below. So Please make sure to take a screenshot of the receipt from your online transaction or take a photo of your receipt from the cashier after payment</p>
                             <p class="hidden">  For online payment instructions, click <a href="/ins2" target="_blank" class="navy inline width0 height0 str500 size14">here</a>. Please make sure to take a screenshot of the transaction receipt or take photo of the receipt from the cashier and upload it <a class="size14 str500 navy inline" href="https://bit.ly/OnlinePaymentGcashBanktransferECPAYPayMaya" target="_blank">here</a></p>
                             <br>
-                           <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10">
+                            <section class="corner12 bgWhite borderPrimary">
+                                <p class="size14"><i class="fas fa-file"></i> Upload your PROOF OF PAYMENT <a href="https://bit.ly/AUFinanceOnlinePayment" target="_blank" class="inline sizeInherit str500 navy">here</a></p>
+                            </section>
+                           <form action="/paymentUpload" method="POST"  enctype="multipart/form-data" class="colorPrimary gap10 hidden">
                                 <input type="hidden" name="id" value="<%= rq ? rq._id : '' %>">
                                 <div class="field hidden">
                                     <label for="">Payment Method</label>

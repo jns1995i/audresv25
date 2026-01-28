@@ -63,7 +63,14 @@
 <section class="col padding0 corner15 card3 width0 absolute left60 top80">
     <section class="justifyBetween gap10 corner20 alignCenter marginBottom10 liquidX">
         <a href="/hom" class="nav liquid"><i class="fas fa-chevron-left"></i>Go Back</a>
-        <a href="/reqPre" class="nav liquid glowImg2"><i class="fas fa-plus"></i> Request</a>
+        
+            <% const day = new Date().getDay(); %>
+
+            <% if (day !== 0 && day !== 3) { %>
+                <a href="/reqPre" class="nav liquid glowImg2"><i class="fas fa-plus"></i> Request</a>
+            <% } else { %>
+            <% } %>
+        
     </section>
 </section>
 <section class="col padding0 bgSoft corner15 padding15 block card2 width60">

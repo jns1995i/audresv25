@@ -47,7 +47,17 @@
             <p class="size16 str400 width70">Requesting Document</p>
             <p class="size16 str400 width70">Made Easy For you!</p>
             <br>
-            <a href="/reqPre" class="nav porcelain colorPrimary"><i class="fas fa-plus"></i> Request Now</a>
+            <% const day = new Date().getDay(); %>
+
+            <% if (day !== 0 && day !== 6) { %>
+                <a href="/reqPre" class="nav porcelain colorPrimary">
+                    <i class="fas fa-plus"></i> Request Now
+                </a>
+            <% } else { %>
+                <a href="/reqPre" class="nav glass gray colorPrimary disabled">
+                    Request Unavailable
+                </a>
+            <% } %>
         </section>
         <img src="/images/student.png" alt="" id="StudentSticker" class="absolute h260 top10" style="right: -40px;">
     </section>

@@ -10685,6 +10685,25 @@ p + p {
 .progress { cursor: progress; }
 .help { cursor: help; }
 
+/* hover effects */
+.hoverOpacity1 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.1;} }
+.hoverOpacity2 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.2;} }
+.hoverOpacity3 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.3;} }
+.hoverOpacity4 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.4;} }
+.hoverOpacity5 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.5;} }
+.hoverOpacity6 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.6;} }
+.hoverOpacity7 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.7;} }
+.hoverOpacity8 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.8;} }
+.hoverOpacity9 { transition: all 0.6s ease-in-out; &:hover{ opacity: 0.9;} }
+.hoverScale09 { transition: all 0.6s ease-in-out; &:hover { transform: scale(0.9 );}}
+.hoverScale11 { transition: all 0.6s ease-in-out; &:hover { transform: scale(1.1 );}}
+.hoverScale12 { transition: all 0.6s ease-in-out; &:hover { transform: scale(1.2 );}}
+.hoverScale13 { transition: all 0.6s ease-in-out; &:hover { transform: scale(1.3 );}}
+.hoverScale14 { transition: all 0.6s ease-in-out; &:hover { transform: scale(1.4 );}}
+.hoverScale15 { transition: all 0.6s ease-in-out; &:hover { transform: scale(1.5 );}}
+.hoverScale16 { transition: all 0.6s ease-in-out; &:hover { transform: scale(1.6 );}}
+.hoverScale17 { transition: all 0.6s ease-in-out; &:hover { transform: scale(1.7 );}}
+
 .grayscale { filter: grayscale(60%);}
 
 @media (min-width: 320px) {

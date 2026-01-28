@@ -92,18 +92,18 @@
                         <form action="/approve4" method="POST" class="form2 width100">
                             <input type="hidden" name="requestId" value="<%= request._id %>">
                             <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav pnav corner10 width100"><i class="fas fa-check-circle"></i> Approve Request</button>
+                            <button type="submit" class="nav pnav corner10 width100"><i class="fas fa-check-circle"></i> For Payment</button>
                         </form>
                     </section>
                 </section>
             <% } %>
 
-            <% if ( request.status === "For Verification") { %>
-                <section class="gap10 justifyBetween corner15 col bgWhite padding20 shadow1">
+            <% if ( request.status === "Assessed") { %>
+                <section class="gap10 justifyBetween corner15 bgWhite padding20 shadow1">
                     <p class="rem14 str500 darkGray">Action Panel</p>
-                    <section class="padding0 gap10">
+                    <section class="padding0 gap10 width0">
                         <% if ( !request.holdAt) { %>
-                        <form action="/hold5" method="POST" class="form2 width100">
+                        <form action="/hold5" method="POST" class="form2 width100 hidden">
                             <input type="hidden" name="requestId" value="<%= request._id %>">
                             <input type="hidden" name="back" value="<%= back %>">
                             <button type="submit" class="nav corner10 width100"><i class="fas fa-rotate"></i> Reupload Proof</button>
@@ -113,7 +113,7 @@
                         <form action="/verify4" method="POST" class="form2 width100">
                             <input type="hidden" name="requestId" value="<%= request._id %>">
                             <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav pnav corner10 width100"><i class="fas fa-check-circle"></i> Verify Payment</button>
+                            <button type="submit" class="nav pnav corner10"><i class="fas fa-check-circle"></i> Mark as Paid</button>
                         </form>
                     </section>
                 </section>

@@ -91,10 +91,11 @@
             </p>
         </section>
     </section>
+
 <% if (user.role === "Accounting") { %>
     <% if (["For Verification", "Verified", "Claimed", "For Release"].includes(request.status)) { %>
         <% if (request.payPhoto && request.payPhoto.length > 0) { %>
-        <section class="corner15 gap20 padding5 bgSoft justifyBetween">
+        <section class="corner15 gap20 padding5 bgSoft justifyBetween hidden">
             <section class="size16 str400 width0">View Payment Here <i class="fas fa-arrow-right marginLeft5"></i> </section>
 
             <section class="gap20 bgWhite corner15 width0">
