@@ -12,6 +12,8 @@
     }
 </style>
 
+            <% const hasPending = request.items && request.items.some(it => it.status === "Pending"); %>
+
  <section class="gap10 alignStart padding5" id="">
     <% const routes = { srv: "/srv",prc: "/prc",rel: "/rel",apr: "/apr",vrf: "/vrf", dsb: "/dsb", srvAll: "/srvAll"};
     const href = routes[back] || "/srv"; %>
@@ -25,6 +27,32 @@
             
             <section class="corner15 bgWhite col gap10 shadow1">
                 <%- include('partials/srvCard') %>
+
+                <% if (hasPending) { %>
+                    <section class="gap10 justifyBetween corner15">
+                        <p class="rem14 str500">Quick Action <i class="fas fa-arrow-right"></i></p>
+                        <section class="padding0 gap10 width0">
+                            <form action="/decline3" method="POST" class="form2 hidden">
+                                <input type="hidden" name="requestId" value="<%= request._id %>">
+                                <input type="hidden" name="back" value="<%= back %>">
+                                <button type="submit" class="nav dnav-fill corner10 width100"><i class="fas fa-xmark-circle"></i> Decline Request</button>
+                            </form>
+                            <% if ( !request.holdAt) { %>
+                            <form action="/hold3" method="POST" class="form2">
+                                <input type="hidden" name="requestId" value="<%= request._id %>">
+                                <input type="hidden" name="back" value="<%= back %>">
+                                <button type="submit" class="nav borderPrimary corner10 width100"><i class="fas fa-clock"></i> Hold Request</button>
+                            </form>
+                            <% } else { %>
+                            <% } %>
+                            <form action="/appAllItem" method="POST" class="form2">
+                                <input type="hidden" name="requestId" value="<%= request._id %>">
+                                <input type="hidden" name="back" value="<%= back %>">
+                                <button type="submit" class="nav corner10 gnav width100"><i class="fas fa-check-circle marginRight5"></i> Approve All Documents</button>
+                            </form>
+                        </section>
+                    </section>
+                <% } %>
                 
                 <section class="col padding15 corner15 bgSoft gap10">
                     <% if (request.items && request.items.length > 0) { %>
@@ -36,24 +64,32 @@
                             porcelain 
                             <% } %>
                             corner15 padding15 relative">
-                                <section class="padding0 alignStart col paddingLeft80">
-                                    <a href="" class="nav cnavLG absolute left20 disabled glass colorPrimary">
+                                <section class="padding0 alignStart col paddingL0">
+                                    <a href="" class="nav cnavLG absolute left20 disabled glass colorPrimary hidden">
                                         <i class="fas fa-file size35"></i>
                                     </a>
                                     <div class="w50 h50 absolute left20 hidden">
                                         <i class="fas fa-file size35"></i>
                                     </div>
-                                    <p class="rem14 str500 flex alignCenter">
+                                    <p class="rem16 str500 flex alignCenter green">
                                         <%= item.qty %> <%= item.type %>
                                         <% if (item.paper) { %>
                                             <span class="marginLeft5 bgBlue100 corner5 border0 width0 height0 inline"><i class="fas fa-print"></i> &nbsp; <%= item.paper %></span>
                                         <% } %>
                                     </p>
                                     <% if (item.semester) { %>
-                                    <p class="size14">
-                                        Semester & School Year: 
-                                        <span class="colorPrimary rem12 str500">
-                                            <%= item.semester + ` Sem` %> <%= `• ` + item.schoolYear %>
+                                    <p class="size14 hidden">
+                                        For 
+                                        <span class="rem12 str500 navy">
+                                            <%= item.semester + ` Sem` %>
+                                        </span>
+                                    </p>
+                                    <% } %>
+                                    <% if (item.schoolYear) { %>
+                                    <p class="size14 hidden">
+                                        With School Year: 
+                                        <span class="rem12 str500 navy">
+                                            <%= item.schoolYear %>
                                         </span>
                                     </p>
                                     <% } %>
@@ -67,8 +103,20 @@
                                         <a href="" class="disabled nav cnavLG absolute translateY right10 bgRed100 hidden"><i class="fas fa-xmark-circle"></i></a>
                                     <% } else if ( item.status === "Approved") { %>
                                         <a href="" class="disabled nav cnavLG absolute translateY right10 bgGreen100 hidden"><i class="fas fa-check-circle"></i></a>
+                                        
+                                        <% if ( request.status === "Pending" || request.status === "Reviewed" ) { %>
+                                            <% if ( item.free !== true && item.status === "Approved" ) { %>
+                                                    <form action="/freebie" method="POST" class="form2 absolute right10 bottom10">
+                                                        <input type="hidden" name="requestId" value="<%= request._id %>">
+                                                        <input type="hidden" name="itemId" value="<%= item._id %>">
+                                                        <input type="hidden" name="back" value="<%= back %>">
+                                                        <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-coins marginRight5"></i> Set as Free</button>
+                                                    </form>
+                                            <% } else { %>
+                                            <% } %>
+                                        <% } %>
                                     <% } else { %>
-                                        <section class="padding10 gap5 width0 corner10 absolute right10 top5">
+                                        <section class="padding10 gap5 width0 corner10 absolute right10 bottom5">
                                             <form action="/decItem" method="POST" class="form2">
                                                 <input type="hidden" name="requestId" value="<%= request._id %>">
                                                 <input type="hidden" name="itemId" value="<%= item._id %>">
@@ -84,14 +132,6 @@
                                         </section>
                                     <% } %>
                                     <% if ( item.free !== true ) { %>
-                                        <section class="paddingTop5 padding0 gap5 width0 corner10">
-                                            <form action="/freebie" method="POST" class="form2 width100">
-                                                <input type="hidden" name="requestId" value="<%= request._id %>">
-                                                <input type="hidden" name="itemId" value="<%= item._id %>">
-                                                <input type="hidden" name="back" value="<%= back %>">
-                                                <button type="submit" class="nav corner10 borderPrimary width100"><i class="fas fa-coins marginRight5"></i> Set as Free</button>
-                                            </form>
-                                        </section>
                                     <% } else { %>
                                         <p class="bgGreen100 border0 size12">Free of Charge</p>
                                     <% } %>
@@ -108,36 +148,9 @@
         <section class="col alignStart width35 padding5 justifyStart corner15 gap10">
             <%- include('partials/status') %>     
             <%- include('partials/notes') %>
-            <% const hasPending = request.items && request.items.some(it => it.status === "Pending"); %>
             <% if (hasPending) { %>
                 <section class="gap10 justifyBetween corner15 shadow1 bgWhite hidden">
                     <p class="rem14 str500">Quick Action <i class="fas fa-arrow-right"></i></p>
-                </section>
-            <% } %>
-
-            <% if (hasPending) { %>
-                <section class="gap10 justifyBetween corner15 col bgWhite padding20 shadow1">
-                    <p class="rem14 str500">Quick Action</p>
-                    <section class="padding0 gap10">
-                        <form action="/decline3" method="POST" class="form2 width100 hidden">
-                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                            <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav dnav-fill corner10 width100"><i class="fas fa-xmark-circle"></i> Decline Request</button>
-                        </form>
-                        <% if ( !request.holdAt) { %>
-                        <form action="/hold3" method="POST" class="form2 width100">
-                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                            <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav borderPrimary corner10 width100"><i class="fas fa-clock"></i> Hold Request</button>
-                        </form>
-                        <% } else { %>
-                        <% } %>
-                        <form action="/appAllItem" method="POST" class="form2 width100">
-                            <input type="hidden" name="requestId" value="<%= request._id %>">
-                            <input type="hidden" name="back" value="<%= back %>">
-                            <button type="submit" class="nav corner10 pnav width100"><i class="fas fa-check-circle marginRight5"></i> Approve Request</button>
-                        </form>
-                    </section>
                 </section>
             <% } %>
 

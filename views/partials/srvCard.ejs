@@ -1,6 +1,37 @@
 
             
 
+    <section class="padding0 corner0 justifyBetween">
+        <% const options = { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true }; 
+        const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); %>
+        <section class="padding0 col alignStart width0 marginLeft10">
+            <p class="rem11"> <i class="fas fa-receipt"></i> Transaction No</p>
+            <p class="rem14 str400"><%= request.tr %></p>
+        </section>
+        <section class="padding0 col alignStart width0">
+            <p class="rem11"><i class="fas fa-calendar"></i> Requested Date</p>
+            <p class="rem14 str400"><%= formattedDate %></p>
+        </section>
+        <section class="corner12 col alignStart borderGray width0 relative padding15">
+            <p class="rem11"> <i class="fas fa-coins"></i> Total Payables</p>
+            <p class="rem16 str400 flex gap10 justifyCenter alignCenter">
+                &#8369;<%= totalAmount || "0" %>.00 
+                <% if ( request.status === "For Verification") { %>
+                <span class="bgBlue100 border0 width0"> <i class="fas fa-check-circle"></i> Paid </span>
+                <% } else if (  request.status === "Verified" ) { %>
+                <span class="bgGreen100 border0 width0"> <i class="fas fa-check-circle"></i> Verified </span>
+                <% } else { %>
+                <span class="bgBlue100 border0 width0">Pending</span>
+                <% } %>
+            </p>
+        </section>
+    </section>
 
     <section class="col alignStart info corner16 padding5 bgSoft">
         <section class="corner16 justifyBetween relative">
@@ -57,38 +88,6 @@
             <p class="rem12 str500"><i class="fas fa-envelope w15"></i> <%= request.requestBy?.email || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-phone w15"></i> <%= request.requestBy?.phone || "--" %></p>
             <p class="rem12 str500"><i class="fas fa-house w15"></i> <%= request.requestBy?.address || "--" %></p>
-        </section>
-    </section>
-
-    <section class="padding10 corner15 justifyBetween bgSoft">
-        <% const options = { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric', 
-            hour: 'numeric', 
-            minute: '2-digit', 
-            hour12: true }; 
-        const formattedDate = new Date(request.createdAt).toLocaleString('en-US', options); %>
-        <section class="padding0 col alignStart width0 marginLeft10">
-            <p class="rem11"> <i class="fas fa-receipt"></i> Transaction No</p>
-            <p class="rem14 str400"><%= request.tr %></p>
-        </section>
-        <section class="padding0 col alignStart width0">
-            <p class="rem11"><i class="fas fa-calendar"></i> Requested Date</p>
-            <p class="rem14 str400"><%= formattedDate %></p>
-        </section>
-        <section class="corner12 col alignStart bgWhite width0 relative padding15">
-            <p class="rem11"> <i class="fas fa-coins"></i> Total Payables</p>
-            <p class="rem16 str400 flex gap10 justifyCenter alignCenter">
-                &#8369;<%= totalAmount || "0" %>.00 
-                <% if ( request.status === "For Verification") { %>
-                <span class="bgBlue100 border0 width0"> <i class="fas fa-check-circle"></i> Paid </span>
-                <% } else if (  request.status === "Verified" ) { %>
-                <span class="bgGreen100 border0 width0"> <i class="fas fa-check-circle"></i> Verified </span>
-                <% } else { %>
-                <span class="bgBlue100 border0 width0">Pending</span>
-                <% } %>
-            </p>
         </section>
     </section>
 
