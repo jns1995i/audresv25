@@ -8,19 +8,6 @@
     }
 </style>
 
-<div class="height0 padding10 justifyBetween corner12 gap5">
-  <section class="width0 padding0 gap5">
-    <a href="/stu" class="nav <% if ( title === 'Students' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user-friends"></i> All Users</a>
-    <a href="/crt" class="nav <% if ( title === 'Current' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user"></i> Current</a>
-    <a href="/alm" class="nav <% if ( title === 'Alumni' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user-graduate"></i> Alumni</a>
-    <a href="/frm" class="nav <% if ( title === 'Former' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-exchange"></i> Former</a>
-  </section>
-  <article>
-    <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
-    <a href="/stuArc" class="nav <% if ( title === 'Student Archive' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-archive"></i> Archive</a>
-    <% } %>
-  </article>
-</div>
 
 
 <div class="justifyBetween height20 padding20 bgWhite col alignStart corner10 relative">
@@ -32,7 +19,20 @@
     <div class="width30 height86 corner10 bgTint14 absolute right6 translateY"></div>
     <img src="/images/student.png" alt="" class="absolute h220" style="right: 22%; top: 0;">
 </div>
-<br>
+
+<div class="height0 padding10 justifyBetween corner12 gap5">
+  <section class="width0 padding0 gap5">
+    <a href="/stu" class="nav <% if ( title === 'Students' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user-friends"></i> All Users</a>
+    <a href="/crt" class="nav <% if ( title === 'Current' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user"></i> Current</a>
+    <a href="/alm" class="nav <% if ( title === 'Alumni' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-user-graduate"></i> Alumni</a>
+    <a href="/frm" class="nav <% if ( title === 'Former' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-exchange"></i> Former</a>
+  </section>
+  <article>
+    <% if (['Admin', 'Head', 'Dev'].includes(user.role)) { %>
+    <a href="/stuArc" class="nav <% if ( title === 'Student Archive' && active === 'stu') { %> pnav <% } %>"><i class="fas fa-archive"></i> Archive Accounts</a>
+    <% } %>
+  </article>
+</div>
 
 <% if (!users || users.length === 0) { %>
     <section class="height50 corner20 empCard paddingInline0 borderGray borderDotted marginBlock20 col">
@@ -40,7 +40,7 @@
         <p class="size20 str500">No Record Found!</p>
     </section>
 <% } else { %>
-    <div class="tableCard height50 overflow-y1 justifyStart padding5">
+    <div class="tableCard height60 overflow-y1 justifyStart padding5">
         <section class="col" id="noRecords"  style="display: none;">
             <%- include('icons/notFound') %>
             <p class="size18 str400">Sorry, No Record Found!</p>
