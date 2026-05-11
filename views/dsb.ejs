@@ -56,7 +56,8 @@
           <section class="width0 relative">
             <a href="/vrf" class="nav"><i class="fas fa-user-check"></i> To Verify &nbsp;</a>
             <% if ( analytics.toVerifyUsers !== 0 ) { %>
-              <div id="toVerifyUsers" class="marginLeft5 divCenter bgOrange w23 h23 white corner500 str500 absolute right0 top5"> 0</div>
+              <div id="toVerifyUsers" class="marginLeft5 divCenter bgOrange w23 h23 white corner500 str500 absolute right0 top5
+              <% if ( analytics.toVerifyUsers === 0 ) { %> hidden <% } %>"></div>
             <% } %>
           </section>
         </section>
@@ -536,12 +537,23 @@ tpl.remove();
 
 function setText(id, value) {
     const el = document.getElementById(id);
-    if (el) el.innerText = value;
+    if (el) {
+        el.innerText = value;
+
+        // Logic to hide the badge if the value is 0 or empty
+        if (id === "toVerifyUsers" || id === "pending" || id === "myPending") {
+            if (parseInt(value) === 0 || !value) {
+                el.classList.add("hidden");
+            } else {
+                el.classList.remove("hidden");
+            }
+        }
+    }
 }
 
 setText("pending", analytics.pending || 0);
 setText("myPending", analytics.myPending || 0);
-setText("toVerifyUsers", analytics.toVerifyUsers || 0);
+setText("toVerifyUsers", analytics.toVerifyUsers );
 
   document.getElementById("activeUserCount").innerText = `${analytics.activeUserCount || 0} Active`;
   // document.getElementById("toVerifyUsers").innerText = analytics.toVerifyUsers || 0;

@@ -12,7 +12,6 @@ const multer = require('multer');
 const dayjs = require('dayjs');
 const helmet = require('helmet');
 
-
 const isLogin = require('./middleware/isLogin');
 const isRequest = require('./middleware/isRequest');
 const isVerify = require('./middleware/isVerify');
@@ -196,6 +195,7 @@ app.use((req, res, next) => {
   // console.log(`🌀 Global variables ready Supreme Ferry`);
   next();
 });
+
 
 app.use(async (req, res, next) => {
   try {
@@ -2952,7 +2952,6 @@ app.post("/claim3", async (req, res) => {
 });
 
 /* end of Approval Routes */
-
 
 app.get('/emp', isLogin, isEmp, (req, res) => {
   res.render('emp', { title: 'Employees', active: 'emp' });
