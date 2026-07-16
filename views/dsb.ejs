@@ -185,7 +185,7 @@ filterSelect.addEventListener("change", () => {
               &nbsp; &nbsp;
               <% users.forEach(user => { %>
                   <% if ( user.role === "Registrar" || user.role === "Admin") { %>
-                      <img src="<%= user.photo ? user.photo : '/images/profile.jpg' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.jpg';" class="h23 w23 corner500 shadow1" style="margin-left: -10px;">
+                      <img src="<%= user.photo ? user.photo : '/images/profile.png' %>" alt="Profile" onerror="this.onerror=null; this.src='/images/profile.png';" class="h23 w23 corner500 shadow1" style="margin-left: -10px;">
                   <% } %>
               <% }) %>
             </section>
