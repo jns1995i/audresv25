@@ -45,11 +45,13 @@
                             </form>
                             <% } else { %>
                             <% } %>
-                            <form action="/appAllItem" method="POST" class="form2">
-                                <input type="hidden" name="requestId" value="<%= request._id %>">
-                                <input type="hidden" name="back" value="<%= back %>">
-                                <button type="submit" class="nav corner10 gnav width100"><i class="fas fa-check-circle marginRight5"></i> Approve All Documents</button>
-                            </form>
+                            <% if (request.items && request.items.length > 1) { %>
+                                <form action="/appAllItem" method="POST" class="form2">
+                                    <input type="hidden" name="requestId" value="<%= request._id %>">
+                                    <input type="hidden" name="back" value="<%= back %>">
+                                    <button type="submit" class="nav corner10 gnav width100"><i class="fas fa-check-circle marginRight5"></i> Approve All Documents</button>
+                                </form>
+                            <% } %>
                         </section>
                     </section>
                 <% } %>
