@@ -5495,3 +5495,1170 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Kudos Supreme Ferry! Running at http://localhost:${PORT}`);
 });
+
+// ============================================================
+// EMAIL INTEGRATION NOTES
+// ============================================================
+
+
+// ============================================================
+// ROUTE: POST /fg
+// PURPOSE: Forgot Password
+// ============================================================
+
+// TODO: Send email after generating and saving the temporary password.
+
+// Subject: "AUDRES Password Reset – Temporary Password"
+
+// Recipient: The email entered by the user.
+
+// Email body must include:
+// - User's complete name
+// - Registered email/username
+// - Newly generated temporary password
+// - Notice that the password was reset
+// - Instruction to log in using the temporary password
+// - Instruction to change the password immediately
+// - AUDRES login page/link
+// - Security reminder not to share the password
+
+
+// ============================================================
+// ROUTE: POST /reqDirect
+// PURPOSE: Direct registration with document request
+// ============================================================
+
+// TODO: Send an account-creation email to the newly registered student.
+
+// Subject: "AUDRES Account Created and Document Request Submitted"
+
+// Recipient: Newly registered student's email.
+
+// Email body must include:
+// - Student's complete name
+// - Registered email/username
+// - Generated temporary password
+// - Student number, if available
+// - Course and year level, if available
+// - Campus
+// - Transaction/reference number
+// - Requested document/s
+// - Quantity of each document
+// - Purpose of request
+// - Date and time of submission
+// - Current status: "Pending" or "For Verification"
+// - AUDRES login link
+// - Instruction to change the temporary password
+
+
+// TODO: Send a separate notification to the assigned registrar.
+
+// Subject: "New Document Request Assigned – TR# [TR NUMBER]"
+
+// Recipient: Assigned registrar's email.
+
+// Email body must include:
+// - Registrar's name
+// - Student's complete name
+// - Student number
+// - Course and year level
+// - Campus
+// - Transaction/reference number
+// - Requested document/s
+// - Quantity of each document
+// - Purpose of request
+// - Date and time submitted
+// - Current request status
+// - Instruction to review the request in AUDRES
+
+
+// ============================================================
+// ROUTE: POST /verify1
+// PURPOSE: Verify student registration/request
+// ============================================================
+
+// TODO: Send a verification-success email to the student.
+
+// Subject: "AUDRES Registration Verified – TR# [TR NUMBER]"
+
+// Recipient: Student's registered email.
+
+// Email body must include:
+// - Student's complete name
+// - Transaction/reference number
+// - Confirmation that the registration/request was verified
+// - Assigned registrar or processing office, if available
+// - Current request status
+// - Next step the student must complete
+// - AUDRES login or tracking instruction
+
+
+// ============================================================
+// ROUTE: POST /decline1
+// PURPOSE: Decline student registration/request verification
+// ============================================================
+
+// TODO: Send a verification-declined email to the student.
+
+// Subject: "AUDRES Registration Verification Declined – TR# [TR NUMBER]"
+
+// Recipient: Student's registered email.
+
+// Email body must include:
+// - Student's complete name
+// - Transaction/reference number
+// - Declined status
+// - Reason for declining, if available
+// - Remarks from the registrar/admin
+// - Required correction or missing information
+// - Instructions for resubmission
+// - Office/contact information for assistance
+
+
+// ============================================================
+// ROUTE: POST /reqDoc
+// PURPOSE: Submit a regular document request
+// ============================================================
+
+// TODO: Send a request-confirmation email to the student.
+
+// Subject: "Document Request Received – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Requested document/s
+// - Quantity of each document
+// - Purpose of request
+// - Campus
+// - Course and year level, if available
+// - Date and time submitted
+// - Current status: "Pending"
+// - Next step in the process
+// - AUDRES tracking/login instruction
+
+
+// TODO: Send a new-request notification to the assigned registrar/staff.
+
+// Subject: "New Document Request – TR# [TR NUMBER]"
+
+// Recipient: Assigned registrar/staff email.
+
+// Email body must include:
+// - Assigned staff/registrar's name
+// - Requester's complete name
+// - Student number
+// - Transaction/reference number
+// - Campus
+// - Course and year level
+// - Requested document/s
+// - Quantity of each document
+// - Purpose of request
+// - Date and time submitted
+// - Current status
+// - Instruction to process the request
+
+
+// ============================================================
+// ROUTE: POST /rst
+// PURPOSE: Change password
+// ============================================================
+
+// TODO: Send a password-change confirmation email.
+
+// Subject: "AUDRES Password Changed Successfully"
+
+// Recipient: User's registered email.
+
+// Email body must include:
+// - User's complete name
+// - Confirmation that the password was successfully changed
+// - Date and time of the password change
+// - Security reminder
+// - Instruction to contact the administrator if the change was unauthorized
+
+// IMPORTANT: Do not include the new password in this email.
+
+
+// ============================================================
+// ROUTE: POST /rstFG
+// PURPOSE: Complete forgot-password reset
+// ============================================================
+
+// TODO: Send a password-reset completion email.
+
+// Subject: "AUDRES Password Reset Completed"
+
+// Recipient: User's registered email.
+
+// Email body must include:
+// - User's complete name
+// - Confirmation that the password reset was completed
+// - Date and time of the reset
+// - Security reminder
+// - Instruction to contact the administrator if unauthorized
+
+// IMPORTANT: Do not include the password in this email.
+
+
+// ============================================================
+// ROUTE: POST /edt
+// PURPOSE: Update regular user's profile/email information
+// ============================================================
+
+// TODO: Send an email-change notification to the previous email address.
+
+// Subject: "AUDRES Email Address Changed"
+
+// Recipient: Previous registered email.
+
+// Email body must include:
+// - User's complete name
+// - Notice that the account email was changed
+// - New email address
+// - Date and time of the change
+// - Security warning
+// - Instruction to contact the administrator if unauthorized
+
+
+// TODO: Send a confirmation email to the new email address.
+
+// Subject: "AUDRES Email Address Updated"
+
+// Recipient: New email address.
+
+// Email body must include:
+// - User's complete name
+// - Confirmation that the new email is now connected to the AUDRES account
+// - Date and time of the update
+// - Security reminder
+
+
+// ============================================================
+// ROUTE: POST /update-status/:id
+// PURPOSE: Update request status
+// ============================================================
+
+// TODO: Send an email whenever the request status is successfully changed.
+
+// Subject: "AUDRES Request Status Updated – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Previous request status
+// - New request status
+// - Requested document/s
+// - Date and time of the status update
+// - Remarks, if available
+// - Required next action
+// - AUDRES tracking/login instruction
+
+
+// Possible status notifications:
+// - Pending
+// - Reviewed
+// - Assessed
+// - For Verification
+// - For Payment
+// - Verified
+// - For Release
+// - Claimed
+// - Declined
+
+
+// ============================================================
+// ROUTE: POST /paymentUpload
+// PURPOSE: Upload proof of payment
+// ============================================================
+
+// TODO: Send a payment-submission confirmation email to the student.
+
+// Subject: "Proof of Payment Received – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Payment method
+// - Date and time of upload
+// - Confirmation that proof of payment was received
+// - Current status: "For Verification"
+// - Next step after payment verification
+
+
+// TODO: Send a notification to the assigned accounting/verifying staff.
+
+// Subject: "Proof of Payment Submitted for Verification – TR# [TR NUMBER]"
+
+// Recipient: Assigned accounting/verifying staff email.
+
+// Email body must include:
+// - Student/requester's complete name
+// - Student number
+// - Transaction/reference number
+// - Payment method
+// - Date and time submitted
+// - Amount, if available
+// - Current status
+// - Instruction to verify the uploaded proof of payment
+
+
+// ============================================================
+// ROUTE: PATCH /req/processBy/:id
+// PURPOSE: Assign or change the processor of a request
+// ============================================================
+
+// TODO: Send an assignment notification to the newly assigned staff.
+
+// Subject: "AUDRES Transaction Assigned to You – TR# [TR NUMBER]"
+
+// Recipient: Newly assigned staff/registrar email.
+
+// Email body must include:
+// - Staff member's name
+// - Requester's complete name
+// - Student number
+// - Transaction/reference number
+// - Requested document/s
+// - Current request status
+// - Campus
+// - Date and time of assignment
+// - Instruction to open and process the transaction
+
+
+// TODO: If the request was reassigned, notify the previous processor.
+
+// Subject: "AUDRES Transaction Reassigned – TR# [TR NUMBER]"
+
+// Recipient: Previous processor's email.
+
+// Email body must include:
+// - Previous processor's name
+// - Transaction/reference number
+// - Notice that the transaction was reassigned
+// - New assigned processor, if allowed
+// - Date and time of reassignment
+
+
+// ============================================================
+// ROUTE: POST /quick-assign
+// PURPOSE: Assign multiple requests to staff
+// ============================================================
+
+// TODO: Send an assignment notification to every assigned staff member.
+
+// Subject: "New AUDRES Transactions Assigned to You"
+
+// Recipient: Each assigned staff member's email.
+
+// Email body must include:
+// - Staff member's name
+// - Number of assigned transactions
+// - List of transaction/reference numbers
+// - Requester's names
+// - Requested document/s
+// - Current status of each transaction
+// - Date and time of assignment
+// - Instruction to open the assigned transactions in AUDRES
+
+
+// ============================================================
+// ROUTE: POST /decItem
+// PURPOSE: Decline a specific document item
+// ============================================================
+
+// TODO: Send an item-declined notification to the requester.
+
+// Subject: "Document Item Declined – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Declined document/item
+// - Quantity of the declined item
+// - Reason for declining, if available
+// - Remarks from the processor
+// - Status of the other requested items, if available
+// - Overall request status
+// - Required action or resubmission instruction
+
+
+// ============================================================
+// ROUTE: POST /appItem
+// PURPOSE: Approve a specific document item
+// ============================================================
+
+// TODO: Send an item-approval notification to the requester.
+
+// Subject: "Document Item Approved – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Approved document/item
+// - Quantity of the approved item
+// - Status of the other requested items, if available
+// - Overall request status
+// - Next processing step
+// - Payment or verification instruction, if applicable
+
+
+// ============================================================
+// ROUTE: POST /freebie
+// PURPOSE: Mark a document item as free
+// ============================================================
+
+// TODO: Send an updated-fee notification to the requester.
+
+// Subject: "Document Fee Updated – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Document/item marked as free
+// - Updated fee or amount
+// - Total amount, if available
+// - Current request status
+// - Next step in the process
+
+
+// ============================================================
+// ROUTE: POST /appAllItem
+// PURPOSE: Approve or review all document items
+// ============================================================
+
+// TODO: Send a request-review notification to the requester.
+
+// Subject: "Document Request Reviewed – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - List of approved document/s
+// - Quantity of each document
+// - Total amount, if available
+// - Current status: "Reviewed"
+// - Review date and time
+// - Payment or assessment instruction
+// - Next step in the process
+
+
+// ============================================================
+// ROUTE: POST /decline3
+// PURPOSE: Decline the entire document request
+// ============================================================
+
+// TODO: Send a request-declined email to the requester.
+
+// Subject: "Document Request Declined – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - List of affected document/s
+// - Current status: "Declined" or applicable status
+// - Decline date and time
+// - Request remarks/reason
+// - Required correction or action
+// - Resubmission instructions
+// - Contact information for assistance
+
+
+// ============================================================
+// ROUTE: POST /hold3
+// PURPOSE: Place the entire document request on hold
+// ============================================================
+
+// TODO: Send a hold notification to the requester.
+
+// Subject: "Document Request Placed on Hold – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Current processing stage
+// - Hold date and time
+// - Hold reason
+// - Request remarks
+// - Required action from the requester
+// - Next step
+// - Contact information for assistance
+
+
+// ============================================================
+// ROUTE: POST /restore3
+// PURPOSE: Restore a declined or held request
+// ============================================================
+
+// TODO: Send a restoration notification to the requester.
+
+// Subject: "Document Request Restored – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Notice that the request was restored
+// - Previous hold/decline status
+// - New/current status
+// - Restoration date and time
+// - Notice that processing has resumed
+// - Next step in the process
+
+
+// ============================================================
+// ROUTE: POST /fRel
+// PURPOSE: Mark documents as For Release
+// ============================================================
+
+// TODO: Send a release notification to the requester.
+
+// Subject: "Your Documents Are Ready for Release – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - List of documents ready for release
+// - Current status: "For Release"
+// - Release date and time
+// - Processor's remarks, if available
+// - Date and time of claiming
+// - Office/location for claiming
+// - Office hours
+// - Requirements to bring
+// - Valid identification requirements
+// - Authorized representative requirements, if applicable
+// - Contact information for questions
+
+
+// ============================================================
+// ROUTE: POST /claim3
+// PURPOSE: Mark a document request as Claimed
+// ============================================================
+
+// TODO: Send a completion/claim confirmation email.
+
+// Subject: "Document Request Claimed Successfully – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - List of released documents
+// - Current status: "Claimed"
+// - Name of the person who processed the claim, if applicable
+// - Date and time of claiming
+// - Completion confirmation
+// - Feedback or evaluation instruction, if available
+
+
+// ============================================================
+// ROUTE: POST /newEmp
+// PURPOSE: Create a new employee account
+// ============================================================
+
+// TODO: Send the new employee's account credentials by email.
+
+// Subject: "Your AUDRES Employee Account Has Been Created"
+
+// Recipient: Newly created employee's email.
+
+// Email body must include:
+// - Employee's complete name
+// - Employee number
+// - Username/email
+// - Generated temporary password
+// - Assigned role
+// - Assigned campus
+// - Assigned department or office
+// - Account creation date and time
+// - AUDRES login link
+// - Instruction to change the temporary password
+// - Security reminder not to share the credentials
+
+
+// ============================================================
+// ROUTE: POST /rst4
+// PURPOSE: Change employee password
+// ============================================================
+
+// TODO: Send a password-change confirmation email.
+
+// Subject: "AUDRES Employee Password Changed"
+
+// Recipient: Employee's registered email.
+
+// Email body must include:
+// - Employee's complete name
+// - Confirmation that the password was changed
+// - Date and time of the change
+// - Security reminder
+// - Instruction to contact the administrator if unauthorized
+
+// IMPORTANT: Do not include the new password.
+
+
+// ============================================================
+// ROUTE: GET /autoPass4
+// PURPOSE: Generate a new employee temporary password
+// ============================================================
+
+// TODO: Send the newly generated temporary password to the employee.
+
+// Subject: "AUDRES Temporary Password Generated"
+
+// Recipient: Employee's registered email.
+
+// Email body must include:
+// - Employee's complete name
+// - Username/email
+// - Newly generated temporary password
+// - Date and time the password was generated
+// - AUDRES login link
+// - Instruction to change the temporary password immediately
+// - Security reminder
+
+
+// ============================================================
+// ROUTE: POST /edt4
+// PURPOSE: Update employee profile/email information
+// ============================================================
+
+// TODO: Send an account-change notification to the previous employee email.
+
+// Subject: "AUDRES Employee Account Information Changed"
+
+// Recipient: Previous employee email.
+
+// Email body must include:
+// - Employee's complete name
+// - Notice that account information was changed
+// - New email address, if changed
+// - Updated role/campus/assignment, if applicable
+// - Date and time of the change
+// - Security warning
+// - Administrator/contact information
+
+
+// TODO: Send an account-update confirmation to the new employee email.
+
+// Subject: "AUDRES Employee Account Updated"
+
+// Recipient: New employee email.
+
+// Email body must include:
+// - Employee's complete name
+// - Confirmation of the account update
+// - Updated email/account information
+// - Updated role/campus/assignment, if applicable
+// - Date and time of the update
+
+// IMPORTANT: Do not include any password.
+
+
+// ============================================================
+// ROUTE: POST /rst2
+// PURPOSE: Employee/staff password change
+// ============================================================
+
+// TODO: Send a password-change confirmation email.
+
+// Subject: "AUDRES Password Changed Successfully"
+
+// Recipient: Logged-in employee/staff email.
+
+// Email body must include:
+// - Employee/staff complete name
+// - Confirmation that the password was changed
+// - Date and time of the change
+// - Security reminder
+// - Unauthorized-change instruction
+
+// IMPORTANT: Do not include the new password.
+
+
+// ============================================================
+// ROUTE: POST /rst2FG
+// PURPOSE: Employee/staff forgot-password reset
+// ============================================================
+
+// TODO: Send a password-reset completion email.
+
+// Subject: "AUDRES Password Reset Completed"
+
+// Recipient: Employee/staff registered email.
+
+// Email body must include:
+// - Employee/staff complete name
+// - Confirmation that the password reset was completed
+// - Date and time of the reset
+// - Security reminder
+// - Instruction to contact the administrator if unauthorized
+
+// IMPORTANT: Do not include the password.
+
+
+// ============================================================
+// ROUTE: POST /rst3FG
+// PURPOSE: Student password reset
+// ============================================================
+
+// TODO: Send a password-reset completion email.
+
+// Subject: "AUDRES Student Password Reset Completed"
+
+// Recipient: Student's registered email.
+
+// Email body must include:
+// - Student's complete name
+// - Confirmation that the password reset was completed
+// - Date and time of the reset
+// - Security reminder
+// - Instruction to contact the administrator if unauthorized
+
+// IMPORTANT: Do not include the password.
+
+
+// ============================================================
+// ROUTE: POST /rst4FG
+// PURPOSE: Initial/temporary password change
+// ============================================================
+
+// TODO: Send a password-reset completion email.
+
+// Subject: "AUDRES Temporary Password Change Completed"
+
+// Recipient: User's registered email.
+
+// Email body must include:
+// - User's complete name
+// - Confirmation that the temporary password was successfully changed
+// - Date and time of the change
+// - Instruction to use the new password on the next login
+// - Security reminder
+
+
+// ============================================================
+// ROUTE: POST /rst4FGA
+// PURPOSE: Employee/account password reset
+// ============================================================
+
+// TODO: Send a password-reset completion email.
+
+// Subject: "AUDRES Password Reset Completed"
+
+// Recipient: User's registered email.
+
+// Email body must include:
+// - User's complete name
+// - Confirmation that the password reset was completed
+// - Date and time of the reset
+// - Security reminder
+// - Instruction to contact the administrator if unauthorized
+
+// IMPORTANT: Do not include the password.
+
+
+// ============================================================
+// ROUTE: POST /edt2
+// PURPOSE: Update staff/employee email information
+// ============================================================
+
+// TODO: Send an email-change notification to the previous email.
+
+// Subject: "AUDRES Email Address Changed"
+
+// Recipient: Previous registered email.
+
+// Email body must include:
+// - User's complete name
+// - Notice that the email address was changed
+// - New email address
+// - Date and time of the change
+// - Security warning
+
+
+// TODO: Send a confirmation email to the new email.
+
+// Subject: "AUDRES Email Address Updated"
+
+// Recipient: New registered email.
+
+// Email body must include:
+// - User's complete name
+// - Confirmation that the new email is connected to the account
+// - Date and time of the update
+// - Security reminder
+
+
+// ============================================================
+// ROUTE: POST /rst3
+// PURPOSE: Administrator changes/resets student password
+// ============================================================
+
+// TODO: Send a notification to the affected student.
+
+// Subject: "AUDRES Student Password Changed by Administrator"
+
+// Recipient: Student's registered email.
+
+// Email body must include:
+// - Student's complete name
+// - Notice that the password was changed by authorized staff
+// - Date and time of the change
+// - Instruction to log in using the updated credentials
+// - Instruction to change the temporary password, if applicable
+// - Security reminder
+// - Administrator/contact information
+
+// IMPORTANT: Do not include the password unless this route intentionally
+// generates and provides a temporary password.
+
+
+// ============================================================
+// ROUTE: GET /autoPass3
+// PURPOSE: Generate a new student temporary password
+// ============================================================
+
+// TODO: Send the newly generated temporary password to the student.
+
+// Subject: "AUDRES Temporary Password Generated"
+
+// Recipient: Student's registered email.
+
+// Email body must include:
+// - Student's complete name
+// - Student number, if available
+// - Username/email
+// - Newly generated temporary password
+// - Date and time the password was generated
+// - AUDRES login link
+// - Instruction to change the temporary password immediately
+// - Security reminder
+
+
+// ============================================================
+// ROUTE: POST /edt3
+// PURPOSE: Update student profile/email information
+// ============================================================
+
+// TODO: Send an account-change notification to the previous student email.
+
+// Subject: "AUDRES Student Account Information Changed"
+
+// Recipient: Previous student email.
+
+// Email body must include:
+// - Student's complete name
+// - Notice that account information was changed
+// - New email address, if changed
+// - Date and time of the change
+// - Security warning
+// - Contact information for unauthorized changes
+
+
+// TODO: Send an account-update confirmation to the new student email.
+
+// Subject: "AUDRES Student Account Updated"
+
+// Recipient: New student email.
+
+// Email body must include:
+// - Student's complete name
+// - Confirmation that the account information was updated
+// - Updated email/account information
+// - Date and time of the update
+
+// IMPORTANT: Do not include any password.
+
+
+// ============================================================
+// ROUTE: POST /rst2A
+// PURPOSE: Accounting password change
+// ============================================================
+
+// TODO: Send a password-change confirmation email.
+
+// Subject: "AUDRES Accounting Account Password Changed"
+
+// Recipient: Accounting user's registered email.
+
+// Email body must include:
+// - Accounting user's complete name
+// - Confirmation that the password was changed
+// - Date and time of the change
+// - Security reminder
+// - Instruction to contact the administrator if unauthorized
+
+// IMPORTANT: Do not include the new password.
+
+
+// ============================================================
+// ROUTE: POST /rst2FGA
+// PURPOSE: Accounting password reset
+// ============================================================
+
+// TODO: Send a password-reset completion email.
+
+// Subject: "AUDRES Accounting Password Reset Completed"
+
+// Recipient: Accounting user's registered email.
+
+// Email body must include:
+// - Accounting user's complete name
+// - Confirmation that the password reset was completed
+// - Date and time of the reset
+// - Security reminder
+// - Instruction to contact the administrator if unauthorized
+
+// IMPORTANT: Do not include the password.
+
+
+// ============================================================
+// ROUTE: POST /edt2A
+// PURPOSE: Update accounting profile/email information
+// ============================================================
+
+// TODO: Send an email-change notification to the previous accounting email.
+
+// Subject: "AUDRES Email Address Changed"
+
+// Recipient: Previous accounting email.
+
+// Email body must include:
+// - Accounting user's complete name
+// - Notice that the email address was changed
+// - New email address
+// - Date and time of the change
+// - Security warning
+
+
+// TODO: Send a confirmation email to the new accounting email.
+
+// Subject: "AUDRES Email Address Updated"
+
+// Recipient: New accounting email.
+
+// Email body must include:
+// - Accounting user's complete name
+// - Confirmation that the new email is connected to the account
+// - Date and time of the update
+// - Security reminder
+
+
+// ============================================================
+// ROUTE: POST /hold4
+// PURPOSE: Place a transaction on hold during assessment/processing
+// ============================================================
+
+// TODO: Send a hold notification to the requester.
+
+// Subject: "AUDRES Transaction Placed on Hold – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Current processing stage
+// - Hold date and time
+// - Hold reason
+// - Request remarks
+// - Required action from the requester
+// - Next step
+// - Contact information for assistance
+
+
+// ============================================================
+// ROUTE: POST /revert4
+// PURPOSE: Remove hold or revert a processing action
+// ============================================================
+
+// TODO: Send a processing-resumed notification to the requester.
+
+// Subject: "AUDRES Transaction Hold Removed – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Previous hold/action
+// - Notice that the hold was removed
+// - Current request status
+// - Date and time of the update
+// - Notice that processing has resumed
+// - Next step
+
+
+// ============================================================
+// ROUTE: POST /approve4
+// PURPOSE: Assess request or mark request as Verified
+// ============================================================
+
+// TODO: Check the final status after processing the route.
+
+// IF THE RESULTING STATUS IS "ASSESSED":
+
+// Subject: "Document Request Assessed – Payment Required – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Approved document/s
+// - Quantity of each document
+// - Assessment amount
+// - Current status: "Assessed"
+// - Payment instructions
+// - Available payment methods
+// - Proof-of-payment upload instructions
+// - Payment deadline, if applicable
+// - Next step
+
+
+// IF THE RESULTING STATUS IS "VERIFIED":
+
+// Subject: "Document Request Verified – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - List of requested document/s
+// - Notice that all documents are free or no payment is required
+// - Current status: "Verified"
+// - Date and time of verification
+// - Next processing or release step
+
+
+// ============================================================
+// ROUTE: POST /verify4
+// PURPOSE: Verify payment
+// ============================================================
+
+// TODO: Send a payment-verification confirmation email.
+
+// Subject: "Payment Verified – Document Request Processing – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Confirmation that payment was verified
+// - Verified amount, if available
+// - Payment date and time
+// - Current status: "Verified"
+// - Requested document/s
+// - Next step toward document release
+
+
+// ============================================================
+// ROUTE: POST /hold5
+// PURPOSE: Reject or request a new proof of payment
+// ============================================================
+
+// TODO: Send an action-required email to the requester.
+
+// Subject: "Action Required: Re-upload Proof of Payment – TR# [TR NUMBER]"
+
+// Recipient: Requester's registered email.
+
+// Email body must include:
+// - Requester's complete name
+// - Transaction/reference number
+// - Notice that the submitted proof of payment was rejected
+// - Reason for rejection
+// - Request remarks
+// - Date and time of rejection
+// - Instruction to upload a new proof of payment
+// - Requirements for a valid proof
+// - Payment/contact instructions
+// - Deadline, if applicable
+
+
+// ============================================================
+// ROUTE: GET /check-email
+// PURPOSE: Check whether an email already exists
+// ============================================================
+
+// EMAIL: NONE.
+
+// This route is only for email validation or duplicate checking.
+// Do not send an email from this route.
+
+
+// ============================================================
+// ROUTE: GET /check-email2
+// PURPOSE: Check whether another email already exists
+// ============================================================
+
+// EMAIL: NONE.
+
+// This route is only for email validation during email changes.
+// Do not send an email from this route.
+
+// Email-change notifications must be placed in:
+// - POST /edt
+// - POST /edt2
+// - POST /edt2A
+// - POST /edt3
+// - POST /edt4
+
+
+// ============================================================
+// ROUTE: POST /updateSeed
+// PURPOSE: Update the system contact email/phone information
+// ============================================================
+
+// TODO: Send a notification to the previous system contact email.
+
+// Subject: "AUDRES System Contact Information Changed"
+
+// Recipient: Previous system contact email.
+
+// Email body must include:
+// - Notice that the system contact information was updated
+// - New system email address
+// - New contact number, if applicable
+// - Date and time of the update
+// - Administrator responsible for the change, if applicable
+// - Security notice
+
+
+// TODO: Send a confirmation email to the new system contact email.
+
+// Subject: "AUDRES System Contact Email Confirmed"
+
+// Recipient: New system contact email.
+
+// Email body must include:
+// - Confirmation that the email is now registered as the system contact email
+// - Updated contact information
+// - Date and time of the update
+// - AUDRES system identification
