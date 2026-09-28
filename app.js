@@ -36,7 +36,10 @@ const items = require('./model/item')
 const Log = require('./model/logs')
 const { isWeakMap } = require('util/types')
 
-const { send as mail, verify as verifySMTP } = require('./services/mailer')
+const {
+  send: mail,
+  verify: verifySMTP
+} = require('./services/mailer')
 
 const app = express()
 const PORT = process.env.PORT
