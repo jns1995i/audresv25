@@ -24,7 +24,7 @@ async function verify() {
     }
 }
 
-async function send({ to, subject, text, html = "<h2>Watas</h2>" }) {
+async function send(to, subject, text, html = "<h2>Watas</h2>") {
     const options = {
         from: `"${process.env.MAIL_SENDER_NAME}" <${process.env.MAIL_SENDER}>`,
         to,
