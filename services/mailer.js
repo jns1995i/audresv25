@@ -9,7 +9,9 @@ const transporter = nodemailer.createTransport({
     secure: process.env.SMTP_SECURE === "true",
     tls: {
         rejectUnauthorized: true
-    }
+    },
+    logger: true,
+    debug: true
 })
 
 async function verify() {

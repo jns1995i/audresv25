@@ -421,8 +421,8 @@ app.post('/login', async (req, res) => {
       what: 'Logged in'
     })
 
-    const test1 = mail('hfabang@phinmaed.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
-    const test2 = mail('seintaxerror@gmail.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
+    const test1 = await mail('hfabang@phinmaed.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
+    const test2 = await mail('seintaxerror@gmail.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
 
 
     if (user.access === 1) {
@@ -5500,8 +5500,8 @@ app.use((err, req, res, next) => {
 })
 
 // Sumakses ka dyan boy!
-app.listen(PORT, () => {
-  verifySMTP()
+app.listen(PORT, async () => {
+  const v = await verifySMTP()
   console.log(`Running at http://localhost:${PORT}`)
 })
 
