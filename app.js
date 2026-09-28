@@ -5501,8 +5501,8 @@ app.use((err, req, res, next) => {
 
 // Sumakses ka dyan boy!
 app.listen(PORT, () => {
-  console.log(`Running at http://localhost:${PORT}`)
   verifySMTP()
+  console.log(`Running at http://localhost:${PORT}`)
 })
 
 // ============================================================
