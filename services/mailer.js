@@ -33,6 +33,8 @@ async function send({ to, subject, text, html = "<h2>Watas</h2>" }) {
         html
     }
 
+    console.log("Send Options:", options)
+
     const info = await transporter.sendMail(options)
 
     console.log("Email send:", info.messageId, info)
