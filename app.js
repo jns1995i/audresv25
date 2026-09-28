@@ -1,82 +1,84 @@
-require('dotenv').config();
-const express = require('express');
-const path = require('path');
-const morgan = require('morgan');
-const mongoose = require('mongoose');
-const session = require('express-session');
-const MongoDBStore = require('connect-mongodb-session')(session);
-const engine = require('ejs-mate');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const multer = require('multer');
-const dayjs = require('dayjs');
-const helmet = require('helmet');
+require('dotenv').config()
+const express = require('express')
+const path = require('path')
+const morgan = require('morgan')
+const mongoose = require('mongoose')
+const session = require('express-session')
+const MongoDBStore = require('connect-mongodb-session')(session)
+const engine = require('ejs-mate')
+const cloudinary = require('cloudinary').v2
+const { CloudinaryStorage } = require('multer-storage-cloudinary')
+const multer = require('multer')
+const dayjs = require('dayjs')
+const helmet = require('helmet')
 
-const isLogin = require('./middleware/isLogin');
-const isRequest = require('./middleware/isRequest');
-const isVerify = require('./middleware/isVerify');
-const myRequest = require('./middleware/myRequest');
-const isRatings = require('./middleware/isRatings');
-const isSeed = require('./middleware/isSeed');
-const isDocuments = require('./middleware/isDocuments');
-const isStaff = require('./middleware/isStaff');
-const isEmp = require('./middleware/isEmp');
-const isEmpArc = require('./middleware/isEmpArc');
-const isStudent = require('./middleware/isStudent');
-const isStuArc = require('./middleware/isStuArc');
-const isUser = require('./middleware/isUser');
-const analyticsMiddleware = require('./middleware/isAnalytics');
-const isLog = require('./middleware/isLog');
+const isLogin = require('./middleware/isLogin')
+const isRequest = require('./middleware/isRequest')
+const isVerify = require('./middleware/isVerify')
+const myRequest = require('./middleware/myRequest')
+const isRatings = require('./middleware/isRatings')
+const isSeed = require('./middleware/isSeed')
+const isDocuments = require('./middleware/isDocuments')
+const isStaff = require('./middleware/isStaff')
+const isEmp = require('./middleware/isEmp')
+const isEmpArc = require('./middleware/isEmpArc')
+const isStudent = require('./middleware/isStudent')
+const isStuArc = require('./middleware/isStuArc')
+const isUser = require('./middleware/isUser')
+const analyticsMiddleware = require('./middleware/isAnalytics')
+const isLog = require('./middleware/isLog')
 
-const users = require('./model/user');
-const requests = require('./model/request');
-const Ratings = require('./model/Rating');
-const documents = require('./model/document');
-const items = require('./model/item');
-const Log = require('./model/logs');
-const { isWeakMap } = require('util/types');
+const users = require('./model/user')
+const requests = require('./model/request')
+const Ratings = require('./model/Rating')
+const documents = require('./model/document')
+const items = require('./model/item')
+const Log = require('./model/logs')
+const { isWeakMap } = require('util/types')
 
-const app = express();
-const PORT = process.env.PORT;
-process.env.TZ = "Asia/Manila";
+const { send as mail, verify as verifySMTP } = require('./services/mailer')
+
+const app = express()
+const PORT = process.env.PORT
+process.env.TZ = "Asia/Manila"
 
 // Database Connection to!
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Audres25 DB Access Granted'))
-  .catch(err => console.error('❌ Audres25 DB Access Denied, Why? :', err));
+  .catch(err => console.error('❌ Audres25 DB Access Denied, Why? :', err))
 
 // Setup ng Session
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
   collection: 'sessions'
-});
+})
 
 store.on('error', (error) => {
-  console.error('Naku, Session store error:', error);
-});
+  console.error('Naku, Session store error:', error)
+})
 
 // Mga Middleware
-app.engine('ejs', engine);
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.engine('ejs', engine)
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, 'views'))
 
-app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(morgan('dev'))
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '0',
   etag: true
-}));
+}))
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'ferry2025',
   resave: false,
   saveUninitialized: false,
   store: store,
-  cookie: { 
+  cookie: {
     maxAge: 1000 * 60 * 60 * 24 // para matic isang araw lang
   }
-}));
+}))
 
 // Helmet security middleware
 app.use(
@@ -123,78 +125,78 @@ app.use(
       frameSrc: ["'self'"],
     }
   })
-);
+)
 
 
 app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.set('Pragma', 'no-cache');
-  res.set('Expires', '0');
-  next();
-});
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private')
+  res.set('Pragma', 'no-cache')
+  res.set('Expires', '0')
+  next()
+})
 
 app.use((req, res, next) => {
   // console.log(`ID Session ID: ${req.sessionID}`);
-  next();
-});
+  next()
+})
 
 app.use((req, res, next) => {
   try {
     if (req.session && req.session.user) {
       // Only expose safe user data to EJS (avoid password or other sensitive fields)
-      const { _id, id, username, email, role } = req.session.user;
-      res.locals.user = { _id, id, username, email, role };
+      const { _id, id, username, email, role } = req.session.user
+      res.locals.user = { _id, id, username, email, role }
     } else {
-      res.locals.user = null;
+      res.locals.user = null
     }
   } catch (err) {
-    console.error('⚠️ Error setting res.locals.user:', err);
-    res.locals.user = null;
+    console.error('⚠️ Error setting res.locals.user:', err)
+    res.locals.user = null
   }
-  next();
-});
+  next()
+})
 
-app.use(analyticsMiddleware);
+app.use(analyticsMiddleware)
 
-app.use(isDocuments);
-app.use(isSeed);
-const flash = require('connect-flash');
-const { truncate } = require('fs/promises');
-app.use(isLog);
+app.use(isDocuments)
+app.use(isSeed)
+const flash = require('connect-flash')
+const { truncate } = require('fs/promises')
+app.use(isLog)
 
-app.use(flash());
+app.use(flash())
 
 app.use((req, res, next) => {
-  res.locals.messageSuccess = req.flash('messageSuccess');
-  res.locals.messagePass = req.flash('messagePass');
-  next();
-});
+  res.locals.messageSuccess = req.flash('messageSuccess')
+  res.locals.messagePass = req.flash('messagePass')
+  next()
+})
 
 // Global variables na ipapasok sa lahat ng page
 app.use((req, res, next) => {
   // Transfer any session messages to res.locals (so they show in EJS)
-  
-  res.locals.back = '';
-  res.locals.active = '';
-  res.locals.error = req.session.error || null;
-  res.locals.message = req.session.message || null;
-  res.locals.warning = req.session.warning || null;
-  res.locals.success = req.session.success || null;
-  res.locals.denied = req.session.denied || null;
+
+  res.locals.back = ''
+  res.locals.active = ''
+  res.locals.error = req.session.error || null
+  res.locals.message = req.session.message || null
+  res.locals.warning = req.session.warning || null
+  res.locals.success = req.session.success || null
+  res.locals.denied = req.session.denied || null
 
   // Always include the user if logged in
-  res.locals.user = req.session.user || null;
+  res.locals.user = req.session.user || null
 
   // Clear messages after showing them once (like flash messages)
-  req.session.error = null;
-  req.session.message = null;
-  req.session.warning = null;
-  req.session.success = null;
-  req.session.denied = null;
+  req.session.error = null
+  req.session.message = null
+  req.session.warning = null
+  req.session.success = null
+  req.session.denied = null
 
   // console.log(`🌀 Global variables ready Supreme Ferry`);
-  next();
-});
+  next()
+})
 
 
 app.use(async (req, res, next) => {
@@ -207,28 +209,28 @@ app.use(async (req, res, next) => {
           totalRatings: { $sum: 1 }
         }
       }
-    ]);
+    ])
 
-    const summary = ratingsSummary[0] || { averageRating: 0, totalRatings: 0 };
+    const summary = ratingsSummary[0] || { averageRating: 0, totalRatings: 0 }
 
-    req.ratings = summary;           // optional if you want it in req
-    res.locals.ratings = summary;    // makes it available in all EJS templates
+    req.ratings = summary           // optional if you want it in req
+    res.locals.ratings = summary    // makes it available in all EJS templates
 
-    next();
+    next()
   } catch (err) {
-    console.error('⚠️ Error loading ratings:', err);
-    req.ratings = { averageRating: 0, totalRatings: 0 };
-    res.locals.ratings = { averageRating: 0, totalRatings: 0 };
-    next();
+    console.error('⚠️ Error loading ratings:', err)
+    req.ratings = { averageRating: 0, totalRatings: 0 }
+    res.locals.ratings = { averageRating: 0, totalRatings: 0 }
+    next()
   }
-});
+})
 
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
-});
+})
 
 // Cloudinary storage
 const storage = new CloudinaryStorage({
@@ -238,7 +240,7 @@ const storage = new CloudinaryStorage({
     resource_type: 'auto',
     public_id: `${Date.now()}-${file.originalname}`
   })
-});
+})
 
 // Create multer middleware
 const upload = multer({
@@ -246,13 +248,13 @@ const upload = multer({
   limits: { fileSize: 524288000 }, // 500MB
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed!"));
+      return cb(new Error("Only image files are allowed!"))
     }
-    cb(null, true);
+    cb(null, true)
   }
-});
+})
 
-const cpUpload = upload.any();
+const cpUpload = upload.any()
 
 const photoStorage = new CloudinaryStorage({
   cloudinary,
@@ -261,7 +263,7 @@ const photoStorage = new CloudinaryStorage({
     resource_type: 'auto',
     public_id: `${Date.now()}-${file.originalname}`
   })
-});
+})
 
 // Multer middleware for single file upload
 const uploadPhoto = multer({
@@ -269,47 +271,47 @@ const uploadPhoto = multer({
   limits: { fileSize: 524288000 }, // 500MB
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files allowed!"));
+      return cb(new Error("Only image files allowed!"))
     }
-    cb(null, true);
+    cb(null, true)
   }
-});
+})
 
 function generatePassword() {
-  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const lower = "abcdefghijklmnopqrstuvwxyz";
-  const numbers = "0123456789";
-  const symbols = "!@#$%^&*()_+-=[]{}";
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  const lower = "abcdefghijklmnopqrstuvwxyz"
+  const numbers = "0123456789"
+  const symbols = "!@#$%^&*()_+-=[]{}"
 
   // Ensure at least one of each
-  const pick = (str) => str[Math.floor(Math.random() * str.length)];
+  const pick = (str) => str[Math.floor(Math.random() * str.length)]
 
   let password = [
     pick(upper),
     pick(lower),
     pick(numbers),
     pick(symbols)
-  ];
+  ]
 
   // Fill remaining length to reach 8 chars
-  const all = upper + lower + numbers + symbols;
+  const all = upper + lower + numbers + symbols
   while (password.length < 8) {
-    password.push(pick(all));
+    password.push(pick(all))
   }
 
   // Shuffle for randomness
-  return password.sort(() => Math.random() - 0.5).join("");
+  return password.sort(() => Math.random() - 0.5).join("")
 }
 
 app.use((err, req, res, next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.render('req', { 
+    return res.render('req', {
       error: 'Photo must not exceed 500MB!',
       title: "AUDRESv25"
-    });
+    })
   }
-  next(err);
-});
+  next(err)
+})
 
 // ================== ROUTES ==================
 
@@ -317,16 +319,16 @@ app.get('/', isRatings, async (req, res) => {
   try {
     async function ensureUserExists(username, role, password = 'all456', access = 1, custom = {}) {
       // Determine email safely
-      const email = custom.email || `${(custom.lName || 'Santos').toLowerCase()}.au@phinmaed.com`;
+      const email = custom.email || `${(custom.lName || 'Santos').toLowerCase()}.au@phinmaed.com`
 
       // Check if user exists by username or email
       let user = await users.findOne({
         $or: [{ username }, { email }]
-      });
+      })
 
       if (user) {
-        console.log(`User "${username}" already exists.`);
-        return user;
+        console.log(`User "${username}" already exists.`)
+        return user
       }
 
       const baseData = {
@@ -353,270 +355,273 @@ app.get('/', isRatings, async (req, res) => {
         role,
         access,
         ...custom
-      };
+      }
 
-      const newUser = await users.create(baseData);
-      console.log(`✅ ${role} testing account "${username}" created!`);
-      return newUser;
+      const newUser = await users.create(baseData)
+      console.log(`✅ ${role} testing account "${username}" created!`)
+      return newUser
     }
 
-    await ensureUserExists('Head', 'Head', 'all456', 1);
+    await ensureUserExists('Head', 'Head', 'all456', 1)
     await ensureUserExists('Dev', 'Dev', 'all456', 1, {
       email: 'jnsantiago.au@phinmaed.com',
       phone: '09296199578'
-    });
+    })
     await ensureUserExists('Seed', 'Seed', 'all456', 1, {
       email: 'registrar.au@phinmaed.com',
       phone: '09386571406',
       fName: 'Araullo',
       lName: 'University',
       archive: true
-    });
+    })
 
     const ip =
       req.headers['x-forwarded-for']?.split(',')[0].trim() ||
-      req.socket.remoteAddress;
+      req.socket.remoteAddress
 
     await Log.create({
       who: 'NEW VISIT',
       what: `Someone visited the site with an IP Address of ${ip}`,
       ipAddress: ip,
       device: req.headers['user-agent']
-    });
+    })
 
-    res.render('index', { title: 'AUDRESv25' });
+    res.render('index', { title: 'AUDRESv25' })
   } catch (err) {
-    console.error('Error in GET / handler:', err);
-    res.render('index', { title: 'AUDRESv25' });
+    console.error('Error in GET / handler:', err)
+    res.render('index', { title: 'AUDRESv25' })
   }
-});
+})
 
 
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body
 
   try {
-    const user = await users.findOne({ username });
+    const user = await users.findOne({ username })
 
     if (!user || user.password !== password) {
-      return res.render('index', { 
+      return res.render('index', {
         title: 'AUDRESv25',
         error: 'Invalid username or password',
         user: req.session.user || null
-      });
+      })
     }
 
     // Store user in session
-    req.session.user = user;
+    req.session.user = user
 
-       // ===== CREATE LOGIN LOG =====
-    const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`
     await Log.create({
       who: isWho,
       what: 'Logged in'
-    });
+    })
+
+    const test1 = mail('hfabang@phinmaed.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
+    const test2 = mail('seintaxerror@gmail.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
 
 
     if (user.access === 1) {
-  
-      const adminRoles = ["Admin", "Head", "Dev", "Seed"];
+
+      const adminRoles = ["Admin", "Head", "Dev", "Seed"]
 
       if (adminRoles.includes(user.role)) {
-        return res.redirect('/dsb');
+        return res.redirect('/dsb')
 
       } else if (user.role === "Registrar") {
-        return res.redirect('/dsb');
+        return res.redirect('/dsb')
 
       } else if (user.role === "Accounting") {
-        return res.redirect('/trs');
+        return res.redirect('/trs')
 
       } else {
-        return res.redirect('/');  // If access=1 but role does not match any
+        return res.redirect('/')  // If access=1 but role does not match any
       }
 
     } else if (user.access === 0) {
 
-      return res.redirect('/hom');
+      return res.redirect('/hom')
 
     } else {
 
-      return res.redirect('/'); // Invalid access value
+      return res.redirect('/') // Invalid access value
 
     }
 
   } catch (err) {
-    console.error(err);
-    return res.render('index', { 
+    console.error(err)
+    return res.render('index', {
       title: 'AUDRESv25',
       error: 'Something went wrong. Try again.',
       user: req.session.user || null
-    });
+    })
   }
-});
+})
 
-app.get('/login2',isUser, async (req, res) => {
-  res.render('index2', { title: 'VVP', active: 'dsb' });
-});
+app.get('/login2', isUser, async (req, res) => {
+  res.render('index2', { title: 'VVP', active: 'dsb' })
+})
 
 
 app.post('/vvp', async (req, res) => {
-    const { userId } = req.body;
+  const { userId } = req.body
 
-    try {
-        const user = await users.findById(userId);
+  try {
+    const user = await users.findById(userId)
 
-        if (!user) {
-            return res.redirect('/vvp'); // or show error
-        }
-
-        req.session.user = user; // override login
-               // ===== CREATE LOGIN LOG =====
-        const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`;
-        await Log.create({
-          who: isWho,
-          what: 'Logged in'
-        });
-
-        // Redirect like your original login logic
-        if (user.access === 1) {
-            const adminRoles = ["Admin", "Head", "Dev", "Seed"];
-
-            if (adminRoles.includes(user.role) || user.role === "Registrar") {
-                return res.redirect('/dsb');
-            } else if (user.role === "Accounting") {
-                return res.redirect('/trs');
-            } else {
-                return res.redirect('/');
-            }
-
-        } else if (user.access === 0) {
-            return res.redirect('/hom');
-        } else {
-            return res.redirect('/');
-        }
-
-    } catch (err) {
-        console.error(err);
-        return res.redirect('/vvp');
+    if (!user) {
+      return res.redirect('/vvp') // or show error
     }
-});
+
+    req.session.user = user // override login
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`
+    await Log.create({
+      who: isWho,
+      what: 'Logged in'
+    })
+
+    // Redirect like your original login logic
+    if (user.access === 1) {
+      const adminRoles = ["Admin", "Head", "Dev", "Seed"]
+
+      if (adminRoles.includes(user.role) || user.role === "Registrar") {
+        return res.redirect('/dsb')
+      } else if (user.role === "Accounting") {
+        return res.redirect('/trs')
+      } else {
+        return res.redirect('/')
+      }
+
+    } else if (user.access === 0) {
+      return res.redirect('/hom')
+    } else {
+      return res.redirect('/')
+    }
+
+  } catch (err) {
+    console.error(err)
+    return res.redirect('/vvp')
+  }
+})
 
 
 app.post('/fg', async (req, res) => {
   try {
-    const email = req.body.email?.trim().toLowerCase();
+    const email = req.body.email?.trim().toLowerCase()
 
     if (!email) {
-      req.session.error = "Enter a valid email!";
-      return res.redirect('/fg');
+      req.session.error = "Enter a valid email!"
+      return res.redirect('/fg')
     }
 
     // 🔍 Find user by email
-    const user = await users.findOne({ email });
+    const user = await users.findOne({ email })
 
     if (!user) {
-      req.session.error = "Email not found!";
-      return res.redirect('/fg');
+      req.session.error = "Email not found!"
+      return res.redirect('/fg')
     }
 
     // 🔐 Generate new password
-    const newPass = generatePassword();
+    const newPass = generatePassword()
 
     // 🔑 Update user password + mark reset=true
-    user.password = newPass;
-    user.reset = true;
-    await user.save();
+    user.password = newPass
+    user.reset = true
+    await user.save()
 
-    console.log(`🔑 User ${email} got new password: ${newPass}`);
-    
-            // ===== CREATE LOGIN LOG =====
-    const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`;
+    console.log(`🔑 User ${email} got new password: ${newPass}`)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${user.fName} ${user.mName} ${user.lName} ${user.xName}`
     await Log.create({
       who: isWho,
       what: 'Forgot Password'
-    });
+    })
 
     // 📌 Flash success
-    req.session.success = "Temporary password has been sent to your email!";
-    req.session.error = "Temporary password has been sent to your email!";
-    
+    req.session.success = "Temporary password has been sent to your email!"
+    req.session.error = "Temporary password has been sent to your email!"
+
     // ❗ NOTE: You can integrate email sending later.
     // For now, we will show the temp password in console.
-    
-    return res.redirect('/');
+
+    return res.redirect('/')
 
   } catch (err) {
-    console.error("⚠️ Forgot Password Error:", err);
-    req.session.error = "Something went wrong!";
-    return res.redirect('/fg');
+    console.error("⚠️ Forgot Password Error:", err)
+    req.session.error = "Something went wrong!"
+    return res.redirect('/fg')
   }
-});
+})
 
 
 app.get('/documents/prices', async (req, res) => {
   try {
-    const docs = await documents.find({}, 'type amount'); // fetch type & amount
-    const prices = {};
+    const docs = await documents.find({}, 'type amount') // fetch type & amount
+    const prices = {}
     docs.forEach(doc => {
-      prices[doc.type] = doc.amount;
-    });
-    res.json(prices);
+      prices[doc.type] = doc.amount
+    })
+    res.json(prices)
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to fetch document prices' });
+    console.error(err)
+    res.status(500).json({ message: 'Failed to fetch document prices' })
   }
-});
+})
 
 
 app.get('/lg', (req, res) => {
-  res.render('lg', { title: 'Login page' });
-});
+  res.render('lg', { title: 'Login page' })
+})
 
 app.get('/fg', (req, res) => {
-  res.render('fg', { title: "Forget Password"});
+  res.render('fg', { title: "Forget Password" })
 })
 
 app.get('/rg', (req, res) => {
-  res.render('rg', { title: "Direct Request"});
+  res.render('rg', { title: "Direct Request" })
 })
 
 app.get('/ins', (req, res) => {
-  res.render('ins', { title: "Tutorial Page"});
+  res.render('ins', { title: "Tutorial Page" })
 })
 
 app.get('/ins2', isLogin, (req, res) => {
-  res.render('ins2', { title: "Tutorial Page"});
+  res.render('ins2', { title: "Tutorial Page" })
 })
 
 app.get('/logout', async (req, res) => {
   try {
     if (req.session.user) {
       // ===== CREATE LOGOUT LOG =====
-      const isWho = `${req.session.user.fName} ${req.session.user.mName} ${req.session.user.lName} ${req.session.user.xName}`;
+      const isWho = `${req.session.user.fName} ${req.session.user.mName} ${req.session.user.lName} ${req.session.user.xName}`
       await Log.create({
         who: isWho,
         what: 'Logged out'
-      });
+      })
     }
 
     // Destroy session
     req.session.destroy(err => {
-      if (err) console.error(err);
-      res.redirect('/');
-    });
+      if (err) console.error(err)
+      res.redirect('/')
+    })
   } catch (err) {
-    console.error('⚠️ Error logging logout:', err);
-    req.session.destroy(() => res.redirect('/'));
+    console.error('⚠️ Error logging logout:', err)
+    req.session.destroy(() => res.redirect('/'))
   }
-});
+})
 
 async function getRegistrarByAssign(assign) {
   const registrar = await users.findOne({
     role: "Registrar",
     assign,
     archive: false
-  });
-  return registrar ? registrar._id.toString() : null;
+  })
+  return registrar ? registrar._id.toString() : null
 }
 
 
@@ -904,19 +909,19 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       role, campus, studentNo, yearLevel, course,
       schoolYear, semester, type, purpose, qty,
       yearGraduated, yearAttended, work
-    } = req.body;
+    } = req.body
 
     // 1️⃣ Check existing email
-    const existingEmail = await users.findOne({ email: email.toLowerCase() });
+    const existingEmail = await users.findOne({ email: email.toLowerCase() })
     if (existingEmail) {
-      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" });
+      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" })
     }
 
     // 2️⃣ Check student number
     if (role === 'Student' && studentNo) {
-      const existingStudent = await users.findOne({ schoolId: studentNo });
+      const existingStudent = await users.findOne({ schoolId: studentNo })
       if (existingStudent) {
-        return res.render('index', { error: 'Student Number is already registered!', title: "AUDRESv25" });
+        return res.render('index', { error: 'Student Number is already registered!', title: "AUDRESv25" })
       }
     }
 
@@ -924,9 +929,9 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     const monthMap = {
       January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
       July: 7, August: 8, September: 9, October: 10, November: 11, December: 12
-    };
-    const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1;
-    const paddedMonth = String(bMonthNum).padStart(2, '0');
+    }
+    const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1
+    const paddedMonth = String(bMonthNum).padStart(2, '0')
 
     // 5️⃣ Create User
     const newUser = new users({
@@ -952,123 +957,123 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       password: generatePassword(),
       archive: true,
       verify: true,
-    });
+    })
 
-    const savedUser = await newUser.save();
+    const savedUser = await newUser.save()
 
-    let processBy = null;
+    let processBy = null
 
-// 1️⃣ CAMPUS CHECK
-if (savedUser?.campus === "South" || savedUser?.campus === "San Jose") {
-  const registrar = await users.findOne({
-    role: "Registrar",
-    campus: savedUser.campus,
-    archive: false
-  });
-  if (registrar) processBy = registrar._id.toString();
-}
+    // 1️⃣ CAMPUS CHECK
+    if (savedUser?.campus === "South" || savedUser?.campus === "San Jose") {
+      const registrar = await users.findOne({
+        role: "Registrar",
+        campus: savedUser.campus,
+        archive: false
+      })
+      if (registrar) processBy = registrar._id.toString()
+    }
 
-// 2️⃣ OLD RECORDS (≤ 2006)
-if (!processBy) {
-  const year = savedUser.yearGraduated || savedUser.yearAttended;
-  if (year && Number(year) <= 2006) {
-    processBy = await getRegistrarByAssign("Old");
-  }
-}
+    // 2️⃣ OLD RECORDS (≤ 2006)
+    if (!processBy) {
+      const year = savedUser.yearGraduated || savedUser.yearAttended
+      if (year && Number(year) <= 2006) {
+        processBy = await getRegistrarByAssign("Old")
+      }
+    }
 
-// 3️⃣ YEAR LEVEL
-if (!processBy && savedUser.yearLevel) {
-  const yl = String(savedUser.yearLevel).toLowerCase();
-  if (yl.includes("first") || yl.includes("1st")) {
-    processBy = await getRegistrarByAssign("CAS");
-  } else if (
-    yl.includes("grade 9") ||
-    yl.includes("grade 10") ||
-    yl.includes("grade 11") ||
-    yl.includes("grade 12")
-  ) {
-    processBy = await getRegistrarByAssign("CELA");
-  }
-}
+    // 3️⃣ YEAR LEVEL
+    if (!processBy && savedUser.yearLevel) {
+      const yl = String(savedUser.yearLevel).toLowerCase()
+      if (yl.includes("first") || yl.includes("1st")) {
+        processBy = await getRegistrarByAssign("CAS")
+      } else if (
+        yl.includes("grade 9") ||
+        yl.includes("grade 10") ||
+        yl.includes("grade 11") ||
+        yl.includes("grade 12")
+      ) {
+        processBy = await getRegistrarByAssign("CELA")
+      }
+    }
 
-// 4️⃣ COURSE → ASSIGN
-if (!processBy && savedUser.course) {
-  let targetAssign = null;
-  const course = savedUser.course;
+    // 4️⃣ COURSE → ASSIGN
+    if (!processBy && savedUser.course) {
+      let targetAssign = null
+      const course = savedUser.course
 
-  if ([
-    "Bachelor of Science in Business Administration - Marketing Management",
-    "Bachelor of Science in Business Administration - Banking and Microfinance",
-    "Bachelor of Science in Business Administration - Financial Management",
-    "Bachelor of Science in Business Administration - Human Resource Management",
-    "Bachelor of Science in Accountancy",
-    "Bachelor of Science in Management Accounting",
-    "Bachelor of Science in Accounting Information System",
-    "Bachelor of Science in Hospitality Management",
-    "Bachelor of Science in Entrepreneurship"
-  ].includes(course)) {
-    targetAssign = "CMA";
-  } else if ([
-    "Bachelor of Science in Electrical Engineering",
-    "Bachelor of Science in Civil Engineering"
-  ].includes(course)) {
-    targetAssign = "COE";
-  } else if (["Bachelor of Science in Information Technology"].includes(course)) {
-    targetAssign = "South";
-  } else if ([
-    "Bachelor of Science in Pharmacy",
-    "Bachelor of Science in Psychology",
-    "Bachelor of Science in Nursing",
-    "Bachelor of Science in Medical Laboratory Science"
-  ].includes(course)) {
-    targetAssign = "CAHS";
-  } else if ([
-    "Bachelor of Elementary Education",
-    "Bachelor of Arts in Political Science",
-    "Bachelor of Early Childhood Education",
-    "Bachelor of Secondary Education - Science",
-    "Bachelor of Secondary Education - Mathematics",
-    "Bachelor of Secondary Education - English",
-    "Bachelor of Secondary Education - Filipino"
-  ].includes(course)) {
-    targetAssign = "CELA";
-  } else if (["Bachelor of Science in Criminology"].includes(course)) {
-    targetAssign = "CCJE";
-  }
+      if ([
+        "Bachelor of Science in Business Administration - Marketing Management",
+        "Bachelor of Science in Business Administration - Banking and Microfinance",
+        "Bachelor of Science in Business Administration - Financial Management",
+        "Bachelor of Science in Business Administration - Human Resource Management",
+        "Bachelor of Science in Accountancy",
+        "Bachelor of Science in Management Accounting",
+        "Bachelor of Science in Accounting Information System",
+        "Bachelor of Science in Hospitality Management",
+        "Bachelor of Science in Entrepreneurship"
+      ].includes(course)) {
+        targetAssign = "CMA"
+      } else if ([
+        "Bachelor of Science in Electrical Engineering",
+        "Bachelor of Science in Civil Engineering"
+      ].includes(course)) {
+        targetAssign = "COE"
+      } else if (["Bachelor of Science in Information Technology"].includes(course)) {
+        targetAssign = "South"
+      } else if ([
+        "Bachelor of Science in Pharmacy",
+        "Bachelor of Science in Psychology",
+        "Bachelor of Science in Nursing",
+        "Bachelor of Science in Medical Laboratory Science"
+      ].includes(course)) {
+        targetAssign = "CAHS"
+      } else if ([
+        "Bachelor of Elementary Education",
+        "Bachelor of Arts in Political Science",
+        "Bachelor of Early Childhood Education",
+        "Bachelor of Secondary Education - Science",
+        "Bachelor of Secondary Education - Mathematics",
+        "Bachelor of Secondary Education - English",
+        "Bachelor of Secondary Education - Filipino"
+      ].includes(course)) {
+        targetAssign = "CELA"
+      } else if (["Bachelor of Science in Criminology"].includes(course)) {
+        targetAssign = "CCJE"
+      }
 
-  if (targetAssign) {
-    processBy = await getRegistrarByAssign(targetAssign);
-  }
-}
-  const firstInitial = (savedUser.fName || '').charAt(0).toLowerCase();
-  const lastInitial = (savedUser.lName || '').charAt(0).toLowerCase();
-  const campusCode = (savedUser.campus || '').substring(0, 2).toLowerCase();
+      if (targetAssign) {
+        processBy = await getRegistrarByAssign(targetAssign)
+      }
+    }
+    const firstInitial = (savedUser.fName || '').charAt(0).toLowerCase()
+    const lastInitial = (savedUser.lName || '').charAt(0).toLowerCase()
+    const campusCode = (savedUser.campus || '').substring(0, 2).toLowerCase()
 
-  const nameCampusCode = `${firstInitial}${lastInitial}${campusCode}`;
+    const nameCampusCode = `${firstInitial}${lastInitial}${campusCode}`
 
     // 1️⃣ Get all TRs
-    const allRequests = await requests.find({}, { tr: 1 });
+    const allRequests = await requests.find({}, { tr: 1 })
 
     // 2️⃣ Find the max sequence
-    let maxSeq = 0;
+    let maxSeq = 0
     allRequests.forEach(r => {
       if (r.tr && r.tr.length >= 3) {
         // Take the last 3 digits as sequence
-        const seq = parseInt(r.tr.slice(-3), 10);
-        if (!isNaN(seq)) maxSeq = Math.max(maxSeq, seq);
+        const seq = parseInt(r.tr.slice(-3), 10)
+        if (!isNaN(seq)) maxSeq = Math.max(maxSeq, seq)
       }
-    });
+    })
 
     // 3️⃣ Increment sequence
-    const nextSeq = maxSeq + 1;
-    const seqStr = String(nextSeq).padStart(3, '0');
+    const nextSeq = maxSeq + 1
+    const seqStr = String(nextSeq).padStart(3, '0')
 
     // 4️⃣ Build TR
-    const year = new Date().getFullYear().toString().slice(-2); // "25"
-    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
-    const userLastTwo = savedUser._id.toString().slice(-2); // e.g., "35"
+    const year = new Date().getFullYear().toString().slice(-2) // "25"
+    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0') // "12"
+    const userLastTwo = savedUser._id.toString().slice(-2) // e.g., "35"
 
-    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}${nameCampusCode}`;
+    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}${nameCampusCode}`
 
     // 7️⃣ Create request header
     const newRequest = new requests({
@@ -1079,26 +1084,26 @@ if (!processBy && savedUser.course) {
       tr,
       processBy,          // ✅ include the assigned registrar
       assignAt: processBy ? new Date() : null
-    });
+    })
 
-    const savedRequest = await newRequest.save();
+    const savedRequest = await newRequest.save()
 
     // 8️⃣ Upload request photos
-  //  const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
-  //  const reqPhotoUrlsMap = await Promise.all(
-  //    reqPhotos.map(async file => {
-  //      if (!file.path) return null;
-  //      const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
-  //      return result.secure_url;
-  //    })
-  //  );
+    //  const reqPhotos = req.files.filter(f => f.fieldname === 'reqPhoto[]');
+    //  const reqPhotoUrlsMap = await Promise.all(
+    //    reqPhotos.map(async file => {
+    //      if (!file.path) return null;
+    //      const result = await cloudinary.uploader.upload(file.path, { folder: 'request_photos' });
+    //      return result.secure_url;
+    //    })
+    //  );
 
     // 9️⃣ Normalize arrays
-    const typesArr = [].concat(type || []);
-    const purposesArr = [].concat(purpose || []);
-    const qtyArr = [].concat(qty || []);
-    const schoolYearsArr = [].concat(schoolYear || []);
-    const semestersArr = [].concat(semester || []);
+    const typesArr = [].concat(type || [])
+    const purposesArr = [].concat(purpose || [])
+    const qtyArr = [].concat(qty || [])
+    const schoolYearsArr = [].concat(schoolYear || [])
+    const semestersArr = [].concat(semester || [])
 
     // 🔟 Create request items
     const itemDocs = typesArr.map((t, i) => ({
@@ -1112,40 +1117,40 @@ if (!processBy && savedUser.course) {
       archive: false,
       verify: false,
       status: "Pending"
-    }));
+    }))
 
-    await items.insertMany(itemDocs);
-    
+    await items.insertMany(itemDocs)
+
     // ===== CREATE LOGIN LOG =====
-    const isWho = `${savedUser.fName} ${savedUser.mName} ${savedUser.lName} ${savedUser.xName}`;
+    const isWho = `${savedUser.fName} ${savedUser.mName} ${savedUser.lName} ${savedUser.xName}`
     await Log.create({
       who: isWho,
       what: `Registered and request a new document with TR# ${savedRequest.tr}`
-    });
+    })
 
     // 1️⃣1️⃣ Success
-    res.redirect('/regSuccess');
+    res.redirect('/regSuccess')
 
   } catch (err) {
-    console.error(err);
-    res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" });
+    console.error(err)
+    res.render('index', { error: 'You entered invalid or duplicate information!', title: "AUDRESv25" })
   }
-});
+})
 
 app.post('/verify1', async (req, res) => {
   try {
-    const { requestId } = req.body;
+    const { requestId } = req.body
 
     // ✅ Get the logged-in user from the session
-    const staff = req.session.user;
-    if (!staff) return res.redirect('/'); // not logged in
+    const staff = req.session.user
+    if (!staff) return res.redirect('/') // not logged in
 
     // ✅ Get the request and student
-    const studentRequest = await requests.findById(requestId).populate('requestBy');
-    if (!studentRequest) return res.redirect('/vrf');
+    const studentRequest = await requests.findById(requestId).populate('requestBy')
+    if (!studentRequest) return res.redirect('/vrf')
 
-    const student = studentRequest.requestBy;
-    let processBy = null;
+    const student = studentRequest.requestBy
+    let processBy = null
 
     /* =========================
       1. CAMPUS CHECK
@@ -1155,10 +1160,10 @@ app.post('/verify1', async (req, res) => {
         role: "Registrar",
         campus: student.campus,
         archive: false
-      });
+      })
 
       if (registrar) {
-        processBy = registrar._id.toString();
+        processBy = registrar._id.toString()
       }
     }
 
@@ -1166,10 +1171,10 @@ app.post('/verify1', async (req, res) => {
       2. OLD RECORDS (≤ 2006)
     ========================= */
     if (!processBy) {
-      const year = student.yearGraduated || student.yearAttended;
+      const year = student.yearGraduated || student.yearAttended
 
       if (year && Number(year) <= 2006) {
-        processBy = await getRegistrarByAssign("Old");
+        processBy = await getRegistrarByAssign("Old")
       }
     }
 
@@ -1177,11 +1182,11 @@ app.post('/verify1', async (req, res) => {
       3. YEAR LEVEL
     ========================= */
     if (!processBy && student.yearLevel) {
-      const yl = String(student.yearLevel).toLowerCase();
+      const yl = String(student.yearLevel).toLowerCase()
 
 
       if (yl.includes("first") || yl.includes("1st")) {
-        processBy = await getRegistrarByAssign("CAS");
+        processBy = await getRegistrarByAssign("CAS")
       }
       else if (
         yl.includes("grade 9") ||
@@ -1189,7 +1194,7 @@ app.post('/verify1', async (req, res) => {
         yl.includes("grade 11") ||
         yl.includes("grade 12")
       ) {
-        processBy = await getRegistrarByAssign("CELA");
+        processBy = await getRegistrarByAssign("CELA")
       }
     }
 
@@ -1197,8 +1202,8 @@ app.post('/verify1', async (req, res) => {
       4. COURSE → ASSIGN
     ========================= */
     if (!processBy && student.course) {
-      let targetAssign = null;
-      const course = student.course;
+      let targetAssign = null
+      const course = student.course
 
       if ([
         "Bachelor of Science in Business Administration - Marketing Management",
@@ -1211,18 +1216,18 @@ app.post('/verify1', async (req, res) => {
         "Bachelor of Science in Hospitality Management",
         "Bachelor of Science in Entrepreneurship"
       ].includes(course)) {
-        targetAssign = "CMA";
+        targetAssign = "CMA"
 
       } else if ([
         "Bachelor of Science in Electrical Engineering",
         "Bachelor of Science in Civil Engineering"
       ].includes(course)) {
-        targetAssign = "COE";
+        targetAssign = "COE"
 
       } else if ([
         "Bachelor of Science in Information Technology"
       ].includes(course)) {
-        targetAssign = "South";
+        targetAssign = "South"
 
       } else if ([
         "Bachelor of Science in Pharmacy",
@@ -1230,7 +1235,7 @@ app.post('/verify1', async (req, res) => {
         "Bachelor of Science in Nursing",
         "Bachelor of Science in Medical Laboratory Science"
       ].includes(course)) {
-        targetAssign = "CAHS";
+        targetAssign = "CAHS"
 
       } else if ([
         "Bachelor of Elementary Education",
@@ -1241,16 +1246,16 @@ app.post('/verify1', async (req, res) => {
         "Bachelor of Secondary Education - English",
         "Bachelor of Secondary Education - Filipino"
       ].includes(course)) {
-        targetAssign = "CELA";
+        targetAssign = "CELA"
 
       } else if ([
         "Bachelor of Science in Criminology"
       ].includes(course)) {
-        targetAssign = "CCJE";
+        targetAssign = "CCJE"
       }
 
       if (targetAssign) {
-        processBy = await getRegistrarByAssign(targetAssign);
+        processBy = await getRegistrarByAssign(targetAssign)
       }
     }
 
@@ -1259,7 +1264,7 @@ app.post('/verify1', async (req, res) => {
       archive: false,
       reset: true,
       verify: false
-    });
+    })
 
     // Update request
     await requests.findByIdAndUpdate(requestId, {
@@ -1267,180 +1272,180 @@ app.post('/verify1', async (req, res) => {
       verify: false,
       processBy,
       assignAt: processBy ? new Date() : null
-    });
+    })
 
     // ===== CREATE LOG =====
-    const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`;
-    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Verified the registration and first request of ${theStudent}`
-    });
+    })
 
-    res.redirect('/vrf');
+    res.redirect('/vrf')
   } catch (err) {
-    console.error(err);
-    res.redirect('/vrf');
+    console.error(err)
+    res.redirect('/vrf')
   }
-});
+})
 
 
 app.post('/decline1', async (req, res) => {
   try {
-    const { requestId } = req.body;
+    const { requestId } = req.body
 
     // ✅ Get the logged-in staff from session
-    const staff = req.session.user;
-    if (!staff) return res.redirect('/'); // not logged in
+    const staff = req.session.user
+    if (!staff) return res.redirect('/') // not logged in
 
     // ✅ Get the request and the student
-    const studentRequest = await requests.findById(requestId).populate('requestBy');
-    if (!studentRequest) return res.redirect('/vrf');
+    const studentRequest = await requests.findById(requestId).populate('requestBy')
+    if (!studentRequest) return res.redirect('/vrf')
 
-    const student = studentRequest.requestBy;
+    const student = studentRequest.requestBy
 
     // ✅ Update request to declined
     await requests.findByIdAndUpdate(requestId, {
       status: "Declined",
       archive: true,
       verify: true
-    });
+    })
 
     // ===== CREATE LOG =====
-    const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`;
-    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Declined the request of ${theStudent}`
-    });
+    })
 
-    res.redirect('/vrf');
+    res.redirect('/vrf')
   } catch (err) {
-    console.error(err);
-    res.redirect('/vrf');
+    console.error(err)
+    res.redirect('/vrf')
   }
-});
+})
 
 
 
 app.get('/regSuccess', (req, res) => {
-  res.render('regSuccess', { title: 'Success' });
-});
+  res.render('regSuccess', { title: 'Success' })
+})
 
 app.post('/rate', async (req, res) => {
-  console.log('Incoming rating:', req.body);
+  console.log('Incoming rating:', req.body)
   try {
-    const { rating } = req.body;
-    if (!rating) return res.status(400).json({ error: 'No rating provided' });
+    const { rating } = req.body
+    if (!rating) return res.status(400).json({ error: 'No rating provided' })
 
     await Ratings.create({
       rating: Number(rating),
       createdAt: new Date(),
       ip: req.ip
-    });
+    })
 
-    res.json({ success: true, message: 'Rating recorded' });
+    res.json({ success: true, message: 'Rating recorded' })
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    console.error(err)
+    res.status(500).json({ success: false })
   }
-});
+})
 
 app.get('/check-studentNo', async (req, res) => {
   try {
-    const studentNo = req.query.studentNo;
-    if (!studentNo) return res.json({ exists: false });
+    const studentNo = req.query.studentNo
+    if (!studentNo) return res.json({ exists: false })
 
     // Check if a user with this student number exists
-    const userExists = await users.findOne({ schoolId: studentNo });
-    
-    return res.json({ exists: !!userExists });
+    const userExists = await users.findOne({ schoolId: studentNo })
+
+    return res.json({ exists: !!userExists })
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ exists: false, error: 'Server error' });
+    console.error(err)
+    res.status(500).json({ exists: false, error: 'Server error' })
   }
-});
+})
 
 app.get('/check-email', async (req, res) => {
   try {
-    const email = req.query.email;
-    if (!email) return res.json({ exists: false });
+    const email = req.query.email
+    if (!email) return res.json({ exists: false })
 
     // Check if a user with this email exists
-    const userExists = await users.findOne({ email: email.toLowerCase() });
-    
-    return res.json({ exists: !!userExists });
+    const userExists = await users.findOne({ email: email.toLowerCase() })
+
+    return res.json({ exists: !!userExists })
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ exists: false, error: 'Server error' });
+    console.error(err)
+    res.status(500).json({ exists: false, error: 'Server error' })
   }
-});
+})
 
 app.get('/check2-schoolId', async (req, res) => {
   try {
-    const schoolId = req.query.schoolId;
-    const currentId = req.query.current; // Current school ID
+    const schoolId = req.query.schoolId
+    const currentId = req.query.current // Current school ID
 
-    if (!schoolId) return res.json({ exists: false });
+    if (!schoolId) return res.json({ exists: false })
 
     // Skip if it's the same as the current ID
-    if (schoolId === currentId) return res.json({ exists: false });
+    if (schoolId === currentId) return res.json({ exists: false })
 
-    const userExists = await users.findOne({ schoolId });
-    return res.json({ exists: !!userExists });
+    const userExists = await users.findOne({ schoolId })
+    return res.json({ exists: !!userExists })
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ exists: false, error: 'Server error' });
+    console.error(err)
+    res.status(500).json({ exists: false, error: 'Server error' })
   }
-});
+})
 
 
 app.get('/check-email2', async (req, res) => {
   try {
-    const email = req.query.email?.toLowerCase();
-    const currentEmail = req.query.current?.toLowerCase(); // Current email of the user
+    const email = req.query.email?.toLowerCase()
+    const currentEmail = req.query.current?.toLowerCase() // Current email of the user
 
-    if (!email) return res.json({ exists: false });
+    if (!email) return res.json({ exists: false })
 
     // Skip the check if email matches current email
-    if (email === currentEmail) return res.json({ exists: false });
+    if (email === currentEmail) return res.json({ exists: false })
 
     // Check if another user with this email exists
-    const userExists = await users.findOne({ email });
-    
-    return res.json({ exists: !!userExists });
+    const userExists = await users.findOne({ email })
+
+    return res.json({ exists: !!userExists })
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ exists: false, error: 'Server error' });
+    console.error(err)
+    res.status(500).json({ exists: false, error: 'Server error' })
   }
-});
+})
 
 app.get('/reqPre', isLogin, (req, res) => {
-  res.render('reqPre', { title: 'Request Form' });
-});
+  res.render('reqPre', { title: 'Request Form' })
+})
 
 app.get('/req', isLogin, (req, res) => {
-  res.render('req', { title: 'Request Form' });
-});
+  res.render('req', { title: 'Request Form' })
+})
 
 app.post('/reqDoc', cpUpload, async (req, res) => {
   try {
     if (!req.session?.user?._id) {
-      return res.render('req', { 
+      return res.render('req', {
         error: 'You must be logged in to submit a request!',
         title: "AUDRESv25"
-      });
+      })
     }
 
-    const userId = req.session.user._id;
-    const student = await users.findById(userId);
+    const userId = req.session.user._id
+    const student = await users.findById(userId)
 
     // 1️⃣ Normalize form arrays
-    const typesArr = [].concat(req.body.type || []);
-    const purposesArr = [].concat(req.body.purpose || []);
-    const qtyArr = [].concat(req.body.qty || []);
-    const schoolYearsArr = [].concat(req.body.schoolYear || []);
-    const semestersArr = [].concat(req.body.semester || []);
+    const typesArr = [].concat(req.body.type || [])
+    const purposesArr = [].concat(req.body.purpose || [])
+    const qtyArr = [].concat(req.body.qty || [])
+    const schoolYearsArr = [].concat(req.body.schoolYear || [])
+    const semestersArr = [].concat(req.body.semester || [])
 
     // 2️⃣ Upload proof photos
     // const reqPhotos = (req.files || []).filter(
@@ -1454,39 +1459,39 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     //     return result.secure_url;
     //   })
     // );
-    
-    const firstInitial = (savedUser.fName || '').charAt(0).toLowerCase();
-    const lastInitial = (savedUser.lName || '').charAt(0).toLowerCase();
-    const campusCode = (savedUser.campus || '').substring(0, 2).toLowerCase();
 
-    const nameCampusCode = `${firstInitial}${lastInitial}${campusCode}`;
-    
+    const firstInitial = (savedUser.fName || '').charAt(0).toLowerCase()
+    const lastInitial = (savedUser.lName || '').charAt(0).toLowerCase()
+    const campusCode = (savedUser.campus || '').substring(0, 2).toLowerCase()
+
+    const nameCampusCode = `${firstInitial}${lastInitial}${campusCode}`
+
     // 1️⃣ Get all TRs
-    const allRequests = await requests.find({}, { tr: 1 });
+    const allRequests = await requests.find({}, { tr: 1 })
 
     // 2️⃣ Find the max sequence
-    let maxSeq = 0;
+    let maxSeq = 0
     allRequests.forEach(r => {
       if (r.tr && r.tr.length >= 3) {
         // Take the last 3 digits as sequence
-        const seq = parseInt(r.tr.slice(-3), 10);
-        if (!isNaN(seq)) maxSeq = Math.max(maxSeq, seq);
+        const seq = parseInt(r.tr.slice(-3), 10)
+        if (!isNaN(seq)) maxSeq = Math.max(maxSeq, seq)
       }
-    });
+    })
 
     // 3️⃣ Increment sequence
-    const nextSeq = maxSeq + 1;
-    const seqStr = String(nextSeq).padStart(3, '0');
+    const nextSeq = maxSeq + 1
+    const seqStr = String(nextSeq).padStart(3, '0')
 
     // 4️⃣ Build TR
-    const year = new Date().getFullYear().toString().slice(-2); // "25"
-    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0'); // "12"
-    const userLastTwo = userId.toString().slice(-2); // e.g., "35"
+    const year = new Date().getFullYear().toString().slice(-2) // "25"
+    const monthNum = String(new Date().getMonth() + 1).padStart(2, '0') // "12"
+    const userLastTwo = userId.toString().slice(-2) // e.g., "35"
 
-    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}${nameCampusCode}`;
+    const tr = `AU${year}-${userLastTwo}${monthNum}${seqStr}${nameCampusCode}`
 
 
-    let processBy = null;
+    let processBy = null
 
     /* =========================
       1. CAMPUS CHECK
@@ -1496,10 +1501,10 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
         role: "Registrar",
         campus: student.campus,
         archive: false
-      });
+      })
 
       if (registrar) {
-        processBy = registrar._id.toString();
+        processBy = registrar._id.toString()
       }
     }
 
@@ -1507,10 +1512,10 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       2. OLD RECORDS (≤ 2006)
     ========================= */
     if (!processBy) {
-      const year = student.yearGraduated || student.yearAttended;
+      const year = student.yearGraduated || student.yearAttended
 
       if (year && Number(year) <= 2006) {
-        processBy = await getRegistrarByAssign("Old");
+        processBy = await getRegistrarByAssign("Old")
       }
     }
 
@@ -1518,11 +1523,11 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       3. YEAR LEVEL
     ========================= */
     if (!processBy && student.yearLevel) {
-      const yl = String(student.yearLevel).toLowerCase();
+      const yl = String(student.yearLevel).toLowerCase()
 
 
       if (yl.includes("first") || yl.includes("1st")) {
-        processBy = await getRegistrarByAssign("CAS");
+        processBy = await getRegistrarByAssign("CAS")
       }
       else if (
         yl.includes("grade 9") ||
@@ -1530,7 +1535,7 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
         yl.includes("grade 11") ||
         yl.includes("grade 12")
       ) {
-        processBy = await getRegistrarByAssign("CELA");
+        processBy = await getRegistrarByAssign("CELA")
       }
     }
 
@@ -1538,8 +1543,8 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       4. COURSE → ASSIGN
     ========================= */
     if (!processBy && student.course) {
-      let targetAssign = null;
-      const course = student.course;
+      let targetAssign = null
+      const course = student.course
 
       if ([
         "Bachelor of Science in Business Administration - Marketing Management",
@@ -1552,18 +1557,18 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
         "Bachelor of Science in Hospitality Management",
         "Bachelor of Science in Entrepreneurship"
       ].includes(course)) {
-        targetAssign = "CMA";
+        targetAssign = "CMA"
 
       } else if ([
         "Bachelor of Science in Electrical Engineering",
         "Bachelor of Science in Civil Engineering"
       ].includes(course)) {
-        targetAssign = "COE";
+        targetAssign = "COE"
 
       } else if ([
         "Bachelor of Science in Information Technology"
       ].includes(course)) {
-        targetAssign = "CIT";
+        targetAssign = "CIT"
 
       } else if ([
         "Bachelor of Science in Pharmacy",
@@ -1571,7 +1576,7 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
         "Bachelor of Science in Nursing",
         "Bachelor of Science in Medical Laboratory Science"
       ].includes(course)) {
-        targetAssign = "CAHS";
+        targetAssign = "CAHS"
 
       } else if ([
         "Bachelor of Elementary Education",
@@ -1582,16 +1587,16 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
         "Bachelor of Secondary Education - English",
         "Bachelor of Secondary Education - Filipino"
       ].includes(course)) {
-        targetAssign = "CELA";
+        targetAssign = "CELA"
 
       } else if ([
         "Bachelor of Science in Criminology"
       ].includes(course)) {
-        targetAssign = "CCJE";
+        targetAssign = "CCJE"
       }
 
       if (targetAssign) {
-        processBy = await getRegistrarByAssign(targetAssign);
+        processBy = await getRegistrarByAssign(targetAssign)
       }
     }
 
@@ -1604,9 +1609,9 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       tr,
       processBy,
       assignAt: processBy ? new Date() : null
-    });
+    })
 
-    const savedRequest = await newRequest.save();
+    const savedRequest = await newRequest.save()
 
     // 8️⃣ Create Request Items
     const itemDocs = typesArr.map((t, i) => ({
@@ -1620,274 +1625,274 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       archive: false,
       verify: false,
       status: "Pending"
-    }));
-    await items.insertMany(itemDocs);
+    }))
+    await items.insertMany(itemDocs)
 
-                // ===== CREATE LOGIN LOG =====
-    const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Request a document with tr# ${savedRequest.tr}`
-    });
+    })
 
     // 9️⃣ Redirect success
-    res.redirect('/reqSuccess');
+    res.redirect('/reqSuccess')
 
   } catch (err) {
-    console.error(err);
-    res.render('req', { 
-      error: 'Error submitting your document request!', 
-      title: "AUDRESv25" 
-    });
+    console.error(err)
+    res.render('req', {
+      error: 'Error submitting your document request!',
+      title: "AUDRESv25"
+    })
   }
-});
+})
 
 app.get('/reqSuccess', (req, res) => {
-  res.render('reqSuccess', { title: 'Success' });
-});
+  res.render('reqSuccess', { title: 'Success' })
+})
 
 // Assuming you have a Request model for your 'request' collection
 app.post("/rate2/:id", async (req, res) => {
-    const id = req.params.id;             // request _id
-    const { rating } = req.body;          // rating value from frontend
+  const id = req.params.id             // request _id
+  const { rating } = req.body          // rating value from frontend
 
-    try {
-        const updatedRequest = await requests.findByIdAndUpdate(
-            id,
-            { rating: Number(rating) },    // update rating
-            { new: true }                  // return updated document
-        );
+  try {
+    const updatedRequest = await requests.findByIdAndUpdate(
+      id,
+      { rating: Number(rating) },    // update rating
+      { new: true }                  // return updated document
+    )
 
-        if (!updatedRequest)
-            return res.status(404).json({ success: false, error: "Request not found" });
+    if (!updatedRequest)
+      return res.status(404).json({ success: false, error: "Request not found" })
 
-        res.json({ success: true, rating: updatedRequest.rating });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, error: "Error updating rating" });
-    }
-});
+    res.json({ success: true, rating: updatedRequest.rating })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ success: false, error: "Error updating rating" })
+  }
+})
 
 app.get("/request/:id", async (req, res) => {
-    const rq = await requests.findById(req.params.id); // fetch request document
-    res.render("requestPage", { rq }); // pass `rq` to EJS
-});
+  const rq = await requests.findById(req.params.id) // fetch request document
+  res.render("requestPage", { rq }) // pass `rq` to EJS
+})
 
 app.get('/getUser', async (req, res) => {
   try {
     // Check if user is logged in
     if (!req.session.user?._id) {
-      return res.status(401).json({ error: 'Not logged in' });
+      return res.status(401).json({ error: 'Not logged in' })
     }
 
-    const userId = req.session.user._id;
+    const userId = req.session.user._id
 
     // Fetch fresh user data from DB (optional, or use session)
-    const user = await users.findById(userId);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    const user = await users.findById(userId)
+    if (!user) return res.status(404).json({ error: 'User not found' })
 
     // Return only necessary fields
-    res.json({ email: user.email, phone: user.phone, address: user.address });
+    res.json({ email: user.email, phone: user.phone, address: user.address })
   } catch (err) {
-    console.error('Error occurred:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error occurred:', err)
+    res.status(500).json({ error: 'Server error' })
   }
-});
+})
 
 app.get('/prf', isLogin, async (req, res) => { // ✅ added async
-  const msg = req.session.msg;
-  delete req.session.msg;
+  const msg = req.session.msg
+  delete req.session.msg
 
-  const userId = req.session.user._id;
-  const student = await users.findById(userId);
+  const userId = req.session.user._id
+  const student = await users.findById(userId)
 
   // ===== CREATE LOGIN LOG =====
-  const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+  const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
   await Log.create({
     who: isWho,
     what: 'View Profile Page'
-  });
+  })
 
   res.render('prf', {
     title: 'Profile',
     user: req.session.user,
     messageSuccess: msg?.type === 'success' ? msg.text : '',
     messagePass: msg?.type === 'error' ? msg.text : ''
-  });
-});
+  })
+})
 
 
 
 app.post('/check-pass', async (req, res) => {
-    try {
-        const { currentPass } = req.body;
+  try {
+    const { currentPass } = req.body
 
-        if (!req.session.user) {
-            return res.json({ valid: false, error: "No session" });
-        }
-
-        const userId = req.session.user._id;
-
-        // ✅ FIX HERE
-        const user = await users.findById(userId);
-
-        if (!user) {
-            return res.json({ valid: false, error: "User not found" });
-        }
-
-        // ✅ Password is not hashed, compare directly
-        const valid = currentPass === user.password;
-
-        res.json({ valid });
-    } catch (err) {
-        console.log(err);
-        res.json({ valid: false, error: "Server error" });
+    if (!req.session.user) {
+      return res.json({ valid: false, error: "No session" })
     }
-});
+
+    const userId = req.session.user._id
+
+    // ✅ FIX HERE
+    const user = await users.findById(userId)
+
+    if (!user) {
+      return res.json({ valid: false, error: "User not found" })
+    }
+
+    // ✅ Password is not hashed, compare directly
+    const valid = currentPass === user.password
+
+    res.json({ valid })
+  } catch (err) {
+    console.log(err)
+    res.json({ valid: false, error: "Server error" })
+  }
+})
 
 app.post('/rst', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/prf');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/prf')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/prf');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/prf')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/prf');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/prf')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/prf');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/prf')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    await currentUser.save();
+    currentUser.password = createPass
+    await currentUser.save()
 
-                // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Change Password'
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Password updated successfully!" };
-    return res.redirect('/prf');
+    req.session.msg = { type: "success", text: "Password updated successfully!" }
+    return res.redirect('/prf')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/prf');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/prf')
   }
-});
+})
 
 app.post('/rstFG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/resetPage');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/resetPage')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/resetPage');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/resetPage')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/resetPage');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/resetPage')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/resetPage');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/resetPage')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    currentUser.reset = null;
-    await currentUser.save();
+    currentUser.password = createPass
+    currentUser.reset = null
+    await currentUser.save()
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Change Password'
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Password updated successfully!" };
-    return res.redirect('/prf');
+    req.session.msg = { type: "success", text: "Password updated successfully!" }
+    return res.redirect('/prf')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/resetPage');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/resetPage')
   }
-});
+})
 
 app.post('/edt', async (req, res) => {
   try {
     if (!req.session.user?._id) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { email, phone, address } = req.body;
+    const userId = req.session.user._id
+    const { email, phone, address } = req.body
 
     // Validation
     if (!email || !phone || !address) {
-      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
-      return res.redirect('/prf');
+      req.session.msg = { type: "error", text: "Email, phone, and address are required!" }
+      return res.redirect('/prf')
     }
 
     // Check email duplication
     const existingUser = await users.findOne({
       email: email.toLowerCase(),
       _id: { $ne: userId }
-    });
+    })
 
     if (existingUser) {
-      req.session.msg = { type: "error", text: "Email is already in use!" };
-      return res.redirect('/prf');
+      req.session.msg = { type: "error", text: "Email is already in use!" }
+      return res.redirect('/prf')
     }
 
     // Update user
@@ -1895,76 +1900,76 @@ app.post('/edt', async (req, res) => {
       userId,
       { email: email.toLowerCase(), phone, address },
       { new: true }
-    );
+    )
 
-    req.session.user = updatedUser;
-    const currentUser = await users.findById(userId);
+    req.session.user = updatedUser
+    const currentUser = await users.findById(userId)
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Edit Contact information'
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Profile updated successfully!" };
-    return res.redirect('/prf');
+    req.session.msg = { type: "success", text: "Profile updated successfully!" }
+    return res.redirect('/prf')
 
   } catch (err) {
-    console.error("Error in /edt:", err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/prf');
+    console.error("Error in /edt:", err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/prf')
   }
-});
+})
 
 app.post('/pht', isLogin, uploadPhoto.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
-      req.session.msg = { type: "error", text: "No photo uploaded!" };
-      return res.redirect('/prf');
+      req.session.msg = { type: "error", text: "No photo uploaded!" }
+      return res.redirect('/prf')
     }
 
-    const userId = req.session.user._id;
-    const photoUrl = req.file.path;
+    const userId = req.session.user._id
+    const photoUrl = req.file.path
 
     const updatedUser = await users.findByIdAndUpdate(
       userId,
       { photo: photoUrl },
       { new: true }
-    );
+    )
 
-    req.session.user = updatedUser;
-    const currentUser = await users.findById(userId);
+    req.session.user = updatedUser
+    const currentUser = await users.findById(userId)
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Edit Contact information'
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Photo updated successfully!" };
-    return res.redirect('/prf');
+    req.session.msg = { type: "success", text: "Photo updated successfully!" }
+    return res.redirect('/prf')
 
   } catch (err) {
-    console.error("Error uploading photo:", err);
-    req.session.msg = { type: "error", text: "Failed to upload photo!" };
-    return res.redirect('/prf');
+    console.error("Error uploading photo:", err)
+    req.session.msg = { type: "error", text: "Failed to upload photo!" }
+    return res.redirect('/prf')
   }
-});
+})
 
 
 
 app.get('/hom', isLogin, myRequest, (req, res) => {
   if (req.user.reset === true) {
-    return res.redirect('/resetPage');
+    return res.redirect('/resetPage')
   }
-  res.render('hom', { title: 'Home' });
-});
+  res.render('hom', { title: 'Home' })
+})
 
 app.get('/resetPage', isLogin, myRequest, (req, res) => {
-  res.render('resetPage', { title: 'Home' });
-});
+  res.render('resetPage', { title: 'Home' })
+})
 
 
 app.get('/reqView/:id', isLogin, async (req, res) => {
@@ -1972,28 +1977,28 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
     const rq = await requests.findById(req.params.id)
       .populate('requestBy')
       .populate('processBy')
-      .populate('releaseBy');
+      .populate('releaseBy')
 
-    if (!rq) return res.status(404).render('404', { title: 'Request Not Found' });
+    if (!rq) return res.status(404).render('404', { title: 'Request Not Found' })
 
-    const rqItems = await items.find({ tr: rq.tr });
+    const rqItems = await items.find({ tr: rq.tr })
 
-    let totalAmount = 0;
-    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
-    const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } });
+    let totalAmount = 0
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true)
+    const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } })
 
     approvedItems.forEach(it => {
-      const doc = docs.find(d => d.type === it.type);
-      if (doc) totalAmount += doc.amount * Number(it.qty || 0);
-    });
+      const doc = docs.find(d => d.type === it.type)
+      if (doc) totalAmount += doc.amount * Number(it.qty || 0)
+    })
 
-    let message = null;
+    let message = null
     switch (req.query.msg) {
-      case 'noPhoto': message = 'No photo uploaded!'; break;
-      case 'success': message = 'Payment uploaded successfully!'; break;
-      case 'error': message = 'Failed to upload payment!'; break;
+      case 'noPhoto': message = 'No photo uploaded!'; break
+      case 'success': message = 'Payment uploaded successfully!'; break
+      case 'error': message = 'Failed to upload payment!'; break
     }
-    const dayjs = require("dayjs");
+    const dayjs = require("dayjs")
 
     // After fetching rq
     const rqWithFormattedDates = {
@@ -2006,7 +2011,7 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
       verifyAtFormatted: rq.verifyAt ? dayjs(rq.verifyAt).format("MMMM D, YYYY h:mm A") : null,
       turnAtFormatted: rq.turnAt ? dayjs(rq.turnAt).format("MMMM D, YYYY h:mm A") : null,
       claimedAtFormatted: rq.claimedAt ? dayjs(rq.claimedAt).format("MMMM D, YYYY h:mm A") : null,
-    };
+    }
 
     res.render('reqView', {
       title: 'View Request',
@@ -2015,45 +2020,45 @@ app.get('/reqView/:id', isLogin, async (req, res) => {
       totalAmount,
       back: 'hom',
       message
-    });
+    })
 
   } catch (err) {
-    console.error('❗ Error loading request:', err);
+    console.error('❗ Error loading request:', err)
     res.status(500).render('index', {
       title: 'Error',
       error: 'Internal Server Error',
       back: 'hom'
-    });
+    })
   }
-});
+})
 
 app.get('/reqView2/:id', isLogin, async (req, res) => {
   try {
     const rq = await requests.findById(req.params.id)
       .populate('requestBy')
       .populate('processBy')
-      .populate('releaseBy');
+      .populate('releaseBy')
 
-    if (!rq) return res.status(404).render('404', { title: 'Request Not Found' });
+    if (!rq) return res.status(404).render('404', { title: 'Request Not Found' })
 
-    const rqItems = await items.find({ tr: rq.tr });
+    const rqItems = await items.find({ tr: rq.tr })
 
-    let totalAmount = 0;
-    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
-    const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } });
+    let totalAmount = 0
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true)
+    const docs = await documents.find({ type: { $in: approvedItems.map(it => it.type) } })
 
     approvedItems.forEach(it => {
-      const doc = docs.find(d => d.type === it.type);
-      if (doc) totalAmount += doc.amount * Number(it.qty || 0);
-    });
+      const doc = docs.find(d => d.type === it.type)
+      if (doc) totalAmount += doc.amount * Number(it.qty || 0)
+    })
 
-    let message = null;
+    let message = null
     switch (req.query.msg) {
-      case 'noPhoto': message = 'No photo uploaded!'; break;
-      case 'success': message = 'Payment uploaded successfully!'; break;
-      case 'error': message = 'Failed to upload payment!'; break;
+      case 'noPhoto': message = 'No photo uploaded!'; break
+      case 'success': message = 'Payment uploaded successfully!'; break
+      case 'error': message = 'Failed to upload payment!'; break
     }
-        const dayjs = require("dayjs");
+    const dayjs = require("dayjs")
 
     // After fetching rq
     const rqWithFormattedDates = {
@@ -2066,7 +2071,7 @@ app.get('/reqView2/:id', isLogin, async (req, res) => {
       verifyAtFormatted: rq.verifyAt ? dayjs(rq.verifyAt).format("MMMM D, YYYY h:mm A") : null,
       turnAtFormatted: rq.turnAt ? dayjs(rq.turnAt).format("MMMM D, YYYY h:mm A") : null,
       claimedAtFormatted: rq.claimedAt ? dayjs(rq.claimedAt).format("MMMM D, YYYY h:mm A") : null,
-    };
+    }
 
     res.render('reqView', {
       title: 'View Request',
@@ -2075,50 +2080,50 @@ app.get('/reqView2/:id', isLogin, async (req, res) => {
       totalAmount,
       back: 'reqAll',
       message
-    });
+    })
 
   } catch (err) {
-    console.error('❗ Error loading request:', err);
+    console.error('❗ Error loading request:', err)
     res.status(500).render('index', {
       title: 'Error',
       error: 'Internal Server Error',
       back: 'reqAll'
-    });
+    })
   }
-});
+})
 
 app.post("/update-status/:id", async (req, res) => {
-    const id = req.params.id;
-    const { status } = req.body;
+  const id = req.params.id
+  const { status } = req.body
 
-    try {
-        await requests.findByIdAndUpdate(id, { status });
-        res.status(200).send("Updated");
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Error updating status");
-    }
-});
+  try {
+    await requests.findByIdAndUpdate(id, { status })
+    res.status(200).send("Updated")
+  } catch (err) {
+    console.error(err)
+    res.status(500).send("Error updating status")
+  }
+})
 
 app.post('/paymentUpload', isLogin, uploadPhoto.array('payPhoto', 10), async (req, res) => {
   // 1️⃣ Get requestId early
-  const requestId = req.body.id;
+  const requestId = req.body.id
 
   // If no ID, redirect safely
-  if (!requestId) return res.redirect('/?msg=invalidRequest');
+  if (!requestId) return res.redirect('/?msg=invalidRequest')
 
   try {
     // 2️⃣ Check if files exist
     if (!req.files || req.files.length === 0) {
-      return res.redirect(`/reqView/${requestId}?msg=noPhoto`);
+      return res.redirect(`/reqView/${requestId}?msg=noPhoto`)
     }
 
-    const payMode = req.body.payMode || 'Unknown';
+    const payMode = req.body.payMode || 'Unknown'
 
     // 3️⃣ Save all file paths as array
-    const payPhotoArray = req.files.map(file => file.path);
+    const payPhotoArray = req.files.map(file => file.path)
 
-    const payAt = new Date();
+    const payAt = new Date()
 
     // 4️⃣ Update the request document
     await requests.findByIdAndUpdate(requestId, {
@@ -2126,34 +2131,34 @@ app.post('/paymentUpload', isLogin, uploadPhoto.array('payPhoto', 10), async (re
       status: 'For Verification',
       payMode,
       payAt
-    });
+    })
 
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Upload Proof of Payment'
-    });
+    })
 
     // 5️⃣ Redirect on success
-    res.redirect(`/reqView/${requestId}?msg=success`);
+    res.redirect(`/reqView/${requestId}?msg=success`)
 
   } catch (err) {
-    console.error('Payment Upload Error:', err);
+    console.error('Payment Upload Error:', err)
 
     // Redirect safely even on error
-    res.redirect(`/reqView/${requestId}?msg=error`);
+    res.redirect(`/reqView/${requestId}?msg=error`)
   }
-});
+})
 
 
 
 app.get('/reqAll', isLogin, myRequest, (req, res) => {
-  res.render('reqAll', { title: 'Request History' });
-});
+  res.render('reqAll', { title: 'Request History' })
+})
 
 app.get('/ddc', async (req, res) => {
   try {
@@ -2186,14 +2191,14 @@ app.get('/ddc', async (req, res) => {
       { type: "Honorable Dismissal", amount: 500 },
       { type: "NTSP Serial Number", amount: 150 },
       { type: "English Proficiency", amount: 150 },
-    ];
+    ]
 
     // ✅ Step 1: Get all types from your predefined list
-    const types = documentsData.map(d => d.type);
+    const types = documentsData.map(d => d.type)
 
     // ✅ Step 2: Find existing documents that match those types
-    const existingDocs = await documents.find({ type: { $in: types } }, 'type');
-    const existingTypes = existingDocs.map(doc => doc.type);
+    const existingDocs = await documents.find({ type: { $in: types } }, 'type')
+    const existingTypes = existingDocs.map(doc => doc.type)
 
     // ✅ Step 3: Filter out new ones that don't exist yet
     const missingDocs = documentsData
@@ -2201,51 +2206,51 @@ app.get('/ddc', async (req, res) => {
       .map(d => ({
         ...d,
         days: "10", // default processing days
-      }));
+      }))
 
     // ✅ Step 4: Insert only missing documents
     if (missingDocs.length > 0) {
-      await documents.insertMany(missingDocs);
+      await documents.insertMany(missingDocs)
       return res.status(200).json({
         message: `📄 ${missingDocs.length} new document(s) added successfully.`,
         added: missingDocs.map(d => d.type),
-      });
+      })
     }
 
     // ✅ Step 5: If all already exist
     res.status(200).json({
       message: '✅ All document types already exist in the database.',
-    });
+    })
 
   } catch (err) {
-    console.error('❌ Error generating documents:', err);
+    console.error('❌ Error generating documents:', err)
     res.status(500).json({
       message: '⚠️ Failed to generate documents.',
       error: err.message,
-    });
+    })
   }
-});
+})
 
 
-const privilegedRoles = ["Admin", "Head", "Dev"];
+const privilegedRoles = ["Admin", "Head", "Dev"]
 
 function filterByStatuses(list = [], statuses = []) {
-  return list.filter(rq => statuses.includes(rq.status) && !rq.declineAt);
+  return list.filter(rq => statuses.includes(rq.status) && !rq.declineAt)
 }
 
 function filterByStatuses2(list = [], statuses = []) {
-  return list.filter(rq => statuses.includes(rq.status) || rq.declineAt);
+  return list.filter(rq => statuses.includes(rq.status) || rq.declineAt)
 }
 
 
 // /srv  (Pending only)
 app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
-  const statuses = ['Pending'];
-  const allFiltered = filterByStatuses(req.requests, statuses);
-  const userFiltered = filterByStatuses(req.userRequests, statuses);
+  const statuses = ['Pending']
+  const allFiltered = filterByStatuses(req.requests, statuses)
+  const userFiltered = filterByStatuses(req.userRequests, statuses)
 
-  const isPrivileged = privilegedRoles.includes(req.user.role);
-  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+  const isPrivileged = privilegedRoles.includes(req.user.role)
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length
 
   res.render('srv', {
     title: 'Transactions',
@@ -2253,20 +2258,20 @@ app.get('/srv', isLogin, isRequest, isStaff, (req, res) => {
     requests: isPrivileged ? allFiltered : userFiltered,
     userRequests: userFiltered,
     totalCount
-  });
-});
+  })
+})
 
 // /srvAll  (multiple allowed statuses)
 app.get('/srvAll', isLogin, isRequest, isStaff, (req, res) => {
   const statuses = [
     'Reviewed', 'Assessed', 'Claimed',
     'For Payment', 'Verified', 'Pending', 'For Release', 'For Verification'
-  ];
-  const allFiltered = filterByStatuses2(req.requests, statuses);
-  const userFiltered = filterByStatuses2(req.userRequests, statuses);
+  ]
+  const allFiltered = filterByStatuses2(req.requests, statuses)
+  const userFiltered = filterByStatuses2(req.userRequests, statuses)
 
-  const isPrivileged = privilegedRoles.includes(req.user.role);
-  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+  const isPrivileged = privilegedRoles.includes(req.user.role)
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length
 
   res.render('srvAll', {
     title: 'All Transactions',
@@ -2274,17 +2279,17 @@ app.get('/srvAll', isLogin, isRequest, isStaff, (req, res) => {
     requests: isPrivileged ? allFiltered : userFiltered,
     userRequests: userFiltered,
     totalCount
-  });
-});
+  })
+})
 
 // /prc  (processing statuses)
 app.get('/prc', isLogin, isRequest, isStaff, (req, res) => {
-  const statuses = ['Reviewed', 'Assessed', 'For Verification', 'For Payment'];
-  const allFiltered = filterByStatuses(req.requests, statuses);
-  const userFiltered = filterByStatuses(req.userRequests, statuses);
+  const statuses = ['Reviewed', 'Assessed', 'For Verification', 'For Payment']
+  const allFiltered = filterByStatuses(req.requests, statuses)
+  const userFiltered = filterByStatuses(req.userRequests, statuses)
 
-  const isPrivileged = privilegedRoles.includes(req.user.role);
-  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+  const isPrivileged = privilegedRoles.includes(req.user.role)
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length
 
   res.render('srv', {
     title: 'Processing',
@@ -2292,17 +2297,17 @@ app.get('/prc', isLogin, isRequest, isStaff, (req, res) => {
     requests: isPrivileged ? allFiltered : userFiltered,
     userRequests: userFiltered,
     totalCount
-  });
-});
+  })
+})
 
 // /apr  (Verified)
 app.get('/apr', isLogin, isRequest, isStaff, (req, res) => {
-  const statuses = ['Verified'];
-  const allFiltered = filterByStatuses(req.requests, statuses);
-  const userFiltered = filterByStatuses(req.userRequests, statuses);
+  const statuses = ['Verified']
+  const allFiltered = filterByStatuses(req.requests, statuses)
+  const userFiltered = filterByStatuses(req.userRequests, statuses)
 
-  const isPrivileged = privilegedRoles.includes(req.user.role);
-  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+  const isPrivileged = privilegedRoles.includes(req.user.role)
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length
 
   res.render('srv', {
     title: 'Approved',
@@ -2310,17 +2315,17 @@ app.get('/apr', isLogin, isRequest, isStaff, (req, res) => {
     requests: isPrivileged ? allFiltered : userFiltered,
     userRequests: userFiltered,
     totalCount
-  });
-});
+  })
+})
 
 // /rel  (For Release)
 app.get('/rel', isLogin, isRequest, isStaff, (req, res) => {
-  const statuses = ['For Release'];
-  const allFiltered = filterByStatuses(req.requests, statuses);
-  const userFiltered = filterByStatuses(req.userRequests, statuses);
+  const statuses = ['For Release']
+  const allFiltered = filterByStatuses(req.requests, statuses)
+  const userFiltered = filterByStatuses(req.userRequests, statuses)
 
-  const isPrivileged = privilegedRoles.includes(req.user.role);
-  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length;
+  const isPrivileged = privilegedRoles.includes(req.user.role)
+  const totalCount = isPrivileged ? allFiltered.length : userFiltered.length
 
   res.render('srv', {
     title: 'For Release',
@@ -2328,52 +2333,52 @@ app.get('/rel', isLogin, isRequest, isStaff, (req, res) => {
     requests: isPrivileged ? allFiltered : userFiltered,
     userRequests: userFiltered,
     totalCount
-  });
-});
+  })
+})
 
 
 app.get('/vrf', isLogin, isVerify, isStaff, (req, res) => {
   // To Verify
   const filteredRequests = req.requests.filter(
     rq => rq.status === 'Pending' && !rq.declineAt
-  );
-    const privilegedRoles = ["Admin", "Head", "Dev"];
-      // Align totalCount with filtered requests
+  )
+  const privilegedRoles = ["Admin", "Head", "Dev"]
+  // Align totalCount with filtered requests
   const totalCount = privilegedRoles.includes(req.user.role)
     ? filteredRequests.length
     : req.user.role === "Registrar"
       ? req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length
-      : req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length;
+      : req.userRequests.filter(rq => rq.status === 'Pending' && !rq.declineAt).length
 
-  res.render('srv', { 
-    title: 'To Verify', 
-    active: 'srv', 
+  res.render('srv', {
+    title: 'To Verify',
+    active: 'srv',
     requests: filteredRequests,
     userRequests: filteredRequests,
     totalCount
-  });
-});
+  })
+})
 
 app.patch('/req/processBy/:id', isLogin, isRequest, isStaff, async (req, res) => {
   try {
-    const { processBy } = req.body;
-    const rq = await requests.findById(req.params.id);
-    if (!rq) return res.status(404).json({ error: 'Request not found' });
+    const { processBy } = req.body
+    const rq = await requests.findById(req.params.id)
+    if (!rq) return res.status(404).json({ error: 'Request not found' })
 
     // Update processBy and assignAt
-    rq.processBy = processBy || null;
-    rq.assignAt = processBy ? new Date() : null;
-    await rq.save();
+    rq.processBy = processBy || null
+    rq.assignAt = processBy ? new Date() : null
+    await rq.save()
 
     // Logged-in user
-    const currentUser = req.session.user;
+    const currentUser = req.session.user
 
     // If processBy is assigned, fetch staff info
-    let staffName = '';
+    let staffName = ''
     if (processBy) {
-      const staffUser = await users.findById(processBy);
+      const staffUser = await users.findById(processBy)
       if (staffUser) {
-        staffName = `${staffUser.fName} ${staffUser.mName} ${staffUser.lName} ${staffUser.xName}`;
+        staffName = `${staffUser.fName} ${staffUser.mName} ${staffUser.lName} ${staffUser.xName}`
       }
     }
 
@@ -2383,52 +2388,52 @@ app.patch('/req/processBy/:id', isLogin, isRequest, isStaff, async (req, res) =>
       what: processBy
         ? `Assigned the transaction with tr# ${rq.tr} to ${staffName}`
         : `Removed assignment from transaction with tr# ${rq.tr}`
-    });
+    })
 
-    console.log('✅ Updated processBy for request:', rq._id);
-    res.status(200).json({ message: 'Staff successfully assigned!' });
+    console.log('✅ Updated processBy for request:', rq._id)
+    res.status(200).json({ message: 'Staff successfully assigned!' })
 
   } catch (err) {
-    console.error('❌ Error in PATCH /req/processBy/:id', err);
-    res.status(500).json({ error: 'Something went wrong while assigning staff.' });
+    console.error('❌ Error in PATCH /req/processBy/:id', err)
+    res.status(500).json({ error: 'Something went wrong while assigning staff.' })
   }
-});
+})
 
 
 // Generic handler to display a request
 async function renderRequest(req, res, backRoute, viewName = 'srvView') {
   try {
-    const requestId = req.params.id;
+    const requestId = req.params.id
 
     // Find the request
-    const rq = req.requests.find(r => r._id.toString() === requestId);
+    const rq = req.requests.find(r => r._id.toString() === requestId)
 
     if (!rq) {
-      return res.status(404).render(viewName, { 
-        title: 'Request Not Found', 
+      return res.status(404).render(viewName, {
+        title: 'Request Not Found',
         back: backRoute,
         active: 'srv',
-        error: 'Request not found.' 
-      });
+        error: 'Request not found.'
+      })
     }
 
     // Find all items for this request
-    const rqItems = rq.items || []; // assuming req.requests contains items array
+    const rqItems = rq.items || [] // assuming req.requests contains items array
 
     // Filter approved items
-    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true)
 
     // Calculate totalAmount
-    let totalAmount = 0;
+    let totalAmount = 0
     if (approvedItems.length > 0) {
       for (const it of approvedItems) {
         // Find document that matches this item type
-        const doc = req.documents.find(d => d.type === it.type);
-        if (doc) totalAmount += doc.amount * it.qty;
+        const doc = req.documents.find(d => d.type === it.type)
+        if (doc) totalAmount += doc.amount * it.qty
       }
     }
 
-    res.render(viewName, { 
+    res.render(viewName, {
       title: 'Request Details',
       back: backRoute,
       active: 'srv',
@@ -2436,126 +2441,126 @@ async function renderRequest(req, res, backRoute, viewName = 'srvView') {
       items: rqItems,
       totalAmount,
       hasPending: rqItems.some(it => it.status === "Pending")
-    });
-    
+    })
+
   } catch (err) {
-    console.error(`❌ Error in /${backRoute}/:id route:`, err);
-    res.status(500).render(viewName, { 
-      title: 'Error', 
+    console.error(`❌ Error in /${backRoute}/:id route:`, err)
+    res.status(500).render(viewName, {
+      title: 'Error',
       back: backRoute,
       active: 'srv',
-      error: 'Something went wrong while loading the request.' 
-    });
+      error: 'Something went wrong while loading the request.'
+    })
   }
 }
 
 // Then your routes become:
-app.get('/srvView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'srv'));
-app.get('/srvAllView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'srvAll'));
-app.get('/prcView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'prc'));
-app.get('/relView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'rel'));
-app.get('/aprView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'apr'));
-app.get('/vrfView/:id', isLogin, isStaff, isVerify, (req, res) => renderRequest(req, res, 'vrf', 'vrfView'));
+app.get('/srvView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'srv'))
+app.get('/srvAllView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'srvAll'))
+app.get('/prcView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'prc'))
+app.get('/relView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'rel'))
+app.get('/aprView/:id', isLogin, isRequest, isStaff, (req, res) => renderRequest(req, res, 'apr'))
+app.get('/vrfView/:id', isLogin, isStaff, isVerify, (req, res) => renderRequest(req, res, 'vrf', 'vrfView'))
 
 
 /* Approval Routes */
 app.post('/quick-assign', isLogin, isStaff, async (req, res) => {
   try {
-    let assignedUsers = req.body.assignedUsers;
+    let assignedUsers = req.body.assignedUsers
 
     if (!assignedUsers || assignedUsers.length === 0) {
-      return res.status(400).send("No staff selected.");
+      return res.status(400).send("No staff selected.")
     }
 
-    if (!Array.isArray(assignedUsers)) assignedUsers = [assignedUsers];
-    assignedUsers = assignedUsers.map(id => new mongoose.Types.ObjectId(id));
+    if (!Array.isArray(assignedUsers)) assignedUsers = [assignedUsers]
+    assignedUsers = assignedUsers.map(id => new mongoose.Types.ObjectId(id))
 
-    let unassignedRequests = await requests.find({ processBy: null, archive: false }).populate('requestBy');
+    let unassignedRequests = await requests.find({ processBy: null, archive: false }).populate('requestBy')
 
     if (unassignedRequests.length === 0) {
-      return res.status(400).send("No unassigned requests available.");
+      return res.status(400).send("No unassigned requests available.")
     }
 
-    const numStaff = assignedUsers.length;
-    const totalRequests = unassignedRequests.length;
-    const base = Math.floor(totalRequests / numStaff);
-    let remainder = totalRequests % numStaff;
+    const numStaff = assignedUsers.length
+    const totalRequests = unassignedRequests.length
+    const base = Math.floor(totalRequests / numStaff)
+    let remainder = totalRequests % numStaff
 
-    const assignmentDetails = [];
+    const assignmentDetails = []
 
     for (let i = 0; i < numStaff; i++) {
-      const userId = assignedUsers[i];
-      let assignCount = base + (remainder > 0 ? 1 : 0);
-      if (remainder > 0) remainder--;
+      const userId = assignedUsers[i]
+      let assignCount = base + (remainder > 0 ? 1 : 0)
+      if (remainder > 0) remainder--
 
-      const toAssign = unassignedRequests.splice(0, assignCount);
+      const toAssign = unassignedRequests.splice(0, assignCount)
 
       const updatePromises = toAssign.map(reqItem =>
         requests.findByIdAndUpdate(reqItem._id, {
           processBy: userId,
           assignAt: new Date()
         })
-      );
+      )
 
-      await Promise.all(updatePromises);
+      await Promise.all(updatePromises)
 
       assignmentDetails.push({
         staffId: userId,
         assignedCount: toAssign.length
-      });
+      })
     }
 
-    const currentUser = await users.findById(req.session.user._id);
+    const currentUser = await users.findById(req.session.user._id)
 
     // ===== LOGGING =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    let whatMsg = `Assigned ${totalRequests} pending request(s) to ${numStaff} staff(s).`;
-    await Log.create({ who: isWho, what: whatMsg });
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    let whatMsg = `Assigned ${totalRequests} pending request(s) to ${numStaff} staff(s).`
+    await Log.create({ who: isWho, what: whatMsg })
 
-    res.redirect('/srv');
+    res.redirect('/srv')
 
   } catch (err) {
-    console.error('❌ Quick Assign Error:', err);
-    res.status(500).send("Failed to assign requests.");
+    console.error('❌ Quick Assign Error:', err)
+    res.status(500).send("Failed to assign requests.")
   }
-});
+})
 
 // ===== DECLINE SINGLE ITEM =====
 app.post("/decItem", async (req, res) => {
-  const { requestId, itemId, back } = req.body;
+  const { requestId, itemId, back } = req.body
 
   try {
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-    const itemDoc = await items.findById(itemId);
-    if (!itemDoc) return res.status(404).send("Item not found");
+    const itemDoc = await items.findById(itemId)
+    if (!itemDoc) return res.status(404).send("Item not found")
 
-    itemDoc.status = "Declined";
-    await itemDoc.save();
+    itemDoc.status = "Declined"
+    await itemDoc.save()
 
-    requestDoc.holdAt = null;
+    requestDoc.holdAt = null
 
-    const allItems = await items.find({ tr: requestDoc.tr });
-    const hasPending = allItems.some(it => it.status === "Pending");
-    const allDeclined = allItems.every(it => it.status === "Declined");
+    const allItems = await items.find({ tr: requestDoc.tr })
+    const hasPending = allItems.some(it => it.status === "Pending")
+    const allDeclined = allItems.every(it => it.status === "Declined")
 
     if (!hasPending) {
-      if (allDeclined) requestDoc.declineAt = new Date();
+      if (allDeclined) requestDoc.declineAt = new Date()
       else {
-        requestDoc.status = "Reviewed";
-        requestDoc.approveAt = new Date();
+        requestDoc.status = "Reviewed"
+        requestDoc.approveAt = new Date()
       }
-      await requestDoc.save();
+      await requestDoc.save()
     }
 
     // ===== LOGGING =====
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     await Log.create({
       who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
       what: `Declined a document(s) requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName}`
-    });
+    })
 
     const viewRoutes = {
       srv: `/srvView/${requestId}`,
@@ -2563,46 +2568,46 @@ app.post("/decItem", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error(err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 // ===== APPROVE SINGLE ITEM =====
 app.post("/appItem", async (req, res) => {
-  const { requestId, itemId, back } = req.body;
+  const { requestId, itemId, back } = req.body
 
   try {
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-    const itemDoc = await items.findById(itemId);
-    if (!itemDoc) return res.status(404).send("Item not found");
+    const itemDoc = await items.findById(itemId)
+    if (!itemDoc) return res.status(404).send("Item not found")
 
-    itemDoc.status = "Approved";
-    await itemDoc.save();
+    itemDoc.status = "Approved"
+    await itemDoc.save()
 
-    requestDoc.declineAt = null;
-    requestDoc.holdAt = null;
-    requestDoc.reviewAt = new Date();
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
+    requestDoc.reviewAt = new Date()
 
-    const pendingItems = await items.find({ tr: requestDoc.tr, status: "Pending" });
+    const pendingItems = await items.find({ tr: requestDoc.tr, status: "Pending" })
     if (pendingItems.length === 0) {
-      requestDoc.status = "Reviewed";
-      requestDoc.reviewAt = new Date();
+      requestDoc.status = "Reviewed"
+      requestDoc.reviewAt = new Date()
     }
-    await requestDoc.save();
+    await requestDoc.save()
 
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     await Log.create({
       who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
       what: `Approved a document(s) requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName}`
-    });
+    })
 
     const viewRoutes = {
       srv: `/srvView/${requestId}`,
@@ -2610,36 +2615,36 @@ app.post("/appItem", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error(err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 
 // ===== SET FREE SINGLE ITEM =====
 app.post("/freebie", async (req, res) => {
-  const { requestId, itemId, back } = req.body;
+  const { requestId, itemId, back } = req.body
 
   try {
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-    const itemDoc = await items.findById(itemId);
-    if (!itemDoc) return res.status(404).send("Item not found");
+    const itemDoc = await items.findById(itemId)
+    if (!itemDoc) return res.status(404).send("Item not found")
 
-    itemDoc.free = true;
-    await itemDoc.save();
+    itemDoc.free = true
+    await itemDoc.save()
 
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     await Log.create({
       who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
       what: `Set a document(s) requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as free`
-    });
+    })
 
     const viewRoutes = {
       srv: `/srvView/${requestId}`,
@@ -2647,44 +2652,44 @@ app.post("/freebie", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error(err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 
 // ===== APPROVE ALL ITEMS =====
 app.post("/appAllItem", async (req, res) => {
-  const { requestId, back } = req.body;
+  const { requestId, back } = req.body
 
   try {
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-    const allItems = await items.find({ tr: requestDoc.tr });
-    if (allItems.length === 0) return res.status(400).send("No items found for this request");
+    const allItems = await items.find({ tr: requestDoc.tr })
+    if (allItems.length === 0) return res.status(400).send("No items found for this request")
 
     await items.updateMany(
       { tr: requestDoc.tr },
       { $set: { status: "Approved", remarks: null } }
-    );
+    )
 
-    requestDoc.status = "Reviewed";
-    requestDoc.declineAt = null;
-    requestDoc.holdAt = null;
-    requestDoc.reviewAt = new Date();
-    await requestDoc.save();
+    requestDoc.status = "Reviewed"
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
+    requestDoc.reviewAt = new Date()
+    await requestDoc.save()
 
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     await Log.create({
       who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
       what: `Approved all documents requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`
-    });
+    })
 
     const viewRoutes = {
       srv: `/srvView/${requestId}`,
@@ -2692,37 +2697,37 @@ app.post("/appAllItem", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error(err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 // ===== DECLINE ALL ITEMS =====
 app.post("/decline3", async (req, res) => {
-  const { requestId, back, requestRemarks } = req.body;
+  const { requestId, back, requestRemarks } = req.body
 
   try {
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-    await items.updateMany({ tr: requestDoc.tr }, { status: "Declined" });
+    await items.updateMany({ tr: requestDoc.tr }, { status: "Declined" })
 
-    requestDoc.declineAt = new Date();
-    requestDoc.holdAt = null;
-    requestDoc.remarks = requestRemarks || "";
-    requestDoc.status = "Pending";
-    await requestDoc.save();
+    requestDoc.declineAt = new Date()
+    requestDoc.holdAt = null
+    requestDoc.remarks = requestRemarks || ""
+    requestDoc.status = "Pending"
+    await requestDoc.save()
 
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     await Log.create({
       who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
       what: `Declined all documents requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`
-    });
+    })
 
     const viewRoutes = {
       srv: `/srvView/${requestId}`,
@@ -2730,44 +2735,44 @@ app.post("/decline3", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error("Decline Error:", err);
-    res.status(500).send("Server error");
+    console.error("Decline Error:", err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 
 
 app.post("/hold3", async (req, res) => {
-  const { requestId, back, requestRemarks } = req.body;
+  const { requestId, back, requestRemarks } = req.body
 
   try {
     // Find the request and populate the requester
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-    requestDoc.declineAt = null;
-    requestDoc.holdAt = new Date();
-    requestDoc.remarks = requestRemarks || "";
+    requestDoc.declineAt = null
+    requestDoc.holdAt = new Date()
+    requestDoc.remarks = requestRemarks || ""
 
-    await requestDoc.save();
+    await requestDoc.save()
 
     // Logged-in user
-    const currentUser = req.session.user;
+    const currentUser = req.session.user
 
     // The student who requested the document
-    const student = requestDoc.requestBy;
+    const student = requestDoc.requestBy
 
     // ===== CREATE LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Hold the transaction requested by ${theStudent} with tr# ${requestDoc.tr}`
-    });
+    })
 
     // Redirect to correct view
     const viewRoutes = {
@@ -2776,51 +2781,51 @@ app.post("/hold3", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
+    }
 
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error("Hold Error:", err);
-    res.status(500).send("Server error");
+    console.error("Hold Error:", err)
+    res.status(500).send("Server error")
   }
-});
+})
 // ===== RESTORE ROUTE =====
 app.post("/restore3", async (req, res) => {
-  const { requestId, back } = req.body;
+  const { requestId, back } = req.body
 
   try {
     // Fetch request and populate requester
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
     // Check if items exist
-    const hasItems = await items.exists({ tr: requestDoc.tr });
-    if (!hasItems) return res.status(400).send("No items found for this request");
+    const hasItems = await items.exists({ tr: requestDoc.tr })
+    if (!hasItems) return res.status(400).send("No items found for this request")
 
     // Approve all items
     await items.updateMany(
       { tr: requestDoc.tr },
       { $set: { status: "Pending", remarks: null } }
-    );
+    )
 
     // Update request
-    requestDoc.status = "Pending";
-    requestDoc.declineAt = null;
-    requestDoc.holdAt = null;
-    requestDoc.updatedAt = new Date();
-    await requestDoc.save();
+    requestDoc.status = "Pending"
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
+    requestDoc.updatedAt = new Date()
+    await requestDoc.save()
 
     // ===== LOGGING =====
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     try {
       await Log.create({
         who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
         what: `Reverted action to a transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`
-      });
+      })
     } catch (err) {
-      console.error("⚠️ Failed to log restore action:", err);
+      console.error("⚠️ Failed to log restore action:", err)
     }
 
     // Redirect
@@ -2830,60 +2835,60 @@ app.post("/restore3", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error(err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 // ===== FOR RELEASE ROUTE =====
 app.post("/fRel", async (req, res) => {
-  const { requestId, back, itemRemarks, paperUsed } = req.body;
+  const { requestId, back, itemRemarks, paperUsed } = req.body
 
   try {
     // Find the request
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
     // Find items associated with this request
-    const requestItems = await items.find({ tr: requestDoc.tr });
-    if (!requestItems || requestItems.length === 0) 
-      return res.status(400).send("No items found for this request");
+    const requestItems = await items.find({ tr: requestDoc.tr })
+    if (!requestItems || requestItems.length === 0)
+      return res.status(400).send("No items found for this request")
 
     // Update request
-    requestDoc.status = "For Release";
-    requestDoc.declineAt = null;
-    requestDoc.holdAt = null;
-    requestDoc.remarks = itemRemarks || null;  // save remarks if any
-    requestDoc.turnAt = new Date();
-    await requestDoc.save();
+    requestDoc.status = "For Release"
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
+    requestDoc.remarks = itemRemarks || null  // save remarks if any
+    requestDoc.turnAt = new Date()
+    await requestDoc.save()
 
     // Update paper for each item
     if (Array.isArray(paperUsed)) {
       await Promise.all(
         requestItems.map((item, i) => {
-          item.paper = paperUsed[i] || 0;
-          return item.save();
+          item.paper = paperUsed[i] || 0
+          return item.save()
         })
-      );
+      )
     } else if (requestItems.length === 1) {
-      requestItems[0].paper = paperUsed || 0;
-      await requestItems[0].save();
+      requestItems[0].paper = paperUsed || 0
+      await requestItems[0].save()
     }
 
     // ===== LOGGING =====
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     try {
       await Log.create({
         who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
         what: `Marked the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as For Release with tr# ${requestDoc.tr}`
-      });
+      })
     } catch (err) {
-      console.error("⚠️ Failed to log For Release action:", err);
+      console.error("⚠️ Failed to log For Release action:", err)
     }
 
     // Redirect
@@ -2893,46 +2898,46 @@ app.post("/fRel", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error(err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 
 // ===== CLAIM ROUTE =====
 app.post("/claim3", async (req, res) => {
-  const { requestId, back, claimedBy } = req.body;
+  const { requestId, back, claimedBy } = req.body
 
   try {
-    const requestDoc = await requests.findById(requestId).populate('requestBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('requestBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-    const hasItems = await items.exists({ tr: requestDoc.tr });
-    if (!hasItems) return res.status(400).send("No items found for this request");
+    const hasItems = await items.exists({ tr: requestDoc.tr })
+    if (!hasItems) return res.status(400).send("No items found for this request")
 
     // Update request
-    requestDoc.status = "Claimed";
-    requestDoc.declineAt = null;
-    requestDoc.holdAt = null;
-    requestDoc.remarks = null;
-    requestDoc.claimedBy = claimedBy;
-    requestDoc.claimedAt = new Date();
-    await requestDoc.save();
+    requestDoc.status = "Claimed"
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
+    requestDoc.remarks = null
+    requestDoc.claimedBy = claimedBy
+    requestDoc.claimedAt = new Date()
+    await requestDoc.save()
 
     // ===== LOGGING =====
-    const currentUser = req.session.user;
-    const student = requestDoc.requestBy;
+    const currentUser = req.session.user
+    const student = requestDoc.requestBy
     try {
       await Log.create({
         who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
         what: `Marked the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as Claimed with tr# ${requestDoc.tr}`
-      });
+      })
     } catch (err) {
-      console.error("⚠️ Failed to log Claim action:", err);
+      console.error("⚠️ Failed to log Claim action:", err)
     }
 
     // Redirect
@@ -2942,44 +2947,44 @@ app.post("/claim3", async (req, res) => {
       rel: `/relView/${requestId}`,
       apr: `/aprView/${requestId}`,
       vrf: `/vrfView/${requestId}`
-    };
-    res.redirect(viewRoutes[back] || `/srvView/${requestId}`);
+    }
+    res.redirect(viewRoutes[back] || `/srvView/${requestId}`)
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error(err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 /* end of Approval Routes */
 
 app.get('/emp', isLogin, isEmp, (req, res) => {
-  res.render('emp', { title: 'Employees', active: 'emp' });
-});
+  res.render('emp', { title: 'Employees', active: 'emp' })
+})
 
 app.get('/empArc', isLogin, isEmpArc, (req, res) => {
-  res.render('empArc', { title: 'Employees', active: 'emp' });
-});
+  res.render('empArc', { title: 'Employees', active: 'emp' })
+})
 
 app.post('/newEmp', async (req, res) => {
   try {
     const {
       firstName, middleName, lastName, extName,
-     number, email,
+      number, email,
       role, campus, studentNo, assign // employee number
-    } = req.body;
+    } = req.body
 
     // 1️⃣ Check if email is already used
-    const existingEmail = await users.findOne({ email: email.toLowerCase() });
+    const existingEmail = await users.findOne({ email: email.toLowerCase() })
     if (existingEmail) {
-      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" });
+      return res.render('index', { error: 'Email is already used by an existing account!', title: "AUDRESv25" })
     }
 
     // 2️⃣ Check if employee number is already used (optional)
     if (studentNo) {
-      const existingEmployee = await users.findOne({ schoolId: studentNo });
+      const existingEmployee = await users.findOne({ schoolId: studentNo })
       if (existingEmployee) {
-        return res.render('index', { error: 'Employee Number is already registered!', title: "AUDRESv25" });
+        return res.render('index', { error: 'Employee Number is already registered!', title: "AUDRESv25" })
       }
     }
 
@@ -3000,55 +3005,55 @@ app.post('/newEmp', async (req, res) => {
       archive: false,            // default not archived
       verify: false,
       access: 1
-    });
+    })
 
-    await newUser.save();
+    await newUser.save()
 
-                    // Logged-in user
-    const currentUser = req.session.user;
+    // Logged-in user
+    const currentUser = req.session.user
 
     // The student who requested the document
-    const student = newUser;
+    const student = newUser
 
     // ===== CREATE LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Create an account for ${theStudent}`
-    });
+    })
 
 
     // 5️⃣ Redirect to employee list page
-    res.redirect('/emp');
+    res.redirect('/emp')
 
   } catch (err) {
-    console.error(err);
-    res.render('index', { error: 'Failed to create employee!', title: "AUDRESv25" });
+    console.error(err)
+    res.render('index', { error: 'Failed to create employee!', title: "AUDRESv25" })
   }
-});
+})
 
 
 
 app.get('/empView/:id', isLogin, isEmp, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
-    
-    const staffId = req.session.user._id;
-    const currentUser = await users.findById(staffId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const staffId = req.session.user._id
+    const currentUser = await users.findById(staffId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `View ${isStudent} information`
-    });
+    })
 
 
     if (!student) {
@@ -3058,10 +3063,10 @@ app.get('/empView/:id', isLogin, isEmp, async (req, res) => {
         active: 'emp',
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('empView', {
@@ -3070,45 +3075,45 @@ app.get('/empView/:id', isLogin, isEmp, async (req, res) => {
       active: 'emp',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /empView/:id route:', err);
+    console.error('❌ Error in /empView/:id route:', err)
     res.status(500).render('empView', {
       title: 'Employees',
       back: 'emp',
       active: 'emp',
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 app.get('/empViewArc/:id', isLogin, isEmpArc, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
-    
-    const staffId = req.session.user._id;
-    const currentUser = await users.findById(staffId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const staffId = req.session.user._id
+    const currentUser = await users.findById(staffId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `View ${isStudent} information in the Archive`
-    });
+    })
 
 
     if (!student) {
@@ -3118,10 +3123,10 @@ app.get('/empViewArc/:id', isLogin, isEmpArc, async (req, res) => {
         active: 'emp',
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('empView', {
@@ -3130,251 +3135,251 @@ app.get('/empViewArc/:id', isLogin, isEmpArc, async (req, res) => {
       active: 'emp',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /empView/:id route:', err);
+    console.error('❌ Error in /empView/:id route:', err)
     res.status(500).render('empView', {
       title: 'Employees',
       back: 'arc',
       active: 'emp',
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 
 app.post('/check-pass4', async (req, res) => {
-    try {
-        const { currentPass, studentId } = req.body;
+  try {
+    const { currentPass, studentId } = req.body
 
-        if (!studentId) {
-            return res.json({ valid: false, error: "Student ID not provided" });
-        }
-
-        // Fetch the student by ID
-        const student = await users.findById(studentId); // or your students collection
-
-        if (!student) {
-            return res.json({ valid: false, error: "Student not found" });
-        }
-
-        // Compare password directly (if not hashed)
-        const valid = currentPass === student.password;
-
-        res.json({ valid });
-
-    } catch (err) {
-        console.error(err);
-        res.json({ valid: false, error: "Server error" });
+    if (!studentId) {
+      return res.json({ valid: false, error: "Student ID not provided" })
     }
-});
+
+    // Fetch the student by ID
+    const student = await users.findById(studentId) // or your students collection
+
+    if (!student) {
+      return res.json({ valid: false, error: "Student not found" })
+    }
+
+    // Compare password directly (if not hashed)
+    const valid = currentPass === student.password
+
+    res.json({ valid })
+
+  } catch (err) {
+    console.error(err)
+    res.json({ valid: false, error: "Server error" })
+  }
+})
 
 app.post('/rst4', async (req, res) => {
   try {
-    const { studentId, currentPass, createPass, confirmPass, redirectUrl } = req.body;
+    const { studentId, currentPass, createPass, confirmPass, redirectUrl } = req.body
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "Student ID not provided!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "Student ID not provided!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "Student not found!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "Student not found!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     if (currentPass.trim() !== student.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
-    student.password = createPass;
-    await student.save();
+    student.password = createPass
+    await student.save()
 
-    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: theStudent,
       what: `Reset Paasword`
-    });
+    })
 
 
-    req.session.msg = { type: "success", text: "Password updated successfully!" };
-    return res.redirect(redirectUrl || '/emp');
+    req.session.msg = { type: "success", text: "Password updated successfully!" }
+    return res.redirect(redirectUrl || '/emp')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect(req.body.redirectUrl || '/emp');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect(req.body.redirectUrl || '/emp')
   }
-});
+})
 
 app.get('/autoPass4', async (req, res) => {
   try {
-    const { studentId, redirectUrl } = req.query;
+    const { studentId, redirectUrl } = req.query
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "User ID not provided!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "User ID not provided!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     // Generate random password
-    const newPassword = generatePassword();
+    const newPassword = generatePassword()
 
     // Save new password
-    student.password = newPassword;
-    await student.save();
+    student.password = newPassword
+    await student.save()
 
-    req.session.msg = { 
-      type: "success", 
-      text: `New password generated!` 
-    };
+    req.session.msg = {
+      type: "success",
+      text: `New password generated!`
+    }
 
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Generate New Password for ${isStudent}`
-    });
+    })
 
-    return res.redirect(redirectUrl || '/emp');
+    return res.redirect(redirectUrl || '/emp')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error generating password!" };
-    return res.redirect(req.query.redirectUrl || '/emp');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error generating password!" }
+    return res.redirect(req.query.redirectUrl || '/emp')
   }
-});
+})
 
 app.get('/archive4', async (req, res) => {
   try {
-    const { studentId, redirectUrl, suspendIs } = req.query;
+    const { studentId, redirectUrl, suspendIs } = req.query
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "User ID not provided!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "User ID not provided!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     // Set archive and suspend info
-    student.archive = true;
-    student.suspendAt = new Date();
-    student.suspendIs = suspendIs || 'No reason provided';
-    await student.save();
+    student.archive = true
+    student.suspendAt = new Date()
+    student.suspendIs = suspendIs || 'No reason provided'
+    await student.save()
 
-    
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Move ${isStudent} to Archive`
-    });
+    })
 
-    req.session.msg = { 
-      type: "success", 
-      text: `` 
-    };
+    req.session.msg = {
+      type: "success",
+      text: ``
+    }
 
-    return res.redirect('/empArc');
+    return res.redirect('/empArc')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error archiving user!" };
-    return res.redirect(req.query.redirectUrl || '/emp');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error archiving user!" }
+    return res.redirect(req.query.redirectUrl || '/emp')
   }
-});
+})
 
 
 
 app.get('/archiveX4', async (req, res) => {
   try {
-    const { studentId, redirectUrl, suspendIs } = req.query;
+    const { studentId, redirectUrl, suspendIs } = req.query
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "User ID not provided!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "User ID not provided!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     // Set archive and suspend info
-    student.archive = false;
-    student.suspendAt = new Date();
-    student.suspendIs = suspendIs || 'No reason provided';
-    await student.save();
+    student.archive = false
+    student.suspendAt = new Date()
+    student.suspendIs = suspendIs || 'No reason provided'
+    await student.save()
 
-        
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Remove ${isStudent} to Archive`
-    });
+    })
 
 
-    req.session.msg = { 
-      type: "success", 
-      text: `` 
-    };
+    req.session.msg = {
+      type: "success",
+      text: ``
+    }
 
-    return res.redirect('/emp');
+    return res.redirect('/emp')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error archiving user!" };
-    return res.redirect(req.query.redirectUrl || '/emp');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error archiving user!" }
+    return res.redirect(req.query.redirectUrl || '/emp')
   }
-});
+})
 
 app.post('/edt4', async (req, res) => {
   try {
@@ -3393,41 +3398,41 @@ app.post('/edt4', async (req, res) => {
       role,
       campus,
       schoolId
-    } = req.body;
+    } = req.body
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "Student ID not provided!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "Student ID not provided!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     if (!fName || !lName || !email || !phone || !schoolId) {
-      req.session.msg = { type: "error", text: "Please fill in all required fields!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "Please fill in all required fields!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     // ✔ username MUST be the same as schoolId
-    const username = schoolId;
+    const username = schoolId
 
     // ✔ Check username duplication (except the current one)
     const existingUsername = await users.findOne({
       username,
       _id: { $ne: studentId }
-    });
+    })
 
     if (existingUsername) {
-      req.session.msg = { type: "error", text: "Employee Number is already used as a username!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "Employee Number is already used as a username!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     // ✔ Check email duplication (except the current one)
     const existingEmail = await users.findOne({
       email: email.toLowerCase(),
       _id: { $ne: studentId }
-    });
+    })
 
     if (existingEmail) {
-      req.session.msg = { type: "error", text: "Email is already in use!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "Email is already in use!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     // Update fields
@@ -3443,82 +3448,82 @@ app.post('/edt4', async (req, res) => {
       assign,
       schoolId,
       username // Automatically applied
-    };
+    }
 
-    await users.findByIdAndUpdate(studentId, updateData);
+    await users.findByIdAndUpdate(studentId, updateData)
 
-        
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
 
-                    // ===== CREATE EDIt LOG =====
-      // After updating the user
-    const editedUser = await users.findById(studentId);
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
 
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${editedUser.fName} ${editedUser.mName} ${editedUser.lName} ${editedUser.xName}`;
+    // ===== CREATE EDIt LOG =====
+    // After updating the user
+    const editedUser = await users.findById(studentId)
+
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${editedUser.fName} ${editedUser.mName} ${editedUser.lName} ${editedUser.xName}`
 
     await Log.create({
       who: isWho,
       what: `Edit ${isStudent}'s Information`
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Profile updated successfully!" };
-    return res.redirect(redirectUrl || '/emp');
+    req.session.msg = { type: "success", text: "Profile updated successfully!" }
+    return res.redirect(redirectUrl || '/emp')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect(req.body.redirectUrl || '/emp');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect(req.body.redirectUrl || '/emp')
   }
-});
+})
 
 
 
 app.post('/pht4', uploadPhoto.single('photo'), async (req, res) => {
   try {
-    const { studentId, redirectUrl } = req.body;
+    const { studentId, redirectUrl } = req.body
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "User ID not provided!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "User ID not provided!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
     if (!req.file) {
-      req.session.msg = { type: "error", text: "No photo uploaded!" };
-      return res.redirect(redirectUrl || '/emp');
+      req.session.msg = { type: "error", text: "No photo uploaded!" }
+      return res.redirect(redirectUrl || '/emp')
     }
 
-    const photoUrl = req.file.path;
-    await users.findByIdAndUpdate(studentId, { photo: photoUrl });
+    const photoUrl = req.file.path
+    await users.findByIdAndUpdate(studentId, { photo: photoUrl })
 
-    req.session.msg = { type: "success", text: "Photo updated successfully!" };
-    return res.redirect(redirectUrl || '/emp');
+    req.session.msg = { type: "success", text: "Photo updated successfully!" }
+    return res.redirect(redirectUrl || '/emp')
 
-    
-        
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`;
+
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`
     await Log.create({
       who: isWho,
       what: `Update ${isStudent}'s Photo`
-    });
+    })
 
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Failed to upload photo!" };
-    return res.redirect(req.body.redirectUrl || '/emp');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Failed to upload photo!" }
+    return res.redirect(req.body.redirectUrl || '/emp')
   }
-});
+})
 
 app.get('/acc', isLogin, (req, res) => {
-  const msg = req.session.msg;
-  delete req.session.msg;
+  const msg = req.session.msg
+  delete req.session.msg
 
   res.render('acc', {
     user: req.session.user,
@@ -3526,341 +3531,341 @@ app.get('/acc', isLogin, (req, res) => {
     active: 'acc',
     messageSuccess: msg?.type === 'success' ? msg.text : null,
     messagePass: msg?.type === 'error' ? msg.text : null
-  });
-});
+  })
+})
 
 
 app.post('/rst2', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/acc');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/acc')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/acc');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/acc')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/acc');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/acc')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/acc');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/acc')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    await currentUser.save();
+    currentUser.password = createPass
+    await currentUser.save()
 
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: `Change Password`
-    });
+    })
 
 
-    req.session.msg = { type: "success", text: "Password updated successfully!" };
-    return res.redirect('/acc');
+    req.session.msg = { type: "success", text: "Password updated successfully!" }
+    return res.redirect('/acc')
 
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/acc');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/acc')
   }
-});
+})
 
 
 app.post('/rst2FG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/resetPage2')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/resetPage2')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/resetPage2')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/resetPage2')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    currentUser.reset = null;
-    await currentUser.save();
+    currentUser.password = createPass
+    currentUser.reset = null
+    await currentUser.save()
 
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: `Change Password`
-    });
+    })
 
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
-    return res.redirect('/acc');
+    return res.redirect('/acc')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/resetPage2');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/resetPage2')
   }
-});
+})
 
 
 app.post('/rst3FG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/resetPage3');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/resetPage3')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/resetPage3');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/resetPage3')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/resetPage3');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/resetPage3')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/resetPage3');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/resetPage3')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    currentUser.reset = null;
-    await currentUser.save();
+    currentUser.password = createPass
+    currentUser.reset = null
+    await currentUser.save()
 
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: `Change Password`
-    });
+    })
 
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
-    return res.redirect('/acc2');
+    return res.redirect('/acc2')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/resetPage3');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/resetPage3')
   }
-});
+})
 
 app.post('/rst4FG', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/resetPage4')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/resetPage4')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/resetPage4')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/resetPage4')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    currentUser.reset = null;
-    await currentUser.save();
+    currentUser.password = createPass
+    currentUser.reset = null
+    await currentUser.save()
 
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: `Change Password`
-    });
+    })
 
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
-    return res.redirect('/acc3');
+    return res.redirect('/acc3')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/resetPage4');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/resetPage4')
   }
-});
+})
 
 
 app.post('/rst4FGA', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/resetPage4')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/resetPage4')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/resetPage4')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/resetPage4');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/resetPage4')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    currentUser.reset = null;
-    await currentUser.save();
+    currentUser.password = createPass
+    currentUser.reset = null
+    await currentUser.save()
 
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: `Change Password`
-    });
+    })
 
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
-    return res.redirect('/acc3');
+    return res.redirect('/acc3')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/resetPage4');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/resetPage4')
   }
-});
+})
 
 app.post('/edt2', async (req, res) => {
   try {
     if (!req.session.user?._id) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { email, phone } = req.body;
+    const userId = req.session.user._id
+    const { email, phone } = req.body
 
     // Validate required fields
     if (!email || !phone) {
-      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
-      return res.redirect('/acc');
+      req.session.msg = { type: "error", text: "Email, phone, and address are required!" }
+      return res.redirect('/acc')
     }
 
     // Check if email is already used by another user
     const existingUser = await users.findOne({
       email: email.toLowerCase(),
       _id: { $ne: userId }
-    });
+    })
 
     if (existingUser) {
-      req.session.msg = { type: "error", text: "Email is already in use!" };
-      return res.redirect('/acc');
+      req.session.msg = { type: "error", text: "Email is already in use!" }
+      return res.redirect('/acc')
     }
 
     // Update user
@@ -3868,65 +3873,65 @@ app.post('/edt2', async (req, res) => {
       userId,
       { email: email.toLowerCase(), phone },
       { new: true }
-    );
+    )
 
-    req.session.user = updatedUser;
-    const currentUser = await users.findById(userId);
+    req.session.user = updatedUser
+    const currentUser = await users.findById(userId)
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Edit Contact information'
-    });
+    })
 
 
-    req.session.msg = { type: "success", text: "Profile updated successfully!" };
-    return res.redirect('/acc');
+    req.session.msg = { type: "success", text: "Profile updated successfully!" }
+    return res.redirect('/acc')
 
   } catch (err) {
-    console.error("Error in /edt2:", err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/acc');
+    console.error("Error in /edt2:", err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/acc')
   }
-});
+})
 
 
 app.post('/pht2', isLogin, uploadPhoto.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
-      req.session.msg = { type: "error", text: "No photo uploaded!" };
-      return res.redirect('/acc');
+      req.session.msg = { type: "error", text: "No photo uploaded!" }
+      return res.redirect('/acc')
     }
 
-    const userId = req.session.user._id;
-    const photoUrl = req.file.path;
+    const userId = req.session.user._id
+    const photoUrl = req.file.path
 
     const updatedUser = await users.findByIdAndUpdate(
       userId,
       { photo: photoUrl },
       { new: true }
-    );
+    )
 
-    req.session.user = updatedUser;
+    req.session.user = updatedUser
 
-    const currentUser = await users.findById(userId);
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    const currentUser = await users.findById(userId)
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Update Photo'
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Photo updated successfully!" };
-    return res.redirect('/acc');
+    req.session.msg = { type: "success", text: "Photo updated successfully!" }
+    return res.redirect('/acc')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Failed to upload photo!" };
-    return res.redirect('/acc');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Failed to upload photo!" }
+    return res.redirect('/acc')
   }
-});
+})
 
 app.get('/stu', isLogin, isStudent, (req, res) => {
   res.render('stu', {
@@ -3934,62 +3939,62 @@ app.get('/stu', isLogin, isStudent, (req, res) => {
     active: 'stu',
     back: '',
     users: req.users
-  });
-});
+  })
+})
 
 app.get('/crt', isLogin, isStudent, (req, res) => {
-  const students = req.users.filter(user => user.role === 'Student');
+  const students = req.users.filter(user => user.role === 'Student')
 
   res.render('stu', {
     title: 'Current',
     active: 'stu',
     back: '',
     users: students
-  });
-});
+  })
+})
 
 app.get('/alm', isLogin, isStudent, (req, res) => {
-  const students = req.users.filter(user => user.role === 'Alumni');
+  const students = req.users.filter(user => user.role === 'Alumni')
 
   res.render('stu', {
     title: 'Alumni',
     active: 'stu',
     back: '',
     users: students
-  });
-});
+  })
+})
 
 app.get('/frm', isLogin, isStudent, (req, res) => {
-  const students = req.users.filter(user => user.role === 'Former');
+  const students = req.users.filter(user => user.role === 'Former')
 
   res.render('stu', {
     title: 'Former',
     active: 'stu',
     back: '',
     users: students
-  });
-});
+  })
+})
 
 
 app.get('/stuView/:id', isLogin, isStudent, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
 
-    const staffId = req.session.user._id;
-    const currentUser = await users.findById(staffId);
+    const staffId = req.session.user._id
+    const currentUser = await users.findById(staffId)
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `View ${isStudent} information`
-    });
+    })
 
 
     if (!student) {
@@ -4000,10 +4005,10 @@ app.get('/stuView/:id', isLogin, isStudent, async (req, res) => {
         student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('stuView', {
@@ -4012,45 +4017,45 @@ app.get('/stuView/:id', isLogin, isStudent, async (req, res) => {
       active: 'stu',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /stuView/:id route:', err);
+    console.error('❌ Error in /stuView/:id route:', err)
     res.status(500).render('stuView', {
       title: 'Students',
       back: 'stu',
       active: 'stu',
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 app.get('/stuViewDsb/:id', isLogin, isStudent, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
-    
-    const staffId = req.session.user._id;
-    const currentUser = await users.findById(staffId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const staffId = req.session.user._id
+    const currentUser = await users.findById(staffId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `View ${isStudent} information`
-    });
+    })
 
 
     if (!student) {
@@ -4061,10 +4066,10 @@ app.get('/stuViewDsb/:id', isLogin, isStudent, async (req, res) => {
         student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('stuView', {
@@ -4073,45 +4078,45 @@ app.get('/stuViewDsb/:id', isLogin, isStudent, async (req, res) => {
       active: 'stu',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /stuView/:id route:', err);
+    console.error('❌ Error in /stuView/:id route:', err)
     res.status(500).render('stuView', {
       title: 'Students',
       back: 'dsb',
       active: 'stu',
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 app.get('/crtView/:id', isLogin, isStudent, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
-    
-    const staffId = req.session.user._id;
-    const currentUser = await users.findById(staffId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const staffId = req.session.user._id
+    const currentUser = await users.findById(staffId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `View ${isStudent} information`
-    });
+    })
 
 
     if (!student) {
@@ -4122,10 +4127,10 @@ app.get('/crtView/:id', isLogin, isStudent, async (req, res) => {
         student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('stuView', {
@@ -4134,59 +4139,59 @@ app.get('/crtView/:id', isLogin, isStudent, async (req, res) => {
       active: 'stu',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /stuView/:id route:', err);
+    console.error('❌ Error in /stuView/:id route:', err)
     res.status(500).render('stuView', {
       title: 'Current',
       back: 'crt',
       active: 'stu',
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 app.get('/almView/:id', isLogin, isStudent, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
-    
-    const staffId = req.session.user._id;
-    const currentUser = await users.findById(staffId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const staffId = req.session.user._id
+    const currentUser = await users.findById(staffId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `View ${isStudent} information`
-    });
+    })
 
 
     if (!student) {
       return res.status(404).render('stuView', {
-      title: 'Alumni',
-      back: 'alm',
+        title: 'Alumni',
+        back: 'alm',
         active: 'stu',
         student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('stuView', {
@@ -4195,59 +4200,59 @@ app.get('/almView/:id', isLogin, isStudent, async (req, res) => {
       active: 'stu',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /stuView/:id route:', err);
+    console.error('❌ Error in /stuView/:id route:', err)
     res.status(500).render('stuView', {
       title: 'Alumni',
       back: 'alm',
       active: 'stu',
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 app.get('/frmView/:id', isLogin, isStudent, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
-    
-    const staffId = req.session.user._id;
-    const currentUser = await users.findById(staffId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const staffId = req.session.user._id
+    const currentUser = await users.findById(staffId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `View ${isStudent} information`
-    });
+    })
 
 
     if (!student) {
       return res.status(404).render('stuView', {
-      title: 'Former',
-      back: 'frm',
+        title: 'Former',
+        back: 'frm',
         active: 'stu',
         student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('stuView', {
@@ -4256,246 +4261,246 @@ app.get('/frmView/:id', isLogin, isStudent, async (req, res) => {
       active: 'stu',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /stuView/:id route:', err);
+    console.error('❌ Error in /stuView/:id route:', err)
     res.status(500).render('stuView', {
       title: 'Former',
       back: 'frm',
       active: 'stu',  // ✅ add
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 app.post('/check-pass3', async (req, res) => {
-    try {
-        const { currentPass, studentId } = req.body;
+  try {
+    const { currentPass, studentId } = req.body
 
-        if (!studentId) {
-            return res.json({ valid: false, error: "Student ID not provided" });
-        }
-
-        // Fetch the student by ID
-        const student = await users.findById(studentId); // or your students collection
-
-        if (!student) {
-            return res.json({ valid: false, error: "Student not found" });
-        }
-
-        // Compare password directly (if not hashed)
-        const valid = currentPass === student.password;
-
-        res.json({ valid });
-
-    } catch (err) {
-        console.error(err);
-        res.json({ valid: false, error: "Server error" });
+    if (!studentId) {
+      return res.json({ valid: false, error: "Student ID not provided" })
     }
-});
+
+    // Fetch the student by ID
+    const student = await users.findById(studentId) // or your students collection
+
+    if (!student) {
+      return res.json({ valid: false, error: "Student not found" })
+    }
+
+    // Compare password directly (if not hashed)
+    const valid = currentPass === student.password
+
+    res.json({ valid })
+
+  } catch (err) {
+    console.error(err)
+    res.json({ valid: false, error: "Server error" })
+  }
+})
 
 app.post('/rst3', async (req, res) => {
   try {
-    const { studentId, currentPass, createPass, confirmPass, redirectUrl } = req.body;
+    const { studentId, currentPass, createPass, confirmPass, redirectUrl } = req.body
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "Student ID not provided!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Student ID not provided!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "Student not found!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Student not found!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     if (currentPass.trim() !== student.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
-    student.password = createPass;
-    await student.save();
+    student.password = createPass
+    await student.save()
 
-    req.session.msg = { type: "success", text: "Password updated successfully!" };
-    return res.redirect(redirectUrl || '/stu');
+    req.session.msg = { type: "success", text: "Password updated successfully!" }
+    return res.redirect(redirectUrl || '/stu')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect(req.body.redirectUrl || '/stu');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect(req.body.redirectUrl || '/stu')
   }
-});
+})
 
 
 app.get('/autoPass3', async (req, res) => {
   try {
-    const { studentId, redirectUrl } = req.query;
+    const { studentId, redirectUrl } = req.query
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "Student ID not provided!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Student ID not provided!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "Student not found!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Student not found!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     // Generate random password
-    const newPassword = generatePassword();
+    const newPassword = generatePassword()
 
     // Save new password
-    student.password = newPassword;
-    await student.save();
+    student.password = newPassword
+    await student.save()
 
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Generate New Password for ${isStudent}`
-    });
+    })
 
-    req.session.msg = { 
-      type: "success", 
-      text: `New password generated!` 
-    };
+    req.session.msg = {
+      type: "success",
+      text: `New password generated!`
+    }
 
-    return res.redirect(redirectUrl || '/stu');
+    return res.redirect(redirectUrl || '/stu')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error generating password!" };
-    return res.redirect(req.query.redirectUrl || '/stu');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error generating password!" }
+    return res.redirect(req.query.redirectUrl || '/stu')
   }
-});
+})
 
 
 app.get('/archive3', async (req, res) => {
   try {
-    const { studentId, redirectUrl, suspendIs } = req.query;
+    const { studentId, redirectUrl, suspendIs } = req.query
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "User ID not provided!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "User ID not provided!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     // Set archive and suspend info
-    student.archive = true;
-    student.suspendAt = new Date();
-    student.suspendIs = suspendIs || 'No reason provided';
-    await student.save();
+    student.archive = true
+    student.suspendAt = new Date()
+    student.suspendIs = suspendIs || 'No reason provided'
+    await student.save()
 
-    
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Move ${isStudent} to archive`
-    });
+    })
 
 
-    req.session.msg = { 
-      type: "success", 
-      text: `` 
-    };
+    req.session.msg = {
+      type: "success",
+      text: ``
+    }
 
-    return res.redirect('/stuArc');
+    return res.redirect('/stuArc')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error archiving user!" };
-    return res.redirect(req.query.redirectUrl || '/stu');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error archiving user!" }
+    return res.redirect(req.query.redirectUrl || '/stu')
   }
-});
+})
 
 
 
 app.get('/archiveX3', async (req, res) => {
   try {
-    const { studentId, redirectUrl, suspendIs } = req.query;
+    const { studentId, redirectUrl, suspendIs } = req.query
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "User ID not provided!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "User ID not provided!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
-    const student = await users.findById(studentId);
+    const student = await users.findById(studentId)
     if (!student) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     // Set archive and suspend info
-    student.archive = false;
-    student.suspendAt = new Date();
-    student.suspendIs = suspendIs || 'No reason provided';
-    await student.save();
+    student.archive = false
+    student.suspendAt = new Date()
+    student.suspendIs = suspendIs || 'No reason provided'
+    await student.save()
 
-    
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Remove ${isStudent} to Archive`
-    });
+    })
 
 
-    req.session.msg = { 
-      type: "success", 
-      text: `` 
-    };
+    req.session.msg = {
+      type: "success",
+      text: ``
+    }
 
-    return res.redirect('/stu');
+    return res.redirect('/stu')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error archiving user!" };
-    return res.redirect(req.query.redirectUrl || '/stu');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error archiving user!" }
+    return res.redirect(req.query.redirectUrl || '/stu')
   }
-});
+})
 
 
 app.post('/edt3', async (req, res) => {
@@ -4519,41 +4524,41 @@ app.post('/edt3', async (req, res) => {
       yearAttended,
       yearGraduated,
       schoolId
-    } = req.body;
+    } = req.body
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "Student ID not provided!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Student ID not provided!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     if (!fName || !lName || !email || !phone || !address || !schoolId) {
-      req.session.msg = { type: "error", text: "Please fill in all required fields!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Please fill in all required fields!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     // ✔ username MUST be the same as schoolId
-    const username = schoolId;
+    const username = schoolId
 
     // ✔ Check username duplication (except the current one)
     const existingUsername = await users.findOne({
       username,
       _id: { $ne: studentId }
-    });
+    })
 
     if (existingUsername) {
-      req.session.msg = { type: "error", text: "School ID is already used as a username!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "School ID is already used as a username!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     // ✔ Check email duplication (except the current one)
     const existingEmail = await users.findOne({
       email: email.toLowerCase(),
       _id: { $ne: studentId }
-    });
+    })
 
     if (existingEmail) {
-      req.session.msg = { type: "error", text: "Email is already in use!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Email is already in use!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     // Update fields
@@ -4573,76 +4578,76 @@ app.post('/edt3', async (req, res) => {
       yearGraduated: yearGraduated || "",
       schoolId,
       username // 👈 Automatically applied
-    };
+    }
 
-    await users.findByIdAndUpdate(studentId, updateData);
+    await users.findByIdAndUpdate(studentId, updateData)
 
-        
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`;
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${users.fName} ${users.mName} ${users.lName} ${users.xName}`
     await Log.create({
       who: isWho,
       what: `Edit ${isStudent} Information`
-    });
+    })
 
 
-    req.session.msg = { type: "success", text: "Profile updated successfully!" };
-    return res.redirect(redirectUrl || '/stu');
+    req.session.msg = { type: "success", text: "Profile updated successfully!" }
+    return res.redirect(redirectUrl || '/stu')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect(req.body.redirectUrl || '/stu');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect(req.body.redirectUrl || '/stu')
   }
-});
+})
 
 
 
 app.post('/pht3', uploadPhoto.single('photo'), async (req, res) => {
   try {
-    const { studentId, redirectUrl } = req.body;
+    const { studentId, redirectUrl } = req.body
 
-                
-    const userId = req.session.user._id;
-    const currentUser = await users.findById(userId);
-    const student = await users.findById(studentId);
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
-    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`;
+    const userId = req.session.user._id
+    const currentUser = await users.findById(userId)
+    const student = await users.findById(studentId)
+
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
+    const isStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
     await Log.create({
       who: isWho,
       what: `Update ${isStudent} Photo`
-    });
+    })
 
 
     if (!studentId) {
-      req.session.msg = { type: "error", text: "Student ID not provided!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "Student ID not provided!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
     if (!req.file) {
-      req.session.msg = { type: "error", text: "No photo uploaded!" };
-      return res.redirect(redirectUrl || '/stu');
+      req.session.msg = { type: "error", text: "No photo uploaded!" }
+      return res.redirect(redirectUrl || '/stu')
     }
 
-    const photoUrl = req.file.path;
-    await users.findByIdAndUpdate(studentId, { photo: photoUrl });
+    const photoUrl = req.file.path
+    await users.findByIdAndUpdate(studentId, { photo: photoUrl })
 
-    req.session.msg = { type: "success", text: "Photo updated successfully!" };
-    return res.redirect(redirectUrl || '/stu');
+    req.session.msg = { type: "success", text: "Photo updated successfully!" }
+    return res.redirect(redirectUrl || '/stu')
 
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Failed to upload photo!" };
-    return res.redirect(req.body.redirectUrl || '/stu');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Failed to upload photo!" }
+    return res.redirect(req.body.redirectUrl || '/stu')
   }
-});
+})
 
 
 
@@ -4652,16 +4657,16 @@ app.get('/stuArc', isLogin, isStuArc, (req, res) => {
     active: 'stu',
     back: 'arc',
     users: req.users
-  });
-});
+  })
+})
 
 app.get('/stuViewArc/:id', isLogin, isStuArc, async (req, res) => {
   try {
-  const msg = req.session.msg;
-  delete req.session.msg;
-    const userId = req.params.id;
+    const msg = req.session.msg
+    delete req.session.msg
+    const userId = req.params.id
 
-    const student = req.users.find(u => u._id.toString() === userId);
+    const student = req.users.find(u => u._id.toString() === userId)
 
     if (!student) {
       return res.status(404).render('stuView', {
@@ -4671,10 +4676,10 @@ app.get('/stuViewArc/:id', isLogin, isStuArc, async (req, res) => {
         student,   // ✅ add
         error: 'Student not found.',
         user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
-      });
+        redirectUrl: req.originalUrl,
+        messageSuccess: msg?.type === 'success' ? msg.text : null,
+        messagePass: msg?.type === 'error' ? msg.text : null // still pass logged-in user
+      })
     }
 
     res.render('stuView', {
@@ -4683,36 +4688,36 @@ app.get('/stuViewArc/:id', isLogin, isStuArc, async (req, res) => {
       active: 'stu',
       student,      // the student being viewed
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null // logged-in user
+    })
 
   } catch (err) {
-    console.error('❌ Error in /stuView/:id route:', err);
+    console.error('❌ Error in /stuView/:id route:', err)
     res.status(500).render('stuView', {
       title: 'Students',
       back: 'arc',
       active: 'stu',
       error: 'Something went wrong while loading the student.',
       user: req.user,
-    redirectUrl: req.originalUrl,
-    messageSuccess: msg?.type === 'success' ? msg.text : null,
-    messagePass: msg?.type === 'error' ? msg.text : null
-    });
+      redirectUrl: req.originalUrl,
+      messageSuccess: msg?.type === 'success' ? msg.text : null,
+      messagePass: msg?.type === 'error' ? msg.text : null
+    })
   }
-});
+})
 
 
 app.get('/cog', isLogin, isDocuments, async (req, res) => {
   try {
-    const allDocs = await documents.find({}).sort({ type: 1 });
+    const allDocs = await documents.find({}).sort({ type: 1 })
 
     // Separate messages in session for each form
-    const seedMsg = req.session.seedMsg;
-    const docMsg = req.session.docMsg;
-    req.session.seedMsg = null;
-    req.session.docMsg = null;
+    const seedMsg = req.session.seedMsg
+    const docMsg = req.session.docMsg
+    req.session.seedMsg = null
+    req.session.docMsg = null
 
     res.render('cog', {
       title: 'Settings',
@@ -4723,9 +4728,9 @@ app.get('/cog', isLogin, isDocuments, async (req, res) => {
       seedError: seedMsg?.type === 'error' ? seedMsg.text : null,
       docSuccess: docMsg?.type === 'success' ? docMsg.text : null,
       docError: docMsg?.type === 'error' ? docMsg.text : null
-    });
+    })
   } catch (err) {
-    console.error(err);
+    console.error(err)
     res.render('cog', {
       title: 'Settings',
       active: 'cog',
@@ -4735,77 +4740,77 @@ app.get('/cog', isLogin, isDocuments, async (req, res) => {
       seedError: 'Failed to load seed user.',
       docSuccess: null,
       docError: 'Failed to load documents.'
-    });
+    })
   }
-});
+})
 
 app.post('/validate-password', isLogin, async (req, res) => {
   try {
-    const { password } = req.body;
-    const user = await users.findById(req.session.user._id);
+    const { password } = req.body
+    const user = await users.findById(req.session.user._id)
 
     if (!user || user.password !== password) {
-      return res.json({ valid: false });
+      return res.json({ valid: false })
     }
 
-    res.json({ valid: true });
+    res.json({ valid: true })
   } catch (err) {
-    console.error(err);
-    res.json({ valid: false });
+    console.error(err)
+    res.json({ valid: false })
   }
-});
+})
 
 
 
 app.post('/updateSeed', isSeed, isDocuments, async (req, res) => {
   try {
-    const { email, phone, confirmPasswordHidden } = req.body;
-    const seedUser = req.seedUser;
-    const currentUser = req.session.user;
+    const { email, phone, confirmPasswordHidden } = req.body
+    const seedUser = req.seedUser
+    const currentUser = req.session.user
 
     if (!seedUser) {
-      req.session.seedMsg = { type: 'error', text: 'Data cannot be found!' };
-      return res.redirect('/cog');
+      req.session.seedMsg = { type: 'error', text: 'Data cannot be found!' }
+      return res.redirect('/cog')
     }
 
     // Verify logged-in user's password (plain text)
-    const user = await users.findById(currentUser._id);
+    const user = await users.findById(currentUser._id)
     if (!user || user.password !== confirmPasswordHidden) {
-      req.session.seedMsg = { type: 'error', text: 'Incorrect password! Try Again Later' };
-      return res.redirect('/cog');
+      req.session.seedMsg = { type: 'error', text: 'Incorrect password! Try Again Later' }
+      return res.redirect('/cog')
     }
 
     // Update seed user info
-    seedUser.email = email;
-    seedUser.phone = phone;
-    await seedUser.save();
+    seedUser.email = email
+    seedUser.phone = phone
+    await seedUser.save()
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: `Update the System Contact Information`
-    });
+    })
 
-    req.session.seedMsg = { type: 'success', text: 'School contact info updated successfully!' };
-    res.redirect('/cog');
+    req.session.seedMsg = { type: 'success', text: 'School contact info updated successfully!' }
+    res.redirect('/cog')
   } catch (err) {
-    console.error('Error updating Seed user:', err);
-    req.session.seedMsg = { type: 'error', text: 'Failed to update.' };
-    res.redirect('/cog');
+    console.error('Error updating Seed user:', err)
+    req.session.seedMsg = { type: 'error', text: 'Failed to update.' }
+    res.redirect('/cog')
   }
-});
+})
 
 app.post('/update-documents', isLogin, async (req, res) => {
   try {
-    const { docs, confirmPasswordHidden } = req.body;
-    const currentUser = req.session.user;
+    const { docs, confirmPasswordHidden } = req.body
+    const currentUser = req.session.user
 
     // Verify logged-in user's password (plain text)
-    const user = await users.findById(currentUser._id);
+    const user = await users.findById(currentUser._id)
     if (!user || user.password !== confirmPasswordHidden) {
-      req.session.docMsg = { type: 'error', text: 'Incorrect password! Try Again Later' };
-      return res.redirect('/cog');
+      req.session.docMsg = { type: 'error', text: 'Incorrect password! Try Again Later' }
+      return res.redirect('/cog')
     }
 
     // Update documents
@@ -4814,95 +4819,95 @@ app.post('/update-documents', isLogin, async (req, res) => {
         type: doc.type,
         amount: doc.amount,
         days: doc.days
-      });
+      })
     }
 
-                        // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: `Update the Documents Information in the system`
-    });
+    })
 
-    req.session.docMsg = { type: "success", text: "Documents updated successfully!" };
-    res.redirect('/cog');
+    req.session.docMsg = { type: "success", text: "Documents updated successfully!" }
+    res.redirect('/cog')
   } catch (err) {
-    console.error(err);
-    req.session.docMsg = { type: "error", text: "Failed to update documents!" };
-    res.redirect('/cog');
+    console.error(err)
+    req.session.docMsg = { type: "error", text: "Failed to update documents!" }
+    res.redirect('/cog')
   }
-});
+})
 
 app.get('/api/analytics', isLogin, analyticsMiddleware, (req, res) => {
-  res.json(res.locals.analytics);
-});
+  res.json(res.locals.analytics)
+})
 
 app.get('/dsb', isLogin, analyticsMiddleware, isEmp, (req, res) => {
-  if (req.user.reset === true) return res.redirect('/resetPage2');
+  if (req.user.reset === true) return res.redirect('/resetPage2')
 
-  const analytics = res.locals.analytics || {};
+  const analytics = res.locals.analytics || {}
   res.render('dsb', {
     title: 'Dashboard',
     active: 'dsb',
     analytics
-  });
-});
+  })
+})
 
 app.get('/ldg', isLogin, isLog, (req, res) => {
   res.render('ldg', {
     title: 'Logs',
     active: 'ldg'
-  });
-});
+  })
+})
 
 app.get('/perf', isLogin, analyticsMiddleware, isEmp, (req, res) => {
-  const analytics = res.locals.analytics || {};
+  const analytics = res.locals.analytics || {}
   res.render('perf', {
     title: 'Team Performance',
     active: 'dsb',
     analytics
-  });
-});
+  })
+})
 
 app.get('/rpt', isLogin, isRequest, isStaff, (req, res) => {
   const statuses = [
     'Reviewed', 'Assessed', 'Claimed',
     'For Payment', 'Verified', 'Pending', 'For Release', 'For Verification'
-  ];
+  ]
 
   // Filter requests based on status
-  const allFiltered = filterByStatuses(req.requests, statuses);
-  const userFiltered = filterByStatuses(req.userRequests, statuses);
+  const allFiltered = filterByStatuses(req.requests, statuses)
+  const userFiltered = filterByStatuses(req.userRequests, statuses)
 
-  const isPrivileged = privilegedRoles.includes(req.user.role);
-  const requestsToShow = isPrivileged ? allFiltered : userFiltered;
+  const isPrivileged = privilegedRoles.includes(req.user.role)
+  const requestsToShow = isPrivileged ? allFiltered : userFiltered
 
   // Calculate totalAmount for each request
-const requestsWithTotal = requestsToShow.map(rq => {
-  const rqItems = rq.items || [];
-    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
+  const requestsWithTotal = requestsToShow.map(rq => {
+    const rqItems = rq.items || []
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true)
 
-  let totalAmount = 0;
-  for (const it of approvedItems) {
-    const doc = req.documents.find(d => d.type === it.type);
-    if (doc) totalAmount += (doc.amount || 0) * (it.qty || 0);
-  }
+    let totalAmount = 0
+    for (const it of approvedItems) {
+      const doc = req.documents.find(d => d.type === it.type)
+      if (doc) totalAmount += (doc.amount || 0) * (it.qty || 0)
+    }
 
-  const createdAtRaw = rq.createdAt;
-  const createdAtFormatted = createdAtRaw
-    ? new Date(createdAtRaw).toISOString().split("T")[0]  // "YYYY-MM-DD"
-    : "";
+    const createdAtRaw = rq.createdAt
+    const createdAtFormatted = createdAtRaw
+      ? new Date(createdAtRaw).toISOString().split("T")[0]  // "YYYY-MM-DD"
+      : ""
 
-  return {
-    ...rq.toObject ? rq.toObject() : rq,
-    totalAmount,
-    createdAtRaw,
-    createdAtFormatted
-  };
-});
+    return {
+      ...rq.toObject ? rq.toObject() : rq,
+      totalAmount,
+      createdAtRaw,
+      createdAtFormatted
+    }
+  })
 
 
-  const totalCount = requestsWithTotal.length;
+  const totalCount = requestsWithTotal.length
 
   res.render('rpt', {
     title: 'Dashboard',
@@ -4910,25 +4915,25 @@ const requestsWithTotal = requestsToShow.map(rq => {
     requests: requestsWithTotal,  // pass requests with total
     userRequests: userFiltered,
     totalCount
-  });
-});
+  })
+})
 
 app.post('/verify-export-password', isLogin, (req, res) => {
-  const { password } = req.body;
+  const { password } = req.body
 
   // Use the user from isLogin middleware
-  const currentUser = req.user;
+  const currentUser = req.user
   if (!currentUser) {
-    return res.status(401).json({ ok: false, message: 'Not logged in' });
+    return res.status(401).json({ ok: false, message: 'Not logged in' })
   }
 
   // Plain text comparison
   if (password !== currentUser.password) {
-    return res.json({ ok: false });
+    return res.json({ ok: false })
   }
 
-  res.json({ ok: true });
-});
+  res.json({ ok: true })
+})
 
 
 
@@ -4937,15 +4942,15 @@ app.post('/verify-export-password', isLogin, (req, res) => {
 
 app.get('/ovr', isLogin, (req, res) => {
   if (req.user.reset === true) {
-    return res.redirect('/resetPage4');
+    return res.redirect('/resetPage4')
   }
-  res.render('ovr', { title: 'Dashboard', active: 'ovr' });
-});
+  res.render('ovr', { title: 'Dashboard', active: 'ovr' })
+})
 
 
 app.get('/acc2', isLogin, (req, res) => {
-  const msg = req.session.msg;
-  delete req.session.msg;
+  const msg = req.session.msg
+  delete req.session.msg
 
   res.render('acc2', {
     user: req.session.user,
@@ -4953,155 +4958,155 @@ app.get('/acc2', isLogin, (req, res) => {
     active: 'acc2',
     messageSuccess: msg?.type === 'success' ? msg.text : null,
     messagePass: msg?.type === 'error' ? msg.text : null
-  });
-});
+  })
+})
 
 app.post('/rst2A', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/acc2');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/acc2')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/acc2');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/acc2')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/acc2');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/acc2')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/acc2');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/acc2')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    await currentUser.save();
+    currentUser.password = createPass
+    await currentUser.save()
 
-                    // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Reset password'
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Password updated successfully!" };
-    return res.redirect('/acc2');
+    req.session.msg = { type: "success", text: "Password updated successfully!" }
+    return res.redirect('/acc2')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/acc2');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/acc2')
   }
-});
+})
 
 
 app.post('/rst2FGA', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { currentPass, createPass, confirmPass } = req.body;
+    const userId = req.session.user._id
+    const { currentPass, createPass, confirmPass } = req.body
 
-    const currentUser = await users.findById(userId);
+    const currentUser = await users.findById(userId)
     if (!currentUser) {
-      req.session.msg = { type: "error", text: "User not found!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "User not found!" }
+      return res.redirect('/resetPage2')
     }
 
     // Check current password
     if (currentPass.trim() !== currentUser.password.trim()) {
-      req.session.msg = { type: "error", text: "Current password is incorrect!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "Current password is incorrect!" }
+      return res.redirect('/resetPage2')
     }
 
     // Validate new password rules
-    const hasUpper = /[A-Z]/.test(createPass);
-    const hasSpecial = /[\W_]/.test(createPass);
-    const hasNumber = /\d/.test(createPass);
-    const longEnough = createPass.length >= 8;
+    const hasUpper = /[A-Z]/.test(createPass)
+    const hasSpecial = /[\W_]/.test(createPass)
+    const hasNumber = /\d/.test(createPass)
+    const longEnough = createPass.length >= 8
 
     if (!hasUpper || !hasSpecial || !hasNumber || !longEnough) {
-      req.session.msg = { type: "error", text: "New password does not meet requirements!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "New password does not meet requirements!" }
+      return res.redirect('/resetPage2')
     }
 
     // Confirm password match
     if (createPass !== confirmPass) {
-      req.session.msg = { type: "error", text: "New password and confirm password do not match!" };
-      return res.redirect('/resetPage2');
+      req.session.msg = { type: "error", text: "New password and confirm password do not match!" }
+      return res.redirect('/resetPage2')
     }
 
     // Update password (plaintext)
-    currentUser.password = createPass;
-    currentUser.reset = null;
-    await currentUser.save();
+    currentUser.password = createPass
+    currentUser.reset = null
+    await currentUser.save()
 
-                        // ===== CREATE LOGIN LOG =====
-    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Reset password'
-    });
+    })
 
     /*
     req.session.msg = { type: "success", text: "Password updated successfully!" };
     */
-    return res.redirect('/acc');
+    return res.redirect('/acc')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/resetPage2');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/resetPage2')
   }
-});
+})
 
 app.post('/edt2A', async (req, res) => {
   try {
     if (!req.session.user?._id) {
-      return res.redirect('/');
+      return res.redirect('/')
     }
 
-    const userId = req.session.user._id;
-    const { email, phone } = req.body;
+    const userId = req.session.user._id
+    const { email, phone } = req.body
 
     // Validate required fields
     if (!email || !phone) {
-      req.session.msg = { type: "error", text: "Email, phone, and address are required!" };
-      return res.redirect('/acc2');
+      req.session.msg = { type: "error", text: "Email, phone, and address are required!" }
+      return res.redirect('/acc2')
     }
 
     // Check if email is already used by another user
     const existingUser = await users.findOne({
       email: email.toLowerCase(),
       _id: { $ne: userId }
-    });
+    })
 
     if (existingUser) {
-      req.session.msg = { type: "error", text: "Email is already in use!" };
-      return res.redirect('/acc2');
+      req.session.msg = { type: "error", text: "Email is already in use!" }
+      return res.redirect('/acc2')
     }
 
     // Update user
@@ -5109,392 +5114,393 @@ app.post('/edt2A', async (req, res) => {
       userId,
       { email: email.toLowerCase(), phone },
       { new: true }
-    );
+    )
 
-    req.session.user = updatedUser;
+    req.session.user = updatedUser
 
-                        // ===== CREATE LOGIN LOG =====
-    const isWho = `${updatedUser.fName} ${updatedUser.mName} ${updatedUser.lName} ${updatedUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${updatedUser.fName} ${updatedUser.mName} ${updatedUser.lName} ${updatedUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Update Information'
-    });
+    })
 
-    req.session.msg = { type: "success", text: "Profile updated successfully!" };
-    return res.redirect('/acc2');
+    req.session.msg = { type: "success", text: "Profile updated successfully!" }
+    return res.redirect('/acc2')
 
   } catch (err) {
-    console.error("Error in /edt2:", err);
-    req.session.msg = { type: "error", text: "Server error!" };
-    return res.redirect('/acc2');
+    console.error("Error in /edt2:", err)
+    req.session.msg = { type: "error", text: "Server error!" }
+    return res.redirect('/acc2')
   }
-});
+})
 
 
 app.post('/pht2A', isLogin, uploadPhoto.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
-      req.session.msg = { type: "error", text: "No photo uploaded!" };
-      return res.redirect('/acc2');
+      req.session.msg = { type: "error", text: "No photo uploaded!" }
+      return res.redirect('/acc2')
     }
 
-    const userId = req.session.user._id;
-    const photoUrl = req.file.path;
+    const userId = req.session.user._id
+    const photoUrl = req.file.path
 
     const updatedUser = await users.findByIdAndUpdate(
       userId,
       { photo: photoUrl },
       { new: true }
-    );
+    )
 
-    req.session.user = updatedUser;
+    req.session.user = updatedUser
 
-                            // ===== CREATE LOGIN LOG =====
-    const isWho = `${updatedUser.fName} ${updatedUser.mName} ${updatedUser.lName} ${updatedUser.xName}`;
+    // ===== CREATE LOGIN LOG =====
+    const isWho = `${updatedUser.fName} ${updatedUser.mName} ${updatedUser.lName} ${updatedUser.xName}`
     await Log.create({
       who: isWho,
       what: 'Update Photo'
-    });
+    })
 
 
-    req.session.msg = { type: "success", text: "Photo updated successfully!" };
-    return res.redirect('/acc2');
+    req.session.msg = { type: "success", text: "Photo updated successfully!" }
+    return res.redirect('/acc2')
 
   } catch (err) {
-    console.error(err);
-    req.session.msg = { type: "error", text: "Failed to upload photo!" };
-    return res.redirect('/acc2');
+    console.error(err)
+    req.session.msg = { type: "error", text: "Failed to upload photo!" }
+    return res.redirect('/acc2')
   }
-});
+})
 
 
 app.get('/resetPage2', isLogin, myRequest, (req, res) => {
-  res.render('resetPage2', { title: 'New Password' });
-});
+  res.render('resetPage2', { title: 'New Password' })
+})
 
 app.get('/resetPage4', isLogin, myRequest, (req, res) => {
-  res.render('resetPage4', { title: 'New Password' });
-});
+  res.render('resetPage4', { title: 'New Password' })
+})
 
 
 app.get('/trs', isLogin, isRequest, isStaff, (req, res) => {
   const filteredRequests = req.requests.filter(
     rq => rq.status === 'Reviewed' && !rq.declineAt
-  );
+  )
 
-  res.render('trs', { 
-    title: 'For Assessment', 
-    active: 'trs', 
+  res.render('trs', {
+    title: 'For Assessment',
+    active: 'trs',
     requests: filteredRequests,
     totalCount: filteredRequests.length
-  });
-});
+  })
+})
 
 app.get('/trsAll', isLogin, isRequest, isStaff, (req, res) => {
 
   const allowedStatuses = [
     'Assessed', 'Claimed', 'Reviewed',
     'For Payment', 'Verified', 'For Release', 'For Verification'
-  ];
+  ]
 
   const filteredRequests = req.requests.filter(
     rq => allowedStatuses.includes(rq.status) && !rq.declineAt
-  );
+  )
 
-  res.render('trsAll', { 
+  res.render('trsAll', {
     title: 'All Transactions',
     active: 'trs',
     requests: filteredRequests,
     totalCount: filteredRequests.length
-  });
-});
+  })
+})
 
 app.get('/toPay', isLogin, isRequest, isStaff, (req, res) => {
-  const statuses = ['For Verification', 'Assessed'];
+  const statuses = ['For Verification', 'Assessed']
 
   const filteredRequests = req.requests.filter(
     rq => statuses.includes(rq.status) && !rq.declineAt
-  );
+  )
 
-  res.render('trs', { 
-    title: 'For Payment', 
-    active: 'trs', 
+  res.render('trs', {
+    title: 'For Payment',
+    active: 'trs',
     requests: filteredRequests,
     totalCount: filteredRequests.length
-  });
-});
+  })
+})
 
 
 app.get('/ver', isLogin, isRequest, isStaff, (req, res) => {
   const filteredRequests = req.requests.filter(
     rq => rq.status === 'Verified' && !rq.declineAt
-  );
+  )
 
-  res.render('trs', { 
-    title: 'Verified', 
-    active: 'trs', 
+  res.render('trs', {
+    title: 'Verified',
+    active: 'trs',
     requests: filteredRequests,
     totalCount: filteredRequests.length
-  });
-});
+  })
+})
 
 
 async function renderAssess(req, res, backRoute, viewName = 'trsView') {
   try {
-    const requestId = req.params.id;
+    const requestId = req.params.id
 
     // Find the request
-    const rq = req.requests.find(r => r._id.toString() === requestId);
+    const rq = req.requests.find(r => r._id.toString() === requestId)
 
     if (!rq) {
-      return res.status(404).render(viewName, { 
-        title: 'Request Not Found', 
+      return res.status(404).render(viewName, {
+        title: 'Request Not Found',
         back: backRoute,
         active: 'trs',
-        error: 'Request not found.' 
-      });
+        error: 'Request not found.'
+      })
     }
 
     // Find all items for this request
-    const rqItems = rq.items || []; // assuming req.requests contains items array
+    const rqItems = rq.items || [] // assuming req.requests contains items array
 
     // Filter approved items
-    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true );
+    const approvedItems = rqItems.filter(it => (it.status === "Approved" || it.status === "Pending") && it.free !== true)
 
     // Calculate totalAmount
-    let totalAmount = 0;
+    let totalAmount = 0
     if (approvedItems.length > 0) {
       for (const it of approvedItems) {
         // Find document that matches this item type
-        const doc = req.documents.find(d => d.type === it.type);
-        if (doc) totalAmount += doc.amount * it.qty;
+        const doc = req.documents.find(d => d.type === it.type)
+        if (doc) totalAmount += doc.amount * it.qty
       }
     }
 
-    res.render(viewName, { 
+    res.render(viewName, {
       title: 'Request Details',
       back: backRoute,
       active: 'trs',
       request: rq,
       items: rqItems,
       totalAmount
-    });
-    
+    })
+
   } catch (err) {
-    console.error(`❌ Error in /${backRoute}/:id route:`, err);
-    res.status(500).render(viewName, { 
-      title: 'Error', 
+    console.error(`❌ Error in /${backRoute}/:id route:`, err)
+    res.status(500).render(viewName, {
+      title: 'Error',
       back: backRoute,
       active: 'trs',
-      error: 'Something went wrong while loading the request.' 
-    });
+      error: 'Something went wrong while loading the request.'
+    })
   }
 }
 
 // Then your routes become:
-app.get('/trsView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'trs'));
-app.get('/trsAllView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'trsAll'));
-app.get('/toPayView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'toPay'));
-app.get('/verView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'ver'));
+app.get('/trsView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'trs'))
+app.get('/trsAllView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'trsAll'))
+app.get('/toPayView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'toPay'))
+app.get('/verView/:id', isLogin, isRequest, isStaff, (req, res) => renderAssess(req, res, 'ver'))
 
 // Helper function to create log
 async function createLog(userId, actionText) {
-    const currentUser = await users.findById(userId);
-    await Log.create({
-        who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
-        what: actionText
-    });
+  const currentUser = await users.findById(userId)
+  await Log.create({
+    who: `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`,
+    what: actionText
+  })
 }
 
 // Helper to get view route
 function getViewRoute(back, requestId) {
-    const viewRoutes = {
-        trs: `/trsView/${requestId}`,
-        toPay: `/toPayView/${requestId}`,
-        ver: `/verView/${requestId}`,
-    };
-    return viewRoutes[back] || `/trsView/${requestId}`;
+  const viewRoutes = {
+    trs: `/trsView/${requestId}`,
+    toPay: `/toPayView/${requestId}`,
+    ver: `/verView/${requestId}`,
+  }
+  return viewRoutes[back] || `/trsView/${requestId}`
 }
 
 // ===== HOLD 4 =====
 app.post("/hold4", async (req, res) => {
-    const { requestId, back, requestRemarks } = req.body;
+  const { requestId, back, requestRemarks } = req.body
 
-    try {
-        const requestDoc = await requests.findById(requestId).populate('processBy');
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    const requestDoc = await requests.findById(requestId).populate('processBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = new Date();
-        requestDoc.remarks = requestRemarks || "";
-        await requestDoc.save();
+    requestDoc.declineAt = null
+    requestDoc.holdAt = new Date()
+    requestDoc.remarks = requestRemarks || ""
+    await requestDoc.save()
 
-        const student = requestDoc.processBy;
-        const userId = req.session.user._id;
-        await createLog(userId, `Hold the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`);
+    const student = requestDoc.processBy
+    const userId = req.session.user._id
+    await createLog(userId, `Hold the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`)
 
-        res.redirect(getViewRoute(back, requestId));
-    } catch (err) {
-        console.error("Hold4 Error:", err);
-        res.status(500).send("Server error");
-    }
-});
+    res.redirect(getViewRoute(back, requestId))
+  } catch (err) {
+    console.error("Hold4 Error:", err)
+    res.status(500).send("Server error")
+  }
+})
 
 // ===== REVERT 4 =====
 app.post("/revert4", async (req, res) => {
-    const { requestId, back } = req.body;
+  const { requestId, back } = req.body
 
-    try {
-        const requestDoc = await requests.findById(requestId).populate('processBy');
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    const requestDoc = await requests.findById(requestId).populate('processBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        await requestDoc.save();
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
+    await requestDoc.save()
 
-        const student = requestDoc.processBy;
-        const userId = req.session.user._id;
-        await createLog(userId, `Revert its action to the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`);
+    const student = requestDoc.processBy
+    const userId = req.session.user._id
+    await createLog(userId, `Revert its action to the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`)
 
-        res.redirect(getViewRoute(back, requestId));
-    } catch (err) {
-        console.error("Revert4 Error:", err);
-        res.status(500).send("Server error");
-    }
-});
+    res.redirect(getViewRoute(back, requestId))
+  } catch (err) {
+    console.error("Revert4 Error:", err)
+    res.status(500).send("Server error")
+  }
+})
 
 // ===== APPROVE 4 =====
 
 app.post("/approve4", async (req, res) => {
-  const { requestId, back } = req.body;
+  const { requestId, back } = req.body
 
   try {
     // Fetch the request
-    const requestDoc = await requests.findById(requestId).populate('processBy');
-    if (!requestDoc) return res.status(404).send("Request not found");
+    const requestDoc = await requests.findById(requestId).populate('processBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
     // Fetch all items where items.tr matches request.tr
-    const matchedItems = await items.find({ tr: requestDoc.tr }).lean();
-    console.log("Matched items:", matchedItems); // DEBUG
+    const matchedItems = await items.find({ tr: requestDoc.tr }).lean()
+    console.log("Matched items:", matchedItems) // DEBUG
 
-    const now = new Date();
+    const now = new Date()
 
     // Determine request status based on matched items
     if (matchedItems.length === 1 && (matchedItems[0].free === true || matchedItems[0].free === "true")) {
       // Single matched item and free
-      requestDoc.status = "Verified";
-      requestDoc.assessAt = now;
-      requestDoc.verifyAt = now;
+      requestDoc.status = "Verified"
+      requestDoc.assessAt = now
+      requestDoc.verifyAt = now
     } else if (
       matchedItems.length > 1 &&
       matchedItems.every(it => it.free === true || it.free === "true")
     ) {
       // Multiple matched items, all free
-      requestDoc.status = "Verified";
-      requestDoc.assessAt = now;
-      requestDoc.verifyAt = now;
+      requestDoc.status = "Verified"
+      requestDoc.assessAt = now
+      requestDoc.verifyAt = now
     } else {
       // Not all free → Assessed
-      requestDoc.status = "Assessed";
-      requestDoc.assessAt = now;
-      requestDoc.verifyAt = null;
+      requestDoc.status = "Assessed"
+      requestDoc.assessAt = now
+      requestDoc.verifyAt = null
     }
 
     // Clear other timestamps
-    requestDoc.declineAt = null;
-    requestDoc.holdAt = null;
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
 
-    await requestDoc.save();
+    await requestDoc.save()
 
     // Log the action
-    const student = requestDoc.processBy;
-    const userId = req.session.user._id;
+    const student = requestDoc.processBy
+    const userId = req.session.user._id
     await createLog(
       userId,
       `Marked the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as ${requestDoc.status} with tr# ${requestDoc.tr}`
-    );
+    )
 
-    res.redirect(getViewRoute(back, requestId));
+    res.redirect(getViewRoute(back, requestId))
   } catch (err) {
-    console.error("Approve4 Error:", err);
-    res.status(500).send("Server error");
+    console.error("Approve4 Error:", err)
+    res.status(500).send("Server error")
   }
-});
+})
 
 
 // ===== VERIFY 4 =====
 app.post("/verify4", async (req, res) => {
-    const { requestId, back } = req.body;
+  const { requestId, back } = req.body
 
-    try {
-        const requestDoc = await requests.findById(requestId).populate('processBy');
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    const requestDoc = await requests.findById(requestId).populate('processBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-        requestDoc.status = "Verified";
-        requestDoc.declineAt = null;
-        requestDoc.holdAt = null;
-        requestDoc.verifyAt = new Date();
-        await requestDoc.save();
+    requestDoc.status = "Verified"
+    requestDoc.declineAt = null
+    requestDoc.holdAt = null
+    requestDoc.verifyAt = new Date()
+    await requestDoc.save()
 
-        const student = requestDoc.processBy;
-        const userId = req.session.user._id;
-        await createLog(userId, `Mark the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as Verified with tr# ${requestDoc.tr}`);
+    const student = requestDoc.processBy
+    const userId = req.session.user._id
+    await createLog(userId, `Mark the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} as Verified with tr# ${requestDoc.tr}`)
 
-        res.redirect(getViewRoute(back, requestId));
-    } catch (err) {
-        console.error("Verify4 Error:", err);
-        res.status(500).send("Server error");
-    }
-});
+    res.redirect(getViewRoute(back, requestId))
+  } catch (err) {
+    console.error("Verify4 Error:", err)
+    res.status(500).send("Server error")
+  }
+})
 
 // ===== HOLD 5 (Proof of Payment Reupload) =====
 app.post("/hold5", async (req, res) => {
-    const { requestId, back, requestRemarks } = req.body;
+  const { requestId, back, requestRemarks } = req.body
 
-    try {
-        const requestDoc = await requests.findById(requestId).populate('processBy');
-        if (!requestDoc) return res.status(404).send("Request not found");
+  try {
+    const requestDoc = await requests.findById(requestId).populate('processBy')
+    if (!requestDoc) return res.status(404).send("Request not found")
 
-        requestDoc.declineAt = null;
-        requestDoc.payPhoto = null; // clear proof of payment
-        requestDoc.holdAt = new Date();
-        requestDoc.remarks = requestRemarks || "";
-        await requestDoc.save();
+    requestDoc.declineAt = null
+    requestDoc.payPhoto = null // clear proof of payment
+    requestDoc.holdAt = new Date()
+    requestDoc.remarks = requestRemarks || ""
+    await requestDoc.save()
 
-        const student = requestDoc.processBy;
-        const userId = req.session.user._id;
-        await createLog(userId, `Request for re-uploading of the proof of payment in the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`);
+    const student = requestDoc.processBy
+    const userId = req.session.user._id
+    await createLog(userId, `Request for re-uploading of the proof of payment in the transaction requested by ${student.fName} ${student.mName} ${student.lName} ${student.xName} with tr# ${requestDoc.tr}`)
 
-        res.redirect(getViewRoute(back, requestId));
-    } catch (err) {
-        console.error("Hold5 Error:", err);
-        res.status(500).send("Server error");
-    }
-});
+    res.redirect(getViewRoute(back, requestId))
+  } catch (err) {
+    console.error("Hold5 Error:", err)
+    res.status(500).send("Server error")
+  }
+})
 
 
 
 app.use((req, res) => {
-  res.status(404);
-  res.locals.error = 'Oops! Page cannot be found!';
-  console.log(`404 triggered: ${res.locals.error}`);
-  res.render('index', { title: 'Invalid URL' });
-});
+  res.status(404)
+  res.locals.error = 'Oops! Page cannot be found!'
+  console.log(`404 triggered: ${res.locals.error}`)
+  res.render('index', { title: 'Invalid URL' })
+})
 
 app.use((err, req, res, next) => {
-  console.error('⚠️ Error occurred:', err.message);
-  res.locals.error = 'Oh no! Page is missing!';
-  res.status(500).render('index', { 
+  console.error('⚠️ Error occurred:', err.message)
+  res.locals.error = 'Oh no! Page is missing!'
+  res.status(500).render('index', {
     title: 'File Missing',
     message: `OH NO! File in Directory is missing!' ${err.message}`,
     error: 'OH NO! File in Directory is missing!'
-  });
-});
+  })
+})
 
 // Sumakses ka dyan boy!
 app.listen(PORT, () => {
-  console.log(`🚀 Kudos Supreme Ferry! Running at http://localhost:${PORT}`);
-});
+  console.log(`Running at http://localhost:${PORT}`)
+  verifySMTP()
+})
 
 // ============================================================
 // EMAIL INTEGRATION NOTES
