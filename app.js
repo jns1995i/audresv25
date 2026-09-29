@@ -38,7 +38,8 @@ const { isWeakMap } = require('util/types')
 
 const {
   send: mail,
-  verify: verifySMTP
+  verify: verifySMTP,
+  template
 } = require('./services/mailer')
 
 const app = express()
@@ -963,6 +964,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     const savedUser = await newUser.save()
 
     let processBy = null
+    let ccRegistrar = null
 
     // 1️⃣ CAMPUS CHECK
     if (savedUser?.campus === "South" || savedUser?.campus === "San Jose") {
@@ -971,7 +973,10 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
         campus: savedUser.campus,
         archive: false
       })
-      if (registrar) processBy = registrar._id.toString()
+      if (registrar) {
+        processBy = registrar._id.toString()
+        ccRegistrar = registrar
+      }
     }
 
     // 2️⃣ OLD RECORDS (≤ 2006)
@@ -1122,10 +1127,12 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
 
     await items.insertMany(itemDocs)
 
+    // mail back to student
     const mailInfo = await mail(
       email.toLowerCase(),
       "AUDRES Account Created For Verification",
-      `<div>
+      template(`<div>
+        <h3>AU ONLINE DOCUMENT REQUEST</h3>
         <div>Student Name: ${lastName}, ${firstName} ${middleName}</div>
         <div>Student Number: ${studentNo}</div>
         <div>Email Address: ${email.toLowerCase()}</div>
@@ -1135,19 +1142,54 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
         <div>Campus: ${campus}</div>
         <div>Status: For Verification</div>
         <div>Login to AUDRES <a href="${process.env.APP_LOGIN_LINK}">here</a></div>
-        <br />
-        <h4>Document Requested:</h4>
+        <div><b>Document Requested:</b></div>
         <div>Reference Number: ${tr}</div>
         <div>Requested Document/s: </div>
         <div>${itemDocs.map((doc) => {
-        return `${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
-      }).join("<br />")}</div>
-        <div>Request Submitted on: ${new Date()}</div>
-        <div>
-          Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
+        return `• ${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
+      }).join("<br />")}
         </div>
-      </div>`
+        <div>Request Submitted on: ${new Date()}</div>
+        <br />
+        <div>
+          <i>Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team</i>
+        </div>
+      </div>`)
     )
+
+    // mail to assigned registrar
+    if (ccRegistrar) {
+      const ccInfo = await mail(
+        ccRegistrar.email,
+        `New Document Request Assigned - TR# [${tr}]`,
+        template(`<div>
+        <h3>AU ONLINE DOCUMENT REQUEST</h3>
+        <div>Student Name: ${lastName}, ${firstName} ${middleName}</div>
+        <div>Student No.: ${studentNo}</div>
+        <div>Course: ${savedUser.course}</div>
+        <div>Year Level: ${savedUser.yearLevel}</div>
+        <div>Campus: ${savedUser.campus}</div>
+        <br />
+        <div><b>Document Requested:</b></div>
+        <div>Reference Number: ${tr}</div>
+        <div>Requested Document/s: </div>
+        <div>${itemDocs.map((doc) => {
+          return `• ${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
+        }).join("<br />")}
+        </div>
+        <div>Request Submitted on: ${new Date()}</div>
+        <br />
+        <div>
+          <div>1. Login to your AUDRES <a href="${process.env.APP_LOGIN_LINK}">account</a>.</div>
+          <div>2. Go to <b>Transactions</b> on the sidebar.</div>
+          <div>3. Click on <b>To Verify</b> tab.</div>
+          <div>4. Select the student you wish to approve/verify.</div>
+          <div>5. Review the student thoroughly.</div>
+          <div>6. Click approve or decline.</div>
+        </div>
+      </div>`)
+      )
+    }
 
     // ===== CREATE LOGIN LOG =====
     const isWho = `${savedUser.fName} ${savedUser.mName} ${savedUser.lName} ${savedUser.xName}`
@@ -1304,20 +1346,19 @@ app.post('/verify1', async (req, res) => {
 
     const mailInfo = await mail(
       student.email,
-      `AUDRES Registration Verified – TR# [${studentRequest.tr}]`,
-      `<div>
+      `AUDRES Registration Verified - TR# [${studentRequest.tr}]`,
+      template(`<div>
+        <h3>AU ONLINE DOCUMENT REQUEST</h3>
         <div>Student Name: ${student.lName}, ${student.fName} ${student.mName}</div>
         <div>Reference Number: ${studentRequest.tr}</div>
-        <br />
         <h3>Your account has been verified.</h3>
-        <br />
-        <div>Processed by: ${processBy}</div>
+        <div>Processed by: ${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}</div>
         <div>Login to AUDRES <a href="${process.env.APP_LOGIN_LINK}">here</a></div>
         <br />
         <div>
-          Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
+          <i>Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team</i>
         </div>
-      </div>`
+      </div>`)
     )
 
     // ===== CREATE LOG =====
@@ -1359,14 +1400,14 @@ app.post('/decline1', async (req, res) => {
 
     const mailInfo = await mail(
       student.email,
-      `AUDRES Registration Verification Declined – TR# [${studentRequest.tr}]`,
-      `<div>
+      `AUDRES Registration Verification Declined - TR# [${studentRequest.tr}]`,
+      template(`<div>
+        <h3>AU ONLINE DOCUMENT REQUEST</h3>
         <div>Student Name: ${student.lName}, ${student.fName} ${student.mName}</div>
         <div>Reference Number: ${studentRequest.tr}</div>
-        <br />
         <h3 style="color: red">Your account registration has been declined.</h3>
         <div>Thank you for your patience.</div>
-      </div>`
+      </div>`)
     )
 
     // ===== CREATE LOG =====
@@ -1685,6 +1726,10 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
       status: "Pending"
     }))
     await items.insertMany(itemDocs)
+
+    // const mailInfo = mail(
+
+    // )
 
     // ===== CREATE LOGIN LOG =====
     const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
@@ -3078,7 +3123,8 @@ app.post('/newEmp', async (req, res) => {
     const mailInfo = await mail(
       email.toLowerCase(),
       "Your AUDRES Employee Account Has Been Created",
-      `<div>
+      template(`<div>
+        <h3>AU ONLINE DOCUMENT REQUEST</h3>
         <div>Employee Name: ${lastName}, ${firstName} ${middleName}</div>
         <div>Employee Number: ${studentNo}</div>
         <div>Email Address: ${email.toLowerCase()}</div>
@@ -3089,9 +3135,9 @@ app.post('/newEmp', async (req, res) => {
         <div>Login to AUDRES <a href="${process.env.APP_LOGIN_LINK}">here</a></div>
         <br />
         <div>
-          Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
+          <i>Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team</i>
         </div>
-      </div>`
+      </div>`)
     )
 
     // ===== CREATE LOG =====
@@ -5609,98 +5655,6 @@ app.listen(PORT, async () => {
 
 
 // ============================================================
-// ROUTE: POST /reqDirect
-// PURPOSE: Direct registration with document request
-// ============================================================
-
-// TODO: Send an account-creation email to the newly registered student.
-
-// Subject: "AUDRES Account Created and Document Request Submitted"
-
-// Recipient: Newly registered student's email.
-
-// Email body must include:
-// - Student's complete name
-// - Registered email/username
-// - Generated temporary password
-// - Student number, if available
-// - Course and year level, if available
-// - Campus
-// - Transaction/reference number
-// - Requested document/s
-// - Quantity of each document
-// - Purpose of request
-// - Date and time of submission
-// - Current status: "Pending" or "For Verification"
-// - AUDRES login link
-// - Instruction to change the temporary password
-
-
-// TODO: Send a separate notification to the assigned registrar.
-
-// Subject: "New Document Request Assigned – TR# [TR NUMBER]"
-
-// Recipient: Assigned registrar's email.
-
-// Email body must include:
-// - Registrar's name
-// - Student's complete name
-// - Student number
-// - Course and year level
-// - Campus
-// - Transaction/reference number
-// - Requested document/s
-// - Quantity of each document
-// - Purpose of request
-// - Date and time submitted
-// - Current request status
-// - Instruction to review the request in AUDRES
-
-
-// ============================================================
-// ROUTE: POST /verify1
-// PURPOSE: Verify student registration/request
-// ============================================================
-
-// TODO: Send a verification-success email to the student.
-
-// Subject: "AUDRES Registration Verified – TR# [TR NUMBER]"
-
-// Recipient: Student's registered email.
-
-// Email body must include:
-// - Student's complete name
-// - Transaction/reference number
-// - Confirmation that the registration/request was verified
-// - Assigned registrar or processing office, if available
-// - Current request status
-// - Next step the student must complete
-// - AUDRES login or tracking instruction
-
-
-// ============================================================
-// ROUTE: POST /decline1
-// PURPOSE: Decline student registration/request verification
-// ============================================================
-
-// TODO: Send a verification-declined email to the student.
-
-// Subject: "AUDRES Registration Verification Declined – TR# [TR NUMBER]"
-
-// Recipient: Student's registered email.
-
-// Email body must include:
-// - Student's complete name
-// - Transaction/reference number
-// - Declined status
-// - Reason for declining, if available
-// - Remarks from the registrar/admin
-// - Required correction or missing information
-// - Instructions for resubmission
-// - Office/contact information for assistance
-
-
-// ============================================================
 // ROUTE: POST /reqDoc
 // PURPOSE: Submit a regular document request
 // ============================================================
@@ -6157,31 +6111,6 @@ app.listen(PORT, async () => {
 // - Date and time of claiming
 // - Completion confirmation
 // - Feedback or evaluation instruction, if available
-
-
-// ============================================================
-// ROUTE: POST /newEmp
-// PURPOSE: Create a new employee account
-// ============================================================
-
-// TODO: Send the new employee's account credentials by email.
-
-// Subject: "Your AUDRES Employee Account Has Been Created"
-
-// Recipient: Newly created employee's email.
-
-// Email body must include:
-// - Employee's complete name
-// - Employee number
-// - Username/email
-// - Generated temporary password
-// - Assigned role
-// - Assigned campus
-// - Assigned department or office
-// - Account creation date and time
-// - AUDRES login link
-// - Instruction to change the temporary password
-// - Security reminder not to share the credentials
 
 
 // ============================================================
