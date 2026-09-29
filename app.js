@@ -1727,9 +1727,33 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     }))
     await items.insertMany(itemDocs)
 
-    // const mailInfo = mail(
-
-    // )
+    const mailInfo = mail(
+      student.email,
+      `Document Request Received – TR# [${tr}]`,
+      template(`<div>
+        <h3>AU ONLINE DOCUMENT REQUEST</h3>
+        <div>Student Name: ${student.lName}, ${student.fName} ${student.mName}</div>
+        <div>Course: ${student.course}</div>
+        <div>Year Level: ${student.yearLevel}</div>
+        <div>Campus: ${student.campus}</div>
+        <div>Status: For Verification</div>
+        <br />
+        <div><b>Document Requested:</b></div>
+        <div>Reference Number: ${tr}</div>
+        <div>Requested Document/s: </div>
+        <div>${itemDocs.map((doc) => {
+        return `• ${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
+      }).join("<br />")}
+        </div>
+        <div>Request Submitted on: ${new Date()}</div>
+        <br />
+        <div>
+          <div>1. Login to your AUDRES <a href="${process.env.APP_LOGIN_LINK}">account</a>.</div>
+          <div>2. Once you login, you can see the recent requests. Click "See All" to view all requests.</div>
+          <div>3. Click on the request to track its progress.</div>
+        </div>
+      </div>`)
+    )
 
     // ===== CREATE LOGIN LOG =====
     const isWho = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
