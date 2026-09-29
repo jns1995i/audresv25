@@ -421,10 +421,6 @@ app.post('/login', async (req, res) => {
       what: 'Logged in'
     })
 
-    const test1 = await mail('hfabang@phinmaed.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
-    const test2 = await mail('seintaxerror@gmail.com', 'AU DOC REQUEST TEST NOTIF', `test - ${JSON.stringify(user)}`)
-
-
     if (user.access === 1) {
 
       const adminRoles = ["Admin", "Head", "Dev", "Seed"]
@@ -936,6 +932,8 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     const bMonthNum = monthMap[bMonth] || new Date().getMonth() + 1
     const paddedMonth = String(bMonthNum).padStart(2, '0')
 
+    const tempPassword = generatePassword()
+
     // 5️⃣ Create User
     const newUser = new users({
       fName: firstName,
@@ -957,7 +955,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
       yearAttended: yearAttended || '',
       work: work || '',
       username: email,
-      password: generatePassword(),
+      password: tempPassword,
       archive: true,
       verify: true,
     })
@@ -1124,6 +1122,33 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
 
     await items.insertMany(itemDocs)
 
+    const mailInfo = await mail(
+      email.toLowerCase(),
+      "AUDRES Account Created For Verification",
+      <div>
+        <div>Student Name: {lastName}, {firstName} {middleName}</div>
+        <div>Student Number: {studentNo}</div>
+        <div>Email Address: {email.toLowerCase()}</div>
+        <div>Generated Temporary Password: {tempPassword}</div>
+        <div>Student No.: {studentNo}</div>
+        <div>Course: {savedUser.course}</div>
+        <div>Campus: {campus}</div>
+        <div>Status: For Verification</div>
+        <div>Login to AUDRES <a href={process.env.APP_LOGIN_LINK}>here</a></div>
+        <br />
+        <h4>Document Requested:</h4>
+        <div>Reference Number: {tr}</div>
+        <div>Requested Document/s: </div>
+        <div>{itemDocs.map((doc) => {
+          return `${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
+        }).join(\n)}</div>
+        <div>Request Submitted on: {new Date()}</div>
+        <div>
+          Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
+        </div>
+      </div>
+    )
+
     // ===== CREATE LOGIN LOG =====
     const isWho = `${savedUser.fName} ${savedUser.mName} ${savedUser.lName} ${savedUser.xName}`
     await Log.create({
@@ -1277,6 +1302,24 @@ app.post('/verify1', async (req, res) => {
       assignAt: processBy ? new Date() : null
     })
 
+    const mailInfo = await mail(
+      student.email,
+      `AUDRES Registration Verified – TR# [${studentRequest.tr}]`,
+      <div>
+        <div>Student Name: {student.lName}, {student.fName} {student.mName}</div>
+        <div>Reference Number: {studentRequest.tr}</div>
+        <br />
+        <h3>Your account has been verified.</h3>
+        <br />
+        <div>Processed by: {processBy}</div>
+        <div>Login to AUDRES <a href={process.env.APP_LOGIN_LINK}>here</a></div>
+        <br />
+        <div>
+          Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
+        </div>
+      </div>
+    )
+
     // ===== CREATE LOG =====
     const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`
     const theStudent = `${student.fName} ${student.mName} ${student.lName} ${student.xName}`
@@ -1313,6 +1356,18 @@ app.post('/decline1', async (req, res) => {
       archive: true,
       verify: true
     })
+
+    const mailInfo = await mail(
+      student.email,
+      `AUDRES Registration Verification Declined – TR# [${studentRequest.tr}]`,
+      <div>
+        <div>Student Name: {student.lName}, {student.fName} {student.mName}</div>
+        <div>Reference Number: {studentRequest.tr}</div>
+        <br />
+        <h3 style="color: red">Your account registration has been declined.</h3>
+        <div>Thank you for your patience.</div>
+      </div>
+    )
 
     // ===== CREATE LOG =====
     const isWho = `${staff.fName} ${staff.mName} ${staff.lName} ${staff.xName}`
@@ -2991,6 +3046,8 @@ app.post('/newEmp', async (req, res) => {
       }
     }
 
+    const tempPassword = generatePassword()
+
     // 4️⃣ Create new user
     const newUser = new users({
       fName: firstName,
@@ -3004,7 +3061,7 @@ app.post('/newEmp', async (req, res) => {
       assign,
       schoolId: studentNo || undefined,
       username: email,           // default username
-      password: generatePassword(),
+      password: tempPassword,
       archive: false,            // default not archived
       verify: false,
       access: 1
@@ -3017,6 +3074,25 @@ app.post('/newEmp', async (req, res) => {
 
     // The student who requested the document
     const student = newUser
+
+    const mailInfo = await mail(
+      email.toLowerCase(),
+      "Your AUDRES Employee Account Has Been Created",
+      <div>
+        <div>Employee Name: {lastName}, {firstName} {middleName}</div>
+        <div>Employee Number: {studentNo}</div>
+        <div>Email Address: {email.toLowerCase()}</div>
+        <div>Generated Temporary Password: {tempPassword}</div>
+        <div>Assigned Role: {role}</div>
+        <div>Assigned Campus: {campus}</div>
+        <div>Account Created on: {new Date()}</div>
+        <div>Login to AUDRES <a href={process.env.APP_LOGIN_LINK}>here</a></div>
+        <br />
+        <div>
+          Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
+        </div>
+      </div>
+    )
 
     // ===== CREATE LOG =====
     const isWho = `${currentUser.fName} ${currentUser.mName} ${currentUser.lName} ${currentUser.xName}`
