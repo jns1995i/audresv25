@@ -37,7 +37,7 @@ async function send(to, subject, html, text = "") {
     return info
 }
 
-async function template(content) {
+function template(content) {
     return `
     <!DOCTYPE html> 
     <html lang="en"> 
