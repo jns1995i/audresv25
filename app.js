@@ -1125,28 +1125,28 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
     const mailInfo = await mail(
       email.toLowerCase(),
       "AUDRES Account Created For Verification",
-      <div>
-        <div>Student Name: {lastName}, {firstName} {middleName}</div>
-        <div>Student Number: {studentNo}</div>
-        <div>Email Address: {email.toLowerCase()}</div>
-        <div>Generated Temporary Password: {tempPassword}</div>
-        <div>Student No.: {studentNo}</div>
-        <div>Course: {savedUser.course}</div>
-        <div>Campus: {campus}</div>
+      `<div>
+        <div>Student Name: ${lastName}, ${firstName} ${middleName}</div>
+        <div>Student Number: ${studentNo}</div>
+        <div>Email Address: ${email.toLowerCase()}</div>
+        <div>Generated Temporary Password: ${tempPassword}</div>
+        <div>Student No.: ${studentNo}</div>
+        <div>Course: ${savedUser.course}</div>
+        <div>Campus: ${campus}</div>
         <div>Status: For Verification</div>
-        <div>Login to AUDRES <a href={process.env.APP_LOGIN_LINK}>here</a></div>
+        <div>Login to AUDRES <a href="${process.env.APP_LOGIN_LINK}">here</a></div>
         <br />
         <h4>Document Requested:</h4>
-        <div>Reference Number: {tr}</div>
+        <div>Reference Number: ${tr}</div>
         <div>Requested Document/s: </div>
-        <div>{itemDocs.map((doc) => {
-          return `${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
-        }).join(\n)}</div>
-        <div>Request Submitted on: {new Date()}</div>
+        <div>${itemDocs.map((doc) => {
+        return `${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
+      }).join(\n)}</div>
+        <div>Request Submitted on: ${new Date()}</div>
         <div>
           Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
         </div>
-      </div>
+      </div>`
     )
 
     // ===== CREATE LOGIN LOG =====
@@ -1305,19 +1305,19 @@ app.post('/verify1', async (req, res) => {
     const mailInfo = await mail(
       student.email,
       `AUDRES Registration Verified – TR# [${studentRequest.tr}]`,
-      <div>
-        <div>Student Name: {student.lName}, {student.fName} {student.mName}</div>
-        <div>Reference Number: {studentRequest.tr}</div>
+      `<div>
+        <div>Student Name: ${student.lName}, ${student.fName} ${student.mName}</div>
+        <div>Reference Number: ${studentRequest.tr}</div>
         <br />
         <h3>Your account has been verified.</h3>
         <br />
-        <div>Processed by: {processBy}</div>
-        <div>Login to AUDRES <a href={process.env.APP_LOGIN_LINK}>here</a></div>
+        <div>Processed by: ${processBy}</div>
+        <div>Login to AUDRES <a href="${process.env.APP_LOGIN_LINK}">here</a></div>
         <br />
         <div>
           Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
         </div>
-      </div>
+      </div>`
     )
 
     // ===== CREATE LOG =====
@@ -1360,13 +1360,13 @@ app.post('/decline1', async (req, res) => {
     const mailInfo = await mail(
       student.email,
       `AUDRES Registration Verification Declined – TR# [${studentRequest.tr}]`,
-      <div>
-        <div>Student Name: {student.lName}, {student.fName} {student.mName}</div>
-        <div>Reference Number: {studentRequest.tr}</div>
+      `<div>
+        <div>Student Name: ${student.lName}, ${student.fName} ${student.mName}</div>
+        <div>Reference Number: ${studentRequest.tr}</div>
         <br />
         <h3 style="color: red">Your account registration has been declined.</h3>
         <div>Thank you for your patience.</div>
-      </div>
+      </div>`
     )
 
     // ===== CREATE LOG =====
@@ -3078,20 +3078,20 @@ app.post('/newEmp', async (req, res) => {
     const mailInfo = await mail(
       email.toLowerCase(),
       "Your AUDRES Employee Account Has Been Created",
-      <div>
-        <div>Employee Name: {lastName}, {firstName} {middleName}</div>
-        <div>Employee Number: {studentNo}</div>
-        <div>Email Address: {email.toLowerCase()}</div>
-        <div>Generated Temporary Password: {tempPassword}</div>
-        <div>Assigned Role: {role}</div>
-        <div>Assigned Campus: {campus}</div>
-        <div>Account Created on: {new Date()}</div>
-        <div>Login to AUDRES <a href={process.env.APP_LOGIN_LINK}>here</a></div>
+      `<div>
+        <div>Employee Name: ${lastName}, ${firstName} ${middleName}</div>
+        <div>Employee Number: ${studentNo}</div>
+        <div>Email Address: ${email.toLowerCase()}</div>
+        <div>Generated Temporary Password: ${tempPassword}</div>
+        <div>Assigned Role: ${role}</div>
+        <div>Assigned Campus: ${campus}</div>
+        <div>Account Created on: ${new Date()}</div>
+        <div>Login to AUDRES <a href="${process.env.APP_LOGIN_LINK}">here</a></div>
         <br />
         <div>
           Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
         </div>
-      </div>
+      </div>`
     )
 
     // ===== CREATE LOG =====
