@@ -1141,7 +1141,7 @@ app.post('/reqDirect', cpUpload, async (req, res) => {
         <div>Requested Document/s: </div>
         <div>${itemDocs.map((doc) => {
         return `${doc.type} (${doc.qty}) - ${doc.purpose} [${doc.status}]`
-      }).join(\n)}</div>
+      }).join("<br />")}</div>
         <div>Request Submitted on: ${new Date()}</div>
         <div>
           Security Reminder: Never share your passwords, login credentials, or multi-factor authentication (MFA) codes with anyone, including colleagues or IT staff—official IT support will never ask for them. Avoid sending access details over email, Slack, or chat, and never approve MFA login prompts you did not initiate. If you suspect your account details have been exposed, change your password immediately and contact the IT/Security Team
