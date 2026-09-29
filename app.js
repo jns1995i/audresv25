@@ -1559,9 +1559,9 @@ app.post('/reqDoc', cpUpload, async (req, res) => {
     //   })
     // );
 
-    const firstInitial = (savedUser.fName || '').charAt(0).toLowerCase()
-    const lastInitial = (savedUser.lName || '').charAt(0).toLowerCase()
-    const campusCode = (savedUser.campus || '').substring(0, 2).toLowerCase()
+    const firstInitial = (student.fName || '').charAt(0).toLowerCase()
+    const lastInitial = (student.lName || '').charAt(0).toLowerCase()
+    const campusCode = (student.campus || '').substring(0, 2).toLowerCase()
 
     const nameCampusCode = `${firstInitial}${lastInitial}${campusCode}`
 
